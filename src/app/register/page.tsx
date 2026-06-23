@@ -1,0 +1,2 @@
+import { PageHero } from "@/components/site";import { RegistrationForm } from "@/components/forms";
+export default function Register(){return <><PageHero eyebrow="Student registration" title="Tell us where you are—and where you want to go.">We’ll use this information to recommend the diagnostic, package, class time, and regional study group that best fit your goals.</PageHero><section className="section"><div className="container" style={{maxWidth:900}}><RegistrationForm/></div></section></>}
