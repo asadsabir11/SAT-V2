@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const NAV_LINKS=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"]] as const;
+const NAV_LINKS=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"],["Dashboard","/dashboard"]] as const;
 
 function StudentNavBadge(){
   const [name, setName] = useState<string|null>(null);
@@ -33,7 +33,9 @@ export function Header(){
         </Link>
         <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
           {NAV_LINKS.map(([label,href])=>(
-            <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
+            label==="Dashboard"
+              ? <Link key={href} href={href} style={{padding:"8px 14px",borderRadius:999,color:"#155eef",background:"#eaf1ff",border:"1.5px solid #d0e0ff",fontWeight:800,fontSize:".85rem",whiteSpace:"nowrap",transition:".16s"}}>My Dashboard</Link>
+              : <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
           <StudentNavBadge />
           <Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
