@@ -1,11 +1,176 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-export function Header(){const links=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"]];return <header style={{borderBottom:"1px solid #dce5ef",background:"rgba(255,255,255,.94)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(12px)"}}><div className="container" style={{minHeight:72,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}><Link href="/" style={{fontWeight:900,color:"#071b33",letterSpacing:"-.03em"}}><span style={{color:"#155eef"}}>The Digital</span> Tutor</Link><nav style={{display:"flex",gap:22,alignItems:"center",fontSize:14,fontWeight:700,overflowX:"auto"}}>{links.map(([label,href])=><Link key={href} href={href}>{label}</Link>)}<Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 16px"}}>Join cohort</Link></nav></div></header>}
-export function Footer(){return <footer className="band" style={{padding:"52px 0 28px"}}><div className="container"><div className="grid grid-3"><div><h3>The Digital Tutor</h3><p style={{color:"#b9c9dc",lineHeight:1.7}}>Affordable accountability for ambitious global students.</p></div><div><h3>Explore</h3><p style={{display:"grid",gap:8,color:"#b9c9dc"}}><Link href="/materials">Materials</Link><Link href="/dashboard">Student dashboard</Link><Link href="/contact">Contact</Link></p></div><div><h3>Launch</h3><p style={{display:"grid",gap:8,color:"#b9c9dc"}}><Link href="/admin">MVP metrics</Link><Link href="/partners">Partnerships</Link><Link href="/parent-webinar">Parent webinar</Link></p></div></div><p style={{borderTop:"1px solid rgba(255,255,255,.14)",paddingTop:24,marginTop:32,color:"#9fb2c9",fontSize:13}}>SAT® is a trademark registered by the College Board, which is not affiliated with and does not endorse The Digital Tutor.</p></div></footer>}
-export function CTAButton({href,children,secondary=false}:{href:string;children:ReactNode;secondary?:boolean}){return <Link href={href} className={`btn ${secondary?"btn-secondary":"btn-primary"}`}>{children}</Link>}
-export function FeatureCard({index,title,children}:{index:string;title:string;children:ReactNode}){return <article className="card"><div className="icon">{index}</div><h3>{title}</h3><p>{children}</p></article>}
-export function PricingCard({name,price,items,href,recommended=false}:{name:string;price:string;items:string[];href:string;recommended?:boolean}){return <article className={`card ${recommended?"recommended":""}`}><span className="eyebrow">{name}</span><div className="price">{price}</div><ul>{items.map(x=><li key={x}>{x}</li>)}</ul><CTAButton href={href}>{name==="Free"?"Start free":name==="Sponsored / NGO"?"Partner with us":name==="Premium"?"Apply for premium":"Join founder cohort"}</CTAButton></article>}
-export function PageHero({eyebrow,title,children,actions}:{eyebrow:string;title:string;children:ReactNode;actions?:ReactNode}){return <section className="page-hero"><div className="container"><div className="eyebrow">{eyebrow}</div><h1 className="title" style={{maxWidth:850}}>{title}</h1><div className="lead">{children}</div>{actions&&<div className="actions">{actions}</div>}</div></section>}
-export function FAQAccordion({items}:{items:[string,string][]}){return <div>{items.map(([q,a])=><details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div>}
-export function DashboardCard({label,value,detail,progress}:{label:string;value:string;detail?:string;progress?:number}){return <article className="card"><div className="eyebrow">{label}</div><div className="metric">{value}</div>{detail&&<p>{detail}</p>}{progress!==undefined&&<div className="progress"><span style={{width:`${progress}%`}}/></div>}</article>}
-export function DisclaimerBanner(){return <div className="note">Independent preparation support. No official affiliation, endorsement, or score guarantee. All practice examples are original.</div>}
+
+const NAV_LINKS=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"]] as const;
+
+function StudentNavBadge(){
+  const [name, setName] = useState<string|null>(null);
+  useEffect(()=>{
+    const n = localStorage.getItem("sat_student_name");
+    if(n) setName(n.split(" ")[0]);
+  },[]);
+  if(!name) return null;
+  return (
+    <Link href="/dashboard" style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,background:"#eaf1ff",color:"#1551c7",fontWeight:800,fontSize:".82rem",border:"1.5px solid #d0e0ff",whiteSpace:"nowrap"}}>
+      <span style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#155eef,#18a999)",color:"#fff",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".78rem",fontWeight:900,flexShrink:0}}>
+        {name[0].toUpperCase()}
+      </span>
+      {name}
+    </Link>
+  );
+}
+const FOOTER_EXPLORE=[["Home","/"],["Founder Cohort","/founder-cohort"],["Free Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"]] as const;
+const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
+
+export function Header(){
+  return (
+    <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
+      <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
+        <Link href="/" style={{fontWeight:900,color:"#071b33",letterSpacing:"-.04em",fontSize:"1.05rem",flexShrink:0}}>
+          <span style={{color:"#155eef"}}>The Digital</span> Tutor
+        </Link>
+        <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
+          {NAV_LINKS.map(([label,href])=>(
+            <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
+          ))}
+          <StudentNavBadge />
+          <Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
+            Join cohort →
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export function Footer(){
+  return (
+    <footer className="band" style={{padding:0}}>
+      <div style={{height:3,background:"linear-gradient(90deg,#155eef 0%,#18a999 100%)"}}/>
+      <div className="container" style={{paddingTop:64}}>
+        <div className="footer-main-grid" style={{display:"grid",gridTemplateColumns:"1.7fr 1fr 1.2fr",gap:56,paddingBottom:60}}>
+
+          {/* Brand */}
+          <div>
+            <Link href="/" style={{fontWeight:900,fontSize:"1.2rem",letterSpacing:"-.04em",display:"block",marginBottom:16,color:"#fff"}}>
+              <span style={{color:"#5eead4"}}>The Digital</span> Tutor
+            </Link>
+            <p style={{color:"#a8c0d8",lineHeight:1.8,marginBottom:16,maxWidth:310,fontSize:".92rem"}}>
+              Affordable accountability for ambitious global students preparing for university, AI literacy, and a changing world.
+            </p>
+            <p style={{color:"#6a8aaa",fontSize:".8rem",marginBottom:22,lineHeight:1.6}}>
+              Founded by{" "}
+              <strong style={{color:"#a8c0d8",fontWeight:700}}>Ibrahim Malick</strong>
+              {" "}— technology executive, educator, and AI specialist.
+            </p>
+            <div style={{marginTop:4}}>
+              {FOOTER_MARKETS.map(m=><span className="footer-market" key={m}>{m}</span>)}
+            </div>
+          </div>
+
+          {/* Explore */}
+          <div>
+            <p className="footer-col-title">Explore</p>
+            <nav className="footer-nav">
+              {FOOTER_EXPLORE.map(([label,href])=>(
+                <Link className="footer-link" key={label} href={href}>{label}</Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Get Started */}
+          <div>
+            <p className="footer-col-title">Get Started</p>
+            <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
+              Take the free 10-minute diagnostic to see where you stand — no registration required.
+            </p>
+            <Link href="/diagnostic" className="footer-cta-btn footer-cta-primary">Take free diagnostic →</Link>
+            <Link href="/register?plan=Founder" className="footer-cta-btn footer-cta-secondary">Join founder cohort</Link>
+            <p style={{color:"#4e6a88",fontSize:".78rem",marginTop:16,lineHeight:1.5}}>
+              Founder cohort open · Limited seats
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={{borderTop:"1px solid rgba(255,255,255,.09)",padding:"22px 0",display:"flex",flexWrap:"wrap",justifyContent:"space-between",alignItems:"center",gap:12}}>
+          <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,maxWidth:680,lineHeight:1.65}}>
+            SAT® is a trademark registered by the College Board, which is not affiliated with and does not endorse The Digital Tutor. Independent preparation support — no official affiliation, endorsement, or score guarantee. All practice content is original.
+          </p>
+          <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,whiteSpace:"nowrap"}}>© 2026 The Digital Tutor</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export function CTAButton({href,children,secondary=false}:{href:string;children:ReactNode;secondary?:boolean}){
+  return <Link href={href} className={`btn ${secondary?"btn-secondary":"btn-primary"}`}>{children}</Link>;
+}
+
+export function FeatureCard({index,title,children}:{index:string;title:string;children:ReactNode}){
+  return (
+    <article className="card">
+      {index&&<div className="icon">{index}</div>}
+      <h3>{title}</h3>
+      <p>{children}</p>
+    </article>
+  );
+}
+
+export function PricingCard({name,price,items,href,recommended=false}:{name:string;price:string;items:string[];href:string;recommended?:boolean}){
+  const label=name==="Free"?"Start free →":name==="Sponsored / NGO"?"Partner with us →":name==="Premium"?"Apply for premium →":"Join founder cohort →";
+  return (
+    <article className={`card${recommended?" recommended":""}`} style={{display:"flex",flexDirection:"column"}}>
+      <span className="eyebrow" style={{marginBottom:4}}>{name}</span>
+      <div className="price">{price}</div>
+      <ul style={{flex:1,paddingLeft:20,margin:"14px 0 22px",display:"grid",gap:6}}>
+        {items.map(x=><li key={x} style={{color:"#4a6070",fontSize:".92rem"}}>{x}</li>)}
+      </ul>
+      <CTAButton href={href}>{label}</CTAButton>
+    </article>
+  );
+}
+
+export function PageHero({eyebrow,title,children,actions}:{eyebrow:string;title:string;children:ReactNode;actions?:ReactNode}){
+  return (
+    <section className="page-hero">
+      <div className="container">
+        <div className="eyebrow">{eyebrow}</div>
+        <h1 className="title" style={{maxWidth:860}}>{title}</h1>
+        <div className="lead">{children}</div>
+        {actions&&<div className="actions">{actions}</div>}
+      </div>
+    </section>
+  );
+}
+
+export function FAQAccordion({items}:{items:[string,string][]}){
+  return (
+    <div style={{marginTop:8}}>
+      {items.map(([q,a])=>(
+        <details key={q}>
+          <summary>{q}</summary>
+          <p>{a}</p>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+export function DashboardCard({label,value,detail,progress}:{label:string;value:string;detail?:string;progress?:number}){
+  return (
+    <article className="card">
+      <div className="eyebrow">{label}</div>
+      <div className="metric">{value}</div>
+      {detail&&<p style={{marginTop:6}}>{detail}</p>}
+      {progress!==undefined&&<div className="progress"><span style={{width:`${progress}%`}}/></div>}
+    </article>
+  );
+}
+
+export function DisclaimerBanner(){
+  return <div className="note">Independent preparation support. No official affiliation, endorsement, or score guarantee. All practice examples are original.</div>;
+}

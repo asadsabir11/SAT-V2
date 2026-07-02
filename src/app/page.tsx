@@ -1,12 +1,13 @@
 import { CTAButton, FAQAccordion, FeatureCard, PricingCard } from "@/components/site";
+import Link from "next/link";
 
 const features: [string, string][] = [
-  ["Weekly Live Classes", "A reliable rhythm, clear instruction, and real-time questions."],
-  ["24/7 AI Tutor", "Step-by-step support between classes using original practice examples."],
-  ["Original Mock Tests", "Timed practice and score reflection without copied test material."],
-  ["Parent Progress Reports", "Simple visibility into attendance, effort, strengths, and next steps."],
-  ["Regional Study Groups", "Time-zone friendly peer accountability through regional communities."],
-  ["Affordable Global Pricing", "Country-aware founder pricing designed around access."],
+  ["Weekly Live Classes", "A reliable rhythm, clear instruction, and real-time Q&A every week."],
+  ["24/7 AI Tutor", "Step-by-step explanations between classes using original practice examples."],
+  ["Original Mock Tests", "Timed full-length practice and score reflection — no copied content."],
+  ["Parent Progress Reports", "Simple weekly visibility into attendance, effort, strengths, and next steps."],
+  ["Regional Study Groups", "Time-zone-friendly peer accountability via WhatsApp and Telegram."],
+  ["Affordable Global Pricing", "Country-aware founder pricing designed around access, not profit."],
 ];
 
 const ngoPartnerTypes = [
@@ -34,62 +35,73 @@ export default function Home() {
       <section className="hero">
         <div className="container hero-layout">
           <div>
-            <div className="eyebrow">Global access. Serious accountability.</div>
+            <div className="eyebrow">Global access · Serious accountability</div>
             <h1 className="display">Affordable SAT® Prep for Global Students</h1>
             <p className="lead">
               Weekly live classes, 24/7 AI tutoring, original mock tests, regional study groups,
-              and parent progress reports for students preparing for global university opportunities.
+              and parent progress reports — designed for families who need more than free self-study.
             </p>
             <div className="actions">
               <CTAButton href="/diagnostic">Take free diagnostic</CTAButton>
-              <CTAButton href="/register?plan=Founder" secondary>Join founder cohort</CTAButton>
-              <CTAButton href="/parent-webinar" secondary>Parent webinar</CTAButton>
-              <CTAButton href="/partners" secondary>Partner with us</CTAButton>
+              <CTAButton href="/register?plan=Founder" secondary>Join founder cohort →</CTAButton>
             </div>
-            <p style={{ marginTop: 28, color: "#5d6d82" }}>
-              Designed for families who need more structure than free self-study but cannot afford
-              expensive private tutoring.
-            </p>
+            <div className="trust-strip">
+              <span className="trust-item">Free diagnostic — no sign-up required</span>
+              <span className="trust-item">Founder cohort seats open now</span>
+              <span className="trust-item">16+ countries served</span>
+              <span className="trust-item">No score guarantee</span>
+            </div>
           </div>
           <div className="hero-panel">
-            <div className="eyebrow" style={{ color: "#5eead4" }}>The accountability layer</div>
+            <div className="eyebrow" style={{ color: "#5eead4", marginBottom: 20 }}>The accountability layer</div>
             <div className="stat"><strong>8 weeks</strong><span>Focused founder cohort</span></div>
             <div className="stat"><strong>Weekly</strong><span>Live teaching + homework rhythm</span></div>
             <div className="stat"><strong>Always on</strong><span>AI explanations and study coaching</span></div>
-            <div className="stat"><strong>Parent-ready</strong><span>Clear progress visibility</span></div>
+            <div className="stat"><strong>Parent-ready</strong><span>Clear weekly progress visibility</span></div>
           </div>
         </div>
       </section>
+
+      {/* Stat strip */}
+      <div style={{ background: "#fff", borderBottom: "1px solid var(--line)", padding: "0" }}>
+        <div className="container">
+          <div className="stat-row">
+            <div className="stat-cell"><strong>16+</strong><span>Countries in scope</span></div>
+            <div className="stat-cell"><strong>8-week</strong><span>Structured cohort</span></div>
+            <div className="stat-cell"><strong>200–800</strong><span>Per section, scored diagnostic</span></div>
+            <div className="stat-cell"><strong>Free</strong><span>Diagnostic, no sign-up needed</span></div>
+          </div>
+        </div>
+      </div>
 
       {/* 2 — Founder story */}
       <section className="section">
         <div className="container">
           <div className="eyebrow">About the founder</div>
-          <div className="grid grid-2" style={{ alignItems: "center", gap: 40 }}>
+          <div className="grid grid-2" style={{ alignItems: "center", gap: 48 }}>
             <div>
               <h2 className="title">More than SAT prep. A broader mission.</h2>
               <p className="lead" style={{ marginBottom: 20 }}>
                 Founded by <strong>Ibrahim Malick</strong>, a retired technology executive,
                 educator, AI specialist, mentor, and lifelong learning advocate, The Digital Tutor
-                helps students prepare not only for exams, but for university, AI literacy, and
-                future careers.
+                helps students prepare not only for exams, but for university, AI literacy, and future careers.
               </p>
-              <p>
+              <p style={{ color: "var(--muted)", lineHeight: 1.75 }}>
                 Ibrahim built this program after recognizing that students across Pakistan,
                 Nigeria, Bangladesh, and dozens of other countries have access to the same free
                 resources as anyone else — yet still struggle. The gap is not content. It is
                 structure, accountability, and a teacher who actually shows up every week.
               </p>
             </div>
-            <div className="card">
+            <div className="card" style={{ background: "linear-gradient(145deg,#f4f8ff,#edfdf9)" }}>
               <div className="eyebrow">The larger vision</div>
-              <h3>SAT® prep is the starting point</h3>
-              <ul style={{ paddingLeft: 20, lineHeight: 2.2, marginTop: 12 }}>
-                <li>University readiness</li>
-                <li>AI-enhanced learning</li>
+              <h3 style={{ marginTop: 10 }}>SAT® prep is the starting point</h3>
+              <ul style={{ paddingLeft: 20, lineHeight: 2.3, marginTop: 12, color: "var(--muted)" }}>
+                <li>University readiness and academic discipline</li>
+                <li>AI-enhanced learning and AI literacy</li>
                 <li>Mentorship from experienced educators</li>
                 <li>Parent accountability and progress visibility</li>
-                <li>Future-of-work awareness</li>
+                <li>Future-of-work awareness and career confidence</li>
                 <li>Affordable access for underserved learners</li>
               </ul>
             </div>
@@ -105,8 +117,8 @@ export default function Home() {
             "Students do not fail because free resources do not exist. They struggle because they
             need structure, support, and accountability."
           </p>
-          <div className="grid grid-3" style={{ marginTop: 32 }}>
-            {["Weekly structure", "Human explanation", "Parent visibility", "Regional time-zone support", "Affordable pricing", "Practice discipline"].map((x, i) => (
+          <div className="grid grid-3" style={{ marginTop: 40 }}>
+            {["Weekly structure","Human explanation","Parent visibility","Time-zone support","Affordable pricing","Practice discipline"].map((x, i) => (
               <FeatureCard key={x} index={`0${i + 1}`} title={x}>
                 A practical layer that turns good intentions and free resources into consistent action.
               </FeatureCard>
@@ -130,27 +142,23 @@ export default function Home() {
 
       {/* 5 — Founder cohort */}
       <section className="section band">
-        <div className="container grid grid-2" style={{ alignItems: "center" }}>
+        <div className="container grid grid-2" style={{ alignItems: "center", gap: 56 }}>
           <div>
             <div className="eyebrow" style={{ color: "#5eead4" }}>Founder cohort</div>
-            <h2 className="title">8-Week Global SAT® Prep Founder Cohort</h2>
+            <h2 className="title">8-Week Global SAT® Prep — Founder Cohort</h2>
             <p className="lead">
               A small first cohort built around weekly class, AI tutor support, homework, a monthly
               mock, parent reporting, and a regional WhatsApp or Telegram group.
             </p>
             <div className="actions">
               <CTAButton href="/founder-cohort">See the curriculum</CTAButton>
+              <CTAButton href="/register?plan=Founder" secondary>Reserve your seat</CTAButton>
             </div>
           </div>
-          <div className="card">
-            <h3>Built for visible momentum</h3>
-            <ul>
-              <li>Weekly live SAT class</li>
-              <li>AI tutor support</li>
-              <li>Weekly homework</li>
-              <li>Monthly mock test</li>
-              <li>Parent progress report</li>
-              <li>Regional accountability group</li>
+          <div className="card" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", color: "#fff" }}>
+            <h3 style={{ color: "#5eead4", marginTop: 0 }}>Built for visible momentum</h3>
+            <ul style={{ paddingLeft: 20, display: "grid", gap: 10, margin: "14px 0 0", color: "rgba(255,255,255,.8)" }}>
+              {["Weekly live SAT class","AI tutor support between classes","Weekly homework and review","Monthly full mock test","Parent progress report","Regional accountability group"].map(x=><li key={x}>{x}</li>)}
             </ul>
           </div>
         </div>
@@ -164,23 +172,23 @@ export default function Home() {
           <div className="grid grid-3">
             <div className="card">
               <h3>Launch markets</h3>
-              {["Pakistan", "Bangladesh", "Nigeria"].map((x) => (
-                <span className="badge" key={x}>{x}</span>
-              ))}
+              <div style={{ marginTop: 10 }}>
+                {["Pakistan", "Bangladesh", "Nigeria"].map(x => <span className="badge" key={x}>{x}</span>)}
+              </div>
             </div>
             <div className="card">
               <h3>Secondary markets</h3>
-              {["Indonesia", "Malaysia", "South Korea"].map((x) => (
-                <span className="badge teal" key={x}>{x}</span>
-              ))}
+              <div style={{ marginTop: 10 }}>
+                {["Indonesia", "Malaysia", "South Korea"].map(x => <span className="badge teal" key={x}>{x}</span>)}
+              </div>
             </div>
             <div className="card">
               <h3>Sponsored access</h3>
               <span className="badge gold">Haiti</span>
-              <h3 style={{ marginTop: 16 }}>Expansion</h3>
-              {["Vietnam", "Nepal", "Ghana", "Kenya", "Philippines", "Egypt", "Sri Lanka", "India", "Morocco"].map((x) => (
-                <span className="badge" key={x}>{x}</span>
-              ))}
+              <h3 style={{ marginTop: 18 }}>Expansion pipeline</h3>
+              <div style={{ marginTop: 6 }}>
+                {["Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco"].map(x => <span className="badge" key={x}>{x}</span>)}
+              </div>
             </div>
           </div>
         </div>
@@ -191,31 +199,31 @@ export default function Home() {
         <div className="container">
           <div className="eyebrow">Simple founder pricing</div>
           <h2 className="title">Choose the support level you need</h2>
-          <div className="grid grid-4">
+          <div className="grid grid-4" style={{ alignItems: "start" }}>
             <PricingCard
               name="Free"
               price="Free"
               href="/diagnostic"
-              items={["Free diagnostic test", "Free study plan", "Parent webinar", "Community access"]}
+              items={["Free diagnostic test","Free study plan","Parent webinar","Community access"]}
             />
             <PricingCard
               recommended
               name="Founder Core"
               price="$19–$49/mo"
               href="/register?plan=Founder"
-              items={["Weekly live class", "AI tutor access", "Monthly mock test", "Parent progress report", "Regional support group"]}
+              items={["Weekly live class","AI tutor access","Monthly mock test","Parent progress report","Regional support group"]}
             />
             <PricingCard
               name="Premium"
               price="$99–$199/mo"
               href="/register?plan=Premium"
-              items={["Small group coaching", "Monthly 1:1 review", "Score improvement plan", "College planning session"]}
+              items={["Small group coaching","Monthly 1:1 review","Score improvement plan","College planning session"]}
             />
             <PricingCard
               name="Sponsored / NGO"
               price="Custom"
               href="/partners"
-              items={["Sponsored seats", "School or NGO cohort", "Group reporting", "Partnership support"]}
+              items={["Sponsored seats","School or NGO cohort","Group reporting","Partnership support"]}
             />
           </div>
         </div>
@@ -229,17 +237,17 @@ export default function Home() {
             Parents are not paying for more worksheets. They are paying for structure,
             accountability, teacher guidance, and progress visibility.
           </p>
-          <div className="grid grid-3" style={{ marginTop: 32 }}>
+          <div className="grid grid-3" style={{ marginTop: 40 }}>
             {[
-              ["Weekly reports", "Parents receive a simple summary: attendance, homework, current score, and next priority."],
-              ["Live class rhythm", "A scheduled weekly class creates the habit loop that self-study rarely sustains."],
-              ["Visible progress", "Diagnostic baseline → monthly mock → target score. Parents see the gap close."],
+              ["Weekly reports", "Parents receive a simple summary each week: attendance, homework, current score, and next priority."],
+              ["Live class rhythm", "A scheduled weekly class creates the habit loop that self-study rarely sustains on its own."],
+              ["Visible progress", "Diagnostic baseline → monthly mock → target score. Parents see the gap close over time."],
             ].map(([t, d]) => (
               <FeatureCard key={t} index="" title={t}>{d}</FeatureCard>
             ))}
           </div>
-          <div className="actions" style={{ marginTop: 24 }}>
-            <CTAButton href="/parent-webinar">Register for parent webinar</CTAButton>
+          <div className="actions" style={{ marginTop: 28 }}>
+            <CTAButton href="/parent-webinar">Register for free parent webinar</CTAButton>
           </div>
         </div>
       </section>
@@ -249,19 +257,19 @@ export default function Home() {
         <div className="container">
           <div className="eyebrow" style={{ color: "#5eead4" }}>Beyond the SAT®</div>
           <h2 className="title">Preparing students for a changing world</h2>
-          <p className="lead" style={{ maxWidth: 680 }}>
+          <p className="lead" style={{ maxWidth: 680, marginBottom: 36 }}>
             SAT® prep is the starting point. The larger goal is to help students build confidence,
-            learning skills, AI awareness, and career readiness for a changing world.
+            learning skills, AI awareness, and career readiness for a world that is rapidly evolving.
           </p>
-          <div className="grid grid-3" style={{ marginTop: 32 }}>
+          <div className="grid grid-3">
             {[
               ["University readiness", "Academic discipline, structured deadlines, and study habits that transfer to university and beyond."],
               ["AI literacy", "Students who learn alongside AI tools understand how to use them responsibly — a skill that matters in every future career."],
               ["Career confidence", "Preparation is not just about scores. It is about building the self-belief that a student belongs at the next level."],
             ].map(([t, d]) => (
-              <div className="card" key={t}>
-                <h3>{t}</h3>
-                <p>{d}</p>
+              <div className="card" key={t} style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)" }}>
+                <h3 style={{ color: "#5eead4" }}>{t}</h3>
+                <p style={{ color: "rgba(255,255,255,.7)" }}>{d}</p>
               </div>
             ))}
           </div>
@@ -272,11 +280,10 @@ export default function Home() {
       <section className="section soft">
         <div className="container">
           <div className="eyebrow">School and NGO partnerships</div>
-          <h2 className="title">Bring low-cost SAT® prep to your students</h2>
-          <p className="lead" style={{ maxWidth: 640, marginBottom: 32 }}>
+          <h2 className="title">Bring affordable SAT® prep to your students</h2>
+          <p className="lead" style={{ maxWidth: 640, marginBottom: 36 }}>
             We work with schools, NGOs, scholarship programs, diaspora organizations, and
-            corporate CSR programs to sponsor access for students who cannot afford individual
-            pricing.
+            corporate CSR programs to sponsor access for students who cannot afford individual pricing.
           </p>
           <div className="grid grid-3">
             {ngoPartnerTypes.map(([t, d]) => (
@@ -286,7 +293,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="actions" style={{ marginTop: 24 }}>
+          <div className="actions" style={{ marginTop: 28 }}>
             <CTAButton href="/partners">Start a partnership conversation</CTAButton>
           </div>
         </div>
@@ -294,28 +301,31 @@ export default function Home() {
 
       {/* 11 — FAQ */}
       <section className="section">
-        <div className="container">
+        <div className="container" style={{ maxWidth: 780 }}>
           <div className="eyebrow">Questions, answered</div>
           <h2 className="title">Frequently asked questions</h2>
           <FAQAccordion items={faqs} />
         </div>
       </section>
 
-      {/* 12 — CTA footer */}
-      <section className="section band">
+      {/* 12 — Final CTA */}
+      <section style={{ padding: "100px 0", background: "linear-gradient(160deg,#061729 0%,#071b33 45%,#0b2440 100%)" }}>
         <div className="container" style={{ textAlign: "center" }}>
-          <div className="eyebrow" style={{ color: "#5eead4" }}>Ready to start?</div>
-          <h2 className="title" style={{ maxWidth: 700, margin: "0 auto 16px" }}>
+          <div className="eyebrow" style={{ color: "#5eead4", justifyContent: "center" }}>Ready to start?</div>
+          <h2 className="title" style={{ color: "#fff", maxWidth: 680, margin: "12px auto 16px" }}>
             Take the free diagnostic. Join the founder cohort. Change the trajectory.
           </h2>
-          <p className="lead" style={{ maxWidth: 560, margin: "0 auto 32px" }}>
+          <p style={{ color: "rgba(255,255,255,.6)", maxWidth: 520, margin: "0 auto 36px", lineHeight: 1.75, fontSize: "1.05rem" }}>
             The founder cohort is intentionally small. Seats are limited. If this is the right
-            moment, register now.
+            moment, register now — the diagnostic takes 10 minutes.
           </p>
-          <div className="actions" style={{ justifyContent: "center" }}>
-            <CTAButton href="/diagnostic">Take free diagnostic</CTAButton>
-            <CTAButton href="/register?plan=Founder" secondary>Reserve founder cohort seat</CTAButton>
+          <div className="actions" style={{ justifyContent: "center", gap: 14 }}>
+            <CTAButton href="/diagnostic">Take free diagnostic →</CTAButton>
+            <Link href="/register?plan=Founder" className="btn btn-ghost">Reserve founder cohort seat</Link>
           </div>
+          <p style={{ color: "rgba(255,255,255,.3)", fontSize: ".8rem", marginTop: 28, lineHeight: 1.6 }}>
+            SAT® is a trademark registered by the College Board · Not affiliated with or endorsed by College Board
+          </p>
         </div>
       </section>
     </>

@@ -214,10 +214,9 @@ export default function Diagnostic() {
     const weakAreas = [...getWeakAreas(mathQs, mathAnswers), ...getWeakAreas(rwQs, rwAnswers)];
     const r: Results = { mathScore, rwScore, totalScore, weakAreas };
 
-    if (email) {
-      localStorage.setItem("sat_student_email", email);
-      localStorage.setItem("sat_student_name", name);
-    }
+    localStorage.setItem("sat_student_email", email);
+    localStorage.setItem("sat_student_name", name);
+    localStorage.setItem("sat_diagnostic_result", JSON.stringify({...r, createdAt: new Date().toISOString()}));
 
     try {
       await fetch("/api/diagnostic", {

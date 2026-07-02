@@ -28,13 +28,24 @@ export default function Dashboard() {
     const email = localStorage.getItem("sat_student_email");
     if (!email) { setLoading(false); return; }
     setHasEmail(true);
+
+    const localStudent = localStorage.getItem("sat_student_data");
+    const localDiag = localStorage.getItem("sat_diagnostic_result");
+
     fetch(`/api/student?email=${encodeURIComponent(email)}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data) {
+        if (data?.student) {
           setStudent(data.student);
-          setDiagnostic(data.diagnostic ?? null);
+          setDiagnostic(data.diagnostic ?? (localDiag ? JSON.parse(localDiag) : null));
+        } else if (localStudent) {
+          setStudent(JSON.parse(localStudent));
+          if (localDiag) setDiagnostic(JSON.parse(localDiag));
         }
+      })
+      .catch(() => {
+        if (localStudent) setStudent(JSON.parse(localStudent));
+        if (localDiag) setDiagnostic(JSON.parse(localDiag));
       })
       .finally(() => setLoading(false));
   }, []);
