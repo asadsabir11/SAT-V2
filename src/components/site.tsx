@@ -176,3 +176,73 @@ export function DashboardCard({label,value,detail,progress}:{label:string;value:
 export function DisclaimerBanner(){
   return <div className="note">Independent preparation support. No official affiliation, endorsement, or score guarantee. All practice examples are original.</div>;
 }
+
+// To use a real video: pass youtubeId="dQw4w9WgXcQ" (the part after ?v= in the YouTube URL)
+export function VideoBox({ youtubeId }: { youtubeId?: string }) {
+  const [playing, setPlaying] = useState(false);
+
+  if (youtubeId && playing) {
+    return (
+      <div style={{ borderRadius: 24, overflow: "hidden", aspectRatio: "16/9", background: "#000", boxShadow: "0 24px 64px rgba(7,27,51,.2)" }}>
+        <iframe
+          width="100%" height="100%"
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          style={{ border: 0, display: "block", width: "100%", height: "100%" }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={() => youtubeId && setPlaying(true)}
+      style={{
+        borderRadius: 24, overflow: "hidden", aspectRatio: "16/9", position: "relative",
+        background: "linear-gradient(145deg,#0b2340 0%,#071b33 55%,#0d2e4a 100%)",
+        boxShadow: "0 24px 64px rgba(7,27,51,.22),0 6px 20px rgba(7,27,51,.14)",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        cursor: youtubeId ? "pointer" : "default",
+      }}
+    >
+      {/* Subtle grid pattern */}
+      <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px)", backgroundSize: "32px 32px", pointerEvents: "none" }} />
+      {/* Teal glow */}
+      <div style={{ position: "absolute", bottom: -40, right: -40, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(#18a99930,transparent 70%)", pointerEvents: "none" }} />
+      {/* Blue glow */}
+      <div style={{ position: "absolute", top: -40, left: -20, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(#155eef28,transparent 70%)", pointerEvents: "none" }} />
+
+      {/* Play button */}
+      <div style={{
+        width: 80, height: 80, borderRadius: "50%", marginBottom: 28, position: "relative", zIndex: 1,
+        background: youtubeId ? "linear-gradient(135deg,#155eef,#18a999)" : "rgba(255,255,255,.1)",
+        border: youtubeId ? "none" : "2px solid rgba(255,255,255,.2)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: youtubeId ? "0 12px 32px rgba(21,94,239,.4)" : "none",
+        transition: "transform .2s",
+      }}>
+        <div style={{ width: 0, height: 0, borderTop: "14px solid transparent", borderBottom: "14px solid transparent", borderLeft: `${youtubeId ? "24px" : "20px"} solid ${youtubeId ? "#fff" : "rgba(255,255,255,.5)"}`, marginLeft: 6 }} />
+      </div>
+
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 32px" }}>
+        <p style={{ color: "#5eead4", fontSize: ".72rem", fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", margin: "0 0 10px", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
+          <span style={{ display: "inline-block", width: 14, height: 2, background: "#5eead4", borderRadius: 2 }} />
+          Welcome from the founder
+          <span style={{ display: "inline-block", width: 14, height: 2, background: "#5eead4", borderRadius: 2 }} />
+        </p>
+        <h3 style={{ color: "#fff", fontSize: "clamp(1.2rem,2.5vw,1.75rem)", fontWeight: 900, margin: "0 0 10px", letterSpacing: "-.03em", lineHeight: 1.15 }}>
+          A message from Ibrahim Malick
+        </h3>
+        <p style={{ color: "rgba(255,255,255,.5)", fontSize: ".9rem", margin: "0 0 6px" }}>
+          Founder, The Digital Tutor · Technology executive, educator, AI specialist
+        </p>
+        {!youtubeId && (
+          <span style={{ display: "inline-block", marginTop: 14, padding: "6px 16px", borderRadius: 999, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.45)", fontSize: ".78rem", fontWeight: 700, letterSpacing: ".06em" }}>
+            VIDEO COMING SOON
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}

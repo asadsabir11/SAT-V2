@@ -1,5 +1,12 @@
-import { CTAButton, FAQAccordion, FeatureCard, PricingCard } from "@/components/site";
+import { CTAButton, FAQAccordion, FeatureCard, PricingCard, VideoBox } from "@/components/site";
 import Link from "next/link";
+
+// ─── To add Ibrahim's welcome video ───────────────────────────────────────────
+// 1. Upload the video to YouTube
+// 2. Copy the video ID from the URL  e.g. youtube.com/watch?v=ABC123  →  "ABC123"
+// 3. Replace undefined below with that ID:  youtubeId="ABC123"
+// ─────────────────────────────────────────────────────────────────────────────
+const WELCOME_VIDEO_ID = undefined; // e.g. "dQw4w9WgXcQ"
 
 const features: [string, string][] = [
   ["Weekly Live Classes", "A reliable rhythm, clear instruction, and real-time Q&A every week."],
@@ -74,7 +81,20 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 2 — Founder story */}
+      {/* 2 — Welcome video */}
+      <section className="section" style={{ paddingTop: 60, paddingBottom: 60 }}>
+        <div className="container" style={{ maxWidth: 860 }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <div className="eyebrow" style={{ justifyContent: "center" }}>Meet the founder</div>
+            <h2 className="title" style={{ margin: "8px auto 0", maxWidth: 560 }}>
+              Hear directly from Ibrahim Malick
+            </h2>
+          </div>
+          <VideoBox youtubeId={WELCOME_VIDEO_ID} />
+        </div>
+      </section>
+
+      {/* Founder story */}
       <section className="section">
         <div className="container">
           <div className="eyebrow">About the founder</div>
