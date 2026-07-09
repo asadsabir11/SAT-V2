@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const record = { ...body, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    appendData("diagnostics.json", record);
+    try { appendData("diagnostics.json", record); } catch { /* non-fatal on serverless */ }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Failed to save" }, { status: 500 });
