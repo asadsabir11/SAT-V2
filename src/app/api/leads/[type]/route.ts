@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!payload || typeof payload !== "object")
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     const record = { ...payload, id: crypto.randomUUID(), leadType: type, createdAt: new Date().toISOString() };
-    try { appendData(`leads-${type}.json`, record); } catch { /* non-fatal on serverless */ }
+    await appendData(`leads-${type}.json`, record);
     sendToN8n(webhooks[type], record).catch(console.error);
     return NextResponse.json({ ok: true });
   } catch (error) {

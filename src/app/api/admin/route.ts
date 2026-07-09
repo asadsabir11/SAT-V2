@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { readData } from "@/lib/storage";
 
 export async function GET() {
-  const students = readData<Record<string, string>>("leads-student.json");
-  const webinar = readData<Record<string, string>>("leads-webinar.json");
-  const partners = readData<Record<string, string>>("leads-partner.json");
-  const contacts = readData<Record<string, string>>("leads-contact.json");
-  const diagnostics = readData<Record<string, unknown>>("diagnostics.json");
+  const [students, webinar, partners, contacts, diagnostics] = await Promise.all([
+    readData<Record<string, string>>("leads-student.json"),
+    readData<Record<string, string>>("leads-webinar.json"),
+    readData<Record<string, string>>("leads-partner.json"),
+    readData<Record<string, string>>("leads-contact.json"),
+    readData<Record<string, unknown>>("diagnostics.json"),
+  ]);
 
   const metrics = {
     totalLeads: students.length,

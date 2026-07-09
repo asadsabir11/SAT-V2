@@ -5,9 +5,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const record = { ...body, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    try { appendData("diagnostics.json", record); } catch { /* non-fatal on serverless */ }
+    await appendData("diagnostics.json", record);
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("Diagnostic save failed", error);
     return NextResponse.json({ error: "Failed to save" }, { status: 500 });
   }
 }
@@ -15,6 +16,6 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get("email");
   if (!email) return NextResponse.json({ error: "Email required" }, { status: 400 });
-  const result = findByField("diagnostics.json", "email", email);
+  const result = await findByField("diagnostics.json", "email", email);
   return NextResponse.json({ result });
 }
