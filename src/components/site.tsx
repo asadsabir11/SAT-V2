@@ -177,9 +177,22 @@ export function DisclaimerBanner(){
   return <div className="note">Independent preparation support. No official affiliation, endorsement, or score guarantee. All practice examples are original.</div>;
 }
 
-// To use a real video: pass youtubeId="dQw4w9WgXcQ" (the part after ?v= in the YouTube URL)
-export function VideoBox({ youtubeId }: { youtubeId?: string }) {
+// Pass videoSrc="/welcome.mp4" for a local file, or youtubeId="ABC123" for YouTube
+export function VideoBox({ youtubeId, videoSrc }: { youtubeId?: string; videoSrc?: string }) {
   const [playing, setPlaying] = useState(false);
+
+  if (videoSrc && playing) {
+    return (
+      <div style={{ borderRadius: 24, overflow: "hidden", aspectRatio: "16/9", background: "#000", boxShadow: "0 24px 64px rgba(7,27,51,.2)" }}>
+        <video
+          src={videoSrc}
+          controls
+          autoPlay
+          style={{ width: "100%", height: "100%", display: "block", outline: "none" }}
+        />
+      </div>
+    );
+  }
 
   if (youtubeId && playing) {
     return (
@@ -197,13 +210,13 @@ export function VideoBox({ youtubeId }: { youtubeId?: string }) {
 
   return (
     <div
-      onClick={() => youtubeId && setPlaying(true)}
+      onClick={() => (youtubeId || videoSrc) && setPlaying(true)}
       style={{
         borderRadius: 24, overflow: "hidden", aspectRatio: "16/9", position: "relative",
         background: "linear-gradient(145deg,#0b2340 0%,#071b33 55%,#0d2e4a 100%)",
         boxShadow: "0 24px 64px rgba(7,27,51,.22),0 6px 20px rgba(7,27,51,.14)",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        cursor: youtubeId ? "pointer" : "default",
+        cursor: (youtubeId || videoSrc) ? "pointer" : "default",
       }}
     >
       {/* Subtle grid pattern */}
@@ -216,13 +229,13 @@ export function VideoBox({ youtubeId }: { youtubeId?: string }) {
       {/* Play button */}
       <div style={{
         width: 80, height: 80, borderRadius: "50%", marginBottom: 28, position: "relative", zIndex: 1,
-        background: youtubeId ? "linear-gradient(135deg,#155eef,#18a999)" : "rgba(255,255,255,.1)",
-        border: youtubeId ? "none" : "2px solid rgba(255,255,255,.2)",
+        background: (youtubeId||videoSrc) ? "linear-gradient(135deg,#155eef,#18a999)" : "rgba(255,255,255,.1)",
+        border: (youtubeId||videoSrc) ? "none" : "2px solid rgba(255,255,255,.2)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: youtubeId ? "0 12px 32px rgba(21,94,239,.4)" : "none",
+        boxShadow: (youtubeId||videoSrc) ? "0 12px 32px rgba(21,94,239,.4)" : "none",
         transition: "transform .2s",
       }}>
-        <div style={{ width: 0, height: 0, borderTop: "14px solid transparent", borderBottom: "14px solid transparent", borderLeft: `${youtubeId ? "24px" : "20px"} solid ${youtubeId ? "#fff" : "rgba(255,255,255,.5)"}`, marginLeft: 6 }} />
+        <div style={{ width: 0, height: 0, borderTop: "14px solid transparent", borderBottom: "14px solid transparent", borderLeft: `${(youtubeId||videoSrc) ? "24px" : "20px"} solid ${(youtubeId||videoSrc) ? "#fff" : "rgba(255,255,255,.5)"}`, marginLeft: 6 }} />
       </div>
 
       <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 32px" }}>

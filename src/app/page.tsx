@@ -6,7 +6,8 @@ import Link from "next/link";
 // 2. Copy the video ID from the URL  e.g. youtube.com/watch?v=ABC123  →  "ABC123"
 // 3. Replace undefined below with that ID:  youtubeId="ABC123"
 // ─────────────────────────────────────────────────────────────────────────────
-const WELCOME_VIDEO_ID = undefined; // e.g. "dQw4w9WgXcQ"
+const WELCOME_VIDEO_ID = undefined;  // YouTube ID (optional)
+const WELCOME_VIDEO_SRC = "/welcome.mp4"; // local file in /public
 
 const features: [string, string][] = [
   ["Weekly Live Classes", "A reliable rhythm, clear instruction, and real-time Q&A every week."],
@@ -90,7 +91,7 @@ export default function Home() {
               Hear directly from Ibrahim Malick
             </h2>
           </div>
-          <VideoBox youtubeId={WELCOME_VIDEO_ID} />
+          <VideoBox youtubeId={WELCOME_VIDEO_ID} videoSrc={WELCOME_VIDEO_SRC} />
         </div>
       </section>
 
