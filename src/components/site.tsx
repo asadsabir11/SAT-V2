@@ -250,7 +250,7 @@ export function VideoBox({ youtubeId, videoSrc }: { youtubeId?: string; videoSrc
         <p style={{ color: "rgba(255,255,255,.5)", fontSize: ".9rem", margin: "0 0 6px" }}>
           Founder, The Digital Tutor · Technology executive, educator, AI specialist
         </p>
-        {!youtubeId && (
+        {!(youtubeId || videoSrc) && (
           <span style={{ display: "inline-block", marginTop: 14, padding: "6px 16px", borderRadius: 999, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.45)", fontSize: ".78rem", fontWeight: 700, letterSpacing: ".06em" }}>
             VIDEO COMING SOON
           </span>
