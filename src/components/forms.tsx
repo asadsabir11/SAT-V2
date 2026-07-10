@@ -125,7 +125,8 @@ export function RegistrationForm() {
   function validateField(name: keyof RegFields, value: string | boolean): string {
     switch (name) {
       case "studentName": case "parentName": return vName(value as string);
-      case "studentEmail": case "parentEmail": return vEmail(value as string);
+      case "studentEmail": return vEmail(value as string);
+      case "parentEmail": return (value as string).trim() ? vEmail(value as string) : "";
       case "whatsapp": return vPhone(value as string);
       case "city": return vCity(value as string);
       case "country": case "grade": return vSelect(value as string);
@@ -152,10 +153,10 @@ export function RegistrationForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const required: (keyof RegFields)[] = [
-      "studentName","parentName","studentEmail","parentEmail",
+      "studentName","parentName","studentEmail",
       "whatsapp","country","city","grade","packageType","consent",
     ];
-    const optional: (keyof RegFields)[] = ["currentScore","targetScore","targetSatDate"];
+    const optional: (keyof RegFields)[] = ["parentEmail","currentScore","targetScore","targetSatDate"];
     const allErrors: Partial<Record<keyof RegFields, string>> = {};
     const allTouched: Partial<Record<keyof RegFields, boolean>> = {};
     [...required, ...optional].forEach(name => {
@@ -252,7 +253,7 @@ export function RegistrationForm() {
         </div>
 
         <div className="field">
-          <label htmlFor="parentEmail">Parent email *</label>
+          <label htmlFor="parentEmail">Parent email</label>
           <input type="email" {...text("parentEmail", "parent@gmail.com")} />
           <Err msg={touched.parentEmail ? errors.parentEmail : undefined} />
         </div>
