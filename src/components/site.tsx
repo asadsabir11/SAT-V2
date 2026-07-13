@@ -3,22 +3,43 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const NAV_LINKS=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"],["Dashboard","/dashboard"]] as const;
+const NAV_LINKS=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"]] as const;
 
-function StudentNavBadge(){
-  const [name, setName] = useState<string|null>(null);
-  useEffect(()=>{
-    const n = localStorage.getItem("sat_student_name");
-    if(n) setName(n.split(" ")[0]);
-  },[]);
-  if(!name) return null;
+type AuthUser = { name: string; role: "student" | "founder" } | null;
+
+function AuthBadge() {
+  const [user, setUser] = useState<AuthUser>(null);
+  useEffect(() => {
+    fetch("/api/auth/me").then(r => r.json()).then(d => { if (d.user) setUser(d.user); }).catch(()=>{});
+  }, []);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
+  }
+
+  if (!user) {
+    return (
+      <Link href="/login" style={{padding:"8px 16px",borderRadius:999,background:"#eaf1ff",color:"#155eef",fontWeight:800,fontSize:".82rem",border:"1.5px solid #d0e0ff",whiteSpace:"nowrap",textDecoration:"none"}}>
+        Login
+      </Link>
+    );
+  }
+
+  const first = user.name.split(" ")[0];
+  const href = user.role === "founder" ? "/admin" : "/dashboard";
   return (
-    <Link href="/dashboard" style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,background:"#eaf1ff",color:"#1551c7",fontWeight:800,fontSize:".82rem",border:"1.5px solid #d0e0ff",whiteSpace:"nowrap"}}>
-      <span style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#155eef,#18a999)",color:"#fff",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".78rem",fontWeight:900,flexShrink:0}}>
-        {name[0].toUpperCase()}
-      </span>
-      {name}
-    </Link>
+    <div style={{display:"inline-flex",alignItems:"center",gap:6}}>
+      <Link href={href} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,background:"#eaf1ff",color:"#1551c7",fontWeight:800,fontSize:".82rem",border:"1.5px solid #d0e0ff",whiteSpace:"nowrap",textDecoration:"none"}}>
+        <span style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#155eef,#18a999)",color:"#fff",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".78rem",fontWeight:900,flexShrink:0}}>
+          {first[0].toUpperCase()}
+        </span>
+        {user.role === "founder" ? "Admin" : first}
+      </Link>
+      <button onClick={logout} style={{padding:"7px 12px",borderRadius:999,background:"transparent",border:"1.5px solid #e2e8f0",color:"#6b7c93",fontWeight:700,fontSize:".78rem",cursor:"pointer",whiteSpace:"nowrap"}}>
+        Logout
+      </button>
+    </div>
   );
 }
 const FOOTER_EXPLORE=[["Home","/"],["Founder Cohort","/founder-cohort"],["Free Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"]] as const;
@@ -33,11 +54,9 @@ export function Header(){
         </Link>
         <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
           {NAV_LINKS.map(([label,href])=>(
-            label==="Dashboard"
-              ? <Link key={href} href={href} style={{padding:"8px 14px",borderRadius:999,color:"#155eef",background:"#eaf1ff",border:"1.5px solid #d0e0ff",fontWeight:800,fontSize:".85rem",whiteSpace:"nowrap",transition:".16s"}}>My Dashboard</Link>
-              : <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
+            <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
-          <StudentNavBadge />
+          <AuthBadge />
           <Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
             Join cohort →
           </Link>

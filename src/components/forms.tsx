@@ -44,6 +44,13 @@ function vSatScore(v: string) {
   if (n % 10 !== 0) return "SAT scores are multiples of 10 (e.g. 1200, 1350)";
   return "";
 }
+function vPassword(v: string) {
+  if (!v) return "Required";
+  if (v.length < 8) return "Minimum 8 characters";
+  if (!/[A-Za-z]/.test(v)) return "Must contain at least one letter";
+  if (!/[0-9]/.test(v)) return "Must contain at least one number";
+  return "";
+}
 function vFutureDate(v: string) {
   if (!v) return "";
   const d = new Date(v);
@@ -97,6 +104,7 @@ type RegFields = {
   city: string; grade: string;
   targetSatDate: string; currentScore: string; targetScore: string;
   packageType: string; preferredClassTime: string; source: string;
+  password: string; confirmPassword: string;
   consent: boolean;
 };
 
@@ -105,6 +113,7 @@ const REG_INIT: RegFields = {
   whatsapp: "", country: "", city: "", grade: "",
   targetSatDate: "", currentScore: "", targetScore: "",
   packageType: "Founder Core", preferredClassTime: "", source: "",
+  password: "", confirmPassword: "",
   consent: false,
 };
 
@@ -133,6 +142,8 @@ export function RegistrationForm() {
       case "packageType": return vSelect(value as string);
       case "currentScore": case "targetScore": return vSatScore(value as string);
       case "targetSatDate": return vFutureDate(value as string);
+      case "password": return vPassword(value as string);
+      case "confirmPassword": return (value as string) ? "" : "Required";
       case "consent": return value ? "" : "You must consent to proceed";
       default: return "";
     }
@@ -154,7 +165,8 @@ export function RegistrationForm() {
     e.preventDefault();
     const required: (keyof RegFields)[] = [
       "studentName","parentName","studentEmail",
-      "whatsapp","country","city","grade","packageType","consent",
+      "whatsapp","country","city","grade","packageType",
+      "password","confirmPassword","consent",
     ];
     const optional: (keyof RegFields)[] = ["parentEmail","currentScore","targetScore","targetSatDate"];
     const allErrors: Partial<Record<keyof RegFields, string>> = {};
@@ -163,6 +175,11 @@ export function RegistrationForm() {
       allTouched[name] = true;
       allErrors[name] = validateField(name, fields[name]);
     });
+
+    // Cross-field: passwords must match
+    if (fields.password && fields.confirmPassword && fields.password !== fields.confirmPassword) {
+      allErrors.confirmPassword = "Passwords do not match";
+    }
 
     // Cross-field: target score must be >= current score
     if (fields.currentScore && fields.targetScore) {
@@ -192,6 +209,7 @@ export function RegistrationForm() {
       packageType: fields.packageType,
       preferredClassTime: fields.preferredClassTime.trim(),
       source: fields.source.trim(),
+      password: fields.password,
       consent: "true",
     });
   }
@@ -324,6 +342,25 @@ export function RegistrationForm() {
           <input type="text" {...text("source", "e.g. WhatsApp, Instagram, friend")} />
         </div>
 
+      </div>
+
+      {/* Password section */}
+      <div style={{ borderTop: "1px solid #edf2f7", paddingTop: 20, marginTop: 4 }}>
+        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".88rem", margin: "0 0 14px" }}>
+          Create a password for your student account
+        </p>
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor="password">Password *</label>
+            <input type="password" {...text("password", "Min 8 chars, include a number")} autoComplete="new-password" />
+            <Err msg={touched.password ? errors.password : undefined} />
+          </div>
+          <div className="field">
+            <label htmlFor="confirmPassword">Confirm password *</label>
+            <input type="password" {...text("confirmPassword", "Repeat your password")} autoComplete="new-password" />
+            <Err msg={touched.confirmPassword ? errors.confirmPassword : undefined} />
+          </div>
+        </div>
       </div>
 
       <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", marginTop: 4 }}>
