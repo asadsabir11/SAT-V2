@@ -5,7 +5,8 @@ import { createUser, findUserByEmail } from "@/lib/users";
 // Requires ADMIN_SECRET env var to match the request header.
 export async function POST(request: NextRequest) {
   const secret = request.headers.get("x-admin-secret");
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
+  const adminSecret = (process.env.ADMIN_SECRET ?? "").trim();
+  if (!secret || !adminSecret || secret !== adminSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
