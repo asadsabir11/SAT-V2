@@ -3,6 +3,7 @@ import { sendToN8n } from "@/lib/n8n";
 import { appendData } from "@/lib/storage";
 import { createUser } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
+import { sendNewStudentAlert } from "@/lib/email";
 
 const webhooks: Record<string, string | undefined> = {
   student: process.env.N8N_STUDENT_REGISTRATION_WEBHOOK_URL,
@@ -28,6 +29,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // For student registrations: create a user account and set auth cookie
     if (type === "student" && password && leadData.studentEmail && leadData.studentName) {
       await createUser(leadData.studentEmail, password, "student", leadData.studentName);
+      sendNewStudentAlert({
+        name: leadData.studentName,
+        email: leadData.studentEmail,
+        country: leadData.country,
+        packageType: leadData.packageType,
+        grade: leadData.grade,
+      }).catch(console.error);
       const token = await createToken({
         id: record.id,
         email: leadData.studentEmail,
