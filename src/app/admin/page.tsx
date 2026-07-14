@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { DashboardCard, PageHero } from "@/components/site";
 
 interface Metrics {
@@ -54,8 +55,10 @@ export default function Admin() {
       </PageHero>
       <section className="section">
         <div className="container">
-          <div className="note" style={{ marginBottom: 24 }}>
-            <strong>MVP note:</strong> production admin access requires authentication before launch.
+          <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+            <Link href="/admin/quiz" className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
+              Manage diagnostic quizzes →
+            </Link>
           </div>
 
           {loading ? (
