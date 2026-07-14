@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const ADMIN_EMAIL = "abdullahbinshahab@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "";
 
 export async function sendNewStudentAlert(student: {
   name: string;
@@ -10,7 +10,7 @@ export async function sendNewStudentAlert(student: {
   grade?: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return; // silently skip if not configured
+  if (!apiKey || !ADMIN_EMAIL) return; // silently skip if not configured
 
   const resend = new Resend(apiKey);
 
