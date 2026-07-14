@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /dashboard — students only
-  if (pathname.startsWith("/dashboard")) {
+  // /dashboard, /diagnostic, /ai-tutor — students only
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor")) {
     if (!session || session.role !== "student") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -32,5 +32,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor"],
 };

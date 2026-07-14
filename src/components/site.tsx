@@ -3,14 +3,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const NAV_LINKS=[["Program","/founder-cohort"],["Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["Partners","/partners"]] as const;
+const PUBLIC_NAV = [["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"], ["Partners", "/partners"]] as const;
+const STUDENT_NAV = [["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
 
-function AuthBadge() {
+function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   const [user, setUser] = useState<AuthUser>(null);
   useEffect(() => {
-    fetch("/api/auth/me").then(r => r.json()).then(d => { if (d.user) setUser(d.user); }).catch(()=>{});
+    fetch("/api/auth/me").then(r => r.json()).then(d => {
+      const u = d.user ?? null;
+      setUser(u);
+      onUser?.(u);
+    }).catch(() => {});
   }, []);
 
   async function logout() {
@@ -42,10 +47,11 @@ function AuthBadge() {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["Founder Cohort","/founder-cohort"],["Free Diagnostic","/diagnostic"],["AI Tutor","/ai-tutor"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["Founder Cohort","/founder-cohort"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
-export function Header(){
+export function Header() {
+  const [user, setUser] = useState<AuthUser>(null);
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
@@ -53,13 +59,18 @@ export function Header(){
           <span style={{color:"#155eef"}}>The Digital</span> Tutor
         </Link>
         <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
-          {NAV_LINKS.map(([label,href])=>(
+          {PUBLIC_NAV.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
-          <AuthBadge />
-          <Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
-            Join cohort →
-          </Link>
+          {user?.role === "student" && STUDENT_NAV.map(([label, href]) => (
+            <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#155eef",fontWeight:800,transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
+          ))}
+          <AuthBadge onUser={setUser} />
+          {!user && (
+            <Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
+              Join cohort →
+            </Link>
+          )}
         </nav>
       </div>
     </header>
@@ -105,9 +116,9 @@ export function Footer(){
           <div>
             <p className="footer-col-title">Get Started</p>
             <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
-              Take the free 10-minute diagnostic to see where you stand — no registration required.
+              Create a free account to access the diagnostic, AI tutor, and your personal dashboard.
             </p>
-            <Link href="/diagnostic" className="footer-cta-btn footer-cta-primary">Take free diagnostic →</Link>
+            <Link href="/register" className="footer-cta-btn footer-cta-primary">Get started free →</Link>
             <Link href="/register?plan=Founder" className="footer-cta-btn footer-cta-secondary">Join founder cohort</Link>
             <p style={{color:"#4e6a88",fontSize:".78rem",marginTop:16,lineHeight:1.5}}>
               Founder cohort open · Limited seats

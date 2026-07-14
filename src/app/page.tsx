@@ -50,11 +50,11 @@ export default function Home() {
               and parent progress reports — designed for families who need more than free self-study.
             </p>
             <div className="actions">
-              <CTAButton href="/diagnostic">Take free diagnostic</CTAButton>
+              <CTAButton href="/register">Get started free</CTAButton>
               <CTAButton href="/register?plan=Founder" secondary>Join founder cohort →</CTAButton>
             </div>
             <div className="trust-strip">
-              <span className="trust-item">Free diagnostic — no sign-up required</span>
+              <span className="trust-item">Free diagnostic — included after sign-up</span>
               <span className="trust-item">Founder cohort seats open now</span>
               <span className="trust-item">16+ countries served</span>
               <span className="trust-item">No score guarantee</span>
