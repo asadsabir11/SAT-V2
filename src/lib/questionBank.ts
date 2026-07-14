@@ -51,6 +51,16 @@ export async function addBankQuestion(q: Omit<BankQuestion, "id" | "created_at">
   return id;
 }
 
+export async function updateBankQuestion(id: string, q: Omit<BankQuestion, "id" | "created_by" | "created_at">) {
+  await ensureTable();
+  await sql`
+    UPDATE question_bank
+    SET section=${q.section}, topic=${q.topic}, passage=${q.passage ?? ""}, text=${q.text},
+        options=${JSON.stringify(q.options)}, correct=${q.correct}, explanation=${q.explanation ?? ""}
+    WHERE id=${id}
+  `;
+}
+
 export async function deleteBankQuestion(id: string) {
   await ensureTable();
   await sql`DELETE FROM question_bank WHERE id = ${id}`;

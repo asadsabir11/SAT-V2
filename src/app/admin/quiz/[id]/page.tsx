@@ -76,6 +76,8 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
   const [saved, setSaved] = useState(false);
   const [newQ, setNewQ] = useState<Omit<Question, "id">>({ ...BLANK_Q, options: ["", "", "", ""] });
   const [addingQ, setAddingQ] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<Omit<Question, "id"> | null>(null);
 
   // Question bank panel
   const [showBank, setShowBank] = useState(false);
@@ -263,42 +265,125 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
               </div>
             ) : (
               <div style={{ display: "grid", gap: 12, marginBottom: 20 }}>
-                {questions.map((q, i) => (
-                  <div key={q.id} className="card" style={{ padding: "16px 20px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
-                          <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".78rem" }}>Q{i + 1}</span>
-                          <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: q.section === "math" ? "#ede9fe" : "#fce7f3", color: q.section === "math" ? "#5b21b6" : "#9d174d" }}>
-                            {q.section === "math" ? "Math" : "Reading & Writing"}
-                          </span>
-                          <span style={{ color: "#a0aec0", fontSize: ".78rem" }}>{q.topic}</span>
+                {questions.map((q, i) => {
+                  const isEditing = editingId === q.id;
+                  const draft = isEditing ? editDraft! : null;
+
+                  if (isEditing && draft) {
+                    return (
+                      <div key={q.id} className="card" style={{ border: "2px solid #155eef", padding: "18px 20px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                          <span style={{ fontWeight: 800, color: "#155eef", fontSize: ".82rem" }}>Editing Q{i + 1}</span>
+                          <button onClick={() => { setEditingId(null); setEditDraft(null); }} style={{ background: "none", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#6b7c93" }}>✕</button>
                         </div>
-                        {q.passage && (
-                          <p style={{ fontSize: ".82rem", color: "#6b7c93", fontStyle: "italic", borderLeft: "3px solid #dce5ef", paddingLeft: 10, margin: "0 0 8px", lineHeight: 1.6 }}>
-                            {q.passage.length > 150 ? q.passage.slice(0, 150) + "…" : q.passage}
-                          </p>
-                        )}
-                        <p style={{ fontWeight: 700, color: "#071b33", margin: "0 0 8px" }}>{q.text}</p>
-                        <div style={{ display: "grid", gap: 4, marginBottom: 6 }}>
-                          {q.options.map((opt, oi) => (
-                            <span key={oi} style={{ fontSize: ".82rem", color: oi === q.correct ? "#065f46" : "#6b7c93", fontWeight: oi === q.correct ? 700 : 400 }}>
-                              {oi === q.correct ? "✓" : "○"} {String.fromCharCode(65 + oi)}. {opt}
-                            </span>
-                          ))}
+                        <div className="form-grid" style={{ marginBottom: 12 }}>
+                          <div className="field">
+                            <label>Section *</label>
+                            <select value={draft.section} onChange={e => setEditDraft(d => ({ ...d!, section: e.target.value as Section }))}>
+                              <option value="math">Math</option>
+                              <option value="reading_writing">Reading & Writing</option>
+                            </select>
+                          </div>
+                          <div className="field">
+                            <label>Topic *</label>
+                            <input value={draft.topic} onChange={e => setEditDraft(d => ({ ...d!, topic: e.target.value }))} placeholder="e.g. Linear Equations" />
+                          </div>
                         </div>
-                        {q.explanation && (
-                          <p style={{ fontSize: ".78rem", color: "#155eef", background: "#eff6ff", borderRadius: 6, padding: "6px 10px", margin: 0 }}>
-                            <strong>Explanation:</strong> {q.explanation}
-                          </p>
-                        )}
+                        <div className="field" style={{ marginBottom: 12 }}>
+                          <label>Passage / Context (optional)</label>
+                          <textarea value={draft.passage ?? ""} onChange={e => setEditDraft(d => ({ ...d!, passage: e.target.value }))} rows={3} style={{ resize: "vertical" }} />
+                        </div>
+                        <div className="field" style={{ marginBottom: 14 }}>
+                          <label>Question text *</label>
+                          <textarea value={draft.text} onChange={e => setEditDraft(d => ({ ...d!, text: e.target.value }))} rows={2} style={{ resize: "vertical" }} />
+                        </div>
+                        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".85rem", margin: "0 0 10px" }}>Answer options — select the correct one:</p>
+                        {(["A", "B", "C", "D"] as const).map((letter, oi) => (
+                          <div key={oi} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
+                            <input type="radio" name={`edit-correct-${q.id}`} checked={draft.correct === oi} onChange={() => setEditDraft(d => ({ ...d!, correct: oi as 0 | 1 | 2 | 3 }))} style={{ accentColor: "#155eef", flexShrink: 0 }} />
+                            <span style={{ fontWeight: 700, color: "#344054", minWidth: 20 }}>{letter}.</span>
+                            <input
+                              value={draft.options[oi]}
+                              onChange={e => {
+                                const opts = [...draft.options] as [string, string, string, string];
+                                opts[oi] = e.target.value;
+                                setEditDraft(d => ({ ...d!, options: opts }));
+                              }}
+                              placeholder={`Option ${letter}`}
+                              style={{ flex: 1 }}
+                            />
+                            {draft.correct === oi && <span style={{ color: "#065f46", fontSize: ".78rem", fontWeight: 700 }}>✓ Correct</span>}
+                          </div>
+                        ))}
+                        <div className="field" style={{ marginTop: 14 }}>
+                          <label>Explanation (shown to students after submitting)</label>
+                          <textarea value={draft.explanation ?? ""} onChange={e => setEditDraft(d => ({ ...d!, explanation: e.target.value }))} rows={2} style={{ resize: "vertical" }} />
+                        </div>
+                        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                          <button
+                            className="btn btn-primary"
+                            disabled={!draft.text.trim() || draft.options.some(o => !o.trim()) || !draft.topic.trim()}
+                            onClick={() => {
+                              const updated = questions.map(qq => qq.id === q.id ? { ...draft, id: q.id } : qq);
+                              setQuestions(updated);
+                              setEditingId(null);
+                              setEditDraft(null);
+                              fetch(`/api/quiz/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questions: updated }) });
+                            }}>
+                            Save changes
+                          </button>
+                          <button onClick={() => { setEditingId(null); setEditDraft(null); }} style={{ padding: "10px 20px", borderRadius: 10, background: "#f1f5f9", border: "none", fontWeight: 700, cursor: "pointer", color: "#6b7c93" }}>
+                            Cancel
+                          </button>
+                        </div>
                       </div>
-                      <button onClick={() => removeQuestion(q.id)} style={{ background: "#fee2e2", border: "none", color: "#991b1b", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontWeight: 700, fontSize: ".78rem", flexShrink: 0 }}>
-                        Remove
-                      </button>
+                    );
+                  }
+
+                  return (
+                    <div key={q.id} className="card" style={{ padding: "16px 20px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+                            <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".78rem" }}>Q{i + 1}</span>
+                            <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: q.section === "math" ? "#ede9fe" : "#fce7f3", color: q.section === "math" ? "#5b21b6" : "#9d174d" }}>
+                              {q.section === "math" ? "Math" : "Reading & Writing"}
+                            </span>
+                            <span style={{ color: "#a0aec0", fontSize: ".78rem" }}>{q.topic}</span>
+                          </div>
+                          {q.passage && (
+                            <p style={{ fontSize: ".82rem", color: "#6b7c93", fontStyle: "italic", borderLeft: "3px solid #dce5ef", paddingLeft: 10, margin: "0 0 8px", lineHeight: 1.6 }}>
+                              {q.passage.length > 150 ? q.passage.slice(0, 150) + "…" : q.passage}
+                            </p>
+                          )}
+                          <p style={{ fontWeight: 700, color: "#071b33", margin: "0 0 8px" }}>{q.text}</p>
+                          <div style={{ display: "grid", gap: 4, marginBottom: 6 }}>
+                            {q.options.map((opt, oi) => (
+                              <span key={oi} style={{ fontSize: ".82rem", color: oi === q.correct ? "#065f46" : "#6b7c93", fontWeight: oi === q.correct ? 700 : 400 }}>
+                                {oi === q.correct ? "✓" : "○"} {String.fromCharCode(65 + oi)}. {opt}
+                              </span>
+                            ))}
+                          </div>
+                          {q.explanation && (
+                            <p style={{ fontSize: ".78rem", color: "#155eef", background: "#eff6ff", borderRadius: 6, padding: "6px 10px", margin: 0 }}>
+                              <strong>Explanation:</strong> {q.explanation}
+                            </p>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                          <button
+                            onClick={() => { setEditingId(q.id); setEditDraft({ section: q.section, topic: q.topic, passage: q.passage ?? "", text: q.text, options: [...q.options] as [string,string,string,string], correct: q.correct, explanation: q.explanation ?? "" }); }}
+                            style={{ background: "#eff6ff", border: "none", color: "#155eef", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontWeight: 700, fontSize: ".78rem" }}>
+                            Edit
+                          </button>
+                          <button onClick={() => removeQuestion(q.id)} style={{ background: "#fee2e2", border: "none", color: "#991b1b", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontWeight: 700, fontSize: ".78rem" }}>
+                            Remove
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
