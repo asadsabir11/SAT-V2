@@ -12,6 +12,12 @@ interface Question {
   text: string;
   options: [string, string, string, string];
   correct: 0 | 1 | 2 | 3;
+  explanation?: string;
+}
+
+interface BankQuestion extends Question {
+  created_by: string;
+  created_at: string;
 }
 
 interface QuizAttempt {
@@ -32,13 +38,36 @@ const BLANK_Q: Omit<Question, "id"> = {
   text: "",
   options: ["", "", "", ""],
   correct: 0,
+  explanation: "",
 };
+
+function exportCSV(results: QuizAttempt[], title: string) {
+  const headers = ["Student Name", "Email", "Math Score", "R&W Score", "Total Score", "Weak Areas", "Date"];
+  const rows = results.map(r => [
+    r.student_name || "",
+    r.student_email,
+    r.math_score,
+    r.rw_score,
+    r.total_score,
+    (r.weak_areas ?? []).join("; "),
+    new Date(r.completed_at).toLocaleDateString(),
+  ]);
+  const csv = [headers, ...rows].map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${title.replace(/[^a-z0-9]/gi, "_")}_results.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function QuizEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [tab, setTab] = useState<"questions" | "results">("questions");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [results, setResults] = useState<QuizAttempt[]>([]);
@@ -48,11 +77,18 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
   const [newQ, setNewQ] = useState<Omit<Question, "id">>({ ...BLANK_Q, options: ["", "", "", ""] });
   const [addingQ, setAddingQ] = useState(false);
 
+  // Question bank panel
+  const [showBank, setShowBank] = useState(false);
+  const [bankQuestions, setBankQuestions] = useState<BankQuestion[]>([]);
+  const [bankLoading, setBankLoading] = useState(false);
+  const [bankFilter, setBankFilter] = useState("");
+
   useEffect(() => {
     fetch(`/api/quiz/${id}`).then(r => r.json()).then(d => {
       if (d.quiz) {
         setTitle(d.quiz.title);
         setDescription(d.quiz.description ?? "");
+        setTimeLimitMinutes(d.quiz.time_limit_minutes ?? 0);
         setIsActive(d.quiz.is_active);
         setQuestions(d.quiz.questions ?? []);
       }
@@ -71,7 +107,7 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
     await fetch(`/api/quiz/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, questions }),
+      body: JSON.stringify({ title, description, time_limit_minutes: timeLimitMinutes, questions }),
     });
     setSaving(false);
     setSaved(true);
@@ -95,7 +131,6 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
     setQuestions(updated);
     setNewQ({ ...BLANK_Q, options: ["", "", "", ""] });
     setAddingQ(false);
-    // Auto-save questions
     fetch(`/api/quiz/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -114,8 +149,44 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
     });
   }
 
+  async function openBank() {
+    setShowBank(true);
+    if (bankQuestions.length === 0) {
+      setBankLoading(true);
+      const res = await fetch("/api/question-bank");
+      const d = await res.json();
+      setBankQuestions(d.questions ?? []);
+      setBankLoading(false);
+    }
+  }
+
+  function addFromBank(bq: BankQuestion) {
+    if (questions.find(q => q.id === bq.id || q.text === bq.text)) return;
+    const q: Question = {
+      id: bq.id,
+      section: bq.section,
+      topic: bq.topic,
+      passage: bq.passage,
+      text: bq.text,
+      options: bq.options,
+      correct: bq.correct,
+      explanation: bq.explanation,
+    };
+    const updated = [...questions, q];
+    setQuestions(updated);
+    fetch(`/api/quiz/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questions: updated }),
+    });
+  }
+
   const mathCount = questions.filter(q => q.section === "math").length;
   const rwCount = questions.filter(q => q.section === "reading_writing").length;
+
+  const filteredBank = bankQuestions.filter(bq =>
+    !bankFilter || bq.topic.toLowerCase().includes(bankFilter.toLowerCase()) || bq.text.toLowerCase().includes(bankFilter.toLowerCase())
+  );
 
   if (loading) return <section className="section"><div className="container"><div className="card"><p>Loading quiz…</p></div></div></section>;
 
@@ -129,7 +200,9 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
             <Link href="/admin/quiz" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← All quizzes</Link>
             <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#071b33", margin: "6px 0 4px", letterSpacing: "-.03em" }}>{title || "Untitled quiz"}</h1>
             <p style={{ color: "#6b7c93", margin: 0, fontSize: ".88rem" }}>
-              {questions.length} questions · {mathCount} Math · {rwCount} R&W ·{" "}
+              {questions.length} questions · {mathCount} Math · {rwCount} R&W
+              {timeLimitMinutes > 0 && ` · ⏱ ${timeLimitMinutes} min`}
+              {" · "}
               <span style={{ color: isActive ? "#065f46" : "#92400e", fontWeight: 700 }}>
                 {isActive ? "● ACTIVE (students can see this)" : "○ Draft (not visible to students)"}
               </span>
@@ -158,7 +231,7 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
             {/* Meta edit */}
             <div className="card" style={{ marginBottom: 20 }}>
               <h3 style={{ margin: "0 0 14px", color: "#071b33" }}>Quiz details</h3>
-              <div className="form-grid">
+              <div className="form-grid" style={{ marginBottom: 12 }}>
                 <div className="field">
                   <label>Title *</label>
                   <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Quiz title" />
@@ -168,7 +241,17 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
                   <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Short description" />
                 </div>
               </div>
-              <button className="btn btn-primary" onClick={saveQuiz} disabled={saving} style={{ marginTop: 8 }}>
+              <div className="field" style={{ maxWidth: 260, marginBottom: 12 }}>
+                <label>Time limit (minutes) — 0 means no limit</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={timeLimitMinutes}
+                  onChange={e => setTimeLimitMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                  placeholder="0"
+                />
+              </div>
+              <button className="btn btn-primary" onClick={saveQuiz} disabled={saving} style={{ marginTop: 4 }}>
                 {saving ? "Saving…" : saved ? "✓ Saved!" : "Save changes"}
               </button>
             </div>
@@ -176,7 +259,7 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
             {/* Existing questions */}
             {questions.length === 0 ? (
               <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93", marginBottom: 20 }}>
-                No questions yet. Add your first question below.
+                No questions yet. Add a question below or pick from the question bank.
               </div>
             ) : (
               <div style={{ display: "grid", gap: 12, marginBottom: 20 }}>
@@ -197,13 +280,18 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
                           </p>
                         )}
                         <p style={{ fontWeight: 700, color: "#071b33", margin: "0 0 8px" }}>{q.text}</p>
-                        <div style={{ display: "grid", gap: 4 }}>
+                        <div style={{ display: "grid", gap: 4, marginBottom: 6 }}>
                           {q.options.map((opt, oi) => (
                             <span key={oi} style={{ fontSize: ".82rem", color: oi === q.correct ? "#065f46" : "#6b7c93", fontWeight: oi === q.correct ? 700 : 400 }}>
                               {oi === q.correct ? "✓" : "○"} {String.fromCharCode(65 + oi)}. {opt}
                             </span>
                           ))}
                         </div>
+                        {q.explanation && (
+                          <p style={{ fontSize: ".78rem", color: "#155eef", background: "#eff6ff", borderRadius: 6, padding: "6px 10px", margin: 0 }}>
+                            <strong>Explanation:</strong> {q.explanation}
+                          </p>
+                        )}
                       </div>
                       <button onClick={() => removeQuestion(q.id)} style={{ background: "#fee2e2", border: "none", color: "#991b1b", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontWeight: 700, fontSize: ".78rem", flexShrink: 0 }}>
                         Remove
@@ -214,12 +302,77 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
               </div>
             )}
 
-            {/* Add question */}
-            {!addingQ ? (
-              <button className="btn btn-primary" onClick={() => setAddingQ(true)} style={{ width: "100%" }}>
-                + Add question
+            {/* Action buttons */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+              {!addingQ && (
+                <button className="btn btn-primary" onClick={() => setAddingQ(true)} style={{ flex: 1 }}>
+                  + Add question manually
+                </button>
+              )}
+              <button
+                onClick={openBank}
+                style={{ flex: 1, padding: "10px 20px", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", cursor: "pointer", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+                📚 Pick from question bank
               </button>
-            ) : (
+            </div>
+
+            {/* Question bank panel */}
+            {showBank && (
+              <div className="card" style={{ border: "2px solid #155eef", marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <h3 style={{ margin: 0, color: "#071b33" }}>Question Bank</h3>
+                  <button onClick={() => setShowBank(false)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#6b7c93" }}>✕</button>
+                </div>
+                <input
+                  value={bankFilter}
+                  onChange={e => setBankFilter(e.target.value)}
+                  placeholder="Filter by topic or keyword…"
+                  style={{ marginBottom: 14, width: "100%" }}
+                />
+                {bankLoading ? (
+                  <p style={{ color: "#6b7c93" }}>Loading bank…</p>
+                ) : filteredBank.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "20px 0", color: "#6b7c93" }}>
+                    {bankQuestions.length === 0
+                      ? "No questions in the bank yet. Go to Admin → Question Bank to add some."
+                      : "No questions match your filter."}
+                    <br />
+                    <Link href="/admin/question-bank" style={{ color: "#155eef", fontSize: ".85rem" }}>Manage question bank →</Link>
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gap: 10, maxHeight: 480, overflowY: "auto" }}>
+                    {filteredBank.map(bq => {
+                      const alreadyAdded = questions.some(q => q.id === bq.id || q.text === bq.text);
+                      return (
+                        <div key={bq.id} style={{ border: "1px solid #e8eef6", borderRadius: 10, padding: "12px 16px", display: "flex", gap: 12, alignItems: "flex-start", background: alreadyAdded ? "#f8fafc" : "#fff" }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                              <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: ".7rem", fontWeight: 700, background: bq.section === "math" ? "#ede9fe" : "#fce7f3", color: bq.section === "math" ? "#5b21b6" : "#9d174d" }}>
+                                {bq.section === "math" ? "Math" : "R&W"}
+                              </span>
+                              <span style={{ color: "#a0aec0", fontSize: ".75rem" }}>{bq.topic}</span>
+                            </div>
+                            <p style={{ margin: "0 0 4px", fontWeight: 600, fontSize: ".85rem", color: "#344054" }}>{bq.text}</p>
+                            <p style={{ margin: 0, fontSize: ".75rem", color: "#065f46" }}>
+                              ✓ {String.fromCharCode(65 + bq.correct)}. {bq.options[bq.correct]}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => addFromBank(bq)}
+                            disabled={alreadyAdded}
+                            style={{ padding: "7px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".78rem", cursor: alreadyAdded ? "default" : "pointer", border: "none", background: alreadyAdded ? "#e5e7eb" : "#d1fae5", color: alreadyAdded ? "#9ca3af" : "#065f46", flexShrink: 0 }}>
+                            {alreadyAdded ? "Added" : "+ Add"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Add question form */}
+            {addingQ && (
               <div className="card" style={{ border: "2px solid #155eef" }}>
                 <h3 style={{ margin: "0 0 16px", color: "#071b33" }}>New question</h3>
                 <div className="form-grid" style={{ marginBottom: 12 }}>
@@ -237,7 +390,7 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
                 </div>
                 <div className="field" style={{ marginBottom: 12 }}>
                   <label>Passage / Context (optional)</label>
-                  <textarea value={newQ.passage ?? ""} onChange={e => setNewQ(q => ({ ...q, passage: e.target.value }))} placeholder="Paste a reading passage or context paragraph here (leave blank for standalone questions)" rows={3} style={{ resize: "vertical" }} />
+                  <textarea value={newQ.passage ?? ""} onChange={e => setNewQ(q => ({ ...q, passage: e.target.value }))} placeholder="Paste a reading passage or context paragraph here" rows={3} style={{ resize: "vertical" }} />
                 </div>
                 <div className="field" style={{ marginBottom: 16 }}>
                   <label>Question text *</label>
@@ -267,6 +420,16 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
                     {newQ.correct === i && <span style={{ color: "#065f46", fontSize: ".78rem", fontWeight: 700 }}>✓ Correct</span>}
                   </div>
                 ))}
+                <div className="field" style={{ marginTop: 14 }}>
+                  <label>Explanation (shown to students after submitting)</label>
+                  <textarea
+                    value={newQ.explanation ?? ""}
+                    onChange={e => setNewQ(q => ({ ...q, explanation: e.target.value }))}
+                    placeholder="Explain why the correct answer is right, e.g. 'Solving 3x+7=22: subtract 7, divide by 3, x=5, so 2x=10'"
+                    rows={2}
+                    style={{ resize: "vertical" }}
+                  />
+                </div>
                 <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
                   <button className="btn btn-primary" onClick={addQuestion} disabled={!newQ.text.trim() || newQ.options.some(o => !o.trim()) || !newQ.topic.trim()}>
                     Add question
@@ -288,6 +451,13 @@ export default function QuizEditor({ params }: { params: Promise<{ id: string }>
               </div>
             ) : (
               <>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+                  <button
+                    onClick={() => exportCSV(results, title)}
+                    style={{ padding: "9px 20px", borderRadius: 10, fontWeight: 700, fontSize: ".85rem", cursor: "pointer", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+                    ⬇ Download CSV
+                  </button>
+                </div>
                 <div className="grid grid-4" style={{ marginBottom: 24 }}>
                   <div className="card"><div className="eyebrow">Total attempts</div><div className="metric">{results.length}</div></div>
                   <div className="card"><div className="eyebrow">Avg total score</div><div className="metric">{Math.round(results.reduce((s, r) => s + r.total_score, 0) / results.length)}</div></div>

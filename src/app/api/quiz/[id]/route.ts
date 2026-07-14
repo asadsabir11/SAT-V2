@@ -26,7 +26,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (body.action === "activate") { await activateQuiz(id); return NextResponse.json({ ok: true }); }
   if (body.action === "deactivate") { await deactivateQuiz(id); return NextResponse.json({ ok: true }); }
   if (body.questions !== undefined) { await setQuizQuestions(id, body.questions); return NextResponse.json({ ok: true }); }
-  if (body.title !== undefined) { await updateQuizMeta(id, body.title, body.description ?? ""); return NextResponse.json({ ok: true }); }
+  if (body.title !== undefined) { await updateQuizMeta(id, body.title, body.description ?? "", body.time_limit_minutes ?? 0); return NextResponse.json({ ok: true }); }
 
   return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 }

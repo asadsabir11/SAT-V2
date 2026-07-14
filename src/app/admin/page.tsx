@@ -59,6 +59,9 @@ export default function Admin() {
             <Link href="/admin/quiz" className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
               Manage diagnostic quizzes →
             </Link>
+            <Link href="/admin/question-bank" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+              📚 Question bank →
+            </Link>
           </div>
 
           {loading ? (

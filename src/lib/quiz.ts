@@ -10,6 +10,7 @@ export type QuizQuestion = {
   text: string;
   options: [string, string, string, string];
   correct: 0 | 1 | 2 | 3;
+  explanation?: string;
 };
 
 export type Quiz = {
@@ -17,6 +18,7 @@ export type Quiz = {
   title: string;
   description: string;
   is_active: boolean;
+  time_limit_minutes: number;
   created_by: string;
   questions: QuizQuestion[];
   created_at: string;
@@ -44,12 +46,15 @@ async function ensureTables() {
       title TEXT NOT NULL,
       description TEXT DEFAULT '',
       is_active BOOLEAN DEFAULT false,
+      time_limit_minutes INTEGER DEFAULT 0,
       created_by TEXT NOT NULL,
       questions JSONB NOT NULL DEFAULT '[]',
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // Migrate existing tables to add new column if missing
+  await sql`ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS time_limit_minutes INTEGER DEFAULT 0`;
   await sql`
     CREATE TABLE IF NOT EXISTS quiz_attempts (
       id TEXT PRIMARY KEY,
@@ -101,9 +106,9 @@ export async function createQuiz(title: string, description: string, createdBy: 
   return id;
 }
 
-export async function updateQuizMeta(id: string, title: string, description: string) {
+export async function updateQuizMeta(id: string, title: string, description: string, timeLimitMinutes: number) {
   await ensureTables();
-  await sql`UPDATE quizzes SET title=${title}, description=${description}, updated_at=NOW() WHERE id=${id}`;
+  await sql`UPDATE quizzes SET title=${title}, description=${description}, time_limit_minutes=${timeLimitMinutes}, updated_at=NOW() WHERE id=${id}`;
 }
 
 export async function setQuizQuestions(id: string, questions: QuizQuestion[]) {
