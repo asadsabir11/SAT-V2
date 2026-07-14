@@ -1,12 +1,11 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type Role = "student" | "founder";
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const nextPath = params.get("next");
 
@@ -35,13 +34,8 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Login failed. Please try again."); return; }
-      // Redirect based on role
-      if (nextPath) {
-        router.push(nextPath);
-      } else {
-        router.push(data.role === "founder" ? "/admin" : "/dashboard");
-      }
-      router.refresh();
+      // Full page reload so the Header re-fetches the session cookie
+      window.location.href = nextPath ?? (data.role === "founder" ? "/admin" : "/dashboard");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
