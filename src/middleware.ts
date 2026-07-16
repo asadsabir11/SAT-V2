@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /dashboard, /diagnostic, /ai-tutor — students only
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor")) {
+  // /dashboard, /diagnostic, /ai-tutor, /lectures — students only
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures")) {
     if (!session || session.role !== "student") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -32,5 +32,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*"],
 };

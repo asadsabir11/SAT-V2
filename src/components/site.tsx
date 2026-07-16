@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"], ["Partners", "/partners"]] as const;
-const STUDENT_NAV = [["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
+const STUDENT_NAV = [["Lectures", "/lectures"], ["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
 
