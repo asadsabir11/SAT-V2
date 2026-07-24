@@ -2,11 +2,16 @@ import { neon } from "@neondatabase/serverless";
 
 const sql = neon(process.env.POSTGRES_URL!);
 
+export type LectureCategory = "introduction" | "math" | "english";
+
 export type Lecture = {
   id: string;
   title: string;
   description: string;
   video_url: string;
+  thumbnail_url: string;
+  category: LectureCategory;
+  is_free_preview: boolean;
   order_index: number;
   is_published: boolean;
   created_by: string;
@@ -23,6 +28,7 @@ async function ensureTable() {
       title TEXT NOT NULL,
       description TEXT DEFAULT '',
       video_url TEXT NOT NULL,
+      thumbnail_url TEXT DEFAULT '',
       order_index INTEGER DEFAULT 0,
       is_published BOOLEAN DEFAULT false,
       created_by TEXT NOT NULL,
@@ -30,6 +36,9 @@ async function ensureTable() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS thumbnail_url TEXT DEFAULT ''`;
+  await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'math'`;
+  await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS is_free_preview BOOLEAN DEFAULT false`;
   ready = true;
 }
 
@@ -51,21 +60,25 @@ export async function getLectureById(id: string): Promise<Lecture | null> {
   return (rows[0] as Lecture) ?? null;
 }
 
-export async function createLecture(title: string, description: string, videoUrl: string, createdBy: string): Promise<string> {
+export async function createLecture(title: string, description: string, videoUrl: string, createdBy: string, thumbnailUrl = "", category: LectureCategory = "math"): Promise<string> {
   await ensureTable();
   const id = crypto.randomUUID();
   const maxRow = await sql`SELECT COALESCE(MAX(order_index), 0) AS m FROM lectures`;
   const nextOrder = (maxRow[0].m as number) + 1;
   await sql`
-    INSERT INTO lectures (id, title, description, video_url, order_index, created_by)
-    VALUES (${id}, ${title}, ${description}, ${videoUrl}, ${nextOrder}, ${createdBy})
+    INSERT INTO lectures (id, title, description, video_url, thumbnail_url, category, order_index, created_by)
+    VALUES (${id}, ${title}, ${description}, ${videoUrl}, ${thumbnailUrl}, ${category}, ${nextOrder}, ${createdBy})
   `;
   return id;
 }
 
-export async function updateLecture(id: string, title: string, description: string) {
+export async function updateLecture(id: string, title: string, description: string, category?: string) {
   await ensureTable();
-  await sql`UPDATE lectures SET title=${title}, description=${description}, updated_at=NOW() WHERE id=${id}`;
+  if (category) {
+    await sql`UPDATE lectures SET title=${title}, description=${description}, category=${category}, updated_at=NOW() WHERE id=${id}`;
+  } else {
+    await sql`UPDATE lectures SET title=${title}, description=${description}, updated_at=NOW() WHERE id=${id}`;
+  }
 }
 
 export async function publishLecture(id: string) {
@@ -86,4 +99,9 @@ export async function deleteLecture(id: string) {
 export async function reorderLecture(id: string, orderIndex: number) {
   await ensureTable();
   await sql`UPDATE lectures SET order_index=${orderIndex}, updated_at=NOW() WHERE id=${id}`;
+}
+
+export async function setFreePreview(id: string, preview: boolean) {
+  await ensureTable();
+  await sql`UPDATE lectures SET is_free_preview=${preview}, updated_at=NOW() WHERE id=${id}`;
 }

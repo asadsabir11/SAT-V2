@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"], ["Partners", "/partners"]] as const;
-const STUDENT_NAV = [["Lectures", "/lectures"], ["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
+const STUDENT_NAV = [["Q&A", "/discussion"], ["Sessions", "/sessions"], ["Lectures", "/lectures"], ["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
 
@@ -47,7 +47,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["Founder Cohort","/founder-cohort"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["The Program","/founder-cohort"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
 export function Header() {
@@ -67,7 +67,7 @@ export function Header() {
           ))}
           <AuthBadge onUser={setUser} />
           {!user && (
-            <Link href="/register?plan=Founder" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
+            <Link href="/register?plan=Core" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
               Join cohort →
             </Link>
           )}
@@ -119,9 +119,9 @@ export function Footer(){
               Create a free account to access the diagnostic, AI tutor, and your personal dashboard.
             </p>
             <Link href="/register" className="footer-cta-btn footer-cta-primary">Get started free →</Link>
-            <Link href="/register?plan=Founder" className="footer-cta-btn footer-cta-secondary">Join founder cohort</Link>
+            <Link href="/register?plan=Core" className="footer-cta-btn footer-cta-secondary">Join the cohort</Link>
             <p style={{color:"#4e6a88",fontSize:".78rem",marginTop:16,lineHeight:1.5}}>
-              Founder cohort open · Limited seats
+              Cohort seats open · Limited seats
             </p>
           </div>
         </div>
@@ -131,7 +131,11 @@ export function Footer(){
           <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,maxWidth:680,lineHeight:1.65}}>
             SAT® is a trademark registered by the College Board, which is not affiliated with and does not endorse The Digital Tutor. Independent preparation support — no official affiliation, endorsement, or score guarantee. All practice content is original.
           </p>
-          <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,whiteSpace:"nowrap"}}>© 2026 The Digital Tutor</p>
+          <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
+            <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,whiteSpace:"nowrap"}}>© 2026 The Digital Tutor</p>
+            <Link href="/privacy" style={{color:"#4e6a88",fontSize:".76rem",whiteSpace:"nowrap",textDecoration:"none"}}>Privacy Policy</Link>
+            <Link href="/terms" style={{color:"#4e6a88",fontSize:".76rem",whiteSpace:"nowrap",textDecoration:"none"}}>Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>
@@ -153,7 +157,7 @@ export function FeatureCard({index,title,children}:{index:string;title:string;ch
 }
 
 export function PricingCard({name,price,items,href,recommended=false}:{name:string;price:string;items:string[];href:string;recommended?:boolean}){
-  const label=name==="Free"?"Start free →":name==="Sponsored / NGO"?"Partner with us →":name==="Premium"?"Apply for premium →":"Join founder cohort →";
+  const label=name==="Free"?"Start free →":name==="Sponsored / NGO"?"Partner with us →":name==="Premium"?"Apply for premium →":"Enroll now →";
   return (
     <article className={`card${recommended?" recommended":""}`} style={{display:"flex",flexDirection:"column"}}>
       <span className="eyebrow" style={{marginBottom:4}}>{name}</span>

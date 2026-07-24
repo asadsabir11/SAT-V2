@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 
 const COUNTRIES = ["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","South Korea","Haiti","Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco","Other"];
-const PACKAGES  = ["Free","Founder Core","Premium","Sponsored/NGO"];
+const PACKAGES  = ["Free","Core Plan","Premium","Sponsored/NGO"];
 const GRADES    = ["Grade 8","Grade 9","Grade 10","Grade 11","Grade 12","College Freshman","College Sophomore","Other"];
 
 // ── Validators ────────────────────────────────────────────────────────────────
@@ -78,22 +78,28 @@ function errStyle(hasError: boolean): React.CSSProperties {
 // ── useSubmit hook ────────────────────────────────────────────────────────────
 function useSubmit(endpoint: string, onSuccess?: (p: Record<string, string>) => void) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   async function submit(payload: Record<string, string>) {
     setStatus("loading");
+    setErrorMessage("");
     try {
       const r = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!r.ok) throw new Error();
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        setErrorMessage(data.error ?? "");
+        throw new Error();
+      }
       setStatus("success");
       onSuccess?.(payload);
     } catch {
       setStatus("error");
     }
   }
-  return { status, submit };
+  return { status, submit, errorMessage };
 }
 
 // ── Registration Form ─────────────────────────────────────────────────────────
@@ -112,13 +118,13 @@ const REG_INIT: RegFields = {
   studentName: "", parentName: "", studentEmail: "", parentEmail: "",
   whatsapp: "", country: "", city: "", grade: "",
   targetSatDate: "", currentScore: "", targetScore: "",
-  packageType: "Founder Core", preferredClassTime: "", source: "",
+  packageType: "Core Plan", preferredClassTime: "", source: "",
   password: "", confirmPassword: "",
   consent: false,
 };
 
 export function RegistrationForm() {
-  const { status, submit } = useSubmit("/api/leads/student", (p) => {
+  const { status, submit, errorMessage } = useSubmit("/api/leads/student", (p) => {
     localStorage.setItem("sat_student_email", p.studentEmail);
     localStorage.setItem("sat_student_name", p.studentName);
     localStorage.setItem("sat_student_data", JSON.stringify({
@@ -381,7 +387,7 @@ export function RegistrationForm() {
       </button>
 
       {status === "error" && (
-        <div className="note">Something went wrong. Please try again or contact us directly.</div>
+        <div className="note">{errorMessage || "Something went wrong. Please try again or contact us directly."}</div>
       )}
     </form>
   );

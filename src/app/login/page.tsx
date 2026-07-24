@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-type Role = "student" | "founder";
+type Role = "student" | "founder" | "parent";
 
 function LoginForm() {
   const params = useSearchParams();
@@ -21,7 +21,7 @@ function LoginForm() {
     if (r === "student" || r === "founder") setRole(r);
   }, [params]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
     if (!email.trim() || !password) { setError("Please enter your email and password."); return; }
     setError("");
@@ -35,7 +35,7 @@ function LoginForm() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Login failed. Please try again."); return; }
       // Full page reload so the Header re-fetches the session cookie
-      window.location.href = nextPath ?? (data.role === "founder" ? "/admin" : "/dashboard");
+      window.location.href = nextPath ?? (data.role === "founder" ? "/admin" : data.role === "parent" ? "/parent" : "/dashboard");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -60,10 +60,11 @@ function LoginForm() {
 
         {/* Role tabs */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28, background: "#f1f5f9", borderRadius: 12, padding: 4 }}>
-          {([["student", "🎓", "Student"], ["founder", "👨‍🏫", "Teacher / Founder"]] as const).map(([r, icon, label]) => (
+          {([["student", "🎓", "Student"], ["parent", "👨‍👩‍👧", "Parent"], ["founder", "👨‍🏫", "Teacher"]] as const).map(([r, icon, label]) => (
             <button
               key={r}
               type="button"
+              aria-pressed={role === r}
               onClick={() => { setRole(r); setError(""); }}
               style={{
                 flex: 1, padding: "10px 8px", borderRadius: 9, border: "none", cursor: "pointer",
@@ -80,25 +81,27 @@ function LoginForm() {
 
         <form onSubmit={handleSubmit} noValidate>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
+            <label htmlFor="login-email" style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
               Email address
             </label>
             <input
+              id="login-email"
               type="email"
               autoComplete="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder={role === "founder" ? "founder@email.com" : "student@gmail.com"}
+              placeholder={role === "founder" ? "founder@email.com" : role === "parent" ? "parent@gmail.com" : "student@gmail.com"}
               style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: "1.5px solid #dce5ef", fontSize: ".95rem", boxSizing: "border-box", outline: "none" }}
             />
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
+            <label htmlFor="login-password" style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
               Password
             </label>
             <div style={{ position: "relative" }}>
               <input
+                id="login-password"
                 type={showPass ? "text" : "password"}
                 autoComplete="current-password"
                 value={password}
@@ -128,10 +131,15 @@ function LoginForm() {
             className="btn btn-primary"
             style={{ width: "100%", minHeight: 46, fontSize: "1rem", borderRadius: 12 }}
           >
-            {loading ? "Signing in…" : `Sign in as ${role === "founder" ? "Teacher / Founder" : "Student"} →`}
+            {loading ? "Signing in…" : `Sign in as ${role === "founder" ? "Teacher" : role === "parent" ? "Parent" : "Student"} →`}
           </button>
         </form>
 
+        {role === "parent" && (
+          <p style={{ textAlign: "center", marginTop: 20, fontSize: ".85rem", color: "#6b7c93" }}>
+            Your login is set up by the tutor. Contact Ibrahim if you need access.
+          </p>
+        )}
         {role === "student" && (
           <p style={{ textAlign: "center", marginTop: 20, fontSize: ".85rem", color: "#6b7c93" }}>
             Don&apos;t have an account?{" "}

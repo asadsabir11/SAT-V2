@@ -1,6 +1,83 @@
 import { Resend } from "resend";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "";
+const ADMIN_EMAIL  = process.env.ADMIN_EMAIL ?? "";
+const WHATSAPP_URL = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL ?? "";
+const APP_URL      = "https://digital-tutor-sat-prep.vercel.app";
+
+export async function sendParentReport(opts: {
+  parentEmail: string;
+  parentName: string;
+  studentName: string;
+  weekNo: number;
+  attendanceStatus: string;
+  homeworkDone: number;
+  homeworkTotal: number;
+  latestScore: number | null;
+  targetScore: number | null;
+  scoreDelta: number | null;
+  strengths: string[];
+  focusAreas: string[];
+  coachNote: string;
+  parentAction: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
+
+  const resend = new Resend(apiKey);
+
+  const scoreRow = opts.latestScore
+    ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:160px;">Latest score</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.latestScore}${opts.scoreDelta !== null ? ` <span style="color:${opts.scoreDelta >= 0 ? "#15803d" : "#dc2626"}">(${opts.scoreDelta >= 0 ? "+" : ""}${opts.scoreDelta})</span>` : ""}</td></tr>`
+    : "";
+  const targetRow = opts.targetScore
+    ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Target score</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#155eef;">${opts.targetScore}</td></tr>`
+    : "";
+
+  try {
+    await resend.emails.send({
+      from: "The Digital Tutor <onboarding@resend.dev>",
+      to: opts.parentEmail,
+      subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+          <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
+            <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
+            <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
+            <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
+          </div>
+
+          <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
+            <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:160px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
+            <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Homework</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.homeworkDone}/${opts.homeworkTotal} assignments completed</td></tr>
+            ${scoreRow}${targetRow}
+          </table>
+
+          ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
+          ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
+
+          <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+            <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
+            <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
+            <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+            <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
+            <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
+          </div>
+
+          <div style="text-align:center;margin-bottom:20px;">
+            <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
+          </div>
+
+          <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service. No score guarantees implied.<br>The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+        </div>
+      `,
+    });
+    return { ok: true, error: undefined };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
 
 export async function sendNewStudentAlert(student: {
   name: string;
@@ -18,6 +95,7 @@ export async function sendNewStudentAlert(student: {
     from: "The Digital Tutor <onboarding@resend.dev>",
     to: ADMIN_EMAIL,
     subject: `New student registered: ${student.name}`,
+
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
         <h2 style="color:#071b33;margin:0 0 8px;">New student registered 🎉</h2>
@@ -33,6 +111,79 @@ export async function sendNewStudentAlert(student: {
           <a href="https://digital-tutor-sat-prep.vercel.app/admin" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View in admin →</a>
         </div>
         <p style="color:#a0aec0;font-size:.75rem;margin-top:24px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendWelcomeEmail(student: { name: string; email: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const resend = new Resend(apiKey);
+
+  const waSection = WHATSAPP_URL
+    ? `<div style="margin:20px 0;padding:16px 20px;background:#dcfce7;border-radius:10px;">
+        <p style="margin:0 0 8px;font-weight:700;color:#166534;">Join our WhatsApp community</p>
+        <p style="margin:0 0 12px;color:#166534;font-size:.88rem;">Get updates, ask questions, and connect with other students.</p>
+        <a href="${WHATSAPP_URL}" style="display:inline-block;padding:10px 20px;background:#25d366;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.88rem;">Join WhatsApp →</a>
+      </div>`
+    : "";
+
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: student.email,
+    subject: "Welcome to The Digital Tutor — you're in!",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 6px;font-size:1.4rem;">Welcome, ${student.name}! 🎉</h2>
+        <p style="color:#6b7c93;margin:0 0 24px;font-size:.95rem;line-height:1.6;">
+          You've joined <strong style="color:#071b33;">The Digital Tutor</strong> SAT Prep program. Here's how to get started:
+        </p>
+
+        <div style="background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:16px;border:1.5px solid #e8eef6;">
+          <p style="margin:0 0 14px;font-weight:800;color:#071b33;font-size:.95rem;">Your first steps</p>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">1</span>
+                <strong style="color:#071b33;">Take your diagnostic</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Identifies your weak areas so we can focus your study time</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">2</span>
+                <strong style="color:#071b33;">Explore the AI Tutor</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Ask any SAT question and get an instant, step-by-step explanation</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">3</span>
+                <strong style="color:#071b33;">Join a live session</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 0 32px;color:#6b7c93;font-size:.85rem;">Check your Sessions page for upcoming instructor-led classes</td>
+            </tr>
+          </table>
+        </div>
+
+        ${waSection}
+
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/dashboard" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
+        </div>
+
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;line-height:1.6;">
+          Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
+          The Digital Tutor · digital-tutor-sat-prep.vercel.app
+        </p>
       </div>
     `,
   });

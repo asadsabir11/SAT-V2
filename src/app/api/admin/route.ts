@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { readData } from "@/lib/storage";
 
 export async function GET() {
+  const session = await getSession();
+  if (!session || session.role !== "founder") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const [students, webinar, partners, contacts, diagnostics] = await Promise.all([
     readData<Record<string, string>>("leads-student.json"),
     readData<Record<string, string>>("leads-webinar.json"),
@@ -13,7 +18,7 @@ export async function GET() {
   const metrics = {
     totalLeads: students.length,
     freeSignups: students.filter((s) => s.packageType === "Free").length,
-    paidFounderCohortStudents: students.filter((s) => s.packageType === "Founder Core").length,
+    paidFounderCohortStudents: students.filter((s) => s.packageType === "Core Plan").length,
     premiumStudents: students.filter((s) => s.packageType === "Premium").length,
     parentWebinarRegistrations: webinar.length,
     partnershipLeads: partners.length,

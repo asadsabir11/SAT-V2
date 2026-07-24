@@ -282,7 +282,7 @@ export default function Diagnostic() {
             <div className="card" style={{ maxWidth: 480 }}>
               {quiz && <div className="eyebrow" style={{ marginBottom: 8 }}>{quiz.title}</div>}
               <h2 style={{ color: "#071b33", marginBottom: 8 }}>Before you begin</h2>
-              <p>Your score identifies your starting baseline and the exact skills to prioritize.</p>
+              <p>Your score identifies your starting baseline and the exact skills to prioritize. This is a short assessment — not a full-length SAT — so treat the result as a directional estimate, not your final score.</p>
               <div style={{ display: "grid", gap: 12, marginTop: 20 }}>
                 <div className="field">
                   <label htmlFor="diag-name">Your name *</label>
@@ -363,6 +363,10 @@ export default function Diagnostic() {
       <>
         <PageHero eyebrow="Diagnostic results" title={`Your baseline score: ${totalScore} / 1600`}>
           {level} level · {weakAreas.length} area{weakAreas.length !== 1 ? "s" : ""} to prioritize
+          {" · "}
+          <span style={{ fontWeight: 400, opacity: 0.75, fontSize: ".9em" }}>
+            Estimated from {mathQs.length + rwQs.length} questions — not a full-length SAT prediction
+          </span>
         </PageHero>
         <section className="section soft">
           <div className="container">
@@ -398,7 +402,7 @@ export default function Diagnostic() {
             <div className="card">
               <div className="eyebrow">Recommended next steps</div>
               <h2 style={{ color: "#071b33" }}>What to do now</h2>
-              <p>Your diagnostic baseline is {totalScore}. Join the founder cohort to get weekly live classes, AI tutoring, and practice targeting exactly your weak areas.</p>
+              <p>Your diagnostic baseline is {totalScore}. Join the cohort to get weekly live classes, AI tutoring, and practice targeting exactly your weak areas.</p>
               <div className="actions">
                 <CTAButton href="/register">Register &amp; join cohort</CTAButton>
                 <CTAButton href="/dashboard" secondary>View your dashboard</CTAButton>

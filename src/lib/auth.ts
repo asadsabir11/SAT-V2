@@ -10,7 +10,7 @@ export const AUTH_COOKIE = "sat_auth";
 export type SessionUser = {
   id: string;
   email: string;
-  role: "student" | "founder";
+  role: "student" | "founder" | "parent";
   name: string;
 };
 

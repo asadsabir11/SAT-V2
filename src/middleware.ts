@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /dashboard, /diagnostic, /ai-tutor, /lectures — students only
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures")) {
+  // /dashboard, /diagnostic, /ai-tutor, /lectures, /sessions — students only
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions")) {
     if (!session || session.role !== "student") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -28,9 +28,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // /discussion — any logged-in user (students AND founders can access)
+  if (pathname.startsWith("/discussion")) {
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/discussion", "/discussion/:path*"],
 };

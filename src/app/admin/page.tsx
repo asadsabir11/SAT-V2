@@ -26,6 +26,19 @@ export default function Admin() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  async function deleteStudent(email: string, name: string) {
+    if (!confirm(`Delete "${name}" (${email})? This removes their account and all data.`)) return;
+    await fetch(`/api/admin/students/${encodeURIComponent(email)}`, { method: "DELETE" });
+    setData(d => d ? { ...d, students: d.students.filter(s => s.studentEmail !== email) } : d);
+  }
+
+  async function clearTestData() {
+    if (!confirm("⚠️ This will permanently delete ALL student registrations, diagnostics, and quiz results. This cannot be undone. Continue?")) return;
+    await fetch("/api/admin/clear-test-data", { method: "DELETE" });
+    setData(d => d ? { ...d, students: [], metrics: { ...d.metrics, totalLeads: 0, freeSignups: 0, paidFounderCohortStudents: 0, premiumStudents: 0, diagnosticCompletions: 0, diagnosticCompletionRate: 0 } } : d);
+    alert("Test data cleared. Metrics reset to zero.");
+  }
+
   useEffect(() => {
     fetch("/api/admin")
       .then((r) => r.json())
@@ -38,7 +51,7 @@ export default function Admin() {
     ? [
         ["Total registrations", m.totalLeads, "All student leads"],
         ["Free signups", m.freeSignups, "Top of funnel"],
-        ["Founder Core students", m.paidFounderCohortStudents, "Goal: 20+"],
+        ["Core Plan students", m.paidFounderCohortStudents, "Goal: 20+"],
         ["Premium students", m.premiumStudents, "Goal: 10+"],
         ["Webinar registrations", m.parentWebinarRegistrations, "Goal: 30+"],
         ["Partnership leads", m.partnershipLeads, "Schools, NGOs, sponsors"],
@@ -65,6 +78,36 @@ export default function Admin() {
             <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
               🎬 Manage lectures →
             </Link>
+            <Link href="/admin/access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
+              🔑 Access requests →
+            </Link>
+            <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
+              📅 Manage sessions →
+            </Link>
+            <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
+              💬 Q&A board →
+            </Link>
+            <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
+              📢 Announcements →
+            </Link>
+            <Link href="/admin/parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
+              👨‍👩‍👧 Parent accounts →
+            </Link>
+            <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
+              ✅ Attendance →
+            </Link>
+            <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+              📚 Homework →
+            </Link>
+            <Link href="/admin/reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+              📊 Parent reports →
+            </Link>
+            <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+              📈 Analytics →
+            </Link>
+            <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+              🗑 Clear test data
+            </button>
           </div>
 
           {loading ? (
@@ -95,6 +138,7 @@ export default function Admin() {
                           <th>Email</th>
                           <th>Grade</th>
                           <th>Registered</th>
+                          <th></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -106,6 +150,12 @@ export default function Admin() {
                             <td>{s.studentEmail}</td>
                             <td>{s.grade ?? "—"}</td>
                             <td>{new Date(s.createdAt).toLocaleDateString()}</td>
+                            <td>
+                              <button onClick={() => deleteStudent(s.studentEmail, s.studentName)}
+                                style={{ padding: "4px 10px", borderRadius: 6, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".75rem", cursor: "pointer" }}>
+                                Delete
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>

@@ -49,3 +49,8 @@ export async function readData<T>(collection: string): Promise<T[]> {
   `;
   return rows.map((r) => r.data as T);
 }
+
+export async function deleteByField(collection: string, field: string, value: string): Promise<void> {
+  await ensureTables();
+  await sql`DELETE FROM sat_records WHERE collection = ${collection} AND data->>${field} = ${value}`;
+}

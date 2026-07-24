@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToN8n } from "@/lib/n8n";
 import { appendData } from "@/lib/storage";
-import { createUser } from "@/lib/users";
+import { createUser, findUserByEmail } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
-import { sendNewStudentAlert } from "@/lib/email";
+import { sendNewStudentAlert, sendWelcomeEmail } from "@/lib/email";
 
 const webhooks: Record<string, string | undefined> = {
   student: process.env.N8N_STUDENT_REGISTRATION_WEBHOOK_URL,
@@ -21,12 +21,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Strip password from the lead record before saving
     const { password, confirmPassword: _confirm, ...leadData } = payload as Record<string, string>;
+
+    // For student registrations: check duplicate email BEFORE saving anything
+    if (type === "student" && leadData.studentEmail) {
+      const existing = await findUserByEmail(leadData.studentEmail);
+      if (existing) {
+        return NextResponse.json(
+          { error: "An account with this email already exists. Please log in instead." },
+          { status: 409 }
+        );
+      }
+    }
+
     const record = { ...leadData, id: crypto.randomUUID(), leadType: type, createdAt: new Date().toISOString() };
 
     await appendData(`leads-${type}.json`, record);
     sendToN8n(webhooks[type], record).catch(console.error);
 
-    // For student registrations: create a user account and set auth cookie
     if (type === "student" && password && leadData.studentEmail && leadData.studentName) {
       await createUser(leadData.studentEmail, password, "student", leadData.studentName);
       sendNewStudentAlert({
@@ -36,6 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         packageType: leadData.packageType,
         grade: leadData.grade,
       }).catch(console.error);
+      sendWelcomeEmail({ name: leadData.studentName, email: leadData.studentEmail }).catch(console.error);
       const token = await createToken({
         id: record.id,
         email: leadData.studentEmail,

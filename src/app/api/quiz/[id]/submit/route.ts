@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getQuizById, submitAttempt } from "@/lib/quiz";
+import { saveAssessment, saveQuestionResults, inferSkillFromTopic, ensureAnalyticsTables } from "@/lib/analytics";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.POSTGRES_URL!);
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,7 +17,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const result = await submitAttempt(id, studentEmail, studentName ?? "", answers, quiz.questions);
 
-    // Also save to sat_records for dashboard compatibility
+    // Track analytics (fire-and-forget — don't fail the response if analytics errors)
+    try {
+      await ensureAnalyticsTables();
+      const userRows = await sql`SELECT id FROM users WHERE email = ${studentEmail} LIMIT 1`;
+      const studentId = (userRows[0] as { id: string } | undefined)?.id;
+      if (studentId) {
+        const assessmentId = await saveAssessment(
+          studentId, "quiz", id,
+          result.totalScore, result.rwScore, result.mathScore
+        );
+        const qResults = quiz.questions.map(q => ({
+          skillId: inferSkillFromTopic(q.topic ?? ""),
+          isCorrect: answers[q.id] === q.correct,
+        }));
+        await saveQuestionResults(assessmentId, qResults);
+      }
+    } catch (analyticsErr) {
+      console.error("Analytics save failed (non-fatal):", analyticsErr);
+    }
+
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     console.error("Quiz submit error", error);

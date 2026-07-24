@@ -33,7 +33,7 @@ const faqs: [string, string][] = [
   ["Do you guarantee score improvement?", "No. We provide structured preparation, practice, feedback, and support, but do not guarantee scores."],
   ["Which countries do you serve?", "Our initial focus is Pakistan, Bangladesh, Nigeria, Indonesia, Malaysia, South Korea, and Haiti, with broader global access."],
   ["Does the AI tutor replace a teacher?", "No. The AI tutor supports practice and explanation. Human instructors guide the program."],
-  ["How does founder pricing work?", "Founder cohort students get the lowest price we will ever offer — in exchange for early feedback and patience as we improve."],
+  ["How does early-access pricing work?", "Early cohort students get the lowest price we will ever offer — in exchange for early feedback and patience as we improve."],
 ];
 
 export default function Home() {
@@ -51,18 +51,18 @@ export default function Home() {
             </p>
             <div className="actions">
               <CTAButton href="/register">Get started free</CTAButton>
-              <CTAButton href="/register?plan=Founder" secondary>Join founder cohort →</CTAButton>
+              <CTAButton href="/register?plan=Core" secondary>Join the cohort →</CTAButton>
             </div>
             <div className="trust-strip">
               <span className="trust-item">Free diagnostic — included after sign-up</span>
-              <span className="trust-item">Founder cohort seats open now</span>
+              <span className="trust-item">Cohort seats open now</span>
               <span className="trust-item">16+ countries served</span>
               <span className="trust-item">No score guarantee</span>
             </div>
           </div>
           <div className="hero-panel">
             <div className="eyebrow" style={{ color: "#5eead4", marginBottom: 20 }}>The accountability layer</div>
-            <div className="stat"><strong>8 weeks</strong><span>Focused founder cohort</span></div>
+            <div className="stat"><strong>8 weeks</strong><span>Focused SAT prep cohort</span></div>
             <div className="stat"><strong>Weekly</strong><span>Live teaching + homework rhythm</span></div>
             <div className="stat"><strong>Always on</strong><span>AI explanations and study coaching</span></div>
             <div className="stat"><strong>Parent-ready</strong><span>Clear weekly progress visibility</span></div>
@@ -77,7 +77,7 @@ export default function Home() {
             <div className="stat-cell"><strong>16+</strong><span>Countries in scope</span></div>
             <div className="stat-cell"><strong>8-week</strong><span>Structured cohort</span></div>
             <div className="stat-cell"><strong>200–800</strong><span>Per section, scored diagnostic</span></div>
-            <div className="stat-cell"><strong>Free</strong><span>Diagnostic, no sign-up needed</span></div>
+            <div className="stat-cell"><strong>Free</strong><span>Diagnostic included with sign-up</span></div>
           </div>
         </div>
       </div>
@@ -139,9 +139,16 @@ export default function Home() {
             need structure, support, and accountability."
           </p>
           <div className="grid grid-3" style={{ marginTop: 40 }}>
-            {["Weekly structure","Human explanation","Parent visibility","Time-zone support","Affordable pricing","Practice discipline"].map((x, i) => (
-              <FeatureCard key={x} index={`0${i + 1}`} title={x}>
-                A practical layer that turns good intentions and free resources into consistent action.
+            {([
+              ["Weekly structure", "A consistent weekly class schedule builds the learning habits that self-study alone rarely sustains."],
+              ["Human explanation", "A real teacher explains concepts, answers questions live, and adapts to where students are actually struggling."],
+              ["Parent visibility", "Parents receive clear weekly updates on attendance, homework completion, and current score trajectory."],
+              ["Time-zone support", "Sessions are scheduled around students' local time zones so learners in every region are never left behind."],
+              ["Affordable pricing", "Country-aware founder pricing designed around access, not profit — starting under $20 per month."],
+              ["Practice discipline", "Regular timed mock tests and weekly homework cycles build the exam stamina that reliably improves scores."],
+            ] as [string, string][]).map(([title, desc], i) => (
+              <FeatureCard key={title} index={`0${i + 1}`} title={title}>
+                {desc}
               </FeatureCard>
             ))}
           </div>
@@ -165,15 +172,15 @@ export default function Home() {
       <section className="section band">
         <div className="container grid grid-2" style={{ alignItems: "center", gap: 56 }}>
           <div>
-            <div className="eyebrow" style={{ color: "#5eead4" }}>Founder cohort</div>
-            <h2 className="title">8-Week Global SAT® Prep — Founder Cohort</h2>
+            <div className="eyebrow" style={{ color: "#5eead4" }}>8-Week Cohort</div>
+            <h2 className="title">8-Week Global SAT® Prep — Core Cohort</h2>
             <p className="lead">
               A small first cohort built around weekly class, AI tutor support, homework, a monthly
               mock, parent reporting, and a regional WhatsApp or Telegram group.
             </p>
             <div className="actions">
               <CTAButton href="/founder-cohort">See the curriculum</CTAButton>
-              <CTAButton href="/register?plan=Founder" secondary>Reserve your seat</CTAButton>
+              <CTAButton href="/register?plan=Core" secondary>Reserve your seat</CTAButton>
             </div>
           </div>
           <div className="card" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", color: "#fff" }}>
@@ -224,26 +231,26 @@ export default function Home() {
             <PricingCard
               name="Free"
               price="Free"
-              href="/diagnostic"
+              href="/register"
               items={["Free diagnostic test","Free study plan","Parent webinar","Community access"]}
             />
             <PricingCard
               recommended
-              name="Founder Core"
+              name="Core Plan"
               price="$19–$49/mo"
-              href="/register?plan=Founder"
+              href={process.env.NEXT_PUBLIC_STRIPE_FOUNDER_COHORT_PAYMENT_LINK ?? "/register?plan=Founder"}
               items={["Weekly live class","AI tutor access","Monthly mock test","Parent progress report","Regional support group"]}
             />
             <PricingCard
               name="Premium"
               price="$99–$199/mo"
-              href="/register?plan=Premium"
+              href={process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PAYMENT_LINK ?? "/register?plan=Premium"}
               items={["Small group coaching","Monthly 1:1 review","Score improvement plan","College planning session"]}
             />
             <PricingCard
               name="Sponsored / NGO"
               price="Custom"
-              href="/partners"
+              href={process.env.NEXT_PUBLIC_SPONSORED_STUDENT_DONATION_LINK ?? "/partners"}
               items={["Sponsored seats","School or NGO cohort","Group reporting","Partnership support"]}
             />
           </div>
@@ -262,7 +269,7 @@ export default function Home() {
             {[
               ["Weekly reports", "Parents receive a simple summary each week: attendance, homework, current score, and next priority."],
               ["Live class rhythm", "A scheduled weekly class creates the habit loop that self-study rarely sustains on its own."],
-              ["Visible progress", "Diagnostic baseline → monthly mock → target score. Parents see the gap close over time."],
+              ["Visible progress", "Diagnostic baseline, monthly mock results, weak areas, and next recommended action — parents see what is happening over time."],
             ].map(([t, d]) => (
               <FeatureCard key={t} index="" title={t}>{d}</FeatureCard>
             ))}
@@ -334,15 +341,15 @@ export default function Home() {
         <div className="container" style={{ textAlign: "center" }}>
           <div className="eyebrow" style={{ color: "#5eead4", justifyContent: "center" }}>Ready to start?</div>
           <h2 className="title" style={{ color: "#fff", maxWidth: 680, margin: "12px auto 16px" }}>
-            Take the free diagnostic. Join the founder cohort. Change the trajectory.
+            Take the free diagnostic. Join the cohort. Change the trajectory.
           </h2>
           <p style={{ color: "rgba(255,255,255,.6)", maxWidth: 520, margin: "0 auto 36px", lineHeight: 1.75, fontSize: "1.05rem" }}>
-            The founder cohort is intentionally small. Seats are limited. If this is the right
+            The cohort is intentionally small. Seats are limited. If this is the right
             moment, register now — the diagnostic takes 10 minutes.
           </p>
           <div className="actions" style={{ justifyContent: "center", gap: 14 }}>
-            <CTAButton href="/diagnostic">Take free diagnostic →</CTAButton>
-            <Link href="/register?plan=Founder" className="btn btn-ghost">Reserve founder cohort seat</Link>
+            <CTAButton href="/register">Create free account →</CTAButton>
+            <Link href="/register?plan=Core" className="btn btn-ghost">Reserve your cohort seat</Link>
           </div>
           <p style={{ color: "rgba(255,255,255,.3)", fontSize: ".8rem", marginTop: 28, lineHeight: 1.6 }}>
             SAT® is a trademark registered by the College Board · Not affiliated with or endorsed by College Board

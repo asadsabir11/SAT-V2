@@ -9,11 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.16",
     "@neondatabase/serverless": "^1.1.0",
     "@vercel/blob": "^2.6.1",
+    "ai": "^7.0.31",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.3",
     "next": "16.2.9",
+    "openai": "^4.104.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.17.2"
