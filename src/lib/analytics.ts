@@ -1,6 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 let ready = false;
 export async function ensureAnalyticsTables() {
@@ -167,8 +166,10 @@ export async function getSkillAccuracy(studentId: string): Promise<SkillAccuracy
       COUNT(qr.id) FILTER (WHERE qr.is_correct)::int AS correct,
       COUNT(qr.id)::int AS total
     FROM skills s
-    LEFT JOIN question_results qr ON qr.skill_id = s.id
-    LEFT JOIN assessments a ON a.id = qr.assessment_id AND a.student_id = ${studentId}
+    LEFT JOIN (
+      question_results qr
+      JOIN assessments a ON a.id = qr.assessment_id AND a.student_id = ${studentId}
+    ) ON qr.skill_id = s.id
     GROUP BY s.id, s.label, s.section, s.sort_order
     ORDER BY s.sort_order
   `;
@@ -297,7 +298,6 @@ Rules:
 - Do not start with "Dear parent" or similar salutation`;
 
   try {
-    const { fetch: undiciFetch } = await import("undici");
     const body = JSON.stringify({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
@@ -305,10 +305,11 @@ Rules:
       max_tokens: 200,
     });
 
-    const res = await undiciFetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey.trim()}` },
       body,
+      cache: "no-store",
     });
 
     const data = await res.json() as { choices?: { message?: { content?: string } }[] };

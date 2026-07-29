@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 interface SkillAccuracy {
   skillId: string; label: string; section: string;
@@ -19,7 +18,11 @@ interface Metrics {
 
 interface Report {
   id: string; week_no: number; period_start: string; period_end: string;
-  metrics_json: Metrics; coach_note: string; parent_action: string; status: string;
+  metrics_json: Metrics; narrative: string | null; coach_note: string; parent_action: string; status: string;
+}
+
+interface ScorePoint {
+  id: string; type: string; taken_at: string; total_score: number;
 }
 
 interface HWItem {
@@ -37,9 +40,11 @@ export default function ParentPortal() {
   const [error, setError]     = useState("");
   const [student, setStudent] = useState<{ id: string; name: string; email: string } | null>(null);
   const [report, setReport]   = useState<Report | null>(null);
+  const [reports, setReports] = useState<Report[]>([]);
   const [homework, setHomework] = useState<HWItem[]>([]);
   const [attendance, setAttendance] = useState<AttItem[]>([]);
   const [skills, setSkills]   = useState<SkillAccuracy[]>([]);
+  const [scoreHistory, setScoreHistory] = useState<ScorePoint[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -49,9 +54,11 @@ export default function ParentPortal() {
       if (d.error) { setError(d.error); return; }
       setStudent(d.student);
       setReport(d.latestReport ?? null);
+      setReports(d.reports ?? []);
       setHomework(d.homework ?? []);
       setAttendance(d.attendance ?? []);
       setSkills(s.skills ?? []);
+      setScoreHistory(d.scoreHistory ?? []);
     }).catch(() => setError("Failed to load data."))
       .finally(() => setLoading(false));
   }, []);
@@ -183,12 +190,20 @@ export default function ParentPortal() {
           </div>
         )}
 
+        {/* Weekly narrative */}
+        {report?.narrative && (
+          <div style={{ background: "#faf5ff", border: "1.5px solid #d8b4fe", borderRadius: 16, padding: "20px 22px", marginBottom: 24 }}>
+            <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#7c3aed", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 10 }}>📝 This week in review</div>
+            <p style={{ margin: 0, fontSize: ".92rem", color: "#4c1d95", lineHeight: 1.8 }}>{report.narrative}</p>
+          </div>
+        )}
+
         {/* Coach note & parent action */}
         {report?.coach_note && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
             <div style={{ background: "#eff6ff", border: "1.5px solid #bfdbfe", borderRadius: 16, padding: "20px 22px" }}>
               <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#1d4ed8", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 10 }}>💬 Coach note</div>
-              <p style={{ margin: 0, fontSize: ".88rem", color: "#1e3a5f", lineHeight: 1.7, fontStyle: "italic" }}>"{report.coach_note}"</p>
+              <p style={{ margin: 0, fontSize: ".88rem", color: "#1e3a5f", lineHeight: 1.7, fontStyle: "italic" }}>“{report.coach_note}”</p>
               <div style={{ marginTop: 10, fontSize: ".75rem", color: "#6b7c93", fontWeight: 700 }}>— Ibrahim Malick</div>
             </div>
             {report.parent_action && (
@@ -205,6 +220,45 @@ export default function ParentPortal() {
             <div style={{ fontSize: "2rem", marginBottom: 12 }}>📋</div>
             <p style={{ fontWeight: 800, color: "#071b33", marginBottom: 6 }}>No report yet</p>
             <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>Your first weekly report will appear here after the first class session.</p>
+          </div>
+        )}
+
+        {/* Score trend */}
+        {scoreHistory.length > 1 && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📈 Score trend</div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 120, padding: "0 4px" }}>
+              {scoreHistory.slice(-8).map(p => (
+                <div key={p.id} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
+                  <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#071b33" }}>{p.total_score}</div>
+                  <div style={{ width: "100%", maxWidth: 44, borderRadius: "6px 6px 0 0", background: "linear-gradient(180deg,#155eef,#18a999)", height: `${Math.max(8, ((p.total_score - 400) / 1200) * 100)}%` }} />
+                  <div style={{ fontSize: ".65rem", color: "#9ca3af", textAlign: "center" }}>{p.type === "diagnostic" ? "Diag" : p.type === "mock" ? "Mock" : "Quiz"}<br />{fmt(p.taken_at)}</div>
+                </div>
+              ))}
+            </div>
+            <p style={{ margin: "12px 0 0", fontSize: ".72rem", color: "#9ca3af" }}>Diagnostic → mock progression. Trends matter more than any single score.</p>
+          </div>
+        )}
+
+        {/* Report history */}
+        {reports.length > 1 && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>🗂 Past reports</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {reports.filter(r => r.id !== report?.id).map(r => (
+                <div key={r.id} style={{ padding: "12px 14px", borderRadius: 10, background: "#f8fafc", border: "1.5px solid #e8eef6" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+                    <div style={{ fontWeight: 800, fontSize: ".88rem", color: "#071b33" }}>Week {r.week_no}</div>
+                    <div style={{ fontSize: ".75rem", color: "#6b7c93" }}>{fmt(r.period_start)} – {fmt(r.period_end)}</div>
+                  </div>
+                  <div style={{ fontSize: ".78rem", color: "#6b7c93", marginTop: 4 }}>
+                    Attendance: {r.metrics_json?.attendance?.status ?? "—"} · Homework: {r.metrics_json?.homework?.done ?? 0}/{r.metrics_json?.homework?.assigned ?? 0}
+                    {r.metrics_json?.score?.latestMock ? ` · Score: ${r.metrics_json.score.latestMock}` : ""}
+                  </div>
+                  {r.coach_note && <div style={{ fontSize: ".78rem", color: "#344054", fontStyle: "italic", marginTop: 4 }}>“{r.coach_note}”</div>}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

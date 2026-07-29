@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { createUser, findUserByEmail } from "@/lib/users";
 import { linkParentToStudent, listParentLinks, deleteParentLink } from "@/lib/parent-system";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 export async function GET() {
   const session = await getSession();

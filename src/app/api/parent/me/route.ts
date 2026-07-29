@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getStudentForParent, getReportForStudent, getHomeworkForStudent, getAttendanceForStudent } from "@/lib/parent-system";
+import { getStudentForParent, getReportForStudent, listReportsForStudent, getHomeworkForStudent, getAttendanceForStudent } from "@/lib/parent-system";
+import { getAssessmentHistory } from "@/lib/analytics";
 
 export async function GET() {
   const session = await getSession();
@@ -13,11 +14,14 @@ export async function GET() {
     return NextResponse.json({ error: "No student linked to this account. Contact your tutor." }, { status: 404 });
   }
 
-  const [latestReport, homework, attendance] = await Promise.all([
-    getReportForStudent((student as { id: string }).id),
-    getHomeworkForStudent((student as { id: string }).id),
-    getAttendanceForStudent((student as { id: string }).id),
+  const studentId = (student as { id: string }).id;
+  const [latestReport, reports, homework, attendance, scoreHistory] = await Promise.all([
+    getReportForStudent(studentId),
+    listReportsForStudent(studentId),
+    getHomeworkForStudent(studentId),
+    getAttendanceForStudent(studentId),
+    getAssessmentHistory(studentId),
   ]);
 
-  return NextResponse.json({ student, latestReport, homework, attendance });
+  return NextResponse.json({ student, latestReport, reports, homework, attendance, scoreHistory });
 }

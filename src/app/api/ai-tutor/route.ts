@@ -3,9 +3,8 @@ import { getSession } from "@/lib/auth";
 import { getStudentAccessLevel } from "@/lib/users";
 import { sendToN8n } from "@/lib/n8n";
 import { ensureAnalyticsTables } from "@/lib/analytics";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 const rules =
   "You are an independent SAT preparation support tutor. Never claim official affiliation, guarantee scores, copy copyrighted questions, or invent official policy. Use original examples, ask the student to try first, explain step by step, and suggest human help after repeated confusion.";
@@ -26,16 +25,14 @@ async function callOpenAI(apiKey: string, system: string, history: ChatMessage[]
     temperature: 0.4,
   });
 
-  // Use undici (built into Node 18+) directly — avoids Next.js fetch patching entirely
-  const { fetch: undiciFetch } = await import("undici");
-
-  const res = await undiciFetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey.trim()}`,
     },
     body,
+    cache: "no-store",
   });
 
   const data = await res.json() as { choices?: { message?: { content?: string } }[]; error?: { message: string } };

@@ -5,10 +5,10 @@ import {
   listAllReports, getReportById, updateReportFields
 } from "@/lib/parent-system";
 import { sendParentReport } from "@/lib/email";
+import { findByField } from "@/lib/storage";
 import { generateReportNarrative, getAITutorUsage } from "@/lib/analytics";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -96,14 +96,25 @@ export async function POST(req: NextRequest) {
     const report = await getReportById(id);
     if (!report) return NextResponse.json({ error: "Report not found" }, { status: 404 });
 
-    // Get parent email via parent_student_links
-    const parentLinks = await sql`
-      SELECT u.email AS parent_email, u.name AS parent_name
-      FROM parent_student_links psl
-      JOIN users u ON u.id = psl.parent_user_id
-      WHERE psl.student_id = ${report.student_id}
-      LIMIT 1
-    `;
+    // Get parent email via parent_student_links, plus the WhatsApp number
+    // captured on the student's registration record.
+    const [parentLinks, studentRows] = await Promise.all([
+      sql`
+        SELECT u.email AS parent_email, u.name AS parent_name
+        FROM parent_student_links psl
+        JOIN users u ON u.id = psl.parent_user_id
+        WHERE psl.student_id = ${report.student_id}
+        LIMIT 1
+      `,
+      sql`SELECT email FROM users WHERE id = ${report.student_id} LIMIT 1`,
+    ]);
+
+    let whatsappNumber = "";
+    const studentEmail = (studentRows[0] as { email: string } | undefined)?.email;
+    if (studentEmail) {
+      const lead = await findByField<{ whatsapp?: string }>("leads-student", "studentEmail", studentEmail);
+      whatsappNumber = (lead?.whatsapp ?? "").replace(/\D/g, "");
+    }
 
     const metrics = report.metrics_json as {
       student: string; week: number;
@@ -152,7 +163,8 @@ export async function POST(req: NextRequest) {
         `Full report: https://digital-tutor-sat-prep.vercel.app/parent`,
       ].filter(Boolean).join("\n");
 
-      waLink = `https://wa.me/${encodeURIComponent(pl.parent_email.replace(/\D/g, ""))}?text=${encodeURIComponent(msg)}`;
+      // Without a stored number, wa.me opens WhatsApp's contact picker instead.
+      waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
     }
 
     if (emailResult.ok) {

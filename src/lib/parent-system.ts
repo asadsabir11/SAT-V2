@@ -1,7 +1,6 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import { getAITutorUsage, getStrengthsAndFocus } from "@/lib/analytics";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 let ready = false;
 export async function ensureParentTables() {
@@ -297,10 +296,14 @@ export async function saveReport(
 ) {
   await ensureParentTables();
   const id = crypto.randomUUID();
+  // Regenerating a week replaces the previous unsent draft instead of stacking duplicates.
+  await sql`
+    DELETE FROM parent_reports
+    WHERE student_id = ${studentId} AND week_no = ${weekNo} AND status = 'draft'
+  `;
   await sql`
     INSERT INTO parent_reports (id, student_id, week_no, period_start, period_end, metrics_json, coach_note, parent_action, status)
     VALUES (${id}, ${studentId}, ${weekNo}, ${periodStart}, ${periodEnd}, ${JSON.stringify(metrics)}, ${coachNote}, ${parentAction}, 'draft')
-    ON CONFLICT DO NOTHING
   `;
   return id;
 }
@@ -314,12 +317,22 @@ export async function updateReportStatus(id: string, status: "draft" | "approved
   `;
 }
 
+// Parent-facing: drafts stay invisible until the coach approves them.
 export async function getReportForStudent(studentId: string, weekNo?: number) {
   await ensureParentTables();
   const rows = weekNo !== undefined
-    ? await sql`SELECT * FROM parent_reports WHERE student_id = ${studentId} AND week_no = ${weekNo} ORDER BY created_at DESC LIMIT 1`
-    : await sql`SELECT * FROM parent_reports WHERE student_id = ${studentId} ORDER BY week_no DESC LIMIT 1`;
+    ? await sql`SELECT * FROM parent_reports WHERE student_id = ${studentId} AND week_no = ${weekNo} AND status IN ('approved','sent') ORDER BY created_at DESC LIMIT 1`
+    : await sql`SELECT * FROM parent_reports WHERE student_id = ${studentId} AND status IN ('approved','sent') ORDER BY week_no DESC LIMIT 1`;
   return rows[0] ?? null;
+}
+
+export async function listReportsForStudent(studentId: string) {
+  await ensureParentTables();
+  return sql`
+    SELECT * FROM parent_reports
+    WHERE student_id = ${studentId} AND status IN ('approved','sent')
+    ORDER BY week_no DESC
+  `;
 }
 
 export async function listAllReports() {

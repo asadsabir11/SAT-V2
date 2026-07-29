@@ -15,9 +15,11 @@ export type SessionUser = {
 };
 
 export async function createToken(user: SessionUser): Promise<string> {
+  // Founder sessions carry admin power — keep them short. Matches the 24h
+  // cookie maxAge set at login so the JWT can't outlive the cookie.
   return new SignJWT({ ...user })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("7d")
+    .setExpirationTime(user.role === "founder" ? "24h" : "7d")
     .sign(SECRET);
 }
 

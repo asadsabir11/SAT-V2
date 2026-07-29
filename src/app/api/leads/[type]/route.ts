@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     sendToN8n(webhooks[type], record).catch(console.error);
 
     if (type === "student" && password && leadData.studentEmail && leadData.studentName) {
-      await createUser(leadData.studentEmail, password, "student", leadData.studentName);
+      const userId = await createUser(leadData.studentEmail, password, "student", leadData.studentName);
       sendNewStudentAlert({
         name: leadData.studentName,
         email: leadData.studentEmail,
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }).catch(console.error);
       sendWelcomeEmail({ name: leadData.studentName, email: leadData.studentEmail }).catch(console.error);
       const token = await createToken({
-        id: record.id,
+        id: userId,
         email: leadData.studentEmail,
         role: "student",
         name: leadData.studentName,
