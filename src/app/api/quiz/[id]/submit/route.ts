@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getQuizById, submitAttempt } from "@/lib/quiz";
 import { saveAssessment, saveQuestionResults, inferSkillFromTopic, ensureAnalyticsTables } from "@/lib/analytics";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

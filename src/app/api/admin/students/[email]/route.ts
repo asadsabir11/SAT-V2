@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { deleteByField } from "@/lib/storage";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 type Params = { params: Promise<{ email: string }> };
 

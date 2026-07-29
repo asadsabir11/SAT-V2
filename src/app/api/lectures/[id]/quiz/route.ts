@@ -7,9 +7,8 @@ import {
   getBestScore,
 } from "@/lib/lecture-quiz";
 import { saveAssessment, saveQuestionResults, ensureAnalyticsTables } from "@/lib/analytics";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 type Params = { params: Promise<{ id: string }> };
 

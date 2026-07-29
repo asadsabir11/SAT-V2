@@ -1,7 +1,5 @@
-import { neon } from "@neondatabase/serverless";
-import { fetch as undiciFetch } from "undici";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 export interface LectureQuizQuestion {
   id: string;
@@ -131,13 +129,14 @@ Return ONLY a valid JSON array, no other text:
     temperature: 0.7,
   });
 
-  const res = await undiciFetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey.trim()}`,
     },
     body,
+    cache: "no-store",
   });
 
   const data = await res.json() as { choices?: { message?: { content?: string } }[] };

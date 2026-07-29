@@ -4,9 +4,8 @@ import {
   createAssignment, listAssignments, deleteAssignment,
   getAllStudentsHomework, upsertHomework
 } from "@/lib/parent-system";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 export async function GET(req: NextRequest) {
   const session = await getSession();

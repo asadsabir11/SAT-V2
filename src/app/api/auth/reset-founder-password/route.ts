@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findUserByEmail } from "@/lib/users";
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 export async function POST(request: NextRequest) {
   const secret = request.headers.get("x-admin-secret");

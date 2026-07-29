@@ -1,6 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "@/lib/db";
 
-const sql = neon(process.env.POSTGRES_URL!);
 
 let tablesReady = false;
 
