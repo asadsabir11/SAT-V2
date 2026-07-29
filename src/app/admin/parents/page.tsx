@@ -53,7 +53,7 @@ export default function AdminParents() {
     <section className="section"><div className="container">
       <Link href="/admin" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← Admin</Link>
       <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "8px 0 4px" }}>Parent Accounts</h1>
-      <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 28px" }}>Create parent logins and link them to students. Parents can only see their own child's data.</p>
+      <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 28px" }}>Create parent logins and link them to students. Parents can only see their own child’s data.</p>
 
       {/* Create form */}
       <div className="card" style={{ marginBottom: 28, border: "2px solid #e8eef6" }}>

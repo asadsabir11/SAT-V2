@@ -112,7 +112,7 @@ function QuizSection({ lectureId }: { lectureId: string }) {
         <div className="card" style={{ textAlign: "center", padding: "36px 24px" }}>
           <div style={{ fontSize: "2rem", marginBottom: 10 }}>📝</div>
           <p style={{ fontWeight: 800, color: "#071b33", marginBottom: 6 }}>Quiz coming soon</p>
-          <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>Your tutor hasn't added a quiz for this lecture yet.</p>
+          <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>Your tutor hasn’t added a quiz for this lecture yet.</p>
         </div>
       )}
 

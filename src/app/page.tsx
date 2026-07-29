@@ -135,8 +135,8 @@ export default function Home() {
         <div className="container">
           <div className="eyebrow">The real problem</div>
           <p className="quote">
-            "Students do not fail because free resources do not exist. They struggle because they
-            need structure, support, and accountability."
+            “Students do not fail because free resources do not exist. They struggle because they
+            need structure, support, and accountability.”
           </p>
           <div className="grid grid-3" style={{ marginTop: 40 }}>
             {([
@@ -254,6 +254,9 @@ export default function Home() {
               items={["Sponsored seats","School or NGO cohort","Group reporting","Partnership support"]}
             />
           </div>
+          <div className="actions" style={{ marginTop: 28 }}>
+            <Link href="/sample-report" className="btn btn-secondary">See the weekly parent report you&apos;ll receive →</Link>
+          </div>
         </div>
       </section>
 
@@ -276,6 +279,7 @@ export default function Home() {
           </div>
           <div className="actions" style={{ marginTop: 28 }}>
             <CTAButton href="/parent-webinar">Register for free parent webinar</CTAButton>
+            <Link href="/sample-report" className="btn btn-secondary">See a sample parent report →</Link>
           </div>
         </div>
       </section>

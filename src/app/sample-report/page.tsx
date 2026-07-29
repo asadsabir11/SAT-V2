@@ -50,7 +50,7 @@ export default function SampleReport() {
             What parents receive<br />every week
           </h1>
           <p className="lead" style={{ margin: "0 auto 36px", fontSize: "1rem" }}>
-            Every Friday, parents get a WhatsApp message + email with their child's
+            Every Friday, parents get a WhatsApp message + email with their child’s
             real weekly progress. No jargon — just honest numbers, one clear action,
             and a direct line to the coach.
           </p>
@@ -154,19 +154,19 @@ export default function SampleReport() {
                 <div style={{ background: "#eff6ff", border: "1.5px solid #bfdbfe", borderRadius: 16, padding: "20px 22px" }}>
                   <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#1d4ed8", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 10 }}>💬 Coach note</div>
                   <p style={{ margin: 0, fontSize: ".88rem", color: "#1e3a5f", lineHeight: 1.7, fontStyle: "italic" }}>
-                    "Ayesha's algebra is clicking — she solved 3 multi-step problems
+                    “Ayesha’s algebra is clicking — she solved 3 multi-step problems
                     independently this week. The gap now is transitions in Reading &amp;
-                    Writing. We're drilling this Thursday."
+                    Writing. We’re drilling this Thursday.”
                   </p>
                   <div style={{ marginTop: 12, fontSize: ".78rem", color: "#6b7c93", fontWeight: 700 }}>— Ibrahim Malick, Founder &amp; Coach</div>
                 </div>
                 <div style={{ background: "linear-gradient(135deg,#155eef,#18a999)", borderRadius: 16, padding: "20px 22px", color: "#fff" }}>
                   <div style={{ fontSize: ".72rem", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 10, color: "rgba(255,255,255,.7)" }}>⭐ Your action this week</div>
                   <p style={{ margin: "0 0 14px", fontSize: ".95rem", fontWeight: 800, lineHeight: 1.5 }}>
-                    Ask Ayesha to explain one "transition word" question to you before Friday.
+                    Ask Ayesha to explain one “transition word” question to you before Friday.
                   </p>
                   <p style={{ margin: 0, fontSize: ".78rem", color: "rgba(255,255,255,.7)", lineHeight: 1.6 }}>
-                    Students who explain concepts aloud retain them 2× better. You don't need to understand SAT — just listen.
+                    Students who explain concepts aloud retain them 2× better. You don’t need to understand SAT — just listen.
                   </p>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default function SampleReport() {
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#155eef,#18a999)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: ".85rem" }}>DT</div>
                   <div>
                     <div style={{ color: "#fff", fontWeight: 800, fontSize: ".9rem" }}>The Digital Tutor</div>
-                    <div style={{ color: "rgba(255,255,255,.65)", fontSize: ".72rem" }}>Weekly update for Ayesha's parent</div>
+                    <div style={{ color: "rgba(255,255,255,.65)", fontSize: ".72rem" }}>Weekly update for Ayesha’s parent</div>
                   </div>
                 </div>
                 <div style={{ padding: 16 }}>
@@ -199,7 +199,7 @@ export default function SampleReport() {
                     <p style={{ margin: "0 0 6px" }}>💪 <strong>Strong:</strong> Algebra, Vocabulary</p>
                     <p style={{ margin: "0 0 10px" }}>⚡ <strong>Focus:</strong> Transitions, Inference</p>
                     <p style={{ margin: "0 0 10px", padding: "8px 10px", background: "#f0fdf4", borderRadius: 8, fontStyle: "italic" }}>
-                      Coach: "Algebra is clicking. Drilling transitions Thursday."
+                      Coach: “Algebra is clicking. Drilling transitions Thursday.”
                     </p>
                     <p style={{ margin: "0 0 10px", padding: "8px 10px", background: "#eff6ff", borderRadius: 8, fontWeight: 700 }}>
                       ⭐ Your action: Ask Ayesha to explain one transition question this week.
@@ -222,7 +222,7 @@ export default function SampleReport() {
                   { quote: "WhatsApp delivery means I see it instantly. No app to install, no login needed.", name: "Parent · Karachi" },
                 ].map((t, i) => (
                   <div key={i} style={{ marginBottom: i < 2 ? 14 : 0, paddingBottom: i < 2 ? 14 : 0, borderBottom: i < 2 ? "1px solid #e8eef6" : "none" }}>
-                    <p style={{ margin: "0 0 6px", fontSize: ".85rem", color: "#344054", lineHeight: 1.6, fontStyle: "italic" }}>"{t.quote}"</p>
+                    <p style={{ margin: "0 0 6px", fontSize: ".85rem", color: "#344054", lineHeight: 1.6, fontStyle: "italic" }}>“{t.quote}”</p>
                     <div style={{ fontSize: ".75rem", fontWeight: 700, color: "#6b7c93" }}>— {t.name}</div>
                   </div>
                 ))}

@@ -51,7 +51,7 @@ export default function AdminAttendance() {
     <section className="section"><div className="container" style={{ maxWidth: 760 }}>
       <Link href="/admin" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← Admin</Link>
       <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "8px 0 4px" }}>Attendance</h1>
-      <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 24px" }}>Select a session and mark each student's attendance.</p>
+      <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 24px" }}>Select a session and mark each student’s attendance.</p>
 
       <div className="field" style={{ marginBottom: 20, maxWidth: 420 }}>
         <label>Session *</label>

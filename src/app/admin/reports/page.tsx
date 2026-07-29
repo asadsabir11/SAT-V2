@@ -129,7 +129,7 @@ export default function AdminReports() {
       {genNarrative && (
         <div style={{ marginBottom: 20, padding: "16px 20px", borderRadius: 12, background: "#f5f3ff", border: "1.5px solid #c4b5fd" }}>
           <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#7c3aed", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 8 }}>✨ AI-generated narrative</div>
-          <p style={{ margin: "0 0 12px", color: "#4c1d95", lineHeight: 1.7, fontStyle: "italic" }}>"{genNarrative}"</p>
+          <p style={{ margin: "0 0 12px", color: "#4c1d95", lineHeight: 1.7, fontStyle: "italic" }}>“{genNarrative}”</p>
           <button onClick={() => setGenNarrative(null)} style={{ background: "none", border: "none", color: "#7c3aed", fontSize: ".78rem", fontWeight: 700, cursor: "pointer" }}>✕ Dismiss</button>
         </div>
       )}
@@ -189,8 +189,8 @@ export default function AdminReports() {
                       {fmtDate(rpt.period_start)} – {fmtDate(rpt.period_end)}
                       {rpt.sent_at && ` · Sent ${fmtDate(rpt.sent_at)}`}
                     </div>
-                    {rpt.narrative && <p style={{ margin: "6px 0 0", fontSize: ".82rem", color: "#7c3aed", fontStyle: "italic" }}>✨ "{rpt.narrative.substring(0, 90)}{rpt.narrative.length > 90 ? "…" : ""}"</p>}
-                    {rpt.coach_note && <p style={{ margin: "4px 0 0", fontSize: ".85rem", color: "#344054", fontStyle: "italic" }}>"{rpt.coach_note.substring(0, 80)}{rpt.coach_note.length > 80 ? "…" : ""}"</p>}
+                    {rpt.narrative && <p style={{ margin: "6px 0 0", fontSize: ".82rem", color: "#7c3aed", fontStyle: "italic" }}>✨ “{rpt.narrative.substring(0, 90)}{rpt.narrative.length > 90 ? "…" : ""}”</p>}
+                    {rpt.coach_note && <p style={{ margin: "4px 0 0", fontSize: ".85rem", color: "#344054", fontStyle: "italic" }}>“{rpt.coach_note.substring(0, 80)}{rpt.coach_note.length > 80 ? "…" : ""}”</p>}
                   </div>
                   <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
                     <button onClick={() => generateNarrative(rpt.id)} disabled={genNarrativeId === rpt.id} style={{ padding: "7px 14px", borderRadius: 8, background: "#f5f3ff", border: "none", color: "#7c3aed", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>

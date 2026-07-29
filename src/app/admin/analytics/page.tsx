@@ -73,7 +73,7 @@ export default function AdminAnalytics() {
           </button>
         </div>
         {skills.length === 0 ? (
-          <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>No skills in DB yet. Click "Seed 8 skills" to populate.</p>
+          <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>No skills in DB yet. Click “Seed 8 skills” to populate.</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 10 }}>
             {(["Math", "RW"] as const).map(sec => (
