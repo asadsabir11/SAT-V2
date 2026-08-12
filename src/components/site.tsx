@@ -1,10 +1,57 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["Academy", "/academy"], ["O Level", "/o-level"], ["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
 const STUDENT_NAV = [["Q&A", "/discussion"], ["Sessions", "/sessions"], ["Lectures", "/lectures"], ["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
+
+function SatNavDropdown() {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{ position: "relative" }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "8px 12px", borderRadius: 10, color: "#155eef", fontWeight: 800, fontSize: ".88rem", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}
+      >
+        SAT
+        <span style={{ fontSize: ".7rem", transition: "transform .15s", transform: open ? "rotate(180deg)" : "none" }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ position: "absolute", top: "100%", left: 0, marginTop: 4, minWidth: 160, background: "#fff", borderRadius: 12, border: "1px solid #e8eef6", boxShadow: "0 12px 32px rgba(7,27,51,.14)", padding: 6, display: "grid", gap: 2 }}>
+          {STUDENT_NAV.map(([label, href]) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setOpen(false)}
+              style={{ padding: "9px 12px", borderRadius: 8, color: "#2d4261", fontWeight: 700, fontSize: ".88rem", whiteSpace: "nowrap", display: "block" }}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
 
@@ -62,9 +109,7 @@ export function Header() {
           {PUBLIC_NAV.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
-          {user?.role === "student" && STUDENT_NAV.map(([label, href]) => (
-            <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#155eef",fontWeight:800,transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
-          ))}
+          {user?.role === "student" && <SatNavDropdown />}
           <AuthBadge onUser={setUser} />
           {!user && (
             <Link href="/register?plan=Core" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
