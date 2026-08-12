@@ -67,6 +67,7 @@ export default async function SubjectPage({
           <CTAButton href={`/o-level/lectures?subject=${subject.slug}`} variant="secondary">Watch Lessons</CTAButton>
           <CTAButton href={`/o-level/quizzes?subject=${subject.slug}`} variant="secondary">Take a Quiz</CTAButton>
           <CTAButton href={`/o-level/sessions?subject=${subject.slug}`} variant="secondary">Live Sessions</CTAButton>
+          <CTAButton href={`/o-level/past-papers?subject=${subject.slug}`} variant="secondary">Past Papers</CTAButton>
         </div>
 
         {cohort && (

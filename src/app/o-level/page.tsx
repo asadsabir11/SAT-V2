@@ -82,6 +82,7 @@ export default function OLevelPage() {
               <Link href="/o-level/lectures" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Browse all lessons →</Link>
               <Link href="/o-level/quizzes" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Browse all quizzes →</Link>
               <Link href="/o-level/sessions" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Live sessions →</Link>
+              <Link href="/o-level/past-papers" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Past papers →</Link>
             </p>
           </div>
           <div className="grid grid-3" style={{ marginTop: 40 }}>
