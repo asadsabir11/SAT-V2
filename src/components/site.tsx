@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"], ["Partners", "/partners"]] as const;
+const PUBLIC_NAV = [["Academy", "/academy"], ["O Level", "/o-level"], ["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"], ["Partners", "/partners"]] as const;
 const STUDENT_NAV = [["Q&A", "/discussion"], ["Sessions", "/sessions"], ["Lectures", "/lectures"], ["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
@@ -142,8 +142,18 @@ export function Footer(){
   );
 }
 
-export function CTAButton({href,children,secondary=false}:{href:string;children:ReactNode;secondary?:boolean}){
-  return <Link href={href} className={`btn ${secondary?"btn-secondary":"btn-primary"}`}>{children}</Link>;
+type CTAVariant = "primary" | "secondary" | "accent" | "ghost";
+const CTA_VARIANT_CLASS: Record<CTAVariant, string> = {
+  primary: "btn-primary",
+  secondary: "btn-secondary",
+  accent: "btn-teal",
+  ghost: "btn-ghost",
+};
+
+export function CTAButton({href,children,secondary=false,variant,className}:{href:string;children:ReactNode;secondary?:boolean;variant?:CTAVariant;className?:string}){
+  const resolved = variant ?? (secondary ? "secondary" : "primary");
+  const classes = `btn ${CTA_VARIANT_CLASS[resolved]}${className?` ${className}`:""}`;
+  return <Link href={href} className={classes}>{children}</Link>;
 }
 
 export function FeatureCard({index,title,children}:{index:string;title:string;children:ReactNode}){

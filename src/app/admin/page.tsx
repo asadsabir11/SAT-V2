@@ -13,6 +13,7 @@ interface Metrics {
   contactMessages: number;
   diagnosticCompletions: number;
   diagnosticCompletionRate: number;
+  oLevelLeads: number;
 }
 
 interface AdminData {
@@ -20,6 +21,7 @@ interface AdminData {
   students: Record<string, string>[];
   webinar: Record<string, string>[];
   partners: Record<string, string>[];
+  oLevelLeads: Record<string, string>[];
 }
 
 export default function Admin() {
@@ -58,6 +60,7 @@ export default function Admin() {
         ["Contact messages", m.contactMessages, "Inbound inquiries"],
         ["Diagnostics taken", m.diagnosticCompletions, "Lead activation"],
         ["Diagnostic rate", `${m.diagnosticCompletionRate}%`, "Completions / registrations"],
+        ["O-Level leads", m.oLevelLeads, "Academy — program=o-level"],
       ]
     : [];
 
@@ -220,6 +223,39 @@ export default function Admin() {
                             <td>{p.organizationType}</td>
                             <td>{p.estimatedStudents ?? "—"}</td>
                             <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {(data?.oLevelLeads.length ?? 0) > 0 && (
+                <div className="card" style={{ marginTop: 24 }}>
+                  <div className="eyebrow">Academy — O Level</div>
+                  <h2 style={{ color: "#071b33" }}>O-Level enrollment leads</h2>
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Student</th>
+                          <th>Parent</th>
+                          <th>Country</th>
+                          <th>Subjects</th>
+                          <th>WhatsApp</th>
+                          <th>Registered</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data?.oLevelLeads.map((o, i) => (
+                          <tr key={i}>
+                            <td>{o.studentName}</td>
+                            <td>{o.parentName}</td>
+                            <td>{o.country}</td>
+                            <td>{o.subject || "—"}</td>
+                            <td>{o.whatsapp}</td>
+                            <td>{new Date(o.createdAt).toLocaleDateString()}</td>
                           </tr>
                         ))}
                       </tbody>

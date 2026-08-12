@@ -7,12 +7,13 @@ export async function GET() {
   if (!session || session.role !== "founder") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const [students, webinar, partners, contacts, diagnostics] = await Promise.all([
+  const [students, webinar, partners, contacts, diagnostics, oLevelLeads] = await Promise.all([
     readData<Record<string, string>>("leads-student.json"),
     readData<Record<string, string>>("leads-webinar.json"),
     readData<Record<string, string>>("leads-partner.json"),
     readData<Record<string, string>>("leads-contact.json"),
     readData<Record<string, unknown>>("diagnostics.json"),
+    readData<Record<string, string>>("leads-o-level.json"),
   ]);
 
   const metrics = {
@@ -27,7 +28,8 @@ export async function GET() {
     diagnosticCompletionRate: students.length
       ? Math.round((diagnostics.length / students.length) * 100)
       : 0,
+    oLevelLeads: oLevelLeads.length,
   };
 
-  return NextResponse.json({ metrics, students, webinar, partners, diagnostics });
+  return NextResponse.json({ metrics, students, webinar, partners, diagnostics, oLevelLeads });
 }

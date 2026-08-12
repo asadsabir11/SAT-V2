@@ -6,19 +6,19 @@ const PACKAGES  = ["Free","Core Plan","Premium","Sponsored/NGO"];
 const GRADES    = ["Grade 8","Grade 9","Grade 10","Grade 11","Grade 12","College Freshman","College Sophomore","Other"];
 
 // ── Validators ────────────────────────────────────────────────────────────────
-function vName(v: string) {
+export function vName(v: string) {
   if (!v.trim()) return "Required";
   if (v.trim().length < 2) return "Minimum 2 characters";
   if (v.trim().length > 100) return "Maximum 100 characters";
   if (!/^[a-zA-Z\s\-'.]+$/.test(v.trim())) return "Letters, spaces and hyphens only";
   return "";
 }
-function vEmail(v: string) {
+export function vEmail(v: string) {
   if (!v.trim()) return "Required";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())) return "Enter a valid email address (e.g. name@gmail.com)";
   return "";
 }
-function vPhone(v: string) {
+export function vPhone(v: string) {
   if (!v.trim()) return "Required";
   const digits = v.replace(/\D/g, "");
   if (digits.length < 7) return "Include country code, e.g. +92 300 1234567";
@@ -26,13 +26,13 @@ function vPhone(v: string) {
   if (!/^[+\d\s\-().]+$/.test(v)) return "Invalid characters in phone number";
   return "";
 }
-function vCity(v: string) {
+export function vCity(v: string) {
   if (!v.trim()) return "Required";
   if (v.trim().length < 2) return "Minimum 2 characters";
   if (v.trim().length > 100) return "Maximum 100 characters";
   return "";
 }
-function vSelect(v: string) {
+export function vSelect(v: string) {
   if (!v) return "Please select an option";
   return "";
 }
@@ -76,7 +76,7 @@ function errStyle(hasError: boolean): React.CSSProperties {
 }
 
 // ── useSubmit hook ────────────────────────────────────────────────────────────
-function useSubmit(endpoint: string, onSuccess?: (p: Record<string, string>) => void) {
+export function useSubmit(endpoint: string, onSuccess?: (p: Record<string, string>) => void) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   async function submit(payload: Record<string, string>) {
@@ -450,6 +450,205 @@ export function ContactForm() {
       <button className="btn btn-primary" disabled={status==="loading"}>{status==="loading"?"Sending…":"Send message"}</button>
       {status==="success"&&<div className="success">Message received. We&apos;ll be in touch.</div>}
       {status==="error"&&<div className="note">Could not submit. Please try again.</div>}
+    </form>
+  );
+}
+
+// ── O-Level Enrollment Form ───────────────────────────────────────────────────
+type OLevelFields = {
+  studentName: string; parentName: string; studentEmail: string; whatsapp: string;
+  country: string; city: string; grade: string; source: string; consent: boolean;
+};
+
+const OLEVEL_INIT: OLevelFields = {
+  studentName: "", parentName: "", studentEmail: "", whatsapp: "",
+  country: "", city: "", grade: "", source: "", consent: false,
+};
+
+export function OLevelEnrollmentForm({
+  subjects, defaultSubject, defaultPlan,
+}: {
+  subjects: { slug: string; name: string }[];
+  defaultSubject?: string;
+  defaultPlan?: string;
+}) {
+  const { status, submit, errorMessage } = useSubmit("/api/leads/o-level");
+  const [fields, setFields] = useState<OLevelFields>(OLEVEL_INIT);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(
+    defaultSubject && subjects.some(s => s.slug === defaultSubject) ? [defaultSubject] : []
+  );
+  const [errors, setErrors] = useState<Partial<Record<keyof OLevelFields, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof OLevelFields, boolean>>>({});
+
+  function validateField(name: keyof OLevelFields, value: string | boolean): string {
+    switch (name) {
+      case "studentName": case "parentName": return vName(value as string);
+      case "studentEmail": return vEmail(value as string);
+      case "whatsapp": return vPhone(value as string);
+      case "city": return vCity(value as string);
+      case "country": case "grade": return vSelect(value as string);
+      case "consent": return value ? "" : "You must consent to proceed";
+      default: return "";
+    }
+  }
+
+  function change(name: keyof OLevelFields, value: string | boolean) {
+    setFields(f => ({ ...f, [name]: value }));
+    if (touched[name]) setErrors(e => ({ ...e, [name]: validateField(name, value) }));
+  }
+
+  function blur(name: keyof OLevelFields) {
+    setTouched(t => ({ ...t, [name]: true }));
+    setErrors(e => ({ ...e, [name]: validateField(name, fields[name]) }));
+  }
+
+  function toggleSubject(slug: string) {
+    setSelectedSubjects(s => s.includes(slug) ? s.filter(x => x !== slug) : [...s, slug]);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const required: (keyof OLevelFields)[] = ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "consent"];
+    const allErrors: Partial<Record<keyof OLevelFields, string>> = {};
+    const allTouched: Partial<Record<keyof OLevelFields, boolean>> = {};
+    required.forEach(name => {
+      allTouched[name] = true;
+      allErrors[name] = validateField(name, fields[name]);
+    });
+    setTouched(allTouched);
+    setErrors(allErrors);
+    if (Object.values(allErrors).some(e => e)) return;
+
+    submit({
+      studentName: fields.studentName.trim(),
+      parentName: fields.parentName.trim(),
+      studentEmail: fields.studentEmail.trim().toLowerCase(),
+      whatsapp: fields.whatsapp.trim(),
+      country: fields.country,
+      city: fields.city.trim(),
+      grade: fields.grade,
+      program: "o-level",
+      subject: selectedSubjects.join(","),
+      plan: defaultPlan ?? "",
+      source: fields.source.trim(),
+      consent: "true",
+    });
+  }
+
+  const text = (name: keyof OLevelFields, placeholder?: string) => ({
+    id: name, name,
+    value: fields[name] as string,
+    placeholder,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => change(name, e.target.value),
+    onBlur: () => blur(name),
+    style: errStyle(!!errors[name]),
+  });
+
+  const sel = (name: keyof OLevelFields) => ({
+    id: name, name,
+    value: fields[name] as string,
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => change(name, e.target.value),
+    onBlur: () => blur(name),
+    style: errStyle(!!errors[name]),
+  });
+
+  if (status === "success") return (
+    <div style={{ padding: 28, borderRadius: 16, background: "linear-gradient(135deg,#d4faf5,#eaf4ff)", border: "1px solid rgba(24,169,153,.2)" }}>
+      <p style={{ color: "#075a50", fontWeight: 700, fontSize: "1.05rem", margin: "0 0 6px" }}>You&apos;re on the list!</p>
+      <p style={{ color: "#2d6b60", margin: 0, lineHeight: 1.65 }}>
+        We received your information. Our team will reach out on WhatsApp to confirm your subjects and founding cohort schedule.
+      </p>
+    </div>
+  );
+
+  return (
+    <form className="form card" onSubmit={handleSubmit} noValidate>
+      <div className="form-grid">
+        <div className="field">
+          <label htmlFor="studentName">Student full name *</label>
+          <input type="text" {...text("studentName", "e.g. Fatima Khan")} />
+          <Err msg={touched.studentName ? errors.studentName : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="parentName">Parent full name *</label>
+          <input type="text" {...text("parentName", "e.g. Ahmed Khan")} />
+          <Err msg={touched.parentName ? errors.parentName : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="studentEmail">Student or parent email *</label>
+          <input type="email" {...text("studentEmail", "name@gmail.com")} />
+          <Err msg={touched.studentEmail ? errors.studentEmail : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="whatsapp">WhatsApp number *</label>
+          <input type="tel" {...text("whatsapp", "+92 300 1234567")} />
+          <Err msg={touched.whatsapp ? errors.whatsapp : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="country">Country *</label>
+          <select {...sel("country")}>
+            <option value="">Select country</option>
+            {COUNTRIES.map(c => <option key={c}>{c}</option>)}
+          </select>
+          <Err msg={touched.country ? errors.country : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="city">City *</label>
+          <input type="text" {...text("city", "e.g. Lahore")} />
+          <Err msg={touched.city ? errors.city : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="grade">Grade / year *</label>
+          <select {...sel("grade")}>
+            <option value="">Select grade</option>
+            {GRADES.map(g => <option key={g}>{g}</option>)}
+          </select>
+          <Err msg={touched.grade ? errors.grade : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="source">How did you hear about us?</label>
+          <input type="text" {...text("source", "e.g. WhatsApp, Instagram, friend")} />
+        </div>
+      </div>
+
+      <div style={{ borderTop: "1px solid #edf2f7", paddingTop: 20, marginTop: 4 }}>
+        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".88rem", margin: "0 0 14px" }}>
+          Which O Level subjects are you interested in?
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          {subjects.map(s => (
+            <label key={s.slug} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 14px", borderRadius: 999, border: "1.5px solid #d0dcea", cursor: "pointer", fontSize: ".88rem", fontWeight: 600, color: "var(--navy)" }}>
+              <input type="checkbox" checked={selectedSubjects.includes(s.slug)} onChange={() => toggleSubject(s.slug)} />
+              {s.name}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", marginTop: 4 }}>
+        <input
+          type="checkbox"
+          name="consent"
+          checked={fields.consent}
+          onChange={e => change("consent", e.target.checked)}
+          onBlur={() => blur("consent")}
+          style={{ marginTop: 3, flexShrink: 0 }}
+        />
+        <span>
+          I consent to being contacted about O Level enrollment. See our{" "}
+          <a href="/privacy" style={{ color: "#155eef" }}>Privacy Policy</a> and{" "}
+          <a href="/terms" style={{ color: "#155eef" }}>Terms of Service</a>.
+        </span>
+      </label>
+      {touched.consent && <Err msg={errors.consent} />}
+
+      <button className="btn btn-primary" type="submit" disabled={status === "loading"}>
+        {status === "loading" ? "Submitting…" : "Join the founding cohort"}
+      </button>
+
+      {status === "error" && (
+        <div className="note">{errorMessage || "Something went wrong. Please try again or contact us directly."}</div>
+      )}
     </form>
   );
 }

@@ -12,12 +12,39 @@ const webhooks: Record<string, string | undefined> = {
   contact: process.env.N8N_CONTACT_WEBHOOK_URL,
 };
 
+// Required, non-empty fields per lead type. Unlisted types are not validated
+// (keeps this endpoint open to future lead types without a code change).
+const REQUIRED_FIELDS: Record<string, string[]> = {
+  student: ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "packageType", "password"],
+  webinar: ["parentName", "email", "whatsapp", "country", "studentGrade", "interestedPackage", "mainConcern"],
+  partner: ["organizationName", "contactName", "email", "country", "organizationType", "message"],
+  contact: ["name", "email", "country", "role", "message"],
+  "o-level": ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade"],
+};
+
+function findMissingFields(type: string, data: Record<string, unknown>): string[] {
+  const required = REQUIRED_FIELDS[type];
+  if (!required) return [];
+  return required.filter((field) => {
+    const value = data[field];
+    return typeof value !== "string" || !value.trim();
+  });
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   try {
     const { type } = await params;
     const payload = await request.json();
     if (!payload || typeof payload !== "object")
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+
+    const missing = findMissingFields(type, payload as Record<string, unknown>);
+    if (missing.length > 0) {
+      return NextResponse.json(
+        { error: `Missing required field${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}` },
+        { status: 400 }
+      );
+    }
 
     // Strip password from the lead record before saving
     const { password, confirmPassword: _confirm, ...leadData } = payload as Record<string, string>;
