@@ -4,6 +4,7 @@ import type { OLevelLectureCategory } from "@/lib/lectures";
 export type OLevelQuizQuestion = {
   id: string;
   topic: string;
+  passage?: string;
   text: string;
   options: [string, string, string, string];
   correct: 0 | 1 | 2 | 3;

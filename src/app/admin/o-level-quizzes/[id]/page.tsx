@@ -6,10 +6,16 @@ import { useSearchParams } from "next/navigation";
 interface Question {
   id: string;
   topic: string;
+  passage?: string;
   text: string;
   options: [string, string, string, string];
   correct: 0 | 1 | 2 | 3;
   explanation?: string;
+}
+
+interface BankQuestion extends Question {
+  program: "sat" | "o-level";
+  section: string;
 }
 
 interface Attempt {
@@ -30,7 +36,7 @@ const SUBJECT_META: Record<string, { label: string; icon: string }> = {
   "pakistan-studies": { label: "Pakistan Studies", icon: "🌍" },
 };
 
-const BLANK_Q: Omit<Question, "id"> = { topic: "", text: "", options: ["", "", "", ""], correct: 0, explanation: "" };
+const BLANK_Q: Omit<Question, "id"> = { topic: "", passage: "", text: "", options: ["", "", "", ""], correct: 0, explanation: "" };
 
 export default function OLevelQuizEditor({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -59,6 +65,10 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
   const [addingQ, setAddingQ] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Omit<Question, "id"> | null>(null);
+  const [showBank, setShowBank] = useState(false);
+  const [bankQuestions, setBankQuestions] = useState<BankQuestion[]>([]);
+  const [bankLoading, setBankLoading] = useState(false);
+  const [bankFilter, setBankFilter] = useState("");
 
   useEffect(() => {
     fetch(`/api/o-level/quizzes/${id}`)
@@ -129,7 +139,7 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
 
   function startEdit(q: Question) {
     setEditingId(q.id);
-    setEditDraft({ topic: q.topic, text: q.text, options: [...q.options] as [string, string, string, string], correct: q.correct, explanation: q.explanation ?? "" });
+    setEditDraft({ topic: q.topic, passage: q.passage ?? "", text: q.text, options: [...q.options] as [string, string, string, string], correct: q.correct, explanation: q.explanation ?? "" });
   }
 
   function saveEdit(qId: string) {
@@ -138,6 +148,27 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
     setEditingId(null);
     setEditDraft(null);
   }
+
+  async function openBank() {
+    setShowBank(true);
+    if (bankQuestions.length === 0) {
+      setBankLoading(true);
+      const res = await fetch("/api/question-bank");
+      const d = await res.json();
+      setBankQuestions((d.questions ?? []).filter((q: BankQuestion) => q.program === "o-level" && q.section === subject));
+      setBankLoading(false);
+    }
+  }
+
+  function addFromBank(bq: BankQuestion) {
+    if (questions.find((q) => q.id === bq.id || q.text === bq.text)) return;
+    const q: Question = { id: bq.id, topic: bq.topic, passage: bq.passage, text: bq.text, options: bq.options, correct: bq.correct, explanation: bq.explanation };
+    persistQuestions([...questions, q]);
+  }
+
+  const filteredBank = bankQuestions.filter((bq) =>
+    !bankFilter || bq.topic.toLowerCase().includes(bankFilter.toLowerCase()) || bq.text.toLowerCase().includes(bankFilter.toLowerCase())
+  );
 
   if (loading) return <section className="section"><div className="container"><div className="card"><p>Loading quiz…</p></div></div></section>;
 
@@ -201,6 +232,10 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
                         <div className="field"><label>Topic</label><input value={editDraft.topic} onChange={(e) => setEditDraft({ ...editDraft, topic: e.target.value })} /></div>
                         <div className="field"><label>Question *</label><input value={editDraft.text} onChange={(e) => setEditDraft({ ...editDraft, text: e.target.value })} /></div>
                       </div>
+                      <div className="field" style={{ marginBottom: 10 }}>
+                        <label>Passage / Context (optional)</label>
+                        <textarea value={editDraft.passage ?? ""} onChange={(e) => setEditDraft({ ...editDraft, passage: e.target.value })} rows={3} style={{ resize: "vertical" }} />
+                      </div>
                       <div style={{ display: "grid", gap: 8, marginBottom: 10 }}>
                         {editDraft.options.map((opt, oi) => (
                           <label key={oi} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -233,6 +268,11 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
                         <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".75rem" }}>Q{i + 1}</span>
                         {q.topic && <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#eff6ff", color: "#155eef" }}>{q.topic}</span>}
                       </div>
+                      {q.passage && (
+                        <p style={{ fontSize: ".82rem", color: "#6b7c93", fontStyle: "italic", borderLeft: "3px solid #dce5ef", paddingLeft: 10, margin: "0 0 8px", lineHeight: 1.6 }}>
+                          {q.passage.length > 150 ? q.passage.slice(0, 150) + "…" : q.passage}
+                        </p>
+                      )}
                       <p style={{ fontWeight: 700, color: "#071b33", margin: "0 0 8px" }}>{q.text}</p>
                       <div style={{ display: "grid", gap: 4, marginBottom: 8 }}>
                         {q.options.map((opt, oi) => (
@@ -252,13 +292,81 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
               ))}
             </div>
 
+            {/* Action buttons */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+              {!addingQ && (
+                <button className="btn btn-primary" onClick={() => setAddingQ(true)} style={{ flex: 1 }}>
+                  + Add question manually
+                </button>
+              )}
+              <button
+                onClick={openBank}
+                style={{ flex: 1, padding: "10px 20px", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", cursor: "pointer", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+                📚 Pick from question bank
+              </button>
+            </div>
+
+            {/* Question bank panel */}
+            {showBank && (
+              <div className="card" style={{ border: "2px solid #155eef", marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <h3 style={{ margin: 0, color: "#071b33" }}>Question Bank — {meta.label}</h3>
+                  <button onClick={() => setShowBank(false)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#6b7c93" }}>✕</button>
+                </div>
+                <input
+                  value={bankFilter}
+                  onChange={(e) => setBankFilter(e.target.value)}
+                  placeholder="Filter by topic or keyword…"
+                  style={{ marginBottom: 14, width: "100%" }}
+                />
+                {bankLoading ? (
+                  <p style={{ color: "#6b7c93" }}>Loading bank…</p>
+                ) : filteredBank.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "20px 0", color: "#6b7c93" }}>
+                    {bankQuestions.length === 0
+                      ? `No ${meta.label} questions in the bank yet. Go to Admin → Question Bank to add some.`
+                      : "No questions match your filter."}
+                    <br />
+                    <Link href="/admin/question-bank" style={{ color: "#155eef", fontSize: ".85rem" }}>Manage question bank →</Link>
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gap: 10, maxHeight: 480, overflowY: "auto" }}>
+                    {filteredBank.map((bq) => {
+                      const alreadyAdded = questions.some((q) => q.id === bq.id || q.text === bq.text);
+                      return (
+                        <div key={bq.id} style={{ border: "1px solid #e8eef6", borderRadius: 10, padding: "12px 16px", display: "flex", gap: 12, alignItems: "flex-start", background: alreadyAdded ? "#f8fafc" : "#fff" }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ color: "#a0aec0", fontSize: ".75rem" }}>{bq.topic}</span>
+                            <p style={{ margin: "4px 0", fontWeight: 600, fontSize: ".85rem", color: "#344054" }}>{bq.text}</p>
+                            <p style={{ margin: 0, fontSize: ".75rem", color: "#065f46" }}>
+                              ✓ {String.fromCharCode(65 + bq.correct)}. {bq.options[bq.correct]}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => addFromBank(bq)}
+                            disabled={alreadyAdded}
+                            style={{ padding: "7px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".78rem", cursor: alreadyAdded ? "default" : "pointer", border: "none", background: alreadyAdded ? "#e5e7eb" : "#d1fae5", color: alreadyAdded ? "#9ca3af" : "#065f46", flexShrink: 0 }}>
+                            {alreadyAdded ? "Added" : "+ Add"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Add question */}
-            {addingQ ? (
+            {addingQ && (
               <div className="card" style={{ border: "2px solid #155eef" }}>
                 <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1rem" }}>New question</h3>
                 <div className="form-grid" style={{ marginBottom: 10 }}>
                   <div className="field"><label>Topic</label><input value={newQ.topic} onChange={(e) => setNewQ({ ...newQ, topic: e.target.value })} placeholder="e.g. Algebra" /></div>
                   <div className="field"><label>Question *</label><input value={newQ.text} onChange={(e) => setNewQ({ ...newQ, text: e.target.value })} /></div>
+                </div>
+                <div className="field" style={{ marginBottom: 10 }}>
+                  <label>Passage / Context (optional)</label>
+                  <textarea value={newQ.passage ?? ""} onChange={(e) => setNewQ({ ...newQ, passage: e.target.value })} rows={3} style={{ resize: "vertical" }} />
                 </div>
                 <div style={{ display: "grid", gap: 8, marginBottom: 10 }}>
                   {newQ.options.map((opt, oi) => (
@@ -286,8 +394,6 @@ function OLevelQuizEditorInner({ params }: { params: Promise<{ id: string }> }) 
                   <button onClick={() => setAddingQ(false)} style={{ padding: "8px 16px", borderRadius: 8, background: "#f1f5f9", border: "none", fontWeight: 700, cursor: "pointer", color: "#6b7c93", fontSize: ".85rem" }}>Cancel</button>
                 </div>
               </div>
-            ) : (
-              <button className="btn btn-primary" onClick={() => setAddingQ(true)}>+ Add question</button>
             )}
           </>
         ) : (

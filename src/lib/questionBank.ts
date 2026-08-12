@@ -1,9 +1,13 @@
 import { sql } from "@/lib/db";
 
 
+export type BankProgram = "sat" | "o-level";
+export type BankSection = "math" | "reading_writing" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+
 export type BankQuestion = {
   id: string;
-  section: "math" | "reading_writing";
+  program: BankProgram;
+  section: BankSection;
   topic: string;
   passage?: string;
   text: string;
@@ -31,6 +35,7 @@ async function ensureTable() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
   ready = true;
 }
 
@@ -44,8 +49,8 @@ export async function addBankQuestion(q: Omit<BankQuestion, "id" | "created_at">
   await ensureTable();
   const id = crypto.randomUUID();
   await sql`
-    INSERT INTO question_bank (id, section, topic, passage, text, options, correct, explanation, created_by)
-    VALUES (${id}, ${q.section}, ${q.topic}, ${q.passage ?? ""}, ${q.text}, ${JSON.stringify(q.options)}, ${q.correct}, ${q.explanation ?? ""}, ${q.created_by})
+    INSERT INTO question_bank (id, program, section, topic, passage, text, options, correct, explanation, created_by)
+    VALUES (${id}, ${q.program}, ${q.section}, ${q.topic}, ${q.passage ?? ""}, ${q.text}, ${JSON.stringify(q.options)}, ${q.correct}, ${q.explanation ?? ""}, ${q.created_by})
   `;
   return id;
 }
@@ -54,7 +59,7 @@ export async function updateBankQuestion(id: string, q: Omit<BankQuestion, "id" 
   await ensureTable();
   await sql`
     UPDATE question_bank
-    SET section=${q.section}, topic=${q.topic}, passage=${q.passage ?? ""}, text=${q.text},
+    SET program=${q.program}, section=${q.section}, topic=${q.topic}, passage=${q.passage ?? ""}, text=${q.text},
         options=${JSON.stringify(q.options)}, correct=${q.correct}, explanation=${q.explanation ?? ""}
     WHERE id=${id}
   `;

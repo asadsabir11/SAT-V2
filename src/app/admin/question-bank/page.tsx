@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Section = "math" | "reading_writing";
+type Program = "sat" | "o-level";
+type Section = "math" | "reading_writing" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 
 interface BankQuestion {
   id: string;
+  program: Program;
   section: Section;
   topic: string;
   passage?: string;
@@ -17,7 +19,24 @@ interface BankQuestion {
   created_at: string;
 }
 
+type SectionMeta = { value: Section; label: string; color: string; bg: string };
+const SAT_SECTIONS: SectionMeta[] = [
+  { value: "math", label: "Math", color: "#5b21b6", bg: "#ede9fe" },
+  { value: "reading_writing", label: "Reading & Writing", color: "#9d174d", bg: "#fce7f3" },
+];
+const OLEVEL_SECTIONS: SectionMeta[] = [
+  { value: "mathematics", label: "Mathematics", color: "#155eef", bg: "#eff6ff" },
+  { value: "computer-science", label: "Computer Science", color: "#7c3aed", bg: "#f5f3ff" },
+  { value: "english-language", label: "English Language", color: "#0e7490", bg: "#ecfeff" },
+  { value: "islamiyat", label: "Islamiyat", color: "#15803d", bg: "#dcfce7" },
+  { value: "pakistan-studies", label: "Pakistan Studies", color: "#b45309", bg: "#fef3c7" },
+];
+const ALL_SECTIONS = [...SAT_SECTIONS, ...OLEVEL_SECTIONS];
+const sectionMeta = (s: Section): SectionMeta => ALL_SECTIONS.find((x) => x.value === s) ?? SAT_SECTIONS[0];
+const sectionsFor = (p: Program) => (p === "o-level" ? OLEVEL_SECTIONS : SAT_SECTIONS);
+
 const BLANK: Omit<BankQuestion, "id" | "created_by" | "created_at"> = {
+  program: "sat",
   section: "math",
   topic: "",
   passage: "",
@@ -34,6 +53,7 @@ export default function QuestionBank() {
   const [form, setForm] = useState({ ...BLANK, options: ["", "", "", ""] as [string, string, string, string] });
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState("");
+  const [programFilter, setProgramFilter] = useState<"all" | Program>("all");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Omit<BankQuestion, "id" | "created_by" | "created_at"> | null>(null);
 
@@ -72,13 +92,14 @@ export default function QuestionBank() {
   }
 
   const filtered = questions.filter(q =>
-    !filter ||
-    q.topic.toLowerCase().includes(filter.toLowerCase()) ||
-    q.text.toLowerCase().includes(filter.toLowerCase())
+    (programFilter === "all" || q.program === programFilter) &&
+    (!filter ||
+      q.topic.toLowerCase().includes(filter.toLowerCase()) ||
+      q.text.toLowerCase().includes(filter.toLowerCase()))
   );
 
-  const mathCount = questions.filter(q => q.section === "math").length;
-  const rwCount = questions.filter(q => q.section === "reading_writing").length;
+  const satCount = questions.filter(q => q.program === "sat").length;
+  const olevelCount = questions.filter(q => q.program === "o-level").length;
 
   return (
     <section className="section">
@@ -90,7 +111,7 @@ export default function QuestionBank() {
             <Link href="/admin" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← Admin</Link>
             <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "6px 0 4px", letterSpacing: "-.03em" }}>Question Bank</h1>
             <p style={{ color: "#6b7c93", margin: 0, fontSize: ".88rem" }}>
-              {questions.length} questions saved · {mathCount} Math · {rwCount} R&W
+              {questions.length} questions saved · {satCount} SAT · {olevelCount} O Level
             </p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -110,12 +131,25 @@ export default function QuestionBank() {
         {showForm && (
           <div className="card" style={{ border: "2px solid #155eef", marginBottom: 24 }}>
             <h3 style={{ margin: "0 0 16px", color: "#071b33" }}>New question</h3>
+            <div className="field" style={{ marginBottom: 12 }}>
+              <label>Program *</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {(["sat", "o-level"] as Program[]).map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, program: p, section: sectionsFor(p)[0].value }))}
+                    style={{ flex: 1, padding: "8px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".85rem", cursor: "pointer", border: form.program === p ? "2px solid #155eef" : "2px solid #e8eef6", background: form.program === p ? "#eff6ff" : "#fff", color: form.program === p ? "#155eef" : "#6b7c93" }}>
+                    {p === "sat" ? "🎓 SAT" : "📘 O Level"}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="form-grid" style={{ marginBottom: 12 }}>
               <div className="field">
-                <label>Section *</label>
+                <label>{form.program === "o-level" ? "Subject *" : "Section *"}</label>
                 <select value={form.section} onChange={e => setForm(f => ({ ...f, section: e.target.value as Section }))}>
-                  <option value="math">Math</option>
-                  <option value="reading_writing">Reading & Writing</option>
+                  {sectionsFor(form.program).map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
               <div className="field">
@@ -184,6 +218,17 @@ export default function QuestionBank() {
         {/* Filter */}
         {questions.length > 0 && (
           <div style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"]] as [typeof programFilter, string][]).map(([val, label]) => (
+                <button
+                  key={val}
+                  onClick={() => setProgramFilter(val)}
+                  style={{ padding: "7px 16px", borderRadius: 999, fontWeight: 700, fontSize: ".82rem", cursor: "pointer", border: programFilter === val ? "2px solid #155eef" : "2px solid #e8eef6", background: programFilter === val ? "#eff6ff" : "#fff", color: programFilter === val ? "#155eef" : "#6b7c93" }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <input
               value={filter}
               onChange={e => setFilter(e.target.value)}
@@ -221,12 +266,25 @@ export default function QuestionBank() {
                       <span style={{ fontWeight: 800, color: "#155eef", fontSize: ".82rem" }}>Editing #{i + 1}</span>
                       <button onClick={() => { setEditingId(null); setEditDraft(null); }} style={{ background: "none", border: "none", fontSize: "1.1rem", cursor: "pointer", color: "#6b7c93" }}>✕</button>
                     </div>
+                    <div className="field" style={{ marginBottom: 12 }}>
+                      <label>Program *</label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {(["sat", "o-level"] as Program[]).map(p => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setEditDraft(d => ({ ...d!, program: p, section: sectionsFor(p)[0].value }))}
+                            style={{ flex: 1, padding: "7px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".82rem", cursor: "pointer", border: draft.program === p ? "2px solid #155eef" : "2px solid #e8eef6", background: draft.program === p ? "#eff6ff" : "#fff", color: draft.program === p ? "#155eef" : "#6b7c93" }}>
+                            {p === "sat" ? "🎓 SAT" : "📘 O Level"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <div className="form-grid" style={{ marginBottom: 12 }}>
                       <div className="field">
-                        <label>Section *</label>
+                        <label>{draft.program === "o-level" ? "Subject *" : "Section *"}</label>
                         <select value={draft.section} onChange={e => setEditDraft(d => ({ ...d!, section: e.target.value as Section }))}>
-                          <option value="math">Math</option>
-                          <option value="reading_writing">Reading & Writing</option>
+                          {sectionsFor(draft.program).map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                         </select>
                       </div>
                       <div className="field">
@@ -290,8 +348,11 @@ export default function QuestionBank() {
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
                         <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".78rem" }}>#{i + 1}</span>
-                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: q.section === "math" ? "#ede9fe" : "#fce7f3", color: q.section === "math" ? "#5b21b6" : "#9d174d" }}>
-                          {q.section === "math" ? "Math" : "Reading & Writing"}
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: q.program === "o-level" ? "#fef3c7" : "#f1f5f9", color: q.program === "o-level" ? "#92400e" : "#475569" }}>
+                          {q.program === "o-level" ? "📘 O Level" : "🎓 SAT"}
+                        </span>
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: sectionMeta(q.section).bg, color: sectionMeta(q.section).color }}>
+                          {sectionMeta(q.section).label}
                         </span>
                         <span style={{ color: "#a0aec0", fontSize: ".78rem" }}>{q.topic}</span>
                       </div>
@@ -316,7 +377,7 @@ export default function QuestionBank() {
                     </div>
                     <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                       <button
-                        onClick={() => { setEditingId(q.id); setEditDraft({ section: q.section, topic: q.topic, passage: q.passage ?? "", text: q.text, options: [...q.options] as [string,string,string,string], correct: q.correct, explanation: q.explanation ?? "" }); }}
+                        onClick={() => { setEditingId(q.id); setEditDraft({ program: q.program, section: q.section, topic: q.topic, passage: q.passage ?? "", text: q.text, options: [...q.options] as [string,string,string,string], correct: q.correct, explanation: q.explanation ?? "" }); }}
                         style={{ background: "#eff6ff", border: "none", color: "#155eef", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontWeight: 700, fontSize: ".78rem" }}>
                         Edit
                       </button>

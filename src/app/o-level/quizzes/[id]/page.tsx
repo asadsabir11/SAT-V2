@@ -5,6 +5,7 @@ import Link from "next/link";
 interface Question {
   id: string;
   topic: string;
+  passage?: string;
   text: string;
   options: [string, string, string, string];
 }
@@ -133,6 +134,11 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
                 <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
                   {quiz.questions.map((q, qi) => (
                     <div key={q.id}>
+                      {q.passage && (
+                        <p style={{ fontSize: ".85rem", color: "#6b7c93", fontStyle: "italic", borderLeft: "3px solid #dce5ef", paddingLeft: 12, margin: "0 0 10px", lineHeight: 1.65 }}>
+                          {q.passage}
+                        </p>
+                      )}
                       <p style={{ fontWeight: 700, color: "#071b33", marginBottom: 10, fontSize: ".92rem" }}>{qi + 1}. {q.text}</p>
                       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         {q.options.map((opt, oi) => {

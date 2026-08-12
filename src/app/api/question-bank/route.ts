@@ -17,11 +17,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json();
-  const { section, topic, passage, text, options, correct, explanation } = body;
+  const { section, topic, passage, text, options, correct, explanation, program } = body;
   if (!section || !topic || !text || !options || correct === undefined) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
   const id = await addBankQuestion({
+    program: program === "o-level" ? "o-level" : "sat",
     section, topic, passage: passage ?? "", text, options, correct,
     explanation: explanation ?? "", created_by: session.email,
   });
