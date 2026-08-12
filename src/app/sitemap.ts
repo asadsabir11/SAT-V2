@@ -9,7 +9,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/register`, priority: 0.9 },
     { url: `${BASE}/login`, priority: 0.7 },
     { url: `${BASE}/parent-webinar`, priority: 0.8 },
-    { url: `${BASE}/partners`, priority: 0.7 },
     { url: `${BASE}/contact`, priority: 0.6 },
     { url: `${BASE}/materials`, priority: 0.6 },
     { url: `${BASE}/privacy`, priority: 0.4 },

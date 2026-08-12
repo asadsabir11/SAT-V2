@@ -414,27 +414,6 @@ export function WebinarForm() {
   );
 }
 
-// ── Partner Inquiry Form ──────────────────────────────────────────────────────
-export function PartnerInquiryForm() {
-  const { status, submit } = useSubmit("/api/leads/partner");
-  return (
-    <form className="form card" onSubmit={e => { e.preventDefault(); submit(Object.fromEntries(new FormData(e.currentTarget)) as Record<string,string>); }}>
-      <div className="form-grid">
-        <div className="field"><label>Organization name *</label><input name="organizationName" required minLength={2} /></div>
-        <div className="field"><label>Contact person *</label><input name="contactName" required minLength={2} /></div>
-        <div className="field"><label>Email *</label><input name="email" type="email" required /></div>
-        <div className="field"><label>Country *</label><select name="country" required defaultValue=""><option value="" disabled>Select country</option>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select></div>
-        <div className="field"><label>Organization type *</label><select name="organizationType" required defaultValue=""><option value="" disabled>Select type</option>{["School","NGO","Scholarship Program","Diaspora Organization","Community Organization","Corporate CSR","Other"].map(t=><option key={t}>{t}</option>)}</select></div>
-        <div className="field"><label>Estimated students</label><input name="estimatedStudents" type="number" min={1} max={100000} placeholder="e.g. 50" /></div>
-      </div>
-      <div className="field"><label>Message *</label><textarea name="message" required minLength={20} placeholder="Describe your organization and what you are looking for…" /></div>
-      <button className="btn btn-primary" disabled={status==="loading"}>{status==="loading"?"Sending…":"Start a partnership conversation"}</button>
-      {status==="success"&&<div className="success">Thank you. We received your inquiry and will follow up with cohort options.</div>}
-      {status==="error"&&<div className="note">Could not submit. Please try again.</div>}
-    </form>
-  );
-}
-
 // ── Contact Form ──────────────────────────────────────────────────────────────
 export function ContactForm() {
   const { status, submit } = useSubmit("/api/leads/contact");

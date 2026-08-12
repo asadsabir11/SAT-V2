@@ -18,15 +18,6 @@ const features: [string, string][] = [
   ["Affordable Global Pricing", "Country-aware founder pricing designed around access, not profit."],
 ];
 
-const ngoPartnerTypes = [
-  ["Schools", "Cohort pricing for classrooms and extracurricular SAT clubs."],
-  ["NGOs & Scholarship Programs", "Sponsored seats for underserved students at no cost to families."],
-  ["Diaspora Organizations", "Support students in your home country from abroad."],
-  ["Corporate CSR Programs", "Fund cohorts as part of education or workforce-readiness initiatives."],
-  ["Refugee-Support Programs", "Pathway preparation for displaced students pursuing university."],
-  ["Community Organizations", "Group cohorts with shared accountability and regional reporting."],
-];
-
 const faqs: [string, string][] = [
   ["Is this official SAT prep?", "No. SAT® is a College Board trademark. The Digital Tutor is independent and not endorsed by College Board."],
   ["Should students still use Khan Academy?", "Yes. We encourage students to use free resources. Our program adds structure, live teaching, AI support, mock-test discipline, and parent reporting."],
@@ -250,7 +241,7 @@ export default function Home() {
             <PricingCard
               name="Sponsored / NGO"
               price="Custom"
-              href={process.env.NEXT_PUBLIC_SPONSORED_STUDENT_DONATION_LINK ?? "/partners"}
+              href={process.env.NEXT_PUBLIC_SPONSORED_STUDENT_DONATION_LINK ?? "/contact"}
               items={["Sponsored seats","School or NGO cohort","Group reporting","Partnership support"]}
             />
           </div>
@@ -304,29 +295,6 @@ export default function Home() {
                 <p style={{ color: "rgba(255,255,255,.7)" }}>{d}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 10 — School/NGO partnerships */}
-      <section className="section soft">
-        <div className="container">
-          <div className="eyebrow">School and NGO partnerships</div>
-          <h2 className="title">Bring affordable SAT® prep to your students</h2>
-          <p className="lead" style={{ maxWidth: 640, marginBottom: 36 }}>
-            We work with schools, NGOs, scholarship programs, diaspora organizations, and
-            corporate CSR programs to sponsor access for students who cannot afford individual pricing.
-          </p>
-          <div className="grid grid-3">
-            {ngoPartnerTypes.map(([t, d]) => (
-              <div className="card" key={t}>
-                <h3>{t}</h3>
-                <p>{d}</p>
-              </div>
-            ))}
-          </div>
-          <div className="actions" style={{ marginTop: 28 }}>
-            <CTAButton href="/partners">Start a partnership conversation</CTAButton>
           </div>
         </div>
       </section>

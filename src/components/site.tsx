@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["Academy", "/academy"], ["O Level", "/o-level"], ["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"], ["Partners", "/partners"]] as const;
+const PUBLIC_NAV = [["Academy", "/academy"], ["O Level", "/o-level"], ["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
 const STUDENT_NAV = [["Q&A", "/discussion"], ["Sessions", "/sessions"], ["Lectures", "/lectures"], ["Diagnostic", "/diagnostic"], ["AI Tutor", "/ai-tutor"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
@@ -47,7 +47,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["The Program","/founder-cohort"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["School & NGO Partners","/partners"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["The Program","/founder-cohort"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
 export function Header() {

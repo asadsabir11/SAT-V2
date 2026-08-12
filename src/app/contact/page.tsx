@@ -1,5 +1,5 @@
 import { ContactForm } from "@/components/forms";
-import { CTAButton, PageHero } from "@/components/site";
+import { PageHero } from "@/components/site";
 
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@thedigitaltutor.net";
 const WHATSAPP_URL  = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL  || "";
@@ -48,13 +48,6 @@ export default function Contact() {
                 )}
 
               </div>
-            </div>
-
-            <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #e8eef6" }}>
-              <p style={{ color: "#6b7c93", fontSize: ".88rem", marginBottom: 14 }}>
-                Schools, NGOs, scholarship programs, and sponsors can use our dedicated partnership form.
-              </p>
-              <CTAButton href="/partners">Partnership inquiry</CTAButton>
             </div>
           </div>
         </div>
