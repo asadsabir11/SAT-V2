@@ -78,8 +78,9 @@ export default function OLevelPage() {
             <p className="lead" style={{ margin: "0 auto" }}>
               Taught by the founder for the founding cohort. More subjects — Physics, Chemistry, Biology, Economics, and A Levels — are on the way.
             </p>
-            <p style={{ marginTop: 10 }}>
+            <p style={{ marginTop: 10, display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
               <Link href="/o-level/lectures" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Browse all lessons →</Link>
+              <Link href="/o-level/quizzes" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Browse all quizzes →</Link>
             </p>
           </div>
           <div className="grid grid-3" style={{ marginTop: 40 }}>
