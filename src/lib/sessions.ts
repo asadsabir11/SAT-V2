@@ -1,5 +1,5 @@
 import { sql } from "@/lib/db";
-
+import type { Program, OLevelLectureCategory } from "@/lib/lectures";
 
 export type Session = {
   id: string;
@@ -9,6 +9,8 @@ export type Session = {
   platform: "zoom" | "google_classroom" | "google_meet" | "other";
   scheduled_at: string;
   is_active: boolean;
+  program: Program;
+  subject: OLevelLectureCategory | null;
   created_by: string;
   created_at: string;
 };
@@ -29,6 +31,8 @@ async function ensureTable() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE live_sessions ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
+  await sql`ALTER TABLE live_sessions ADD COLUMN IF NOT EXISTS subject TEXT`;
   ready = true;
 }
 
@@ -48,13 +52,13 @@ export async function createSession(data: Omit<Session, "id" | "created_at">): P
   await ensureTable();
   const id = crypto.randomUUID();
   await sql`
-    INSERT INTO live_sessions (id, title, description, meeting_link, platform, scheduled_at, is_active, created_by)
-    VALUES (${id}, ${data.title}, ${data.description}, ${data.meeting_link}, ${data.platform}, ${data.scheduled_at}, ${data.is_active}, ${data.created_by})
+    INSERT INTO live_sessions (id, title, description, meeting_link, platform, scheduled_at, is_active, program, subject, created_by)
+    VALUES (${id}, ${data.title}, ${data.description}, ${data.meeting_link}, ${data.platform}, ${data.scheduled_at}, ${data.is_active}, ${data.program}, ${data.subject}, ${data.created_by})
   `;
   return id;
 }
 
-export async function updateSession(id: string, data: Partial<Pick<Session, "title" | "description" | "meeting_link" | "platform" | "scheduled_at" | "is_active">>) {
+export async function updateSession(id: string, data: Partial<Pick<Session, "title" | "description" | "meeting_link" | "platform" | "scheduled_at" | "is_active" | "subject">>) {
   await ensureTable();
   await sql`
     UPDATE live_sessions SET
@@ -63,7 +67,8 @@ export async function updateSession(id: string, data: Partial<Pick<Session, "tit
       meeting_link = COALESCE(${data.meeting_link ?? null}, meeting_link),
       platform = COALESCE(${data.platform ?? null}, platform),
       scheduled_at = COALESCE(${data.scheduled_at ?? null}, scheduled_at),
-      is_active = COALESCE(${data.is_active ?? null}, is_active)
+      is_active = COALESCE(${data.is_active ?? null}, is_active),
+      subject = COALESCE(${data.subject ?? null}, subject)
     WHERE id = ${id}
   `;
 }

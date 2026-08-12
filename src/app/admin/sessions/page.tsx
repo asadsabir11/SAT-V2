@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type Platform = "zoom" | "google_classroom" | "google_meet" | "other";
+type Program = "sat" | "o-level";
+type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 
 interface LiveSession {
   id: string;
@@ -12,6 +14,8 @@ interface LiveSession {
   platform: Platform;
   scheduled_at: string;
   is_active: boolean;
+  program: Program;
+  subject: OLevelSubject | null;
   created_at: string;
 }
 
@@ -22,7 +26,16 @@ const PLATFORM_LABELS: Record<Platform, { label: string; icon: string; color: st
   other:            { label: "Other",            icon: "🔗", color: "#92400e", bg: "#fef3c7" },
 };
 
-const BLANK = { title: "", description: "", meeting_link: "", platform: "zoom" as Platform, scheduled_at: "", is_active: true };
+const OLEVEL_SUBJECTS: { value: OLevelSubject; label: string; icon: string }[] = [
+  { value: "mathematics", label: "Mathematics", icon: "📐" },
+  { value: "computer-science", label: "Computer Science", icon: "💻" },
+  { value: "english-language", label: "English Language", icon: "📖" },
+  { value: "islamiyat", label: "Islamiyat", icon: "🕌" },
+  { value: "pakistan-studies", label: "Pakistan Studies", icon: "🌍" },
+];
+const subjectMeta = (s: string | null) => OLEVEL_SUBJECTS.find((x) => x.value === s);
+
+const BLANK = { title: "", description: "", meeting_link: "", platform: "zoom" as Platform, scheduled_at: "", is_active: true, program: "sat" as Program, subject: "mathematics" as OLevelSubject };
 
 export default function AdminSessions() {
   const [sessions, setSessions] = useState<LiveSession[]>([]);
@@ -32,6 +45,7 @@ export default function AdminSessions() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ ...BLANK });
+  const [filterProgram, setFilterProgram] = useState<"all" | Program>("all");
 
   useEffect(() => {
     fetch("/api/sessions").then(r => r.json()).then(d => setSessions(d.sessions ?? [])).finally(() => setLoading(false));
@@ -44,7 +58,7 @@ export default function AdminSessions() {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
     });
     const d = await res.json();
-    const newS: LiveSession = { ...form, id: d.id, created_at: new Date().toISOString() };
+    const newS: LiveSession = { ...form, subject: form.program === "o-level" ? form.subject : null, id: d.id, created_at: new Date().toISOString() };
     setSessions(s => [newS, ...s]);
     setForm({ ...BLANK });
     setShowForm(false);
@@ -97,6 +111,27 @@ export default function AdminSessions() {
           <div className="card" style={{ border: "2px solid #155eef", marginBottom: 24 }}>
             <h3 style={{ margin: "0 0 18px", color: "#071b33" }}>New session</h3>
 
+            <div className="field" style={{ marginBottom: 14 }}>
+              <label>Program *</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {(["sat", "o-level"] as Program[]).map(p => (
+                  <button key={p} type="button" onClick={() => setForm(f => ({ ...f, program: p }))}
+                    style={{ flex: 1, padding: "8px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".85rem", cursor: "pointer", border: form.program === p ? "2px solid #155eef" : "2px solid #e8eef6", background: form.program === p ? "#eff6ff" : "#fff", color: form.program === p ? "#155eef" : "#6b7c93" }}>
+                    {p === "sat" ? "🎓 SAT" : "📘 O Level"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {form.program === "o-level" && (
+              <div className="field" style={{ marginBottom: 14 }}>
+                <label>Subject *</label>
+                <select value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value as OLevelSubject }))}>
+                  {OLEVEL_SUBJECTS.map(s => <option key={s.value} value={s.value}>{s.icon} {s.label}</option>)}
+                </select>
+              </div>
+            )}
+
             <div className="form-grid" style={{ marginBottom: 14 }}>
               <div className="field">
                 <label>Session title *</label>
@@ -142,6 +177,18 @@ export default function AdminSessions() {
           </div>
         )}
 
+        {/* Program filter */}
+        {!loading && sessions.length > 0 && (
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"]] as [typeof filterProgram, string][]).map(([val, label]) => (
+              <button key={val} onClick={() => setFilterProgram(val)}
+                style={{ padding: "7px 16px", borderRadius: 999, fontWeight: 700, fontSize: ".82rem", cursor: "pointer", border: filterProgram === val ? "2px solid #155eef" : "2px solid #e8eef6", background: filterProgram === val ? "#eff6ff" : "#fff", color: filterProgram === val ? "#155eef" : "#6b7c93" }}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Sessions list */}
         {loading ? (
           <div className="card"><p>Loading…</p></div>
@@ -153,7 +200,7 @@ export default function AdminSessions() {
           </div>
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
-            {sessions.map(s => {
+            {sessions.filter(s => filterProgram === "all" || s.program === filterProgram).map(s => {
               const p = PLATFORM_LABELS[s.platform] ?? PLATFORM_LABELS.other;
               const isPast = new Date(s.scheduled_at) < new Date();
 
@@ -172,6 +219,14 @@ export default function AdminSessions() {
                       </div>
                     </div>
                     <div className="field" style={{ marginBottom: 12 }}><label>Meeting link *</label><input value={editForm.meeting_link} onChange={e => setEditForm(f => ({ ...f, meeting_link: e.target.value }))} /></div>
+                    {editForm.program === "o-level" && (
+                      <div className="field" style={{ marginBottom: 12, maxWidth: 260 }}>
+                        <label>Subject</label>
+                        <select value={editForm.subject} onChange={e => setEditForm(f => ({ ...f, subject: e.target.value as OLevelSubject }))}>
+                          {OLEVEL_SUBJECTS.map(subj => <option key={subj.value} value={subj.value}>{subj.icon} {subj.label}</option>)}
+                        </select>
+                      </div>
+                    )}
                     <div className="form-grid" style={{ marginBottom: 14 }}>
                       <div className="field"><label>Date & time</label><input type="datetime-local" value={editForm.scheduled_at} onChange={e => setEditForm(f => ({ ...f, scheduled_at: e.target.value }))} /></div>
                       <div className="field"><label>Description</label><input value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} /></div>
@@ -194,6 +249,9 @@ export default function AdminSessions() {
 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 5, flexWrap: "wrap" }}>
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: s.program === "o-level" ? "#fef3c7" : "#f1f5f9", color: s.program === "o-level" ? "#92400e" : "#475569" }}>
+                          {s.program === "o-level" ? `📘 ${subjectMeta(s.subject)?.label ?? "O Level"}` : "🎓 SAT"}
+                        </span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: p.bg, color: p.color }}>{p.label}</span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: s.is_active ? "#d1fae5" : "#f3f4f6", color: s.is_active ? "#065f46" : "#6b7c93" }}>
                           {s.is_active ? "● Visible" : "○ Hidden"}
@@ -213,7 +271,7 @@ export default function AdminSessions() {
                     </div>
 
                     <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                      <button onClick={() => { setEditingId(s.id); setEditForm({ title: s.title, description: s.description, meeting_link: s.meeting_link, platform: s.platform, scheduled_at: s.scheduled_at.slice(0, 16), is_active: s.is_active }); }}
+                      <button onClick={() => { setEditingId(s.id); setEditForm({ title: s.title, description: s.description, meeting_link: s.meeting_link, platform: s.platform, scheduled_at: s.scheduled_at.slice(0, 16), is_active: s.is_active, program: s.program, subject: s.subject ?? "mathematics" }); }}
                         style={{ padding: "6px 12px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>Edit</button>
                       <button onClick={() => toggleActive(s)}
                         style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", background: s.is_active ? "#fef3c7" : "#d1fae5", color: s.is_active ? "#92400e" : "#065f46" }}>
