@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /dashboard, /diagnostic, /ai-tutor, /lectures, /sessions — students only
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions")) {
+  // /dashboard, /diagnostic, /ai-tutor, /lectures, /sessions, /o-level/lectures — students only
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions") || pathname.startsWith("/o-level/lectures")) {
     if (!session || session.role !== "student") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -42,5 +42,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/discussion", "/discussion/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/discussion", "/discussion/:path*", "/o-level/lectures", "/o-level/lectures/:path*"],
 };

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  if (session.role === "student") {
+  if (session.role === "student" && lecture.program !== "o-level") {
     const isIntro = lecture.category === "introduction";
     if (!isIntro && !lecture.is_free_preview) {
       const accessLevel = await getStudentAccessLevel(session.email);

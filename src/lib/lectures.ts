@@ -1,7 +1,14 @@
 import { sql } from "@/lib/db";
 
 
-export type LectureCategory = "introduction" | "math" | "english";
+export type Program = "sat" | "o-level";
+export type SatLectureCategory = "introduction" | "math" | "english";
+export type OLevelLectureCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+export type LectureCategory = SatLectureCategory | OLevelLectureCategory;
+
+export const OLEVEL_LECTURE_CATEGORIES: OLevelLectureCategory[] = [
+  "mathematics", "computer-science", "english-language", "islamiyat", "pakistan-studies",
+];
 
 export type Lecture = {
   id: string;
@@ -9,6 +16,7 @@ export type Lecture = {
   description: string;
   video_url: string;
   thumbnail_url: string;
+  program: Program;
   category: LectureCategory;
   is_free_preview: boolean;
   order_index: number;
@@ -38,6 +46,7 @@ async function ensureTable() {
   await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS thumbnail_url TEXT DEFAULT ''`;
   await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'math'`;
   await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS is_free_preview BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
   ready = true;
 }
 
@@ -53,20 +62,26 @@ export async function getPublishedLectures(): Promise<Lecture[]> {
   return rows as Lecture[];
 }
 
+export async function getPublishedLecturesByProgram(program: Program): Promise<Lecture[]> {
+  await ensureTable();
+  const rows = await sql`SELECT * FROM lectures WHERE is_published = true AND program = ${program} ORDER BY order_index ASC, created_at ASC`;
+  return rows as Lecture[];
+}
+
 export async function getLectureById(id: string): Promise<Lecture | null> {
   await ensureTable();
   const rows = await sql`SELECT * FROM lectures WHERE id = ${id} LIMIT 1`;
   return (rows[0] as Lecture) ?? null;
 }
 
-export async function createLecture(title: string, description: string, videoUrl: string, createdBy: string, thumbnailUrl = "", category: LectureCategory = "math"): Promise<string> {
+export async function createLecture(title: string, description: string, videoUrl: string, createdBy: string, thumbnailUrl = "", category: LectureCategory = "math", program: Program = "sat"): Promise<string> {
   await ensureTable();
   const id = crypto.randomUUID();
   const maxRow = await sql`SELECT COALESCE(MAX(order_index), 0) AS m FROM lectures`;
   const nextOrder = (maxRow[0].m as number) + 1;
   await sql`
-    INSERT INTO lectures (id, title, description, video_url, thumbnail_url, category, order_index, created_by)
-    VALUES (${id}, ${title}, ${description}, ${videoUrl}, ${thumbnailUrl}, ${category}, ${nextOrder}, ${createdBy})
+    INSERT INTO lectures (id, title, description, video_url, thumbnail_url, category, program, order_index, created_by)
+    VALUES (${id}, ${title}, ${description}, ${videoUrl}, ${thumbnailUrl}, ${category}, ${program}, ${nextOrder}, ${createdBy})
   `;
   return id;
 }

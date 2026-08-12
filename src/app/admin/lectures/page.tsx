@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
-type LectureCategory = "introduction" | "math" | "english";
+type LectureProgram = "sat" | "o-level";
+type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 
 interface Lecture {
   id: string;
@@ -11,12 +12,34 @@ interface Lecture {
   description: string;
   video_url: string;
   thumbnail_url: string;
+  program: LectureProgram;
   category: LectureCategory;
   is_free_preview: boolean;
   order_index: number;
   is_published: boolean;
   created_at: string;
 }
+
+type CategoryMeta = { value: LectureCategory; label: string; icon: string; color: string; bg: string };
+
+const SAT_CATEGORIES: CategoryMeta[] = [
+  { value: "introduction", label: "Introduction", icon: "📝", color: "#15803d", bg: "#dcfce7" },
+  { value: "math",         label: "Math",         icon: "📐", color: "#155eef", bg: "#eff6ff" },
+  { value: "english",      label: "English",      icon: "📖", color: "#7c3aed", bg: "#f5f3ff" },
+];
+
+const OLEVEL_CATEGORIES: CategoryMeta[] = [
+  { value: "mathematics",       label: "Mathematics",       icon: "📐", color: "#155eef", bg: "#eff6ff" },
+  { value: "computer-science",  label: "Computer Science",  icon: "💻", color: "#7c3aed", bg: "#f5f3ff" },
+  { value: "english-language",  label: "English Language",  icon: "📖", color: "#0e7490", bg: "#ecfeff" },
+  { value: "islamiyat",         label: "Islamiyat",         icon: "🕌", color: "#15803d", bg: "#dcfce7" },
+  { value: "pakistan-studies",  label: "Pakistan Studies",  icon: "🌍", color: "#b45309", bg: "#fef3c7" },
+];
+
+const ALL_CATEGORIES = [...SAT_CATEGORIES, ...OLEVEL_CATEGORIES];
+const categoryMeta = (cat: LectureCategory): CategoryMeta =>
+  ALL_CATEGORIES.find(c => c.value === cat) ?? SAT_CATEGORIES[1];
+const categoriesFor = (program: LectureProgram) => program === "o-level" ? OLEVEL_CATEGORIES : SAT_CATEGORIES;
 
 export default function AdminLectures() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
@@ -25,6 +48,7 @@ export default function AdminLectures() {
   // Upload form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [program, setProgram] = useState<LectureProgram>("sat");
   const [category, setCategory] = useState<LectureCategory>("math");
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
@@ -40,6 +64,10 @@ export default function AdminLectures() {
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [editCategory, setEditCategory] = useState<LectureCategory>("math");
+  const [editProgram, setEditProgram] = useState<LectureProgram>("sat");
+
+  // List filter
+  const [filterProgram, setFilterProgram] = useState<"all" | LectureProgram>("all");
 
   useEffect(() => {
     fetch("/api/lectures")
@@ -47,6 +75,11 @@ export default function AdminLectures() {
       .then(d => setLectures(d.lectures ?? []))
       .finally(() => setLoading(false));
   }, []);
+
+  function switchProgram(p: LectureProgram) {
+    setProgram(p);
+    setCategory(categoriesFor(p)[0].value);
+  }
 
   async function handleUpload() {
     if (!title.trim() || !file) return;
@@ -77,7 +110,7 @@ export default function AdminLectures() {
       const res = await fetch("/api/lectures", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, video_url: blob.url, thumbnail_url: thumbnailUrl, category }),
+        body: JSON.stringify({ title, description, video_url: blob.url, thumbnail_url: thumbnailUrl, category, program }),
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
@@ -91,6 +124,7 @@ export default function AdminLectures() {
         description,
         video_url: blob.url,
         thumbnail_url: thumbnailUrl,
+        program,
         category,
         is_free_preview: false,
         order_index: lectures.length + 1,
@@ -100,7 +134,7 @@ export default function AdminLectures() {
       setLectures(ls => [...ls, newLecture]);
       setTitle("");
       setDescription("");
-      setCategory("math");
+      setCategory(categoriesFor(program)[0].value);
       setFile(null);
       setThumbnail(null);
       setThumbnailPreview("");
@@ -184,33 +218,56 @@ export default function AdminLectures() {
             </div>
           </div>
 
-          {/* Category selector */}
+          {/* Program selector */}
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Category *</label>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {([
-                ["introduction", "📝 Introduction", "#15803d", "#dcfce7"],
-                ["math",         "📐 Math",         "#155eef", "#eff6ff"],
-                ["english",      "📖 English",      "#7c3aed", "#f5f3ff"],
-              ] as [LectureCategory, string, string, string][]).map(([val, label, activeColor, activeBg]) => (
+            <label>Program *</label>
+            <div style={{ display: "flex", gap: 10 }}>
+              {([["sat", "🎓 SAT"], ["o-level", "📘 O Level"]] as [LectureProgram, string][]).map(([val, label]) => (
                 <button
                   key={val}
                   type="button"
-                  onClick={() => setCategory(val)}
+                  onClick={() => switchProgram(val)}
                   style={{
                     flex: 1, padding: "10px 16px", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", cursor: "pointer", transition: ".15s",
-                    border: category === val ? `2px solid ${activeColor}` : "2px solid #e8eef6",
-                    background: category === val ? activeBg : "#f8fafc",
-                    color: category === val ? activeColor : "#6b7c93",
+                    border: program === val ? "2px solid #155eef" : "2px solid #e8eef6",
+                    background: program === val ? "#eff6ff" : "#f8fafc",
+                    color: program === val ? "#155eef" : "#6b7c93",
                   }}
                 >
                   {label}
                 </button>
               ))}
             </div>
-            {category === "introduction" && (
+          </div>
+
+          {/* Category selector */}
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>{program === "o-level" ? "Subject *" : "Category *"}</label>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {categoriesFor(program).map(({ value, label, icon, color, bg }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setCategory(value)}
+                  style={{
+                    flex: 1, minWidth: 130, padding: "10px 16px", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", cursor: "pointer", transition: ".15s",
+                    border: category === value ? `2px solid ${color}` : "2px solid #e8eef6",
+                    background: category === value ? bg : "#f8fafc",
+                    color: category === value ? color : "#6b7c93",
+                  }}
+                >
+                  {icon} {label}
+                </button>
+              ))}
+            </div>
+            {program === "sat" && category === "introduction" && (
               <p style={{ color: "#15803d", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
                 ✓ Introduction videos are free for all students — no lock, no payment required.
+              </p>
+            )}
+            {program === "o-level" && (
+              <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
+                ℹ O Level materials are open to any logged-in student — no payment tier yet.
               </p>
             )}
           </div>
@@ -321,6 +378,24 @@ export default function AdminLectures() {
         </div>
 
         {/* Lecture list */}
+        {!loading && lectures.length > 0 && (
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"]] as [typeof filterProgram, string][]).map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setFilterProgram(val)}
+                style={{
+                  padding: "7px 16px", borderRadius: 999, fontWeight: 700, fontSize: ".82rem", cursor: "pointer",
+                  border: filterProgram === val ? "2px solid #155eef" : "2px solid #e8eef6",
+                  background: filterProgram === val ? "#eff6ff" : "#fff",
+                  color: filterProgram === val ? "#155eef" : "#6b7c93",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
         {loading ? (
           <div className="card"><p>Loading lectures…</p></div>
         ) : lectures.length === 0 ? (
@@ -331,7 +406,7 @@ export default function AdminLectures() {
           </div>
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
-            {lectures.map((lec, i) => (
+            {lectures.filter(l => filterProgram === "all" || l.program === filterProgram).map((lec, i) => (
               <div key={lec.id} className="card" style={{ padding: "16px 20px", border: editingId === lec.id ? "2px solid #155eef" : "1px solid #e8eef6" }}>
                 {editingId === lec.id ? (
                   /* Edit mode */
@@ -347,25 +422,23 @@ export default function AdminLectures() {
                       </div>
                     </div>
                     <div className="field" style={{ marginBottom: 12 }}>
-                      <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#344054", display: "block", marginBottom: 6 }}>Category</label>
+                      <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#344054", display: "block", marginBottom: 6 }}>
+                        {editProgram === "o-level" ? "Subject" : "Category"}
+                      </label>
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        {([
-                          ["introduction", "📝 Introduction", "#15803d", "#dcfce7"],
-                          ["math",         "📐 Math",         "#155eef", "#eff6ff"],
-                          ["english",      "📖 English",      "#7c3aed", "#f5f3ff"],
-                        ] as [LectureCategory, string, string, string][]).map(([val, label, activeColor, activeBg]) => (
+                        {categoriesFor(editProgram).map(({ value, label, icon, color, bg }) => (
                           <button
-                            key={val}
+                            key={value}
                             type="button"
-                            onClick={() => setEditCategory(val)}
+                            onClick={() => setEditCategory(value)}
                             style={{
                               padding: "7px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".82rem", cursor: "pointer",
-                              border: editCategory === val ? `2px solid ${activeColor}` : "2px solid #e8eef6",
-                              background: editCategory === val ? activeBg : "#f8fafc",
-                              color: editCategory === val ? activeColor : "#6b7c93",
+                              border: editCategory === value ? `2px solid ${color}` : "2px solid #e8eef6",
+                              background: editCategory === value ? bg : "#f8fafc",
+                              color: editCategory === value ? color : "#6b7c93",
                             }}
                           >
-                            {label}
+                            {icon} {label}
                           </button>
                         ))}
                       </div>
@@ -389,10 +462,13 @@ export default function AdminLectures() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
                         <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".75rem" }}>#{i + 1}</span>
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: lec.program === "o-level" ? "#fef3c7" : "#f1f5f9", color: lec.program === "o-level" ? "#92400e" : "#475569" }}>
+                          {lec.program === "o-level" ? "📘 O Level" : "🎓 SAT"}
+                        </span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700,
-                          background: lec.category === "english" ? "#ede9fe" : lec.category === "introduction" ? "#dcfce7" : "#dbeafe",
-                          color:      lec.category === "english" ? "#7c3aed" : lec.category === "introduction" ? "#15803d" : "#1d4ed8" }}>
-                          {lec.category === "english" ? "📖 English" : lec.category === "introduction" ? "📝 Introduction" : "📐 Math"}
+                          background: categoryMeta(lec.category).bg,
+                          color:      categoryMeta(lec.category).color }}>
+                          {categoryMeta(lec.category).icon} {categoryMeta(lec.category).label}
                         </span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: lec.is_published ? "#d1fae5" : "#f3f4f6", color: lec.is_published ? "#065f46" : "#6b7c93" }}>
                           {lec.is_published ? "● Published" : "○ Draft"}
@@ -415,7 +491,7 @@ export default function AdminLectures() {
                         Preview
                       </a>
                       <button
-                        onClick={() => { setEditingId(lec.id); setEditTitle(lec.title); setEditDesc(lec.description); setEditCategory(lec.category); }}
+                        onClick={() => { setEditingId(lec.id); setEditTitle(lec.title); setEditDesc(lec.description); setEditCategory(lec.category); setEditProgram(lec.program); }}
                         style={{ padding: "6px 12px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
                         Edit
                       </button>

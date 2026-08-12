@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getAllLectures, getPublishedLectures, createLecture } from "@/lib/lectures";
+import { getAllLectures, getPublishedLectures, createLecture, OLEVEL_LECTURE_CATEGORIES, type Program, type LectureCategory } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
 
 export async function GET() {
@@ -21,7 +21,8 @@ export async function GET() {
   const isUnlocked = accessLevel === "unlocked";
   const lecturesWithLock = lectures.map(({ video_url: _v, ...l }) => ({
     ...l,
-    is_locked: l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
+    // O-Level has no paid tier yet — any logged-in student can watch.
+    is_locked: l.program !== "o-level" && l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
   }));
 
   return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel });
@@ -32,11 +33,14 @@ export async function POST(req: NextRequest) {
   if (!session || session.role !== "founder") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { title, description, video_url, thumbnail_url, category } = await req.json();
+  const { title, description, video_url, thumbnail_url, category, program } = await req.json();
   if (!title || !video_url) {
     return NextResponse.json({ error: "title and video_url are required" }, { status: 400 });
   }
-  const cat = category === "english" ? "english" : category === "introduction" ? "introduction" : "math";
-  const id = await createLecture(title, description ?? "", video_url, session.email, thumbnail_url ?? "", cat);
+  const prog: Program = program === "o-level" ? "o-level" : "sat";
+  const cat: LectureCategory = prog === "o-level"
+    ? (OLEVEL_LECTURE_CATEGORIES.includes(category) ? category : "mathematics")
+    : (category === "english" ? "english" : category === "introduction" ? "introduction" : "math");
+  const id = await createLecture(title, description ?? "", video_url, session.email, thumbnail_url ?? "", cat, prog);
   return NextResponse.json({ id });
 }

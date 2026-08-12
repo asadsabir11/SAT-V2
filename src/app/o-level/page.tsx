@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CTAButton, FeatureCard } from "@/components/site";
 import { SubjectCard } from "@/components/academy/SubjectCard";
 import { InstructorProfile } from "@/components/academy/InstructorProfile";
@@ -76,6 +77,9 @@ export default function OLevelPage() {
             <h2 className="title">Five subjects to start</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
               Taught by the founder for the founding cohort. More subjects — Physics, Chemistry, Biology, Economics, and A Levels — are on the way.
+            </p>
+            <p style={{ marginTop: 10 }}>
+              <Link href="/o-level/lectures" style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".92rem" }}>Browse all lessons →</Link>
             </p>
           </div>
           <div className="grid grid-3" style={{ marginTop: 40 }}>

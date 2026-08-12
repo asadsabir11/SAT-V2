@@ -2,17 +2,32 @@
 import { useEffect, useState, use, useRef, useCallback } from "react";
 import Link from "next/link";
 
+type LectureProgram = "sat" | "o-level";
+type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+
 interface Lecture {
   id: string;
   title: string;
   description: string;
   thumbnail_url: string;
-  category: "math" | "english" | "introduction";
+  program: LectureProgram;
+  category: LectureCategory;
   is_free_preview: boolean;
   is_locked?: boolean;
   order_index: number;
   created_at: string;
 }
+
+const CATEGORY_LABEL: Record<LectureCategory, string> = {
+  introduction: "📝 Intro",
+  math: "📐 Math",
+  english: "📖 English",
+  mathematics: "📐 Mathematics",
+  "computer-science": "💻 Computer Science",
+  "english-language": "📖 English Language",
+  islamiyat: "🕌 Islamiyat",
+  "pakistan-studies": "🌍 Pakistan Studies",
+};
 
 interface QuizQuestion {
   id: string;
@@ -233,7 +248,9 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
       if (lecRes.status === 403) setLocked(true);
       else if (lecData.error) setNotFound(true);
       else setLecture(lecData.lecture);
-      setAllLectures(all.lectures ?? []);
+      // Scope the sidebar/navigation to the same program (SAT vs O-Level).
+      const program = lecData.lecture?.program;
+      setAllLectures(program ? (all.lectures ?? []).filter((l: Lecture) => l.program === program) : (all.lectures ?? []));
     }).finally(() => setLoading(false));
   }, [id]);
 
@@ -296,10 +313,12 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
   const prevLec = currentIndex > 0 ? allLectures[currentIndex - 1] : null;
   const nextLec = currentIndex < allLectures.length - 1 ? allLectures[currentIndex + 1] : null;
 
+  const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : "/lectures";
+
   return (
     <section className="section">
       <div className="container">
-        <Link href="/lectures" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none", display: "inline-block", marginBottom: 16 }}>← All lectures</Link>
+        <Link href={libraryHref} style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none", display: "inline-block", marginBottom: 16 }}>← All lectures</Link>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24, alignItems: "start" }}>
 
@@ -325,7 +344,7 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
 
             <div style={{ marginBottom: 20 }}>
               <div style={{ fontSize: ".75rem", fontWeight: 800, color: "#155eef", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 8 }}>
-                Lecture {currentIndex + 1} of {sameCat.length} · {lecture.category === "math" ? "📐 Math" : lecture.category === "english" ? "📖 English" : "📝 Intro"}
+                Lecture {currentIndex + 1} of {sameCat.length} · {CATEGORY_LABEL[lecture.category]}
               </div>
               <h1 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#071b33", letterSpacing: "-.03em", margin: "0 0 10px" }}>{lecture.title}</h1>
               {lecture.description && <p style={{ color: "#6b7c93", lineHeight: 1.7, fontSize: ".92rem" }}>{lecture.description}</p>}
@@ -382,7 +401,7 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
               <div style={{ maxHeight: 480, overflowY: "auto" }}>
                 {allLectures.map((lec, i) => (
                   lec.is_locked ? (
-                    <Link key={lec.id} href="/lectures" style={{ textDecoration: "none" }}>
+                    <Link key={lec.id} href={libraryHref} style={{ textDecoration: "none" }}>
                       <div style={{ display: "flex", gap: 10, alignItems: "center", padding: "12px 16px", borderBottom: "1px solid #f1f5f9", opacity: .55 }}>
                         <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#f1f5f9", color: "#6b7c93", display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".72rem", fontWeight: 800, flexShrink: 0 }}>🔒</div>
                         <p style={{ fontSize: ".82rem", fontWeight: 600, color: "#344054", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lec.title}</p>
