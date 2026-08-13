@@ -10,7 +10,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   const paper = await getPaperById(id);
   if (!paper) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (!paper.is_published && session.role !== "founder") {
+  if (session.role === "founder") return NextResponse.json({ paper });
+  if (session.role !== "student" || !paper.is_published) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   return NextResponse.json({ paper });
