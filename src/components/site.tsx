@@ -179,10 +179,15 @@ export function PricingCard({name,price,items,href,recommended=false}:{name:stri
   );
 }
 
-export function PageHero({eyebrow,title,children,actions}:{eyebrow:string;title:string;children:ReactNode;actions?:ReactNode}){
+export function PageHero({eyebrow,title,children,actions,backHref,backLabel}:{eyebrow:string;title:string;children:ReactNode;actions?:ReactNode;backHref?:string;backLabel?:string}){
   return (
     <section className="page-hero">
       <div className="container">
+        {backHref && (
+          <Link href={backHref} style={{ display: "inline-block", marginBottom: 14, color: "#6b7c93", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>
+            ← {backLabel ?? "Back"}
+          </Link>
+        )}
         <div className="eyebrow">{eyebrow}</div>
         <h1 className="title" style={{maxWidth:860}}>{title}</h1>
         <div className="lead">{children}</div>

@@ -110,7 +110,7 @@ function OLevelSessionsInner() {
 
   return (
     <>
-      <PageHero eyebrow="O Level live sessions" title="Live Sessions">
+      <PageHero eyebrow="O Level live sessions" title="Live Sessions" backHref="/o-level" backLabel="O Level">
         Join live classes and office hours with your teacher. Unlock a subject to see its sessions.
       </PageHero>
 

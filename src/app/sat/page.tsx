@@ -18,7 +18,7 @@ const MODULES = [
 export default function SatHubPage() {
   return (
     <>
-      <PageHero eyebrow="Your SAT toolkit" title="Everything for your SAT prep, in one place.">
+      <PageHero eyebrow="Your SAT toolkit" title="Everything for your SAT prep, in one place." backHref="/dashboard" backLabel="Dashboard">
         Open any module below — your Q&amp;A board, live sessions, recorded lectures, diagnostic test, and AI tutor.
       </PageHero>
 

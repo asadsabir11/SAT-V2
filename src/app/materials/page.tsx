@@ -179,7 +179,7 @@ export default function Materials() {
 
   return (
     <>
-      <PageHero eyebrow="Preparation library" title="Simple materials. Used consistently.">
+      <PageHero eyebrow="Preparation library" title="Simple materials. Used consistently." backHref="/dashboard" backLabel="Dashboard">
         Original resources will be released in stages for diagnostic, weekly practice, mock testing, parent support, and cohort delivery.
       </PageHero>
       <section className="section soft">

@@ -80,7 +80,7 @@ function OLevelPastPapersInner() {
 
   return (
     <>
-      <PageHero eyebrow="O Level past papers" title="Past Papers">
+      <PageHero eyebrow="O Level past papers" title="Past Papers" backHref="/o-level" backLabel="O Level">
         Practice with past exam papers, mark schemes, and examiner reports. Unlock a subject to access its papers.
       </PageHero>
 

@@ -53,7 +53,7 @@ function OLevelQuizzesInner() {
 
   return (
     <>
-      <PageHero eyebrow="O Level quizzes" title="Practice Quizzes">
+      <PageHero eyebrow="O Level quizzes" title="Practice Quizzes" backHref="/o-level" backLabel="O Level">
         Short subject quizzes to check your understanding. Unlock a subject to take its quizzes — your best score is saved.
       </PageHero>
 

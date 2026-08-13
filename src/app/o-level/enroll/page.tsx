@@ -18,7 +18,7 @@ export default async function OLevelEnroll({
 
   return (
     <>
-      <PageHero eyebrow="O Level enrollment" title="Join the founding Cambridge O Level cohort.">
+      <PageHero eyebrow="O Level enrollment" title="Join the founding Cambridge O Level cohort." backHref="/o-level" backLabel="O Level">
         Tell us about your student and which subjects you&apos;re interested in — we&apos;ll follow up on WhatsApp to confirm your schedule and founder pricing.
       </PageHero>
       <section className="section">

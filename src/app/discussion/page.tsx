@@ -84,6 +84,7 @@ export default function DiscussionPage() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
           <div>
+            <Link href="/sat" style={{ display: "inline-block", marginBottom: 8, color: "#6b7c93", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>← SAT toolkit</Link>
             <h1 style={{ fontSize: "1.7rem", fontWeight: 900, color: "#071b33", margin: "0 0 4px", letterSpacing: "-.03em" }}>Q&amp;A Board</h1>
             <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: 0 }}>Ask questions, help classmates, get answers from your instructor.</p>
           </div>

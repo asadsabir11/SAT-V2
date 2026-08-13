@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type Platform = "zoom" | "google_classroom" | "google_meet" | "other";
@@ -68,6 +69,7 @@ export default function SessionsPage() {
 
       <div className="container" style={{ maxWidth: 760 }}>
         <div style={{ marginBottom: 32 }}>
+          <Link href="/sat" style={{ display: "inline-block", marginBottom: 8, color: "#6b7c93", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>← SAT toolkit</Link>
           <h1 style={{ fontSize: "1.7rem", fontWeight: 900, color: "#071b33", margin: "0 0 6px", letterSpacing: "-.03em" }}>Live Sessions</h1>
           <p style={{ color: "#6b7c93", fontSize: ".92rem", margin: 0 }}>Join live classes, tutoring sessions, and Q&amp;A calls with your instructor.</p>
         </div>

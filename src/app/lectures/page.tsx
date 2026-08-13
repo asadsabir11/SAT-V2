@@ -131,7 +131,7 @@ export default function LecturesPage() {
         />
       )}
 
-      <PageHero eyebrow="Your study library" title="Lectures">
+      <PageHero eyebrow="Your study library" title="Lectures" backHref="/sat" backLabel="SAT toolkit">
         Watch your class recordings at any time. Each lecture is available on demand so you can rewatch, pause, and take notes at your own pace.
       </PageHero>
 

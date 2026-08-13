@@ -106,7 +106,7 @@ function OLevelLecturesInner() {
 
   return (
     <>
-      <PageHero eyebrow="O Level materials" title="Lessons">
+      <PageHero eyebrow="O Level materials" title="Lessons" backHref="/o-level" backLabel="O Level">
         Recorded lessons for each O Level subject — watch on demand, rewatch, and take the quiz after each one. Unlock a subject to access its lessons.
       </PageHero>
 

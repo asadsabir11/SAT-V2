@@ -31,7 +31,7 @@ export default function AITutor() {
         />
       )}
 
-      <PageHero eyebrow="AI tutor" title="Get unstuck without giving away the learning.">
+      <PageHero eyebrow="AI tutor" title="Get unstuck without giving away the learning." backHref="/sat" backLabel="SAT toolkit">
         Ask for a hint, explanation, or step-by-step walkthrough. The tutor uses original examples and encourages an attempt before a full solution.
       </PageHero>
 

@@ -272,7 +272,7 @@ export default function Diagnostic() {
   if (step === "intro") {
     return (
       <>
-        <PageHero eyebrow="Start with evidence" title="Take the free diagnostic. Stop guessing what to study.">
+        <PageHero eyebrow="Start with evidence" title="Take the free diagnostic. Stop guessing what to study." backHref="/sat" backLabel="SAT toolkit">
           {quiz ? `${mathQs.length + rwQs.length} questions — ${mathQs.length} Math, ${rwQs.length} Reading & Writing.` : "10 original practice questions — 5 Math, 5 Reading & Writing."}
           {quiz?.time_limit_minutes ? ` Time limit: ${quiz.time_limit_minutes} minutes.` : " Takes about 15 minutes."}
           {" Results saved to your dashboard."}
