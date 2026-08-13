@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { findByField } from "@/lib/storage";
-import { getStudentAccessLevel } from "@/lib/users";
+import { getStudentAccessLevel, getUserProgram } from "@/lib/users";
 
 export async function GET() {
   const session = await getSession();
@@ -10,11 +10,20 @@ export async function GET() {
   }
 
   const email = session.email;
-  const [student, diagnostic, accessLevel] = await Promise.all([
-    findByField("leads-student.json", "studentEmail", email),
-    findByField("diagnostics.json", "email", email),
+  const [program, accessLevel] = await Promise.all([
+    getUserProgram(email),
     getStudentAccessLevel(email),
   ]);
 
-  return NextResponse.json({ student, diagnostic, name: session.name, access_level: accessLevel });
+  if (program === "o-level") {
+    const student = await findByField("leads-o-level.json", "studentEmail", email);
+    return NextResponse.json({ program, student, name: session.name, access_level: accessLevel });
+  }
+
+  const [student, diagnostic] = await Promise.all([
+    findByField("leads-student.json", "studentEmail", email),
+    findByField("diagnostics.json", "email", email),
+  ]);
+
+  return NextResponse.json({ program, student, diagnostic, name: session.name, access_level: accessLevel });
 }

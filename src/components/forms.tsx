@@ -436,12 +436,14 @@ export function ContactForm() {
 // ── O-Level Enrollment Form ───────────────────────────────────────────────────
 type OLevelFields = {
   studentName: string; parentName: string; studentEmail: string; whatsapp: string;
-  country: string; city: string; grade: string; source: string; consent: boolean;
+  country: string; city: string; grade: string; source: string;
+  password: string; confirmPassword: string; consent: boolean;
 };
 
 const OLEVEL_INIT: OLevelFields = {
   studentName: "", parentName: "", studentEmail: "", whatsapp: "",
-  country: "", city: "", grade: "", source: "", consent: false,
+  country: "", city: "", grade: "", source: "",
+  password: "", confirmPassword: "", consent: false,
 };
 
 export function OLevelEnrollmentForm({
@@ -466,6 +468,8 @@ export function OLevelEnrollmentForm({
       case "whatsapp": return vPhone(value as string);
       case "city": return vCity(value as string);
       case "country": case "grade": return vSelect(value as string);
+      case "password": return vPassword(value as string);
+      case "confirmPassword": return (value as string) ? "" : "Required";
       case "consent": return value ? "" : "You must consent to proceed";
       default: return "";
     }
@@ -487,13 +491,18 @@ export function OLevelEnrollmentForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const required: (keyof OLevelFields)[] = ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "consent"];
+    const required: (keyof OLevelFields)[] = ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "password", "confirmPassword", "consent"];
     const allErrors: Partial<Record<keyof OLevelFields, string>> = {};
     const allTouched: Partial<Record<keyof OLevelFields, boolean>> = {};
     required.forEach(name => {
       allTouched[name] = true;
       allErrors[name] = validateField(name, fields[name]);
     });
+
+    if (fields.password && fields.confirmPassword && fields.password !== fields.confirmPassword) {
+      allErrors.confirmPassword = "Passwords do not match";
+    }
+
     setTouched(allTouched);
     setErrors(allErrors);
     if (Object.values(allErrors).some(e => e)) return;
@@ -510,6 +519,7 @@ export function OLevelEnrollmentForm({
       subject: selectedSubjects.join(","),
       plan: defaultPlan ?? "",
       source: fields.source.trim(),
+      password: fields.password,
       consent: "true",
     });
   }
@@ -533,10 +543,13 @@ export function OLevelEnrollmentForm({
 
   if (status === "success") return (
     <div style={{ padding: 28, borderRadius: 16, background: "linear-gradient(135deg,#d4faf5,#eaf4ff)", border: "1px solid rgba(24,169,153,.2)" }}>
-      <p style={{ color: "#075a50", fontWeight: 700, fontSize: "1.05rem", margin: "0 0 6px" }}>You&apos;re on the list!</p>
-      <p style={{ color: "#2d6b60", margin: 0, lineHeight: 1.65 }}>
-        We received your information. Our team will reach out on WhatsApp to confirm your subjects and founding cohort schedule.
+      <p style={{ color: "#075a50", fontWeight: 700, fontSize: "1.05rem", margin: "0 0 6px" }}>You&apos;re enrolled!</p>
+      <p style={{ color: "#2d6b60", margin: "0 0 20px", lineHeight: 1.65 }}>
+        Your student account is ready. Our team will reach out on WhatsApp to confirm your subjects and founding cohort schedule — meanwhile, go to your dashboard to start learning.
       </p>
+      <a href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg,#155eef,#18a999)", color: "#fff", fontWeight: 800, padding: "12px 22px", borderRadius: 999, fontSize: ".95rem", textDecoration: "none" }}>
+        Go to my dashboard →
+      </a>
     </div>
   );
 
@@ -601,6 +614,24 @@ export function OLevelEnrollmentForm({
               {s.name}
             </label>
           ))}
+        </div>
+      </div>
+
+      <div style={{ borderTop: "1px solid #edf2f7", paddingTop: 20, marginTop: 4 }}>
+        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".88rem", margin: "0 0 14px" }}>
+          Create a password for your student account
+        </p>
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor="password">Password *</label>
+            <input type="password" {...text("password", "Min 8 chars, include a number")} autoComplete="new-password" />
+            <Err msg={touched.password ? errors.password : undefined} />
+          </div>
+          <div className="field">
+            <label htmlFor="confirmPassword">Confirm password *</label>
+            <input type="password" {...text("confirmPassword", "Repeat your password")} autoComplete="new-password" />
+            <Err msg={touched.confirmPassword ? errors.confirmPassword : undefined} />
+          </div>
         </div>
       </div>
 

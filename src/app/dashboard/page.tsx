@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CTAButton, DashboardCard, PageHero } from "@/components/site";
 
 interface DiagnosticResult {
@@ -18,6 +19,21 @@ interface StudentData {
   grade?: string;
 }
 
+interface OLevelStudentData {
+  studentName: string;
+  country: string;
+  city?: string;
+  grade?: string;
+  subject?: string;
+}
+
+const OLEVEL_MODULES = [
+  { href: "/o-level/lectures", icon: "🎬", title: "Lectures", description: "Watch recorded lessons on demand, anytime." },
+  { href: "/o-level/quizzes", icon: "📝", title: "Quizzes", description: "Practice with subject quizzes and track your best scores." },
+  { href: "/o-level/sessions", icon: "📅", title: "Live Sessions", description: "Join live classes and open office hours." },
+  { href: "/o-level/past-papers", icon: "📄", title: "Past Papers", description: "Practice with past-paper style questions." },
+];
+
 interface Announcement {
   id: string;
   title: string;
@@ -34,7 +50,9 @@ function timeAgo(d: string) {
 }
 
 export default function Dashboard() {
+  const [program, setProgram] = useState<"sat" | "o-level">("sat");
   const [student, setStudent] = useState<StudentData | null>(null);
+  const [oLevelStudent, setOLevelStudent] = useState<OLevelStudentData | null>(null);
   const [diagnostic, setDiagnostic] = useState<DiagnosticResult | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [sessionName, setSessionName] = useState<string | null>(null);
@@ -51,8 +69,14 @@ export default function Dashboard() {
     ])
       .then(([studentData, annData]) => {
         if (studentData) {
-          setStudent(studentData.student ?? null);
-          setDiagnostic(studentData.diagnostic ?? null);
+          const isOLevel = studentData.program === "o-level";
+          setProgram(isOLevel ? "o-level" : "sat");
+          if (isOLevel) {
+            setOLevelStudent(studentData.student ?? null);
+          } else {
+            setStudent(studentData.student ?? null);
+            setDiagnostic(studentData.diagnostic ?? null);
+          }
           setSessionName(studentData.name ?? null);
         }
         setAnnouncements(annData.announcements ?? []);
@@ -94,29 +118,112 @@ export default function Dashboard() {
     );
   }
 
-  // Logged in but no student profile yet (e.g. registered via auth but no lead record)
-  if (!student) {
+  // Logged in but no lead profile yet (e.g. account created outside the normal registration flow)
+  if (program === "o-level" ? !oLevelStudent : !student) {
     const displayName = sessionName?.split(" ")[0] ?? "there";
     return (
       <>
         <PageHero eyebrow="Student dashboard" title={`Welcome, ${displayName}.`}>
-          You are logged in. Complete your diagnostic to populate your dashboard.
+          {program === "o-level"
+            ? "You are logged in. Browse subjects and start learning."
+            : "You are logged in. Complete your diagnostic to populate your dashboard."}
         </PageHero>
         <section className="section">
           <div className="container">
             <div className="card" style={{ maxWidth: 480 }}>
               <h3>Get started</h3>
-              <p>Take the free diagnostic to see your baseline score and unlock your personalized study plan.</p>
-              <div className="actions">
-                <CTAButton href="/diagnostic">Take the free diagnostic</CTAButton>
-                <CTAButton href="/register" secondary>Complete registration</CTAButton>
-              </div>
+              {program === "o-level" ? (
+                <>
+                  <p>Browse O Level subjects, watch lessons, and join live sessions.</p>
+                  <div className="actions">
+                    <CTAButton href="/o-level">Browse O Level</CTAButton>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>Take the free diagnostic to see your baseline score and unlock your personalized study plan.</p>
+                  <div className="actions">
+                    <CTAButton href="/diagnostic">Take the free diagnostic</CTAButton>
+                    <CTAButton href="/register" secondary>Complete registration</CTAButton>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
       </>
     );
   }
+
+  if (program === "o-level" && oLevelStudent) {
+    const firstName = oLevelStudent.studentName?.split(" ")[0] ?? sessionName?.split(" ")[0] ?? "Student";
+    const subjects = oLevelStudent.subject ? oLevelStudent.subject.split(",").filter(Boolean) : [];
+
+    return (
+      <>
+        <PageHero
+          eyebrow="Student dashboard"
+          title={`Welcome back, ${firstName}. Let's keep learning.`}
+        >
+          O Level{oLevelStudent.country ? ` · ${oLevelStudent.country}` : ""}
+          {subjects.length > 0 ? ` · ${subjects.length} subject${subjects.length > 1 ? "s" : ""}` : ""}
+        </PageHero>
+
+        <section className="section soft">
+          <div className="container">
+            {announcements.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                {announcements.map(a => (
+                  <div key={a.id} style={{
+                    display: "flex", gap: 14, alignItems: "flex-start",
+                    background: "#fffbeb", border: "1.5px solid #fde68a",
+                    borderRadius: 12, padding: "14px 18px", marginBottom: 10,
+                  }}>
+                    <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>📢</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontWeight: 800, color: "#92400e", margin: "0 0 3px", fontSize: ".92rem" }}>{a.title}</p>
+                      <p style={{ color: "#78350f", fontSize: ".85rem", margin: "0 0 4px", lineHeight: 1.5 }}>{a.body}</p>
+                      <span style={{ color: "#b45309", fontSize: ".72rem" }}>{timeAgo(a.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {subjects.length > 0 && (
+              <div className="card" style={{ marginBottom: 24 }}>
+                <div className="eyebrow">Your subjects</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                  {subjects.map(s => (
+                    <span className="badge teal" key={s}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-3">
+              {OLEVEL_MODULES.map((m) => (
+                <Link key={m.href} href={m.href} style={{ textDecoration: "none" }}>
+                  <article className="card" style={{ height: "100%" }}>
+                    <div className="icon">{m.icon}</div>
+                    <h3>{m.title}</h3>
+                    <p>{m.description}</p>
+                    <span style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
+                  </article>
+                </Link>
+              ))}
+            </div>
+
+            <div className="actions" style={{ marginTop: 24 }}>
+              <CTAButton href="/o-level" secondary>Browse all O Level</CTAButton>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  if (!student) return null;
 
   const firstName = student.studentName?.split(" ")[0] ?? sessionName?.split(" ")[0] ?? "Student";
   const target = student.targetScore ? Number(student.targetScore) : null;

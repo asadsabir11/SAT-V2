@@ -20,6 +20,7 @@ async function ensureUsersTable() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS approved_by TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS notes TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
   // Migrate role constraint to include 'parent'
   await sql`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`;
   await sql`ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('student', 'founder', 'parent'))`;
@@ -30,17 +31,24 @@ export async function createUser(
   email: string,
   password: string,
   role: "student" | "founder" | "parent",
-  name: string
+  name: string,
+  program: "sat" | "o-level" = "sat"
 ): Promise<string> {
   await ensureUsersTable();
   const id = crypto.randomUUID();
   const hash = await bcrypt.hash(password, 10);
   await sql`
-    INSERT INTO users (id, email, password_hash, role, name)
-    VALUES (${id}, ${email.toLowerCase().trim()}, ${hash}, ${role}, ${name})
+    INSERT INTO users (id, email, password_hash, role, name, program)
+    VALUES (${id}, ${email.toLowerCase().trim()}, ${hash}, ${role}, ${name}, ${program})
     ON CONFLICT (email) DO NOTHING
   `;
   return id;
+}
+
+export async function getUserProgram(email: string): Promise<"sat" | "o-level"> {
+  await ensureUsersTable();
+  const rows = await sql`SELECT program FROM users WHERE email = ${email.toLowerCase().trim()} LIMIT 1`;
+  return rows[0]?.program === "o-level" ? "o-level" : "sat";
 }
 
 export async function findUserByEmail(email: string) {
