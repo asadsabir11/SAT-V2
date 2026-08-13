@@ -287,6 +287,19 @@ export default function Dashboard() {
             />
           </div>
 
+          {/* Quick links */}
+          <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+            <Link href="/quizzes" style={{ padding: "10px 20px", background: "#155eef", color: "#fff", borderRadius: 10, fontWeight: 800, fontSize: ".88rem", textDecoration: "none" }}>
+              📝 Quizzes →
+            </Link>
+            <Link href="/ai-tutor" style={{ padding: "10px 20px", background: "#f5f3ff", color: "#6d28d9", border: "1.5px solid #ddd6fe", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
+              🤖 AI Tutor →
+            </Link>
+            <Link href="/sessions" style={{ padding: "10px 20px", background: "#ecfdf5", color: "#065f46", border: "1.5px solid #a7f3d0", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
+              📅 Sessions →
+            </Link>
+          </div>
+
           <div className="grid grid-2" style={{ marginTop: 20 }}>
             <div className="card">
               <div className="eyebrow">Next recommended action</div>
