@@ -308,10 +308,10 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
 
   if (!lecture) return null;
 
-  const currentIndex = allLectures.findIndex(l => l.id === id);
   const sameCat = allLectures.filter(l => l.category === lecture.category);
-  const prevLec = currentIndex > 0 ? allLectures[currentIndex - 1] : null;
-  const nextLec = currentIndex < allLectures.length - 1 ? allLectures[currentIndex + 1] : null;
+  const currentIndex = sameCat.findIndex(l => l.id === id);
+  const prevLec = currentIndex > 0 ? sameCat[currentIndex - 1] : null;
+  const nextLec = currentIndex < sameCat.length - 1 ? sameCat[currentIndex + 1] : null;
 
   const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : "/lectures";
 

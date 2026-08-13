@@ -177,7 +177,7 @@ export async function getBestAttempt(quizId: string, studentEmail: string): Prom
   const rows = await sql`
     SELECT score, total FROM olevel_quiz_attempts
     WHERE quiz_id = ${quizId} AND student_email = ${studentEmail}
-    ORDER BY score DESC LIMIT 1
+    ORDER BY (score::float / NULLIF(total, 0)) DESC NULLS LAST LIMIT 1
   `;
   return (rows[0] as { score: number; total: number } | undefined) ?? null;
 }

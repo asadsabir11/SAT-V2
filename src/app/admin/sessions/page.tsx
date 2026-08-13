@@ -66,10 +66,13 @@ export default function AdminSessions() {
   }
 
   async function saveEdit(id: string) {
+    // Only persist `subject` for O-Level sessions — the field isn't shown (or meaningful) for SAT sessions.
+    const { subject, ...rest } = editForm;
+    const payload = editForm.program === "o-level" ? { ...rest, subject } : rest;
     await fetch(`/api/sessions/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editForm),
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
     });
-    setSessions(s => s.map(ss => ss.id === id ? { ...ss, ...editForm } : ss));
+    setSessions(s => s.map(ss => ss.id === id ? { ...ss, ...payload, subject: editForm.program === "o-level" ? subject : ss.subject } : ss));
     setEditingId(null);
   }
 

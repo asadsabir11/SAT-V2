@@ -38,6 +38,7 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
   const { id } = use(params);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [results, setResults] = useState<QuizResult[]>([]);
@@ -52,6 +53,7 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
       .then((r) => ({ status: r.status, data: r.json() }))
       .then(async ({ status, data }) => {
         const d = await data;
+        if (status === 401) { setUnauthorized(true); return; }
         if (status !== 200 || d.error) { setNotFound(true); return; }
         setQuiz(d.quiz);
         setBestScore(d.best_score ?? null);
@@ -72,7 +74,11 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
       setScore(d.score);
       setTotal(d.total);
       setResults(d.results ?? []);
-      setBestScore((prev) => (!prev || d.score > prev.score ? { score: d.score, total: d.total } : prev));
+      setBestScore((prev) => {
+        const newPct = d.total > 0 ? d.score / d.total : 0;
+        const prevPct = prev && prev.total > 0 ? prev.score / prev.total : -1;
+        return !prev || newPct > prevPct ? { score: d.score, total: d.total } : prev;
+      });
       setState("submitted");
     } finally {
       setSubmitting(false);
@@ -93,6 +99,16 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
   };
 
   if (loading) return <section className="section"><div className="container"><div className="card" style={{ maxWidth: 400 }}><p>Loading quiz…</p></div></div></section>;
+
+  if (unauthorized) return (
+    <section className="section"><div className="container">
+      <div className="card" style={{ maxWidth: 400, textAlign: "center", padding: 40 }}>
+        <p style={{ fontWeight: 700, marginBottom: 12 }}>Please sign in to continue.</p>
+        <p style={{ color: "#6b7c93", fontSize: ".88rem", marginBottom: 16 }}>Your session may have expired.</p>
+        <Link href={`/login?role=student&next=/o-level/quizzes/${id}`} style={{ color: "#155eef", fontWeight: 700 }}>Sign in →</Link>
+      </div>
+    </div></section>
+  );
 
   if (notFound || !quiz) return (
     <section className="section"><div className="container">
