@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 const ADMIN_EMAIL  = process.env.ADMIN_EMAIL ?? "";
+const ADMIN_EMAILS = ADMIN_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
 const WHATSAPP_URL = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL ?? "";
 const APP_URL      = "https://digital-tutor-sat-prep.vercel.app";
 
@@ -87,13 +88,13 @@ export async function sendNewStudentAlert(student: {
   grade?: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || !ADMIN_EMAIL) return; // silently skip if not configured
+  if (!apiKey || ADMIN_EMAILS.length === 0) return; // silently skip if not configured
 
   const resend = new Resend(apiKey);
 
   await resend.emails.send({
     from: "The Digital Tutor <onboarding@resend.dev>",
-    to: ADMIN_EMAIL,
+    to: ADMIN_EMAILS,
     subject: `New student registered: ${student.name}`,
 
     html: `
