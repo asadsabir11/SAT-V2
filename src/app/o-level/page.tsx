@@ -43,9 +43,8 @@ export default function OLevelPage() {
             progress reporting. Your teacher does not disappear when class ends.
           </p>
           <div className="actions">
-            <CTAButton href="/o-level/enroll?program=o-level" variant="accent">Take a Free Diagnostic</CTAButton>
+            <CTAButton href="#pricing" variant="accent">Join the Founding Cohort</CTAButton>
             <CTAButton href="#subjects" variant="ghost">View Subjects</CTAButton>
-            <CTAButton href="#pricing" variant="ghost">Join the Founding Cohort</CTAButton>
           </div>
           <div style={{ marginTop: 40 }}>
             <LearningModelStrip />

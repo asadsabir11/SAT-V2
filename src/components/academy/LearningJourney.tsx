@@ -1,5 +1,5 @@
 const DEFAULT_STEPS = [
-  "Take Diagnostic",
+  "Join the Founding Cohort",
   "Get Your Study Plan",
   "Attend Live Classes",
   "Practice During the Week",

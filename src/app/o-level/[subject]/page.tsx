@@ -40,7 +40,6 @@ export default async function SubjectPage({
 
   const instructor = getInstructor(subject.instructorId);
   const cohort = getCohortForSubject(subject.slug);
-  const enrollHref = `/o-level/enroll?program=o-level&subject=${subject.slug}`;
 
   return (
     <section className="section">
@@ -62,8 +61,7 @@ export default async function SubjectPage({
         )}
         <p className="lead">{subject.description}</p>
         <div className="actions">
-          <CTAButton href={enrollHref} variant="accent">Take a Free Diagnostic</CTAButton>
-          <CTAButton href="#enroll">Enroll in the Founding Cohort</CTAButton>
+          <CTAButton href="#enroll" variant="accent">Enroll in the Founding Cohort</CTAButton>
           <CTAButton href={`/o-level/lectures?subject=${subject.slug}`} variant="secondary">Watch Lessons</CTAButton>
           <CTAButton href={`/o-level/quizzes?subject=${subject.slug}`} variant="secondary">Take a Quiz</CTAButton>
           <CTAButton href={`/o-level/sessions?subject=${subject.slug}`} variant="secondary">Live Sessions</CTAButton>
