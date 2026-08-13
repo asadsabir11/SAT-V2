@@ -35,17 +35,17 @@ export default function Home() {
         <div className="container hero-layout">
           <div>
             <div className="eyebrow">Global access · Serious accountability</div>
-            <h1 className="display">Affordable SAT® Prep for Global Students</h1>
+            <h1 className="display">SAT® Prep and Cambridge O Level — Live Teaching, Global Access</h1>
             <p className="lead">
-              Weekly live classes, 24/7 AI tutoring, original mock tests, regional study groups,
-              and parent progress reports — designed for families who need more than free self-study.
+              Weekly live classes, 24/7 AI tutoring, original practice, and parent progress reports —
+              for SAT® applicants and Cambridge O Level / IGCSE students who need more than free self-study.
             </p>
             <div className="actions">
-              <CTAButton href="/register">Get started free</CTAButton>
-              <CTAButton href="/register?plan=Core" secondary>Join the cohort →</CTAButton>
+              <CTAButton href="#sat-prep">Explore SAT Prep →</CTAButton>
+              <CTAButton href="/o-level" secondary>Explore O Level →</CTAButton>
             </div>
             <div className="trust-strip">
-              <span className="trust-item">Free diagnostic — included after sign-up</span>
+              <span className="trust-item">Free SAT diagnostic — included after sign-up</span>
               <span className="trust-item">Cohort seats open now</span>
               <span className="trust-item">16+ countries served</span>
               <span className="trust-item">No score guarantee</span>
@@ -53,10 +53,44 @@ export default function Home() {
           </div>
           <div className="hero-panel">
             <div className="eyebrow" style={{ color: "#5eead4", marginBottom: 20 }}>The accountability layer</div>
-            <div className="stat"><strong>8 weeks</strong><span>Focused SAT prep cohort</span></div>
             <div className="stat"><strong>Weekly</strong><span>Live teaching + homework rhythm</span></div>
             <div className="stat"><strong>Always on</strong><span>AI explanations and study coaching</span></div>
             <div className="stat"><strong>Parent-ready</strong><span>Clear weekly progress visibility</span></div>
+            <div className="stat"><strong>Two programs</strong><span>SAT® prep and Cambridge O Level</span></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Program picker */}
+      <section className="section" style={{ paddingBottom: 20 }}>
+        <div className="container">
+          <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
+            <div className="eyebrow" style={{ justifyContent: "center" }}>Choose your program</div>
+            <h2 className="title">One academy, two ways to get ahead</h2>
+          </div>
+          <div className="grid grid-2" style={{ marginTop: 32 }}>
+            <article className="card" style={{ display: "flex", flexDirection: "column" }}>
+              <h3 style={{ marginTop: 0 }}>SAT® Preparation</h3>
+              <p style={{ flex: 1 }}>Affordable SAT® prep for ambitious global students — weekly live classes, AI tutor, and mock tests.</p>
+              <ul className="check-list" style={{ margin: "14px 0 20px" }}>
+                <li>Weekly live classes</li>
+                <li>24/7 AI tutor</li>
+                <li>Original mock tests</li>
+                <li>Parent progress reports</li>
+              </ul>
+              <a href="#sat-prep" className="btn btn-primary">Explore SAT Prep</a>
+            </article>
+            <article className="card" style={{ display: "flex", flexDirection: "column" }}>
+              <h3 style={{ marginTop: 0 }}>Cambridge O Level / IGCSE</h3>
+              <p style={{ flex: 1 }}>Live O Level tuition where students are never left stuck — open office hours and past-paper mastery.</p>
+              <ul className="check-list" style={{ margin: "14px 0 20px" }}>
+                <li>Live classes</li>
+                <li>Open office hours</li>
+                <li>Past-paper mastery</li>
+                <li>Parent reporting</li>
+              </ul>
+              <Link href="/o-level" className="btn btn-primary">Explore O Level</Link>
+            </article>
           </div>
         </div>
       </section>
@@ -147,7 +181,7 @@ export default function Home() {
       </section>
 
       {/* 4 — Solution */}
-      <section className="section">
+      <section id="sat-prep" className="section" style={{ scrollMarginTop: 90 }}>
         <div className="container">
           <div className="eyebrow">Our solution</div>
           <h2 className="title">Everything needed to keep moving</h2>

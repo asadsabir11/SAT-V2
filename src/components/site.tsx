@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["Academy", "/academy"], ["O Level", "/o-level"], ["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
+const PUBLIC_NAV = [["O Level", "/o-level"], ["Program", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" } | null;
 

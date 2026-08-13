@@ -45,7 +45,7 @@ export default async function SubjectPage({
     <section className="section">
       <div className="container" style={{ maxWidth: 880 }}>
         <nav style={{ marginBottom: 20, color: "var(--muted)", fontSize: ".85rem" }}>
-          <Link href="/academy" style={{ color: "var(--muted)" }}>Academy</Link>
+          <Link href="/" style={{ color: "var(--muted)" }}>Home</Link>
           <span style={{ margin: "0 8px" }}>/</span>
           <Link href="/o-level" style={{ color: "var(--muted)" }}>O Level</Link>
           <span style={{ margin: "0 8px" }}>/</span>

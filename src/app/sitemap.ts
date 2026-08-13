@@ -5,6 +5,7 @@ const BASE = "https://digital-tutor-sat-prep.vercel.app";
 export default function sitemap(): MetadataRoute.Sitemap {
   const publicRoutes = [
     { url: BASE, priority: 1.0 },
+    { url: `${BASE}/o-level`, priority: 0.9 },
     { url: `${BASE}/founder-cohort`, priority: 0.9 },
     { url: `${BASE}/register`, priority: 0.9 },
     { url: `${BASE}/login`, priority: 0.7 },

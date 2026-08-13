@@ -3,7 +3,6 @@ import type {
   Instructor,
   OfficeHoursInfo,
   PricingSchedule,
-  Program,
   Subject,
   Track,
 } from "./types";
@@ -13,62 +12,7 @@ import type {
  *
  * Edit THIS file to add subjects, change prices, open cohorts, or adjust
  * schedules. Components read from here; nothing below is hard-coded in the UI.
- * The existing SAT program is represented here too, but its pages/flows remain
- * the original SAT experience — this only powers the academy-level selector.
  */
-
-export const ACADEMY_NAME = "The Digital Tutor Academy";
-export const ACADEMY_TAGLINE =
-  "Live teaching. Open office hours. AI-supported learning.";
-
-export const PROGRAMS: Program[] = [
-  {
-    key: "o-level",
-    name: "Cambridge O Level / IGCSE",
-    short: "O Level / IGCSE",
-    tagline: "Live O Level tuition where students are never left stuck.",
-    href: "/o-level",
-    status: "live",
-    highlights: [
-      "Live classes",
-      "Open office hours",
-      "Past-paper mastery",
-      "Parent reporting",
-    ],
-  },
-  {
-    key: "sat",
-    name: "SAT Preparation",
-    short: "SAT Prep",
-    tagline: "Affordable SAT® prep for ambitious global students.",
-    href: "/", // preserves the existing SAT landing/flow
-    status: "live",
-    highlights: [
-      "Weekly live classes",
-      "24/7 AI tutor",
-      "Original mock tests",
-      "Parent progress reports",
-    ],
-  },
-  {
-    key: "a-level",
-    name: "A Level (coming soon)",
-    short: "A Level",
-    tagline: "Advanced-level teaching, built on the same support model.",
-    href: "/academy",
-    status: "coming-soon",
-    highlights: ["Live teaching", "Office hours", "Exam practice"],
-  },
-  {
-    key: "foundation",
-    name: "Foundation Program — Grades 7–8 (coming soon)",
-    short: "Foundation",
-    tagline: "Early foundations for future Cambridge success.",
-    href: "/academy",
-    status: "coming-soon",
-    highlights: ["Concept-first teaching", "Study habits", "Confidence"],
-  },
-];
 
 export const INSTRUCTORS: Instructor[] = [
   {

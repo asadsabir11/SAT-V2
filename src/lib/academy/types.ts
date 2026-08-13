@@ -12,18 +12,6 @@
 
 export type ProgramKey = "sat" | "o-level" | "a-level" | "foundation";
 
-export type ProgramStatus = "live" | "coming-soon";
-
-export interface Program {
-  key: ProgramKey;
-  name: string;
-  short: string;
-  tagline: string;
-  href: string;
-  status: ProgramStatus;
-  highlights: string[];
-}
-
 /** A live-class or workshop slot template (configurable — no fixed dates here). */
 export interface ClassSlot {
   title: string;

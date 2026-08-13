@@ -9,21 +9,21 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const DESC     = "Affordable SAT® accountability, live classes, AI support, mock tests, and parent reporting for global students.";
+const DESC     = "Affordable SAT® prep and Cambridge O Level / IGCSE tuition — live classes, AI support, mock tests, and parent reporting for global students.";
 const BASE_URL = "https://digital-tutor-sat-prep.vercel.app";
 
 export const metadata: Metadata = {
-  title: { default: "The Digital Tutor Global SAT® Prep", template: "%s | The Digital Tutor" },
+  title: { default: "The Digital Tutor — SAT® Prep & Cambridge O Level", template: "%s | The Digital Tutor" },
   description: DESC,
   metadataBase: new URL(BASE_URL),
   openGraph: {
     type: "website",
     siteName: "The Digital Tutor",
-    title: "The Digital Tutor Global SAT® Prep",
+    title: "The Digital Tutor — SAT® Prep & Cambridge O Level",
     description: DESC,
     url: BASE_URL,
   },
-  twitter: { card: "summary_large_image", title: "The Digital Tutor SAT® Prep", description: DESC },
+  twitter: { card: "summary_large_image", title: "The Digital Tutor — SAT® Prep & Cambridge O Level", description: DESC },
   robots: { index: true, follow: true },
 };
 
