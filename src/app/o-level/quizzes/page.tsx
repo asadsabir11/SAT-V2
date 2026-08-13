@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
+import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 
@@ -34,23 +35,40 @@ function OLevelQuizzesInner() {
     preselect && SUBJECTS.some((s) => s.slug === preselect) ? preselect : SUBJECTS[0].slug
   );
   const [quizzes, setQuizzes] = useState<QuizSummary[]>([]);
+  const [access, setAccess] = useState<AccessLevel>("free");
   const [loading, setLoading] = useState(true);
+  const [showUnlock, setShowUnlock] = useState(false);
 
   const load = useCallback((subject: OLevelCategory) => {
     setLoading(true);
     fetch(`/api/o-level/quizzes?subject=${subject}`)
       .then((r) => r.json())
-      .then((d) => setQuizzes(d.quizzes ?? []))
+      .then((d) => { setQuizzes(d.quizzes ?? []); setAccess(d.access ?? "free"); })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { load(tab); }, [tab, load]);
 
+  const subjectName = SUBJECTS.find((s) => s.slug === tab)?.name ?? tab;
+
   return (
     <>
       <PageHero eyebrow="O Level quizzes" title="Practice Quizzes">
-        Short subject quizzes to check your understanding. Take as many as you like — your best score is saved.
+        Short subject quizzes to check your understanding. Unlock a subject to take its quizzes — your best score is saved.
       </PageHero>
+
+      {showUnlock && (
+        <UnlockModal
+          accessLevel={access}
+          onClose={() => setShowUnlock(false)}
+          onSubmitted={() => load(tab)}
+          eyebrow="O Level subject access"
+          title={`Unlock O Level ${subjectName}`}
+          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
+          endpoint="/api/o-level/access/request"
+          requestBody={{ subject: tab }}
+        />
+      )}
 
       <section className="section">
         <div className="container">
@@ -75,9 +93,19 @@ function OLevelQuizzesInner() {
             })}
           </div>
 
+          {!loading && access !== "unlocked" && (
+            <LockedBanner
+              accessLevel={access}
+              onUnlock={() => setShowUnlock(true)}
+              title={`🔒 Unlock ${subjectName}`}
+              subtitle="Unlock this subject to take its quizzes and see your scores."
+              buttonLabel="Unlock this subject"
+            />
+          )}
+
           {loading ? (
             <div className="card" style={{ maxWidth: 400 }}><p>Loading quizzes…</p></div>
-          ) : quizzes.length === 0 ? (
+          ) : access !== "unlocked" ? null : quizzes.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: 56, maxWidth: 480 }}>
               <div style={{ fontSize: "3rem", marginBottom: 14 }}>{SUBJECT_ICON[tab]}</div>
               <h2 style={{ color: "#071b33", marginBottom: 8 }}>No quizzes yet</h2>

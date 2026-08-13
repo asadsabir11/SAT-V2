@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getPaperById, updatePaper, publishPaper, unpublishPaper, deletePaper } from "@/lib/past-papers";
+import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -13,6 +14,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (session.role === "founder") return NextResponse.json({ paper });
   if (session.role !== "student" || !paper.is_published) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const access = await getOLevelSubjectAccess(session.email, paper.subject);
+  if (access !== "unlocked") {
+    return NextResponse.json({ error: "Access denied. Unlock this subject to view this paper." }, { status: 403 });
   }
   return NextResponse.json({ paper });
 }

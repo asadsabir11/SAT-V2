@@ -11,17 +11,33 @@ const ACC_NUM   = process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_NUMBER ?? "";
 const JAZZCASH  = process.env.NEXT_PUBLIC_PAYMENT_JAZZCASH ?? "";
 const EASYPAISA = process.env.NEXT_PUBLIC_PAYMENT_EASYPAISA ?? "";
 
-export function UnlockModal({ accessLevel, onClose, onSubmitted }: {
+export function UnlockModal({
+  accessLevel, onClose, onSubmitted,
+  eyebrow = "Full Access",
+  title = "Unlock The Digital Tutor",
+  features = ["All Math lectures", "All English lectures", "Live Sessions", "Q&A Board", "AI Tutor", "Practice Tests"],
+  endpoint = "/api/access/request",
+  requestBody,
+}: {
   accessLevel: AccessLevel;
   onClose: () => void;
   onSubmitted: () => void;
+  eyebrow?: string;
+  title?: string;
+  features?: string[];
+  endpoint?: string;
+  requestBody?: Record<string, string>;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(accessLevel === "pending");
 
   async function handleSubmit() {
     setSubmitting(true);
-    await fetch("/api/access/request", { method: "POST" });
+    await fetch(endpoint, {
+      method: "POST",
+      headers: requestBody ? { "Content-Type": "application/json" } : undefined,
+      body: requestBody ? JSON.stringify(requestBody) : undefined,
+    });
     setDone(true);
     setSubmitting(false);
     onSubmitted();
@@ -37,8 +53,8 @@ export function UnlockModal({ accessLevel, onClose, onSubmitted }: {
         <div style={{ background: "linear-gradient(135deg,#071b33 0%,#1e3a5f 100%)", padding: "28px 28px 24px", color: "#fff" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: ".72rem", fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "#93c5fd", marginBottom: 6 }}>Full Access</div>
-              <h2 style={{ fontSize: "1.4rem", fontWeight: 900, margin: 0, letterSpacing: "-.02em" }}>Unlock The Digital Tutor</h2>
+              <div style={{ fontSize: ".72rem", fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "#93c5fd", marginBottom: 6 }}>{eyebrow}</div>
+              <h2 style={{ fontSize: "1.4rem", fontWeight: 900, margin: 0, letterSpacing: "-.02em" }}>{title}</h2>
             </div>
             <button onClick={onClose} style={{ background: "rgba(255,255,255,.15)", border: "none", color: "#fff", borderRadius: 8, width: 32, height: 32, cursor: "pointer", fontSize: "1rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✕</button>
           </div>
@@ -66,7 +82,7 @@ export function UnlockModal({ accessLevel, onClose, onSubmitted }: {
             <>
               <h4 style={{ color: "#071b33", marginBottom: 14, fontWeight: 800, fontSize: ".95rem" }}>What you unlock</h4>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-                {["All Math lectures", "All English lectures", "Live Sessions", "Q&A Board", "AI Tutor", "Practice Tests"].map(f => (
+                {features.map(f => (
                   <span key={f} style={{ padding: "4px 12px", borderRadius: 999, background: "#eff6ff", color: "#155eef", fontSize: ".78rem", fontWeight: 700 }}>✓ {f}</span>
                 ))}
               </div>
@@ -124,7 +140,18 @@ export function UnlockModal({ accessLevel, onClose, onSubmitted }: {
   );
 }
 
-export function LockedBanner({ accessLevel, onUnlock }: { accessLevel: AccessLevel; onUnlock: () => void }) {
+export function LockedBanner({
+  accessLevel, onUnlock,
+  title = "🔒 Full access required",
+  subtitle = "Unlock all lectures, live sessions, Q&A, and more.",
+  buttonLabel = "Unlock Full Access",
+}: {
+  accessLevel: AccessLevel;
+  onUnlock: () => void;
+  title?: string;
+  subtitle?: string;
+  buttonLabel?: string;
+}) {
   if (accessLevel === "pending") {
     return (
       <div style={{ padding: "16px 20px", borderRadius: 14, background: "#fffbeb", border: "1.5px solid #fde68a", marginBottom: 28, display: "flex", gap: 12, alignItems: "center" }}>
@@ -139,11 +166,11 @@ export function LockedBanner({ accessLevel, onUnlock }: { accessLevel: AccessLev
   return (
     <div style={{ display: "flex", gap: 16, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", padding: "16px 20px", borderRadius: 14, background: "linear-gradient(135deg,#071b33,#1e3a5f)", color: "#fff", marginBottom: 28 }}>
       <div>
-        <p style={{ fontWeight: 800, fontSize: ".95rem", margin: "0 0 3px" }}>🔒 Full access required</p>
-        <p style={{ color: "#93c5fd", fontSize: ".83rem", margin: 0 }}>Unlock all lectures, live sessions, Q&A, and more.</p>
+        <p style={{ fontWeight: 800, fontSize: ".95rem", margin: "0 0 3px" }}>{title}</p>
+        <p style={{ color: "#93c5fd", fontSize: ".83rem", margin: 0 }}>{subtitle}</p>
       </div>
       <button onClick={onUnlock} style={{ padding: "10px 22px", background: "#155eef", color: "#fff", border: "none", borderRadius: 10, fontWeight: 800, fontSize: ".88rem", cursor: "pointer", whiteSpace: "nowrap" }}>
-        Unlock Full Access
+        {buttonLabel}
       </button>
     </div>
   );

@@ -9,6 +9,7 @@ import {
   deleteQuiz,
   getBestAttempt,
 } from "@/lib/olevel-quiz";
+import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -26,6 +27,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   if (session.role !== "student" || !quiz.is_published) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const access = await getOLevelSubjectAccess(session.email, quiz.subject);
+  if (access !== "unlocked") {
+    return NextResponse.json({ error: "Access denied. Unlock this subject to take this quiz.", access, subject: quiz.subject }, { status: 403 });
   }
 
   const bestScore = await getBestAttempt(id, session.email);

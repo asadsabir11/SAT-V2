@@ -1,0 +1,36 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
+import { listOLevelAccessRequests, grantOLevelAccess, revokeOLevelAccess } from "@/lib/olevelAccess";
+import { OLEVEL_LECTURE_CATEGORIES } from "@/lib/lectures";
+
+export async function GET() {
+  const session = await getSession();
+  if (!session || session.role !== "founder") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const requests = await listOLevelAccessRequests();
+  return NextResponse.json({ requests });
+}
+
+export async function POST(req: NextRequest) {
+  const session = await getSession();
+  if (!session || session.role !== "founder") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { action, email, subject, notes } = await req.json();
+  if (!action || !email || !subject || !OLEVEL_LECTURE_CATEGORIES.includes(subject)) {
+    return NextResponse.json({ error: "action, email and a valid subject are required" }, { status: 400 });
+  }
+
+  if (action === "grant") {
+    await grantOLevelAccess(email, subject, session.email, notes);
+    return NextResponse.json({ ok: true });
+  }
+  if (action === "revoke") {
+    await revokeOLevelAccess(email, subject);
+    return NextResponse.json({ ok: true });
+  }
+
+  return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+}

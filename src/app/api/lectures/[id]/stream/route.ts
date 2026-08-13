@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getLectureById } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
+import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 
 export const runtime = "edge";
 
@@ -18,12 +19,19 @@ export async function GET(req: NextRequest, { params }: Params) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  if (session.role === "student" && lecture.program !== "o-level") {
-    const isIntro = lecture.category === "introduction";
-    if (!isIntro && !lecture.is_free_preview) {
-      const accessLevel = await getStudentAccessLevel(session.email);
-      if (accessLevel !== "unlocked") {
+  if (session.role === "student") {
+    if (lecture.program === "o-level") {
+      const subjectAccess = await getOLevelSubjectAccess(session.email, lecture.category);
+      if (subjectAccess !== "unlocked") {
         return new NextResponse("Access denied", { status: 403 });
+      }
+    } else {
+      const isIntro = lecture.category === "introduction";
+      if (!isIntro && !lecture.is_free_preview) {
+        const accessLevel = await getStudentAccessLevel(session.email);
+        if (accessLevel !== "unlocked") {
+          return new NextResponse("Access denied", { status: 403 });
+        }
       }
     }
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getAllLectures, getPublishedLectures, createLecture, OLEVEL_LECTURE_CATEGORIES, type Program, type LectureCategory } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
+import { getOLevelAccessMap } from "@/lib/olevelAccess";
 
 export async function GET() {
   const session = await getSession();
@@ -13,19 +14,21 @@ export async function GET() {
   }
 
   // Student: return all published lectures marked with is_locked
-  const [lectures, accessLevel] = await Promise.all([
+  const [lectures, accessLevel, oLevelAccess] = await Promise.all([
     getPublishedLectures(),
     getStudentAccessLevel(session.email),
+    getOLevelAccessMap(session.email),
   ]);
 
   const isUnlocked = accessLevel === "unlocked";
   const lecturesWithLock = lectures.map(({ video_url: _v, ...l }) => ({
     ...l,
-    // O-Level has no paid tier yet — any logged-in student can watch.
-    is_locked: l.program !== "o-level" && l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
+    is_locked: l.program === "o-level"
+      ? oLevelAccess[l.category] !== "unlocked"
+      : l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
   }));
 
-  return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel });
+  return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel, o_level_access: oLevelAccess });
 }
 
 export async function POST(req: NextRequest) {

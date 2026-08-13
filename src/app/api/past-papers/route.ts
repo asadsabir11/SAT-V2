@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getAllPapers, getPublishedPapersBySubject, createPaper, type PaperType } from "@/lib/past-papers";
 import { OLEVEL_LECTURE_CATEGORIES, type OLevelLectureCategory } from "@/lib/lectures";
+import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -20,8 +21,13 @@ export async function GET(req: NextRequest) {
   if (!subjectParam || !OLEVEL_LECTURE_CATEGORIES.includes(subjectParam as OLevelLectureCategory)) {
     return NextResponse.json({ error: "subject is required" }, { status: 400 });
   }
-  const papers = await getPublishedPapersBySubject(subjectParam as OLevelLectureCategory);
-  return NextResponse.json({ papers });
+  const subject = subjectParam as OLevelLectureCategory;
+  const access = await getOLevelSubjectAccess(session.email, subject);
+  if (access !== "unlocked") {
+    return NextResponse.json({ papers: [], access });
+  }
+  const papers = await getPublishedPapersBySubject(subject);
+  return NextResponse.json({ papers, access });
 }
 
 export async function POST(req: NextRequest) {

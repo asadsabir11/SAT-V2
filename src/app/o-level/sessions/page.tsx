@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
+import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 type Platform = "zoom" | "google_classroom" | "google_meet" | "other";
@@ -85,30 +86,46 @@ function OLevelSessionsInner() {
   const preselect = searchParams.get("subject") as OLevelCategory | null;
 
   const [sessions, setSessions] = useState<LiveSession[]>([]);
+  const [access, setAccess] = useState<AccessLevel>("free");
   const [loading, setLoading] = useState(true);
+  const [showUnlock, setShowUnlock] = useState(false);
   const [tab, setTab] = useState<OLevelCategory>(
     preselect && SUBJECTS.some((s) => s.slug === preselect) ? preselect : SUBJECTS[0].slug
   );
 
-  const load = useCallback(() => {
-    fetch("/api/sessions?program=o-level")
+  const load = useCallback((subject: OLevelCategory) => {
+    setLoading(true);
+    fetch(`/api/sessions?program=o-level&subject=${subject}`)
       .then((r) => r.json())
-      .then((d) => setSessions(d.sessions ?? []))
+      .then((d) => { setSessions(d.sessions ?? []); setAccess(d.access_level ?? "free"); })
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(tab); }, [tab, load]);
 
-  const bySubject = (subj: OLevelCategory) => sessions.filter((s) => s.subject === subj);
-  const visible = bySubject(tab);
+  const visible = sessions;
   const upcoming = visible.filter((s) => new Date(s.scheduled_at).getTime() > Date.now() - 3600000);
   const past = visible.filter((s) => new Date(s.scheduled_at).getTime() <= Date.now() - 3600000);
+  const subjectName = SUBJECTS.find((s) => s.slug === tab)?.name ?? tab;
 
   return (
     <>
       <PageHero eyebrow="O Level live sessions" title="Live Sessions">
-        Join live classes and office hours with your teacher. Open to any enrolled student.
+        Join live classes and office hours with your teacher. Unlock a subject to see its sessions.
       </PageHero>
+
+      {showUnlock && (
+        <UnlockModal
+          accessLevel={access}
+          onClose={() => setShowUnlock(false)}
+          onSubmitted={() => load(tab)}
+          eyebrow="O Level subject access"
+          title={`Unlock O Level ${subjectName}`}
+          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
+          endpoint="/api/o-level/access/request"
+          requestBody={{ subject: tab }}
+        />
+      )}
 
       <section className="section">
         <div className="container" style={{ maxWidth: 760 }}>
@@ -133,9 +150,19 @@ function OLevelSessionsInner() {
             })}
           </div>
 
+          {!loading && access !== "unlocked" && (
+            <LockedBanner
+              accessLevel={access}
+              onUnlock={() => setShowUnlock(true)}
+              title={`🔒 Unlock ${subjectName}`}
+              subtitle="Unlock this subject to see its live sessions."
+              buttonLabel="Unlock this subject"
+            />
+          )}
+
           {loading ? (
             <div className="card" style={{ textAlign: "center", padding: 40, color: "#6b7c93" }}>Loading sessions…</div>
-          ) : visible.length === 0 ? (
+          ) : access !== "unlocked" ? null : visible.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: 56 }}>
               <div style={{ fontSize: "3rem", marginBottom: 12 }}>{SUBJECT_ICON[tab]}</div>
               <p style={{ fontWeight: 700, color: "#071b33", marginBottom: 6 }}>No sessions scheduled yet</p>

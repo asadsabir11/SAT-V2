@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
+import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 type PaperType = "question_paper" | "mark_scheme" | "examiner_report" | "other";
@@ -58,7 +59,9 @@ function OLevelPastPapersInner() {
   const preselect = searchParams.get("subject") as OLevelCategory | null;
 
   const [papers, setPapers] = useState<PastPaper[]>([]);
+  const [access, setAccess] = useState<AccessLevel>("free");
   const [loading, setLoading] = useState(true);
+  const [showUnlock, setShowUnlock] = useState(false);
   const [tab, setTab] = useState<OLevelCategory>(
     preselect && SUBJECTS.some((s) => s.slug === preselect) ? preselect : SUBJECTS[0].slug
   );
@@ -67,17 +70,32 @@ function OLevelPastPapersInner() {
     setLoading(true);
     fetch(`/api/past-papers?subject=${subject}`)
       .then((r) => r.json())
-      .then((d) => setPapers(d.papers ?? []))
+      .then((d) => { setPapers(d.papers ?? []); setAccess(d.access ?? "free"); })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { load(tab); }, [tab, load]);
 
+  const subjectName = SUBJECTS.find((s) => s.slug === tab)?.name ?? tab;
+
   return (
     <>
       <PageHero eyebrow="O Level past papers" title="Past Papers">
-        Practice with past exam papers, mark schemes, and examiner reports for each subject.
+        Practice with past exam papers, mark schemes, and examiner reports. Unlock a subject to access its papers.
       </PageHero>
+
+      {showUnlock && (
+        <UnlockModal
+          accessLevel={access}
+          onClose={() => setShowUnlock(false)}
+          onSubmitted={() => load(tab)}
+          eyebrow="O Level subject access"
+          title={`Unlock O Level ${subjectName}`}
+          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
+          endpoint="/api/o-level/access/request"
+          requestBody={{ subject: tab }}
+        />
+      )}
 
       <section className="section">
         <div className="container" style={{ maxWidth: 900 }}>
@@ -102,9 +120,19 @@ function OLevelPastPapersInner() {
             })}
           </div>
 
+          {!loading && access !== "unlocked" && (
+            <LockedBanner
+              accessLevel={access}
+              onUnlock={() => setShowUnlock(true)}
+              title={`🔒 Unlock ${subjectName}`}
+              subtitle="Unlock this subject to access its past papers."
+              buttonLabel="Unlock this subject"
+            />
+          )}
+
           {loading ? (
             <div className="card" style={{ maxWidth: 400 }}><p>Loading past papers…</p></div>
-          ) : papers.length === 0 ? (
+          ) : access !== "unlocked" ? null : papers.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: 56, maxWidth: 480 }}>
               <div style={{ fontSize: "3rem", marginBottom: 14 }}>{SUBJECT_ICON[tab]}</div>
               <h2 style={{ color: "#071b33", marginBottom: 8 }}>No past papers yet</h2>

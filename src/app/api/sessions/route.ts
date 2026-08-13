@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getAllSessions, getActiveSessions, createSession } from "@/lib/sessions";
 import { getStudentAccessLevel } from "@/lib/users";
+import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -9,14 +10,20 @@ export async function GET(req: NextRequest) {
 
   const programParam = req.nextUrl.searchParams.get("program");
 
-  // O-Level has no paid tier yet — any logged-in student can see O-Level sessions.
   if (programParam === "o-level") {
     if (session.role === "founder") {
       const sessions = (await getAllSessions()).filter((s) => s.program === "o-level");
       return NextResponse.json({ sessions, access_level: "unlocked" });
     }
     if (session.role !== "student") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const sessions = (await getActiveSessions()).filter((s) => s.program === "o-level");
+
+    const subjectParam = req.nextUrl.searchParams.get("subject");
+    // Sessions without a subject (general announcements) stay open to any enrolled student.
+    const access = subjectParam ? await getOLevelSubjectAccess(session.email, subjectParam) : "unlocked";
+    if (access !== "unlocked") {
+      return NextResponse.json({ sessions: [], access_level: access, locked: true });
+    }
+    const sessions = (await getActiveSessions()).filter((s) => s.program === "o-level" && (!subjectParam || !s.subject || s.subject === subjectParam));
     return NextResponse.json({ sessions, access_level: "unlocked", locked: false });
   }
 
