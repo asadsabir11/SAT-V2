@@ -443,7 +443,7 @@ type OLevelAppFields = {
   parentName: string; parentEmail: string; parentWhatsapp: string;
   studentName: string; studentGrade: string; schoolName: string; city: string;
   subject: string; preferredClassTime: string; targetExamSession: string;
-  source: string; consent: boolean;
+  source: string; consent: boolean; studyGroupConsent: boolean;
   website: string; // honeypot — left blank by humans, often filled by bots
 };
 
@@ -451,7 +451,7 @@ const OLEVEL_APP_INIT: OLevelAppFields = {
   parentName: "", parentEmail: "", parentWhatsapp: "",
   studentName: "", studentGrade: "", schoolName: "", city: "",
   subject: "", preferredClassTime: "", targetExamSession: "",
-  source: "", consent: false, website: "",
+  source: "", consent: false, studyGroupConsent: false, website: "",
 };
 
 export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: string }) {
@@ -529,6 +529,7 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
           utm_content: params.get("utm_content") ?? "",
           utm_term: params.get("utm_term") ?? "",
           fbclid: params.get("fbclid") ?? "",
+          studyGroupConsent: fields.studyGroupConsent ? "true" : "false",
           website: fields.website,
         }),
       });
@@ -652,6 +653,20 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
         </span>
       </label>
       {touched.consent && <Err msg={errors.consent} />}
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          name="studyGroupConsent"
+          checked={fields.studyGroupConsent}
+          onChange={e => change("studyGroupConsent", e.target.checked)}
+          style={{ marginTop: 3, flexShrink: 0 }}
+        />
+        <span>
+          I would also like to be added to a regional WhatsApp/Telegram study group with other O Level parents and
+          students (optional).
+        </span>
+      </label>
 
       <button className="btn btn-primary" type="submit" disabled={status === "loading"}>
         {status === "loading" ? "Submitting…" : "Submit Application and View Payment Options"}

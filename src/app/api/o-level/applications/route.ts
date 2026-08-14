@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       preferred_class_time: body.preferredClassTime.trim(),
       target_exam_session: body.targetExamSession as TargetExamSession,
       source: body.source?.trim() || null,
+      study_group_consent: body.studyGroupConsent === "true" || body.studyGroupConsent === true,
       utm_source: body.utm_source?.trim() || null,
       utm_medium: body.utm_medium?.trim() || null,
       utm_campaign: body.utm_campaign?.trim() || null,

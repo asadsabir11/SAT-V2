@@ -56,6 +56,7 @@ export interface OLevelApplication {
   preferred_class_time: string;
   target_exam_session: TargetExamSession;
   source: string | null;
+  study_group_consent: boolean;
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
@@ -93,6 +94,7 @@ async function ensureTable() {
       preferred_class_time TEXT NOT NULL,
       target_exam_session TEXT NOT NULL,
       source TEXT,
+      study_group_consent BOOLEAN NOT NULL DEFAULT FALSE,
       utm_source TEXT,
       utm_medium TEXT,
       utm_campaign TEXT,
@@ -128,6 +130,7 @@ export type NewApplicationInput = {
   preferred_class_time: string;
   target_exam_session: TargetExamSession;
   source: string | null;
+  study_group_consent: boolean;
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
@@ -143,12 +146,12 @@ export async function createApplication(input: NewApplicationInput): Promise<OLe
   const rows = await sql`
     INSERT INTO olevel_applications (
       id, parent_name, parent_email, parent_whatsapp, student_name, student_grade, school_name, city,
-      subject, preferred_class_time, target_exam_session, source,
+      subject, preferred_class_time, target_exam_session, source, study_group_consent,
       utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid,
       status, amount_due
     ) VALUES (
       ${id}, ${input.parent_name}, ${input.parent_email}, ${input.parent_whatsapp}, ${input.student_name}, ${input.student_grade}, ${input.school_name}, ${input.city},
-      ${input.subject}, ${input.preferred_class_time}, ${input.target_exam_session}, ${input.source},
+      ${input.subject}, ${input.preferred_class_time}, ${input.target_exam_session}, ${input.source}, ${input.study_group_consent},
       ${input.utm_source}, ${input.utm_medium}, ${input.utm_campaign}, ${input.utm_content}, ${input.utm_term}, ${input.fbclid},
       'new_application', ${amountDue}
     )

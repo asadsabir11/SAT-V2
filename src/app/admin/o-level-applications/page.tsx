@@ -50,6 +50,7 @@ interface Application {
   preferred_class_time: string;
   target_exam_session: string;
   source: string | null;
+  study_group_consent: boolean;
   utm_source: string | null;
   status: ApplicationStatus;
   amount_due: number | null;
@@ -226,6 +227,7 @@ export default function AdminOLevelApplications() {
                         <div><strong>Amount submitted:</strong> {a.amount_paid ? `PKR ${a.amount_paid.toLocaleString()}` : "—"}</div>
                         <div><strong>Transaction ref:</strong> {a.transaction_reference || "—"}</div>
                         <div><strong>Source:</strong> {a.source || a.utm_source || "—"}</div>
+                        <div><strong>Study group opt-in:</strong> {a.study_group_consent ? "Yes" : "No"}</div>
                         <div>
                           <strong>Screenshot:</strong>{" "}
                           {a.payment_screenshot_url ? (
