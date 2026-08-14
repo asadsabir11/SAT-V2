@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getApplicationById, updateApplicationStatus, updateApplicationNotes, subjectsToGrant, amountDueForSubject, APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/olevelApplications";
+import { getApplicationById, updateApplicationStatus, updateApplicationNotes, deleteApplication, subjectsToGrant, amountDueForSubject, APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/olevelApplications";
 import { grantOLevelAccess, revokeOLevelAccess } from "@/lib/olevelAccess";
 import { sendMetaPurchaseEvent, sendGA4PurchaseEvent } from "@/lib/serverConversions";
 
@@ -50,4 +50,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   return NextResponse.json({ application: updated });
+}
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getSession();
+  if (!session || session.role !== "founder") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { id } = await params;
+  await deleteApplication(id);
+  return NextResponse.json({ ok: true });
 }

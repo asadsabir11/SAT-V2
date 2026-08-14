@@ -78,9 +78,9 @@ function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number
       <h3 style={{ marginTop: 6 }}>O Level {subject.name}</h3>
       <div style={{ display: "grid", gap: 6, margin: "12px 0 18px" }}>
         {rows.map(([label, value]) => (
-          <div key={label} style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: ".85rem", padding: "4px 0", borderBottom: "1px solid #f0f4f8" }}>
+          <div key={label} style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "2px 12px", fontSize: ".85rem", padding: "4px 0", borderBottom: "1px solid #f0f4f8" }}>
             <span style={{ color: "var(--muted)" }}>{label}</span>
-            <span style={{ fontWeight: 700, color: value === "To be confirmed" ? "#92400e" : "var(--navy)" }}>{value}</span>
+            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" ? "#92400e" : "var(--navy)" }}>{value}</span>
           </div>
         ))}
       </div>

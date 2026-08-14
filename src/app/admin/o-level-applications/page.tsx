@@ -109,6 +109,14 @@ export default function AdminOLevelApplications() {
     load();
   }
 
+  async function deleteApp(id: string, studentName: string) {
+    if (!confirm(`Delete the application for "${studentName}"? This cannot be undone — use this for test/spam records only.`)) return;
+    setBusy(id);
+    await fetch(`/api/admin/o-level-applications/${id}`, { method: "DELETE" });
+    setBusy(null);
+    load();
+  }
+
   async function sendWelcome(id: string) {
     if (!confirm("Send the 'Payment Verified — Welcome' email now?")) return;
     setBusy(id);
@@ -229,9 +237,14 @@ export default function AdminOLevelApplications() {
                         <label>Admin notes</label>
                         <textarea value={notesDraft} onChange={(e) => setNotesDraft(e.target.value)} rows={2} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1.5px solid #e8eef6", fontFamily: "inherit", resize: "vertical" }} />
                       </div>
-                      <button onClick={() => saveNotes(a.id)} disabled={busy === a.id} style={{ padding: "6px 14px", borderRadius: 8, background: "#155eef", color: "#fff", border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
-                        Save notes
-                      </button>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => saveNotes(a.id)} disabled={busy === a.id} style={{ padding: "6px 14px", borderRadius: 8, background: "#155eef", color: "#fff", border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
+                          Save notes
+                        </button>
+                        <button onClick={() => deleteApp(a.id, a.student_name)} disabled={busy === a.id} style={{ padding: "6px 14px", borderRadius: 8, background: "#fee2e2", color: "#991b1b", border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
+                          Delete (test/spam only)
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

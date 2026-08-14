@@ -266,6 +266,10 @@ export default function PaymentPageClient() {
                   <textarea id="note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #d0d7e3", fontFamily: "inherit", resize: "vertical" }} />
                 </div>
 
+                <p style={{ fontSize: ".78rem", color: "#6b7c93", margin: "0 0 4px" }}>
+                  By submitting, you confirm you&apos;ve reviewed our{" "}
+                  <a href="/o-level/refund-policy" target="_blank" rel="noreferrer" style={{ color: "#155eef" }}>Refund &amp; Cancellation Policy</a>.
+                </p>
                 <button className="btn btn-primary" type="submit" disabled={submitting}>
                   {submitting ? "Submitting…" : "Submit Payment for Verification"}
                 </button>

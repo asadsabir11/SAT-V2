@@ -119,6 +119,9 @@ export function Footer(){
               {FOOTER_EXPLORE.map(([label,href])=>(
                 <Link className="footer-link" key={label} href={href}>{label}</Link>
               ))}
+              {isOLevel && (
+                <Link className="footer-link" href="/o-level/refund-policy">Refund & Cancellation Policy</Link>
+              )}
             </nav>
           </div>
 
@@ -150,7 +153,9 @@ export function Footer(){
         {/* Bottom bar */}
         <div style={{borderTop:"1px solid rgba(255,255,255,.09)",padding:"22px 0",display:"flex",flexWrap:"wrap",justifyContent:"space-between",alignItems:"center",gap:12}}>
           <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,maxWidth:680,lineHeight:1.65}}>
-            SAT® is a trademark registered by the College Board, which is not affiliated with and does not endorse The Digital Tutor. Independent preparation support — no official affiliation, endorsement, or score guarantee. All practice content is original.
+            {isOLevel
+              ? "The Digital Tutor is an independent tuition provider and is not affiliated with or endorsed by Cambridge University Press & Assessment. Cambridge O Level and IGCSE are qualifications of Cambridge University Press & Assessment — no examination grade is guaranteed."
+              : "SAT® is a trademark registered by the College Board, which is not affiliated with and does not endorse The Digital Tutor. Independent preparation support — no official affiliation, endorsement, or score guarantee. All practice content is original."}
           </p>
           <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
             <p style={{color:"#4e6a88",fontSize:".76rem",margin:0,whiteSpace:"nowrap"}}>© 2026 The Digital Tutor</p>

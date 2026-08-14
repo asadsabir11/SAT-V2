@@ -211,3 +211,8 @@ export async function updateApplicationNotes(id: string, adminNotes: string): Pr
   await ensureTable();
   await sql`UPDATE olevel_applications SET admin_notes = ${adminNotes}, updated_at = NOW() WHERE id = ${id}`;
 }
+
+export async function deleteApplication(id: string): Promise<void> {
+  await ensureTable();
+  await sql`DELETE FROM olevel_applications WHERE id = ${id}`;
+}
