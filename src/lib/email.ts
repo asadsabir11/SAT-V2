@@ -1,9 +1,20 @@
 import { Resend } from "resend";
+import type { OLevelApplication } from "@/lib/olevelApplications";
 
 const ADMIN_EMAIL  = process.env.ADMIN_EMAIL ?? "";
 const ADMIN_EMAILS = ADMIN_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
 const WHATSAPP_URL = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL ?? "";
 const APP_URL      = "https://digital-tutor-sat-prep.vercel.app";
+
+const SUBJECT_LABELS: Record<string, string> = {
+  "english-language": "English Language",
+  "mathematics": "Mathematics",
+  "english-language+mathematics": "English Language and Mathematics",
+  "computer-science-waitlist": "Computer Science (waiting list)",
+  "islamiyat-waitlist": "Islamiyat (waiting list)",
+  "pakistan-studies-waitlist": "Pakistan Studies (waiting list)",
+};
+const subjectLabel = (s: string) => SUBJECT_LABELS[s] ?? s;
 
 export async function sendParentReport(opts: {
   parentEmail: string;
@@ -185,6 +196,135 @@ export async function sendWelcomeEmail(student: { name: string; email: string })
           Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
           The Digital Tutor · digital-tutor-sat-prep.vercel.app
         </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelApplicationConfirmation(app: OLevelApplication) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: app.parent_email,
+    subject: "We Received Your O Level Founding Cohort Application",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Application received</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Thank you for applying to The Digital Tutor's O Level Founding Cohort. We have received the application
+          for <strong>${app.student_name}</strong> and <strong>${subjectLabel(app.subject)}</strong>.
+        </p>
+        <p style="color:#344054;line-height:1.65;margin:0 0 24px;">
+          The next step is to complete the payment instructions, or wait for our team to contact you through WhatsApp.
+        </p>
+        <div style="text-align:center;">
+          <a href="${APP_URL}/o-level/payment?applicationId=${app.id}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">View payment instructions →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelApplicationAdminAlert(app: OLevelApplication) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || ADMIN_EMAILS.length === 0) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: ADMIN_EMAILS,
+    subject: `New O Level application: ${app.student_name} (${subjectLabel(app.subject)})`,
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 16px;">New O Level application 🎉</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:140px;">Parent</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${app.parent_name}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">WhatsApp</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.parent_whatsapp}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Student</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.student_name} (Grade ${app.student_grade})</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">City</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.city}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Subject</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${subjectLabel(app.subject)}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Preferred time</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.preferred_class_time}</td></tr>
+          <tr><td style="padding:8px 0;color:#6b7c93;font-size:.85rem;">Source</td><td style="padding:8px 0;color:#071b33;">${app.source || app.utm_source || "—"}</td></tr>
+        </table>
+        <div style="margin-top:24px;">
+          <a href="${APP_URL}/admin/o-level-applications" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View in admin →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelPaymentSubmittedAck(app: OLevelApplication) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: app.parent_email,
+    subject: "Payment Information Received — Verification in Progress",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Thank you</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          We have received your payment information for <strong>${app.student_name}</strong>
+          (${subjectLabel(app.subject)}). Your enrollment will be confirmed after the transaction is verified —
+          please allow up to one business day. We'll follow up on WhatsApp and email.
+        </p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelPaymentSubmittedAdminAlert(app: OLevelApplication) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || ADMIN_EMAILS.length === 0) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: ADMIN_EMAILS,
+    subject: `Payment submitted: ${app.student_name} — needs verification`,
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 16px;">Payment submitted for verification 💳</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:140px;">Student</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${app.student_name}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Subject</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${subjectLabel(app.subject)}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Method</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.payment_method ?? "—"}</td></tr>
+          <tr><td style="padding:8px 0;color:#6b7c93;font-size:.85rem;">Amount paid</td><td style="padding:8px 0;color:#071b33;">PKR ${app.amount_paid ?? "—"}</td></tr>
+        </table>
+        <div style="margin-top:24px;">
+          <a href="${APP_URL}/admin/o-level-applications" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">Review and verify →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelEnrollmentConfirmed(app: OLevelApplication, opts?: { startDate?: string; schedule?: string; orientationDate?: string; nextSteps?: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: app.parent_email,
+    subject: "Payment Verified — Welcome to The Digital Tutor",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Welcome, ${app.student_name}! 🎉</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment has been verified and <strong>${app.student_name}</strong> is enrolled in
+          <strong>${subjectLabel(app.subject)}</strong>.
+        </p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+          ${opts?.startDate ? `<tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:140px;">Start date</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.startDate}</td></tr>` : ""}
+          ${opts?.schedule ? `<tr><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Class schedule</td><td style="padding:8px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${opts.schedule}</td></tr>` : ""}
+          ${opts?.orientationDate ? `<tr><td style="padding:8px 0;color:#6b7c93;font-size:.85rem;">Orientation</td><td style="padding:8px 0;color:#071b33;">${opts.orientationDate}</td></tr>` : ""}
+        </table>
+        ${opts?.nextSteps ? `<p style="color:#344054;line-height:1.65;">${opts.nextSteps}</p>` : ""}
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
       </div>
     `,
   });

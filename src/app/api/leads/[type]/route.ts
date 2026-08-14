@@ -19,7 +19,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
   webinar: ["parentName", "email", "whatsapp", "country", "studentGrade", "interestedPackage", "mainConcern"],
   partner: ["organizationName", "contactName", "email", "country", "organizationType", "message"],
   contact: ["name", "email", "country", "role", "message"],
-  "o-level": ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "password"],
 };
 
 function findMissingFields(type: string, data: Record<string, unknown>): string[] {
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { password, confirmPassword: _confirm, ...leadData } = payload as Record<string, string>;
 
     // For registrations that create an account: check duplicate email BEFORE saving anything
-    if ((type === "student" || type === "o-level") && leadData.studentEmail) {
+    if (type === "student" && leadData.studentEmail) {
       const existing = await findUserByEmail(leadData.studentEmail);
       if (existing) {
         return NextResponse.json(
@@ -65,9 +64,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await appendData(`leads-${type}.json`, record);
     sendToN8n(webhooks[type], record).catch(console.error);
 
-    if ((type === "student" || type === "o-level") && password && leadData.studentEmail && leadData.studentName) {
-      const program = type === "o-level" ? "o-level" : "sat";
-      const userId = await createUser(leadData.studentEmail, password, "student", leadData.studentName, program);
+    if (type === "student" && password && leadData.studentEmail && leadData.studentName) {
+      const userId = await createUser(leadData.studentEmail, password, "student", leadData.studentName, "sat");
       sendNewStudentAlert({
         name: leadData.studentName,
         email: leadData.studentEmail,

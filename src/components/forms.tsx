@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { SUBJECT_OPTIONS, TARGET_EXAM_SESSIONS } from "@/lib/olevelApplicationOptions";
 
 const COUNTRIES = ["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","South Korea","Haiti","Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco","Other"];
 const PACKAGES  = ["Free","Core Plan","Premium","Sponsored/NGO"];
@@ -433,98 +435,114 @@ export function ContactForm() {
   );
 }
 
-// ── O-Level Enrollment Form ───────────────────────────────────────────────────
-type OLevelFields = {
-  studentName: string; parentName: string; studentEmail: string; whatsapp: string;
-  country: string; city: string; grade: string; source: string;
-  password: string; confirmPassword: string; consent: boolean;
+// ── O-Level Application Form ────────────────────────────────────────────────
+// No password / account creation here — the parent applies, then is sent to
+// /o-level/payment. An account is only created once payment is verified.
+type OLevelAppFields = {
+  parentName: string; parentEmail: string; parentWhatsapp: string;
+  studentName: string; studentGrade: string; schoolName: string; city: string;
+  subject: string; preferredClassTime: string; targetExamSession: string;
+  source: string; consent: boolean;
 };
 
-const OLEVEL_INIT: OLevelFields = {
-  studentName: "", parentName: "", studentEmail: "", whatsapp: "",
-  country: "", city: "", grade: "", source: "",
-  password: "", confirmPassword: "", consent: false,
+const OLEVEL_APP_INIT: OLevelAppFields = {
+  parentName: "", parentEmail: "", parentWhatsapp: "",
+  studentName: "", studentGrade: "", schoolName: "", city: "",
+  subject: "", preferredClassTime: "", targetExamSession: "",
+  source: "", consent: false,
 };
 
-export function OLevelEnrollmentForm({
-  subjects, defaultSubject, defaultPlan,
-}: {
-  subjects: { slug: string; name: string }[];
-  defaultSubject?: string;
-  defaultPlan?: string;
-}) {
-  const { status, submit, errorMessage } = useSubmit("/api/leads/o-level");
-  const [fields, setFields] = useState<OLevelFields>(OLEVEL_INIT);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(
-    defaultSubject && subjects.some(s => s.slug === defaultSubject) ? [defaultSubject] : []
-  );
-  const [errors, setErrors] = useState<Partial<Record<keyof OLevelFields, string>>>({});
-  const [touched, setTouched] = useState<Partial<Record<keyof OLevelFields, boolean>>>({});
+export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: string }) {
+  const router = useRouter();
+  const [fields, setFields] = useState<OLevelAppFields>({
+    ...OLEVEL_APP_INIT,
+    subject: defaultSubject && SUBJECT_OPTIONS.some(s => s.value === defaultSubject) ? defaultSubject : "",
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof OLevelAppFields, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof OLevelAppFields, boolean>>>({});
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  function validateField(name: keyof OLevelFields, value: string | boolean): string {
+  function validateField(name: keyof OLevelAppFields, value: string | boolean): string {
     switch (name) {
-      case "studentName": case "parentName": return vName(value as string);
-      case "studentEmail": return vEmail(value as string);
-      case "whatsapp": return vPhone(value as string);
+      case "parentName": case "studentName": return vName(value as string);
+      case "parentEmail": return vEmail(value as string);
+      case "parentWhatsapp": return vPhone(value as string);
       case "city": return vCity(value as string);
-      case "country": case "grade": return vSelect(value as string);
-      case "password": return vPassword(value as string);
-      case "confirmPassword": return (value as string) ? "" : "Required";
+      case "studentGrade": return vSelect(value as string);
+      case "subject": return vSelect(value as string);
+      case "preferredClassTime": return (value as string).trim() ? "" : "Required";
+      case "targetExamSession": return vSelect(value as string);
       case "consent": return value ? "" : "You must consent to proceed";
       default: return "";
     }
   }
 
-  function change(name: keyof OLevelFields, value: string | boolean) {
+  function change(name: keyof OLevelAppFields, value: string | boolean) {
     setFields(f => ({ ...f, [name]: value }));
     if (touched[name]) setErrors(e => ({ ...e, [name]: validateField(name, value) }));
   }
 
-  function blur(name: keyof OLevelFields) {
+  function blur(name: keyof OLevelAppFields) {
     setTouched(t => ({ ...t, [name]: true }));
     setErrors(e => ({ ...e, [name]: validateField(name, fields[name]) }));
   }
 
-  function toggleSubject(slug: string) {
-    setSelectedSubjects(s => s.includes(slug) ? s.filter(x => x !== slug) : [...s, slug]);
-  }
-
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const required: (keyof OLevelFields)[] = ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "password", "confirmPassword", "consent"];
-    const allErrors: Partial<Record<keyof OLevelFields, string>> = {};
-    const allTouched: Partial<Record<keyof OLevelFields, boolean>> = {};
+    const required: (keyof OLevelAppFields)[] = ["parentName", "parentEmail", "parentWhatsapp", "studentName", "studentGrade", "city", "subject", "preferredClassTime", "targetExamSession", "consent"];
+    const allErrors: Partial<Record<keyof OLevelAppFields, string>> = {};
+    const allTouched: Partial<Record<keyof OLevelAppFields, boolean>> = {};
     required.forEach(name => {
       allTouched[name] = true;
       allErrors[name] = validateField(name, fields[name]);
     });
-
-    if (fields.password && fields.confirmPassword && fields.password !== fields.confirmPassword) {
-      allErrors.confirmPassword = "Passwords do not match";
-    }
-
     setTouched(allTouched);
     setErrors(allErrors);
     if (Object.values(allErrors).some(e => e)) return;
 
-    submit({
-      studentName: fields.studentName.trim(),
-      parentName: fields.parentName.trim(),
-      studentEmail: fields.studentEmail.trim().toLowerCase(),
-      whatsapp: fields.whatsapp.trim(),
-      country: fields.country,
-      city: fields.city.trim(),
-      grade: fields.grade,
-      program: "o-level",
-      subject: selectedSubjects.join(","),
-      plan: defaultPlan ?? "",
-      source: fields.source.trim(),
-      password: fields.password,
-      consent: "true",
-    });
+    setStatus("loading");
+    setErrorMessage("");
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const res = await fetch("/api/o-level/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          parentName: fields.parentName.trim(),
+          parentEmail: fields.parentEmail.trim().toLowerCase(),
+          parentWhatsapp: fields.parentWhatsapp.trim(),
+          studentName: fields.studentName.trim(),
+          studentGrade: fields.studentGrade.trim(),
+          schoolName: fields.schoolName.trim(),
+          city: fields.city.trim(),
+          subject: fields.subject,
+          preferredClassTime: fields.preferredClassTime.trim(),
+          targetExamSession: fields.targetExamSession,
+          source: fields.source.trim(),
+          consent: "true",
+          utm_source: params.get("utm_source") ?? "",
+          utm_medium: params.get("utm_medium") ?? "",
+          utm_campaign: params.get("utm_campaign") ?? "",
+          utm_content: params.get("utm_content") ?? "",
+          utm_term: params.get("utm_term") ?? "",
+          fbclid: params.get("fbclid") ?? "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMessage(data.error ?? "Something went wrong. Please try again.");
+        setStatus("error");
+        return;
+      }
+      router.push(`/o-level/payment?applicationId=${data.id}`);
+    } catch {
+      setErrorMessage("Something went wrong. Please try again.");
+      setStatus("error");
+    }
   }
 
-  const text = (name: keyof OLevelFields, placeholder?: string) => ({
+  const text = (name: keyof OLevelAppFields, placeholder?: string) => ({
     id: name, name,
     value: fields[name] as string,
     placeholder,
@@ -533,7 +551,7 @@ export function OLevelEnrollmentForm({
     style: errStyle(!!errors[name]),
   });
 
-  const sel = (name: keyof OLevelFields) => ({
+  const sel = (name: keyof OLevelAppFields) => ({
     id: name, name,
     value: fields[name] as string,
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => change(name, e.target.value),
@@ -541,48 +559,40 @@ export function OLevelEnrollmentForm({
     style: errStyle(!!errors[name]),
   });
 
-  if (status === "success") return (
-    <div style={{ padding: 28, borderRadius: 16, background: "linear-gradient(135deg,#d4faf5,#eaf4ff)", border: "1px solid rgba(24,169,153,.2)" }}>
-      <p style={{ color: "#075a50", fontWeight: 700, fontSize: "1.05rem", margin: "0 0 6px" }}>You&apos;re enrolled!</p>
-      <p style={{ color: "#2d6b60", margin: "0 0 20px", lineHeight: 1.65 }}>
-        Your student account is ready. Our team will reach out on WhatsApp to confirm your subjects and founding cohort schedule — meanwhile, go to your dashboard to start learning.
-      </p>
-      <a href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg,#155eef,#18a999)", color: "#fff", fontWeight: 800, padding: "12px 22px", borderRadius: 999, fontSize: ".95rem", textDecoration: "none" }}>
-        Go to my dashboard →
-      </a>
-    </div>
-  );
-
   return (
     <form className="form card" onSubmit={handleSubmit} noValidate>
       <div className="form-grid">
-        <div className="field">
-          <label htmlFor="studentName">Student full name *</label>
-          <input type="text" {...text("studentName", "e.g. Fatima Khan")} />
-          <Err msg={touched.studentName ? errors.studentName : undefined} />
-        </div>
         <div className="field">
           <label htmlFor="parentName">Parent full name *</label>
           <input type="text" {...text("parentName", "e.g. Ahmed Khan")} />
           <Err msg={touched.parentName ? errors.parentName : undefined} />
         </div>
         <div className="field">
-          <label htmlFor="studentEmail">Student or parent email *</label>
-          <input type="email" {...text("studentEmail", "name@gmail.com")} />
-          <Err msg={touched.studentEmail ? errors.studentEmail : undefined} />
+          <label htmlFor="parentEmail">Parent email *</label>
+          <input type="email" {...text("parentEmail", "parent@gmail.com")} />
+          <Err msg={touched.parentEmail ? errors.parentEmail : undefined} />
         </div>
         <div className="field">
-          <label htmlFor="whatsapp">WhatsApp number *</label>
-          <input type="tel" {...text("whatsapp", "+92 300 1234567")} />
-          <Err msg={touched.whatsapp ? errors.whatsapp : undefined} />
+          <label htmlFor="parentWhatsapp">Parent WhatsApp number *</label>
+          <input type="tel" {...text("parentWhatsapp", "+92 300 1234567")} />
+          <Err msg={touched.parentWhatsapp ? errors.parentWhatsapp : undefined} />
         </div>
         <div className="field">
-          <label htmlFor="country">Country *</label>
-          <select {...sel("country")}>
-            <option value="">Select country</option>
-            {COUNTRIES.map(c => <option key={c}>{c}</option>)}
+          <label htmlFor="studentName">Student first name *</label>
+          <input type="text" {...text("studentName", "e.g. Fatima")} />
+          <Err msg={touched.studentName ? errors.studentName : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="studentGrade">Student grade / year *</label>
+          <select {...sel("studentGrade")}>
+            <option value="">Select grade</option>
+            {GRADES.map(g => <option key={g}>{g}</option>)}
           </select>
-          <Err msg={touched.country ? errors.country : undefined} />
+          <Err msg={touched.studentGrade ? errors.studentGrade : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="schoolName">School name</label>
+          <input type="text" {...text("schoolName", "Optional")} />
         </div>
         <div className="field">
           <label htmlFor="city">City *</label>
@@ -590,48 +600,29 @@ export function OLevelEnrollmentForm({
           <Err msg={touched.city ? errors.city : undefined} />
         </div>
         <div className="field">
-          <label htmlFor="grade">Grade / year *</label>
-          <select {...sel("grade")}>
-            <option value="">Select grade</option>
-            {GRADES.map(g => <option key={g}>{g}</option>)}
+          <label htmlFor="subject">Subject of interest *</label>
+          <select {...sel("subject")}>
+            <option value="">Select subject</option>
+            {SUBJECT_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
-          <Err msg={touched.grade ? errors.grade : undefined} />
+          <Err msg={touched.subject ? errors.subject : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="preferredClassTime">Preferred class time *</label>
+          <input type="text" {...text("preferredClassTime", "e.g. Weekday evenings (PKT)")} />
+          <Err msg={touched.preferredClassTime ? errors.preferredClassTime : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="targetExamSession">Target exam session *</label>
+          <select {...sel("targetExamSession")}>
+            <option value="">Select session</option>
+            {TARGET_EXAM_SESSIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <Err msg={touched.targetExamSession ? errors.targetExamSession : undefined} />
         </div>
         <div className="field">
           <label htmlFor="source">How did you hear about us?</label>
-          <input type="text" {...text("source", "e.g. WhatsApp, Instagram, friend")} />
-        </div>
-      </div>
-
-      <div style={{ borderTop: "1px solid #edf2f7", paddingTop: 20, marginTop: 4 }}>
-        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".88rem", margin: "0 0 14px" }}>
-          Which O Level subjects are you interested in?
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-          {subjects.map(s => (
-            <label key={s.slug} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 14px", borderRadius: 999, border: "1.5px solid #d0dcea", cursor: "pointer", fontSize: ".88rem", fontWeight: 600, color: "var(--navy)" }}>
-              <input type="checkbox" checked={selectedSubjects.includes(s.slug)} onChange={() => toggleSubject(s.slug)} />
-              {s.name}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ borderTop: "1px solid #edf2f7", paddingTop: 20, marginTop: 4 }}>
-        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".88rem", margin: "0 0 14px" }}>
-          Create a password for your student account
-        </p>
-        <div className="form-grid">
-          <div className="field">
-            <label htmlFor="password">Password *</label>
-            <input type="password" {...text("password", "Min 8 chars, include a number")} autoComplete="new-password" />
-            <Err msg={touched.password ? errors.password : undefined} />
-          </div>
-          <div className="field">
-            <label htmlFor="confirmPassword">Confirm password *</label>
-            <input type="password" {...text("confirmPassword", "Repeat your password")} autoComplete="new-password" />
-            <Err msg={touched.confirmPassword ? errors.confirmPassword : undefined} />
-          </div>
+          <input type="text" {...text("source", "e.g. Facebook, Instagram, friend")} />
         </div>
       </div>
 
@@ -645,7 +636,8 @@ export function OLevelEnrollmentForm({
           style={{ marginTop: 3, flexShrink: 0 }}
         />
         <span>
-          I consent to being contacted about O Level enrollment. See our{" "}
+          I agree that The Digital Tutor may contact me by WhatsApp, phone or email regarding the selected O Level
+          program. I have reviewed the{" "}
           <a href="/privacy" style={{ color: "#155eef" }}>Privacy Policy</a> and{" "}
           <a href="/terms" style={{ color: "#155eef" }}>Terms of Service</a>.
         </span>
@@ -653,7 +645,7 @@ export function OLevelEnrollmentForm({
       {touched.consent && <Err msg={errors.consent} />}
 
       <button className="btn btn-primary" type="submit" disabled={status === "loading"}>
-        {status === "loading" ? "Submitting…" : "Join the founding cohort"}
+        {status === "loading" ? "Submitting…" : "Submit Application and View Payment Options"}
       </button>
 
       {status === "error" && (

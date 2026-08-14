@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -51,6 +52,8 @@ const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","
 
 export function Header() {
   const [user, setUser] = useState<AuthUser>(null);
+  const pathname = usePathname();
+  const isOLevel = pathname?.startsWith("/o-level") ?? false;
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
@@ -61,14 +64,20 @@ export function Header() {
           {PUBLIC_NAV.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
-          {user?.role === "student" && (
+          {!isOLevel && user?.role === "student" && (
             <Link href="/sat" style={{padding:"8px 12px",borderRadius:10,color:"#155eef",fontWeight:800,transition:".16s",whiteSpace:"nowrap"}}>SAT</Link>
           )}
           <AuthBadge onUser={setUser} />
           {!user && (
-            <Link href="/register?plan=Core" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
-              Join cohort →
-            </Link>
+            isOLevel ? (
+              <Link href="/o-level/enroll" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
+                Join O Level Cohort →
+              </Link>
+            ) : (
+              <Link href="/register?plan=Core" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
+                Join cohort →
+              </Link>
+            )
           )}
         </nav>
       </div>
@@ -77,6 +86,8 @@ export function Header() {
 }
 
 export function Footer(){
+  const pathname = usePathname();
+  const isOLevel = pathname?.startsWith("/o-level") ?? false;
   return (
     <footer className="band" style={{padding:0}}>
       <div style={{height:3,background:"linear-gradient(90deg,#155eef 0%,#18a999 100%)"}}/>
@@ -114,11 +125,22 @@ export function Footer(){
           {/* Get Started */}
           <div>
             <p className="footer-col-title">Get Started</p>
-            <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
-              Create a free account to access the diagnostic, AI tutor, and your personal dashboard.
-            </p>
-            <Link href="/register" className="footer-cta-btn footer-cta-primary">Get started free →</Link>
-            <Link href="/register?plan=Core" className="footer-cta-btn footer-cta-secondary">Join the cohort</Link>
+            {isOLevel ? (
+              <>
+                <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
+                  Apply for the O Level Founding Cohort — English Language and Mathematics enrolling now.
+                </p>
+                <Link href="/o-level/enroll" className="footer-cta-btn footer-cta-primary">Apply for O Level →</Link>
+              </>
+            ) : (
+              <>
+                <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
+                  Create a free account to access the diagnostic, AI tutor, and your personal dashboard.
+                </p>
+                <Link href="/register" className="footer-cta-btn footer-cta-primary">Get started free →</Link>
+                <Link href="/register?plan=Core" className="footer-cta-btn footer-cta-secondary">Join the cohort</Link>
+              </>
+            )}
             <p style={{color:"#4e6a88",fontSize:".78rem",marginTop:16,lineHeight:1.5}}>
               Cohort seats open · Limited seats
             </p>

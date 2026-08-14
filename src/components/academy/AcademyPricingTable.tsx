@@ -29,7 +29,7 @@ export function AcademyPricingTable() {
       </div>
 
       <div className="actions">
-        <CTAButton href="/o-level/enroll?program=o-level&plan=Founding">Join the Founding Cohort</CTAButton>
+        <CTAButton href="/o-level/enroll">Join the Founding Cohort</CTAButton>
         <CTAButton href="/o-level#subjects" variant="secondary">View Subjects</CTAButton>
       </div>
       <p style={{ marginTop: 16, color: "var(--muted)", fontSize: ".8rem", lineHeight: 1.6 }}>
