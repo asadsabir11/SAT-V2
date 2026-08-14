@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApplicationById, submitPayment } from "@/lib/olevelApplications";
 import { sendOLevelPaymentSubmittedAck, sendOLevelPaymentSubmittedAdminAlert } from "@/lib/email";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 const VALID_METHODS = new Set(["jazzcash", "easypaisa", "bank_transfer"]);
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const allowed = await checkRateLimit(`o-level-payment:${clientIp(req)}`, 8, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many submissions. Please try again later or contact us on WhatsApp." }, { status: 429 });
+  }
+
   const { id } = await params;
   const existing = await getApplicationById(id);
   if (!existing) return NextResponse.json({ error: "Application not found" }, { status: 404 });

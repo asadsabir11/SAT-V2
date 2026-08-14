@@ -41,3 +41,4 @@ details{border-bottom:1px solid var(--line);padding:20px 0}summary{color:var(--n
 .check-list{list-style:none;padding:0;margin:0;display:grid;gap:8px}.check-list li{display:flex;align-items:flex-start;gap:8px;color:var(--muted);font-size:.92rem;line-height:1.6}.check-list li::before{content:"✓";color:var(--teal);font-weight:900;flex-shrink:0}
 @media(max-width:900px){.grid-4,.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-layout{grid-template-columns:1fr}.footer-main-grid{grid-template-columns:1fr 1fr!important}.stat-row{flex-direction:column}.stat-cell{border-right:0;border-bottom:1px solid var(--line)}.stat-cell:last-child{border-bottom:0}}
 @media(max-width:680px){.section{padding:68px 0}.grid-4,.grid-3,.grid-2,.form-grid{grid-template-columns:1fr}.display{font-size:2.8rem}.hero{padding-top:56px}.footer-main-grid{grid-template-columns:1fr!important}.trust-strip{gap:8px 16px}}
+@media(max-width:480px){.whatsapp-cta-label{display:none}}

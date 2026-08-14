@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createApplication, SUBJECT_OPTIONS, TARGET_EXAM_SESSIONS, type SubjectOption, type TargetExamSession } from "@/lib/olevelApplications";
 import { sendOLevelApplicationConfirmation, sendOLevelApplicationAdminAlert } from "@/lib/email";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 const VALID_SUBJECTS = new Set(SUBJECT_OPTIONS.map((s) => s.value));
 const VALID_SESSIONS = new Set(TARGET_EXAM_SESSIONS.map((s) => s.value));
@@ -15,6 +16,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+
+    // Honeypot — bots tend to fill every field; humans never see this one.
+    // Pretend success so the bot doesn't learn to avoid it.
+    if (typeof body.website === "string" && body.website.trim()) {
+      return NextResponse.json({ id: crypto.randomUUID() });
+    }
+
+    const allowed = await checkRateLimit(`o-level-application:${clientIp(req)}`, 5, 60);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many submissions. Please try again later or contact us on WhatsApp." }, { status: 429 });
     }
 
     const missing = REQUIRED_FIELDS.filter((f) => {

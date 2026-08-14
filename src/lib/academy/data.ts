@@ -19,7 +19,7 @@ export const INSTRUCTORS: Instructor[] = [
     id: "ibrahim",
     name: "Ibrahim Sajid Malick",
     title: "Founder, The Digital Tutor — Educator & Technology Leader",
-    bio: "An experienced technology professional and educator with a background in technology, cloud, AI, networking, and cybersecurity. Ibrahim teaches the founding O Level cohort personally, connecting exam content with real-world understanding while keeping every course aligned to the Cambridge examination.",
+    bio: "Ibrahim Sajid Malick is an experienced educator, technology executive and founder of The Digital Tutor. He brings more than 25 years of technology and leadership experience to the classroom, including expertise in mathematics, computer science, artificial intelligence, cloud computing, networking and cybersecurity.",
     teaches: [
       "Mathematics",
       "Computer Science",
@@ -28,10 +28,11 @@ export const INSTRUCTORS: Instructor[] = [
       "Pakistan Studies",
     ],
     highlights: [
+      "Former Executive Director at Iqra University",
+      "25+ years of technology and leadership experience",
+      "Experienced online educator and course creator",
       "Founder of The Digital Tutor",
-      "Experienced instructor across sciences and humanities",
-      "Connects Computer Science with real-world technology concepts",
-      "Keeps courses aligned to Cambridge examination requirements",
+      "Personally teaching the initial English and Mathematics cohorts",
     ],
   },
 ];
@@ -276,7 +277,7 @@ export const COHORTS: Cohort[] = [
     targetExam: "May/June 2027",
     scheduleLabel: "Weekly concept class + weekly workshop",
     status: "enrolling",
-    capacity: 20,
+    capacity: 15,
     enrolled: 0,
   },
   {
@@ -298,7 +299,7 @@ export const COHORTS: Cohort[] = [
     targetExam: "May/June 2027",
     scheduleLabel: "Weekly concept class + weekly writing workshop",
     status: "enrolling",
-    capacity: 20,
+    capacity: 15,
     enrolled: 0,
   },
   {

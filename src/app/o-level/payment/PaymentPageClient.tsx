@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { upload } from "@vercel/blob/client";
+import { trackInitiateCheckout, trackPaymentSubmitted } from "@/lib/analyticsClient";
 
 interface ApplicationSummary {
   id: string;
@@ -72,6 +73,8 @@ export default function PaymentPageClient() {
         setApplication(d.application);
         if (d.application.status !== "new_application" && d.application.status !== "contact_required" && d.application.status !== "awaiting_payment") {
           setSubmitted(true);
+        } else {
+          trackInitiateCheckout({ subject: d.application.subject, value: d.application.amount_due ?? undefined });
         }
       })
       .finally(() => setLoading(false));
@@ -79,7 +82,7 @@ export default function PaymentPageClient() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!applicationId) return;
+    if (!applicationId || !application) return;
     if (!paymentMethod || !amountPaid || !transactionReference.trim() || !paymentDate || !payerAccountName.trim()) {
       setError("Please fill in all required fields.");
       return;
@@ -118,6 +121,7 @@ export default function PaymentPageClient() {
         setSubmitting(false);
         return;
       }
+      trackPaymentSubmitted({ subject: application.subject, value: Number(amountPaid) });
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");

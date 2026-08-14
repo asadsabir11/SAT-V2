@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SUBJECT_OPTIONS, TARGET_EXAM_SESSIONS } from "@/lib/olevelApplicationOptions";
+import { SUBJECT_OPTIONS, TARGET_EXAM_SESSIONS, amountDueForSubject, type SubjectOption } from "@/lib/olevelApplicationOptions";
+import { trackLead } from "@/lib/analyticsClient";
 
 const COUNTRIES = ["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","South Korea","Haiti","Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco","Other"];
 const PACKAGES  = ["Free","Core Plan","Premium","Sponsored/NGO"];
@@ -443,13 +444,14 @@ type OLevelAppFields = {
   studentName: string; studentGrade: string; schoolName: string; city: string;
   subject: string; preferredClassTime: string; targetExamSession: string;
   source: string; consent: boolean;
+  website: string; // honeypot — left blank by humans, often filled by bots
 };
 
 const OLEVEL_APP_INIT: OLevelAppFields = {
   parentName: "", parentEmail: "", parentWhatsapp: "",
   studentName: "", studentGrade: "", schoolName: "", city: "",
   subject: "", preferredClassTime: "", targetExamSession: "",
-  source: "", consent: false,
+  source: "", consent: false, website: "",
 };
 
 export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: string }) {
@@ -527,6 +529,7 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
           utm_content: params.get("utm_content") ?? "",
           utm_term: params.get("utm_term") ?? "",
           fbclid: params.get("fbclid") ?? "",
+          website: fields.website,
         }),
       });
       const data = await res.json();
@@ -535,6 +538,7 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
         setStatus("error");
         return;
       }
+      trackLead({ subject: fields.subject, value: amountDueForSubject(fields.subject as SubjectOption) ?? undefined });
       router.push(`/o-level/payment?applicationId=${data.id}`);
     } catch {
       setErrorMessage("Something went wrong. Please try again.");
@@ -561,6 +565,11 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
 
   return (
     <form className="form card" onSubmit={handleSubmit} noValidate>
+      {/* Honeypot — hidden from real users, left blank; bots often fill every field */}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+        <label htmlFor="website">Leave this field blank</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={fields.website} onChange={(e) => setFields((f) => ({ ...f, website: e.target.value }))} />
+      </div>
       <div className="form-grid">
         <div className="field">
           <label htmlFor="parentName">Parent full name *</label>

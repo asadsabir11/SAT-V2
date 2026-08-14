@@ -70,7 +70,7 @@ export function Header() {
           <AuthBadge onUser={setUser} />
           {!user && (
             isOLevel ? (
-              <Link href="/o-level/enroll" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
+              <Link href="/o-level#apply" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
                 Join O Level Cohort →
               </Link>
             ) : (
@@ -130,7 +130,7 @@ export function Footer(){
                 <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
                   Apply for the O Level Founding Cohort — English Language and Mathematics enrolling now.
                 </p>
-                <Link href="/o-level/enroll" className="footer-cta-btn footer-cta-primary">Apply for O Level →</Link>
+                <Link href="/o-level#apply" className="footer-cta-btn footer-cta-primary">Apply for O Level →</Link>
               </>
             ) : (
               <>

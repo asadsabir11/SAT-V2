@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getApplicationById, updateApplicationStatus, updateApplicationNotes, subjectsToGrant, APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/olevelApplications";
+import { getApplicationById, updateApplicationStatus, updateApplicationNotes, subjectsToGrant, amountDueForSubject, APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/olevelApplications";
 import { grantOLevelAccess, revokeOLevelAccess } from "@/lib/olevelAccess";
+import { sendMetaPurchaseEvent, sendGA4PurchaseEvent } from "@/lib/serverConversions";
 
 const ACCESS_GRANTING_STATUSES: ApplicationStatus[] = ["payment_verified", "enrolled"];
 const ACCESS_REVOKING_STATUSES: ApplicationStatus[] = ["refunded", "cancelled", "declined"];
@@ -39,6 +40,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     for (const subject of subjects) {
       await grantOLevelAccess(updated.parent_email, subject, session.email, `O-Level application ${updated.id}`);
     }
+    const value = updated.amount_paid ?? amountDueForSubject(updated.subject) ?? 0;
+    sendMetaPurchaseEvent({ applicationId: updated.id, subject: updated.subject, value }).catch(console.error);
+    sendGA4PurchaseEvent({ applicationId: updated.id, subject: updated.subject, value }).catch(console.error);
   } else if (wasGranted && ACCESS_REVOKING_STATUSES.includes(status)) {
     for (const subject of subjects) {
       await revokeOLevelAccess(updated.parent_email, subject);
