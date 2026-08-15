@@ -63,6 +63,12 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
+export async function updateUserPassword(email: string, newPassword: string): Promise<void> {
+  await ensureUsersTable();
+  const hash = await bcrypt.hash(newPassword, 10);
+  await sql`UPDATE users SET password_hash = ${hash} WHERE email = ${email.toLowerCase().trim()}`;
+}
+
 export async function getStudentAccessLevel(email: string): Promise<"free" | "pending" | "unlocked"> {
   await ensureUsersTable();
   const rows = await sql`SELECT access_level FROM users WHERE email = ${email.toLowerCase().trim()} LIMIT 1`;

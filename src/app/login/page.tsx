@@ -96,9 +96,16 @@ function LoginForm() {
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <label htmlFor="login-password" style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
-              Password
-            </label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <label htmlFor="login-password" style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054" }}>
+                Password
+              </label>
+              {role === "student" && (
+                <Link href="/forgot-password" style={{ color: "#155eef", fontWeight: 600, textDecoration: "none", fontSize: ".8rem" }}>
+                  Forgot password?
+                </Link>
+              )}
+            </div>
             <div style={{ position: "relative" }}>
               <input
                 id="login-password"

@@ -4,6 +4,8 @@ import { appendData } from "@/lib/storage";
 import { createUser, findUserByEmail } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
 import { sendNewStudentAlert, sendWelcomeEmail } from "@/lib/email";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 
 const webhooks: Record<string, string | undefined> = {
   student: process.env.N8N_STUDENT_REGISTRATION_WEBHOOK_URL,
@@ -19,6 +21,14 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
   webinar: ["parentName", "email", "whatsapp", "country", "studentGrade", "interestedPackage", "mainConcern"],
   partner: ["organizationName", "contactName", "email", "country", "organizationType", "message"],
   contact: ["name", "email", "country", "role", "message"],
+};
+
+// Which field holds the contact email for each type, so it can be format-checked server-side.
+const EMAIL_FIELDS: Record<string, string> = {
+  student: "studentEmail",
+  webinar: "email",
+  partner: "email",
+  contact: "email",
 };
 
 function findMissingFields(type: string, data: Record<string, unknown>): string[] {
@@ -37,6 +47,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!payload || typeof payload !== "object")
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
+    // Honeypot — bots tend to fill every field; humans never see this one.
+    // Pretend success so the bot doesn't learn to avoid it.
+    if (typeof payload.website === "string" && payload.website.trim()) {
+      return NextResponse.json({ ok: true });
+    }
+
+    const allowed = await checkRateLimit(`leads-${type}:${clientIp(request)}`, 5, 60);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many submissions. Please try again later or contact us directly." }, { status: 429 });
+    }
+
     const missing = findMissingFields(type, payload as Record<string, unknown>);
     if (missing.length > 0) {
       return NextResponse.json(
@@ -45,8 +66,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
+    const emailField = EMAIL_FIELDS[type];
+    if (emailField && !isValidEmail(String(payload[emailField]))) {
+      return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
+    }
+
+    if (type === "student") {
+      const pwError = passwordStrengthError(String(payload.password ?? ""));
+      if (pwError) {
+        return NextResponse.json({ error: `Password: ${pwError}` }, { status: 400 });
+      }
+    }
+
     // Strip password from the lead record before saving
-    const { password, confirmPassword: _confirm, ...leadData } = payload as Record<string, string>;
+    const { password, confirmPassword: _confirm, website: _website, ...leadData } = payload as Record<string, string>;
 
     // For registrations that create an account: check duplicate email BEFORE saving anything
     if (type === "student" && leadData.studentEmail) {

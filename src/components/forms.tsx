@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SUBJECT_OPTIONS, TARGET_EXAM_SESSIONS, amountDueForSubject, type SubjectOption } from "@/lib/olevelApplicationOptions";
 import { trackLead } from "@/lib/analyticsClient";
+import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 
 const COUNTRIES = ["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","South Korea","Haiti","Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco","Other"];
 const PACKAGES  = ["Free","Core Plan","Premium","Sponsored/NGO"];
@@ -18,7 +19,7 @@ export function vName(v: string) {
 }
 export function vEmail(v: string) {
   if (!v.trim()) return "Required";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())) return "Enter a valid email address (e.g. name@gmail.com)";
+  if (!isValidEmail(v)) return "Enter a valid email address (e.g. name@gmail.com)";
   return "";
 }
 export function vPhone(v: string) {
@@ -48,11 +49,7 @@ function vSatScore(v: string) {
   return "";
 }
 function vPassword(v: string) {
-  if (!v) return "Required";
-  if (v.length < 8) return "Minimum 8 characters";
-  if (!/[A-Za-z]/.test(v)) return "Must contain at least one letter";
-  if (!/[0-9]/.test(v)) return "Must contain at least one number";
-  return "";
+  return passwordStrengthError(v);
 }
 function vFutureDate(v: string) {
   if (!v) return "";
@@ -115,6 +112,7 @@ type RegFields = {
   packageType: string; preferredClassTime: string; source: string;
   password: string; confirmPassword: string;
   consent: boolean;
+  website: string; // honeypot — left blank by humans, often filled by bots
 };
 
 const REG_INIT: RegFields = {
@@ -123,7 +121,7 @@ const REG_INIT: RegFields = {
   targetSatDate: "", currentScore: "", targetScore: "",
   packageType: "Core Plan", preferredClassTime: "", source: "",
   password: "", confirmPassword: "",
-  consent: false,
+  consent: false, website: "",
 };
 
 export function RegistrationForm() {
@@ -220,6 +218,7 @@ export function RegistrationForm() {
       source: fields.source.trim(),
       password: fields.password,
       consent: "true",
+      website: fields.website,
     });
   }
 
@@ -259,6 +258,11 @@ export function RegistrationForm() {
 
   return (
     <form className="form card" onSubmit={handleSubmit} noValidate>
+      {/* Honeypot — hidden from real users, left blank; bots often fill every field */}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+        <label htmlFor="reg-website">Leave this field blank</label>
+        <input id="reg-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={fields.website} onChange={(e) => setFields((f) => ({ ...f, website: e.target.value }))} />
+      </div>
       <div className="form-grid">
 
         <div className="field">

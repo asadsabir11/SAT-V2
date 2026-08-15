@@ -4,7 +4,7 @@ import type { OLevelApplication } from "@/lib/olevelApplications";
 const ADMIN_EMAIL  = process.env.ADMIN_EMAIL ?? "";
 const ADMIN_EMAILS = ADMIN_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
 const WHATSAPP_URL = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL ?? "";
-const APP_URL      = "https://digital-tutor-sat-prep.vercel.app";
+const APP_URL      = "https://academy.thedigitaltutor.net";
 
 const SUBJECT_LABELS: Record<string, string> = {
   "english-language": "English Language",
@@ -81,7 +81,7 @@ export async function sendParentReport(opts: {
             <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
           </div>
 
-          <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service. No score guarantees implied.<br>The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+          <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service. No score guarantees implied.<br>The Digital Tutor · academy.thedigitaltutor.net</p>
         </div>
       `,
     });
@@ -120,9 +120,9 @@ export async function sendNewStudentAlert(student: {
           ${student.grade ? `<tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Grade</td><td style="padding:10px 0;color:#071b33;">${student.grade}</td></tr>` : ""}
         </table>
         <div style="margin-top:24px;">
-          <a href="https://digital-tutor-sat-prep.vercel.app/admin" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View in admin →</a>
+          <a href="${APP_URL}/admin" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View in admin →</a>
         </div>
-        <p style="color:#a0aec0;font-size:.75rem;margin-top:24px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:24px;">The Digital Tutor · academy.thedigitaltutor.net</p>
       </div>
     `,
   });
@@ -194,7 +194,34 @@ export async function sendWelcomeEmail(student: { name: string; email: string })
 
         <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;line-height:1.6;">
           Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
-          The Digital Tutor · digital-tutor-sat-prep.vercel.app
+          The Digital Tutor · academy.thedigitaltutor.net
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPasswordResetEmail(opts: { email: string; name: string; resetUrl: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+
+  await resend.emails.send({
+    from: "The Digital Tutor <onboarding@resend.dev>",
+    to: opts.email,
+    subject: "Reset your password — The Digital Tutor",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">Reset your password</h2>
+        <p style="color:#6b7c93;margin:0 0 24px;font-size:.9rem;line-height:1.6;">
+          Hi ${opts.name}, we received a request to reset the password on your Digital Tutor account. This link expires in 1 hour and can only be used once.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${opts.resetUrl}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Reset my password →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.78rem;line-height:1.6;">
+          If you didn't request this, you can safely ignore this email — your password will not change.<br>
+          The Digital Tutor · academy.thedigitaltutor.net
         </p>
       </div>
     `,
@@ -222,7 +249,7 @@ export async function sendOLevelApplicationConfirmation(app: OLevelApplication) 
         <div style="text-align:center;">
           <a href="${APP_URL}/o-level/payment?applicationId=${app.id}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">View payment instructions →</a>
         </div>
-        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
       </div>
     `,
   });
@@ -272,7 +299,7 @@ export async function sendOLevelPaymentSubmittedAck(app: OLevelApplication) {
           (${subjectLabel(app.subject)}). Your enrollment will be confirmed after the transaction is verified —
           please allow up to one business day. We'll follow up on WhatsApp and email.
         </p>
-        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
       </div>
     `,
   });
@@ -324,7 +351,7 @@ export async function sendOLevelEnrollmentConfirmed(app: OLevelApplication, opts
           ${opts?.orientationDate ? `<tr><td style="padding:8px 0;color:#6b7c93;font-size:.85rem;">Orientation</td><td style="padding:8px 0;color:#071b33;">${opts.orientationDate}</td></tr>` : ""}
         </table>
         ${opts?.nextSteps ? `<p style="color:#344054;line-height:1.65;">${opts.nextSteps}</p>` : ""}
-        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · digital-tutor-sat-prep.vercel.app</p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
       </div>
     `,
   });
