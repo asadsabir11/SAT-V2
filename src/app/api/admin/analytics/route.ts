@@ -4,7 +4,7 @@ import { getSkillAccuracy, getAITutorUsage, getAssessmentHistory } from "@/lib/a
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const studentId = new URL(req.url).searchParams.get("studentId");
   if (!studentId) return NextResponse.json({ error: "studentId required" }, { status: 400 });

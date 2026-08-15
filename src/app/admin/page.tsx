@@ -27,6 +27,7 @@ interface AdminData {
 export default function Admin() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFounder, setIsFounder] = useState(false);
 
   async function deleteStudent(email: string, name: string) {
     if (!confirm(`Delete "${name}" (${email})? This removes their account and all data.`)) return;
@@ -46,6 +47,10 @@ export default function Admin() {
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false));
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => setIsFounder(d.user?.role === "founder"))
+      .catch(() => {});
   }, []);
 
   const m = data?.metrics;
@@ -72,9 +77,11 @@ export default function Admin() {
       <section className="section">
         <div className="container">
           <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-            <Link href="/admin/quiz" className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
-              Manage diagnostic quizzes →
-            </Link>
+            {isFounder && (
+              <Link href="/admin/quiz" className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
+                Manage diagnostic quizzes →
+              </Link>
+            )}
             <Link href="/admin/quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #1d4ed8", background: "#eff6ff", color: "#1d4ed8" }}>
               📝 SAT quizzes →
             </Link>
@@ -90,18 +97,24 @@ export default function Admin() {
             <Link href="/admin/o-level-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fef3c7", color: "#b45309" }}>
               📘 O Level quizzes →
             </Link>
-            <Link href="/admin/o-level-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
-              🔑 O Level access →
-            </Link>
-            <Link href="/admin/o-level-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #c2410c", background: "#fff7ed", color: "#c2410c" }}>
-              📋 O Level applications →
-            </Link>
+            {isFounder && (
+              <Link href="/admin/o-level-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
+                🔑 O Level access →
+              </Link>
+            )}
+            {isFounder && (
+              <Link href="/admin/o-level-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #c2410c", background: "#fff7ed", color: "#c2410c" }}>
+                📋 O Level applications →
+              </Link>
+            )}
             <Link href="/admin/past-papers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
               📄 O Level past papers →
             </Link>
-            <Link href="/admin/access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
-              🔑 Access requests →
-            </Link>
+            {isFounder && (
+              <Link href="/admin/access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
+                🔑 Access requests →
+              </Link>
+            )}
             <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
               📅 Manage sessions →
             </Link>
@@ -111,9 +124,16 @@ export default function Admin() {
             <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
               📢 Announcements →
             </Link>
-            <Link href="/admin/parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
-              👨‍👩‍👧 Parent accounts →
-            </Link>
+            {isFounder && (
+              <Link href="/admin/parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
+                👨‍👩‍👧 Parent accounts →
+              </Link>
+            )}
+            {isFounder && (
+              <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                👨‍🏫 Teacher accounts →
+              </Link>
+            )}
             <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
               ✅ Attendance →
             </Link>
@@ -126,9 +146,11 @@ export default function Admin() {
             <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
               📈 Analytics →
             </Link>
-            <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
-              🗑 Clear test data
-            </button>
+            {isFounder && (
+              <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+                🗑 Clear test data
+              </button>
+            )}
           </div>
 
           {loading ? (

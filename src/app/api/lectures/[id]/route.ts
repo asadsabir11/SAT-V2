@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   const lecture = await getLectureById(id);
   if (!lecture) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (!lecture.is_published && session.role !== "founder") {
+  if (!lecture.is_published && session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   // Enforce access for students
@@ -38,7 +38,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;
@@ -55,7 +55,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;

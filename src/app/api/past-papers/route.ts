@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (session.role === "founder") {
+  if ((session.role === "founder" || session.role === "teacher")) {
     const papers = await getAllPapers();
     return NextResponse.json({ papers });
   }
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { subject, title, description, session: examSession, paper_type, file_url, file_name } = await req.json();

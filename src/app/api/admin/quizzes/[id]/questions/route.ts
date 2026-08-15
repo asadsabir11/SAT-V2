@@ -5,7 +5,7 @@ import { ensureSatQuizTables } from "@/lib/satQuizzes";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await ensureSatQuizTables();
   const { id } = await params;
   const { question_text, options, correct_answer, explanation, order_index } = await req.json();

@@ -4,7 +4,7 @@ import { getBankQuestions, addBankQuestion } from "@/lib/questionBank";
 
 export async function GET() {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const questions = await getBankQuestions();
@@ -13,7 +13,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json();

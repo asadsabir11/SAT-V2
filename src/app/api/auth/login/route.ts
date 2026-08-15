@@ -29,12 +29,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email, password, and role are required" }, { status: 400 });
     }
 
-    // Both students and founders are stored in the users table
+    // Students, founders, parents, and teachers are all stored in the users table
     const user = await findUserByEmail(email);
     if (!user || user.role !== role) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
-    if (!["student", "founder", "parent"].includes(user.role)) {
+    if (!["student", "founder", "parent", "teacher"].includes(user.role)) {
       return NextResponse.json({ error: "Invalid account type" }, { status: 401 });
     }
     const valid = await verifyPassword(password, user.password_hash);
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: user.role === "founder" ? 60 * 60 * 24 : 60 * 60 * 24 * 7,
+      maxAge: (user.role === "founder" || user.role === "teacher") ? 60 * 60 * 24 : 60 * 60 * 24 * 7,
       path: "/",
     });
     return res;

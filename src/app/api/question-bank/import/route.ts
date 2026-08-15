@@ -37,7 +37,7 @@ function resolveProgram(raw: string | undefined): BankProgram {
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

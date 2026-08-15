@@ -21,16 +21,16 @@ async function ensureUsersTable() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS approved_by TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS notes TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
-  // Migrate role constraint to include 'parent'
+  // Migrate role constraint to include 'parent', then 'teacher'
   await sql`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`;
-  await sql`ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('student', 'founder', 'parent'))`;
+  await sql`ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('student', 'founder', 'parent', 'teacher'))`;
   usersReady = true;
 }
 
 export async function createUser(
   email: string,
   password: string,
-  role: "student" | "founder" | "parent",
+  role: "student" | "founder" | "parent" | "teacher",
   name: string,
   program: "sat" | "o-level" = "sat"
 ): Promise<string> {

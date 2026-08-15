@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

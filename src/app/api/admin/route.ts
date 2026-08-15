@@ -4,7 +4,7 @@ import { readData } from "@/lib/storage";
 
 export async function GET() {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const [students, webinar, partners, contacts, diagnostics, oLevelLeads] = await Promise.all([

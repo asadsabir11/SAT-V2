@@ -21,7 +21,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const quiz = await getQuizById(id);
   if (!quiz) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (session.role === "founder") {
+  if ((session.role === "founder" || session.role === "teacher")) {
     return NextResponse.json({ quiz });
   }
 
@@ -41,7 +41,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;
@@ -59,7 +59,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const programParam = req.nextUrl.searchParams.get("program");
 
   if (programParam === "o-level") {
-    if (session.role === "founder") {
+    if ((session.role === "founder" || session.role === "teacher")) {
       const sessions = (await getAllSessions()).filter((s) => s.program === "o-level");
       return NextResponse.json({ sessions, access_level: "unlocked" });
     }
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ sessions, access_level: "unlocked", locked: false });
   }
 
-  if (session.role === "founder") {
+  if ((session.role === "founder" || session.role === "teacher")) {
     const sessions = await getAllSessions();
     return NextResponse.json({ sessions, access_level: "unlocked" });
   }
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json();

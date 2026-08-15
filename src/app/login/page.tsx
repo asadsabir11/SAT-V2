@@ -3,7 +3,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-type Role = "student" | "founder" | "parent";
+type Role = "student" | "founder" | "parent" | "teacher";
+const ROLE_LABELS: Record<Role, string> = { student: "Student", parent: "Parent", founder: "Founder", teacher: "Teacher" };
 
 function LoginForm() {
   const params = useSearchParams();
@@ -18,7 +19,7 @@ function LoginForm() {
 
   useEffect(() => {
     const r = params.get("role") as Role;
-    if (r === "student" || r === "founder") setRole(r);
+    if (r === "student" || r === "founder" || r === "parent" || r === "teacher") setRole(r);
   }, [params]);
 
   async function handleSubmit(e: { preventDefault(): void }) {
@@ -35,7 +36,7 @@ function LoginForm() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Login failed. Please try again."); return; }
       // Full page reload so the Header re-fetches the session cookie
-      window.location.href = nextPath ?? (data.role === "founder" ? "/admin" : data.role === "parent" ? "/parent" : "/dashboard");
+      window.location.href = nextPath ?? ((data.role === "founder" || data.role === "teacher") ? "/admin" : data.role === "parent" ? "/parent" : "/dashboard");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -60,7 +61,7 @@ function LoginForm() {
 
         {/* Role tabs */}
         <div style={{ display: "flex", gap: 8, marginBottom: 28, background: "#f1f5f9", borderRadius: 12, padding: 4 }}>
-          {([["student", "🎓", "Student"], ["parent", "👨‍👩‍👧", "Parent"], ["founder", "👨‍🏫", "Teacher"]] as const).map(([r, icon, label]) => (
+          {([["student", "🎓", "Student"], ["parent", "👨‍👩‍👧", "Parent"], ["teacher", "👨‍🏫", "Teacher"], ["founder", "🛡️", "Founder"]] as const).map(([r, icon, label]) => (
             <button
               key={r}
               type="button"
@@ -90,7 +91,7 @@ function LoginForm() {
               autoComplete="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder={role === "founder" ? "founder@email.com" : role === "parent" ? "parent@gmail.com" : "student@gmail.com"}
+              placeholder={role === "founder" ? "founder@email.com" : role === "teacher" ? "teacher@email.com" : role === "parent" ? "parent@gmail.com" : "student@gmail.com"}
               style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: "1.5px solid #dce5ef", fontSize: ".95rem", boxSizing: "border-box", outline: "none" }}
             />
           </div>
@@ -138,13 +139,18 @@ function LoginForm() {
             className="btn btn-primary"
             style={{ width: "100%", minHeight: 46, fontSize: "1rem", borderRadius: 12 }}
           >
-            {loading ? "Signing in…" : `Sign in as ${role === "founder" ? "Teacher" : role === "parent" ? "Parent" : "Student"} →`}
+            {loading ? "Signing in…" : `Sign in as ${ROLE_LABELS[role]} →`}
           </button>
         </form>
 
         {role === "parent" && (
           <p style={{ textAlign: "center", marginTop: 20, fontSize: ".85rem", color: "#6b7c93" }}>
             Your login is set up by the tutor. Contact Ibrahim if you need access.
+          </p>
+        )}
+        {role === "teacher" && (
+          <p style={{ textAlign: "center", marginTop: 20, fontSize: ".85rem", color: "#6b7c93" }}>
+            Teacher accounts are created by the founder. Contact Ibrahim if you need access.
           </p>
         )}
         {role === "student" && (

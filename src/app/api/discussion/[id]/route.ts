@@ -20,7 +20,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const post = await getPostById(id);
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
   // Founder can delete any post; student can only delete their own
-  if (session.role !== "founder" && post.author_email !== session.email) {
+  if (session.role !== "founder" && session.role !== "teacher" && post.author_email !== session.email) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   await deletePost(id);

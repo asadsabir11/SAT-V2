@@ -10,16 +10,18 @@ export const AUTH_COOKIE = "sat_auth";
 export type SessionUser = {
   id: string;
   email: string;
-  role: "student" | "founder" | "parent";
+  role: "student" | "founder" | "parent" | "teacher";
   name: string;
 };
 
 export async function createToken(user: SessionUser): Promise<string> {
-  // Founder sessions carry admin power — keep them short. Matches the 24h
-  // cookie maxAge set at login so the JWT can't outlive the cookie.
+  // Founder and teacher sessions carry admin-dashboard power — keep them
+  // short. Matches the 24h cookie maxAge set at login so the JWT can't
+  // outlive the cookie.
+  const isStaff = user.role === "founder" || user.role === "teacher";
   return new SignJWT({ ...user })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime(user.role === "founder" ? "24h" : "7d")
+    .setExpirationTime(isStaff ? "24h" : "7d")
     .sign(SECRET);
 }
 

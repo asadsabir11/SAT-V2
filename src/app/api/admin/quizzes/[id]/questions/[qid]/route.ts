@@ -5,7 +5,7 @@ import { ensureSatQuizTables } from "@/lib/satQuizzes";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string; qid: string }> }) {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await ensureSatQuizTables();
   const { qid } = await params;
   const { question_text, options, correct_answer, explanation } = await req.json();
@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string; qid: string }> }) {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await ensureSatQuizTables();
   const { qid } = await params;
   await sql`DELETE FROM quiz_set_questions WHERE id = ${qid}`;

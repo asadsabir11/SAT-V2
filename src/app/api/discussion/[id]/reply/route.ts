@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     post_id, body: body.trim(),
     author_email: session.email,
     author_name: session.name,
-    is_instructor: session.role === "founder",
+    is_instructor: (session.role === "founder" || session.role === "teacher"),
   });
   return NextResponse.json({ id });
 }

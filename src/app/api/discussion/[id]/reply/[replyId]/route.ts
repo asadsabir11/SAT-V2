@@ -6,7 +6,7 @@ type Params = { params: Promise<{ id: string; replyId: string }> };
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id: postId, replyId } = await params;
@@ -22,7 +22,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const replies = await getReplies(postId);
   const reply = replies.find(r => r.id === replyId);
   if (!reply) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (session.role !== "founder" && reply.author_email !== session.email) {
+  if (session.role !== "founder" && session.role !== "teacher" && reply.author_email !== session.email) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   await deleteReply(replyId);

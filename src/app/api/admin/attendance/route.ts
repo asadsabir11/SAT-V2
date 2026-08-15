@@ -6,7 +6,7 @@ import { sql } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const sessionId = new URL(req.url).searchParams.get("sessionId");
   if (!sessionId) return NextResponse.json({ error: "sessionId required" }, { status: 400 });
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { sessionId, records } = await req.json() as {
     sessionId: string;
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 // List all live sessions for the selector
 export async function OPTIONS() {
   const session = await getSession();
-  if (!session || session.role !== "founder") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const sessions = await sql`SELECT id, title, scheduled_at FROM live_sessions ORDER BY scheduled_at DESC LIMIT 50`;
   return NextResponse.json({ sessions });
 }

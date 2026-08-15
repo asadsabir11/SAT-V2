@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const subjectParam = req.nextUrl.searchParams.get("subject");
 
-  if (session.role === "founder") {
+  if ((session.role === "founder" || session.role === "teacher")) {
     const quizzes = await getAllQuizzes();
     return NextResponse.json({ quizzes });
   }
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session || session.role !== "founder") {
+  if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { subject, title, description } = await req.json();
