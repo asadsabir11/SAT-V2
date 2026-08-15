@@ -48,26 +48,38 @@ const FAQ_ITEMS: [string, string][] = [
   ["Are the classes live or recorded?", "Classes are delivered live online."],
   ["What happens if my child misses a class?", "Our missed-class and recording policy will be published here before the founding cohort begins."],
   ["How many students will be in each class?", "The founding cohorts will be limited to a maximum of 15 students per class."],
-  ["How often are classes held?", "Each subject includes a published live-class schedule and designated office hours — shared with applicants as cohorts are confirmed."],
+  ["How often are classes held?", "Mathematics meets weekly on Saturdays (6:00–7:00 PM PKT) and English Language meets weekly on Fridays (6:00–7:00 PM PKT), each 1 hour long, plus office hours Monday–Friday from 7:30–8:15 PM PKT."],
   ["Does the program guarantee a particular grade?", "No. The program provides teaching, practice, feedback and structured preparation, but no examination grade can be guaranteed."],
   ["How will parents receive progress updates?", "Parents will receive regular reports covering attendance, homework, current strengths, areas for improvement and recommended next steps."],
   ["How do I pay?", "Payments are initially accepted through JazzCash, Easypaisa and local bank transfer. Enrollment is confirmed after payment verification."],
-  ["What is the refund policy?", "Our refund and cancellation policy will be published here before we accept payment for the founding cohort."],
+  ["What is the refund policy?", "If you cancel within 7 days of your first payment, you'll receive a 100% refund. See our full Refund & Cancellation Policy for details."],
   ["Is The Digital Tutor affiliated with Cambridge?", "No. The Digital Tutor is an independent tuition provider and is not affiliated with or endorsed by Cambridge University Press & Assessment."],
 ];
+
+const COHORT_SCHEDULE = {
+  startDate: "September 12, 2026",
+  registrationDeadline: "September 10, 2026",
+  officeHours: "7:30 PM – 8:15 PM, Monday–Friday (PKT)",
+  sessionDuration: "1 hour",
+} as const;
+
+const SUBJECT_CLASS_TIME: Record<string, string> = {
+  "english-language": "Friday, 6:00 PM – 7:00 PM (PKT)",
+  "mathematics": "Saturday, 6:00 PM – 7:00 PM (PKT)",
+};
 
 function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number }) {
   const subject = getSubject(subjectSlug);
   const cohort = getCohortForSubject(subjectSlug);
   if (!subject) return null;
 
+  const classTime = SUBJECT_CLASS_TIME[subjectSlug];
   const rows: [string, string][] = [
-    ["Cohort start date", "To be confirmed"],
-    ["Registration deadline", "To be confirmed"],
-    ["Class days", "To be confirmed"],
-    ["Class time (PKT)", "To be confirmed"],
-    ["Session duration", "To be confirmed"],
-    ["Weekly office-hour time", "To be confirmed"],
+    ["Cohort start date", COHORT_SCHEDULE.startDate],
+    ["Registration deadline", COHORT_SCHEDULE.registrationDeadline],
+    ["Class day & time (PKT)", classTime ?? "To be confirmed"],
+    ["Session duration", COHORT_SCHEDULE.sessionDuration],
+    ["Weekly office hours", COHORT_SCHEDULE.officeHours],
     ["Maximum students", "15"],
     ["Monthly price", `PKR ${price.toLocaleString()}`],
   ];
@@ -136,8 +148,7 @@ export default async function OLevelPage({
             <div className="eyebrow" style={{ justifyContent: "center" }}>Founding cohorts</div>
             <h2 className="title">English Language and Mathematics</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
-              These two subjects are confirmed for the founding cohort. Exact class days and times will be shared
-              with applicants as each cohort is finalized.
+              These two subjects are confirmed for the founding cohort, starting September 12, 2026.
             </p>
           </div>
           <div className="grid grid-2" style={{ marginTop: 40 }}>

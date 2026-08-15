@@ -6,37 +6,33 @@ export const metadata: Metadata = {
   description: "Refund and cancellation policy for The Digital Tutor's O Level Founding Cohort.",
 };
 
-const SECTIONS = [
-  "Whether the first payment is refundable",
-  "The cancellation deadline",
-  "Whether attended classes are refundable",
-  "How refunds are requested",
-  "Processing time",
-  "Treatment of missed classes",
-  "What happens if The Digital Tutor cancels a cohort",
-  "Whether founder pricing continues after a break in enrollment",
+const SECTIONS: [string, string | null][] = [
+  ["Whether the first payment is refundable", "Yes — your first payment is 100% refundable if you cancel within 7 days of making it."],
+  ["The cancellation deadline", "7 days from the date of your first payment."],
+  ["Whether attended classes are refundable", null],
+  ["How refunds are requested", null],
+  ["Processing time", null],
+  ["Treatment of missed classes", null],
+  ["What happens if The Digital Tutor cancels a cohort", null],
+  ["Whether founder pricing continues after a break in enrollment", null],
 ];
 
 export default function OLevelRefundPolicy() {
   return (
     <>
       <PageHero eyebrow="Refund & cancellation policy" title="Refund & Cancellation Policy" backHref="/o-level" backLabel="O Level">
-        This policy will be published in full, approved by the founder, before the O Level Founding Cohort begins
-        accepting payment.
+        The core refund terms below are confirmed. The remaining sections will be published before the founding
+        cohort begins.
       </PageHero>
       <section className="section">
         <div className="container" style={{ maxWidth: 720 }}>
-          <div className="card" style={{ background: "#fffbeb", borderColor: "#fde68a", marginBottom: 32 }}>
-            <p style={{ margin: 0, color: "#92400e", fontWeight: 700 }}>
-              ⚠ This policy is pending founder approval and is not yet final. It will be completed before any
-              payment is accepted for the founding cohort.
-            </p>
-          </div>
           <div style={{ display: "grid", gap: 20 }}>
-            {SECTIONS.map((s) => (
-              <div key={s} className="card">
-                <h3 style={{ marginTop: 0, fontSize: "1rem" }}>{s}</h3>
-                <p style={{ margin: 0, color: "var(--muted)" }}>To be confirmed by the founder before launch.</p>
+            {SECTIONS.map(([title, answer]) => (
+              <div key={title} className="card" style={!answer ? { background: "#fffbeb", borderColor: "#fde68a" } : undefined}>
+                <h3 style={{ marginTop: 0, fontSize: "1rem" }}>{title}</h3>
+                <p style={{ margin: 0, color: answer ? "var(--muted)" : "#92400e" }}>
+                  {answer ?? "⚠ To be confirmed by the founder before launch."}
+                </p>
               </div>
             ))}
           </div>

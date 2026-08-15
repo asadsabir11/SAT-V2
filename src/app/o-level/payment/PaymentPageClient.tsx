@@ -43,6 +43,19 @@ function PlaceholderRow({ label }: { label: string }) {
   );
 }
 
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <p style={{ margin: "4px 0", fontSize: ".88rem", color: "#071b33" }}>
+      <span style={{ color: "#6b7c93" }}>{label}: </span>
+      <strong>{value}</strong>
+    </p>
+  );
+}
+
+const BANK_NAME = process.env.NEXT_PUBLIC_OLEVEL_BANK_NAME;
+const BANK_ACCOUNT_TITLE = process.env.NEXT_PUBLIC_OLEVEL_BANK_ACCOUNT_TITLE;
+const BANK_IBAN = process.env.NEXT_PUBLIC_OLEVEL_BANK_IBAN;
+
 export default function PaymentPageClient() {
   const searchParams = useSearchParams();
   const applicationId = searchParams.get("applicationId");
@@ -201,9 +214,19 @@ export default function PaymentPageClient() {
                   <PlaceholderRow label="Mobile/account number" />
                 </PaymentMethodCard>
                 <PaymentMethodCard title="Bank Transfer" color="#1d4ed8" bg="#eff6ff">
-                  <PlaceholderRow label="Bank name" />
-                  <PlaceholderRow label="Account title" />
-                  <PlaceholderRow label="Account / IBAN" />
+                  {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
+                    <>
+                      <DetailRow label="Bank" value={BANK_NAME} />
+                      <DetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
+                      <DetailRow label="IBAN" value={BANK_IBAN} />
+                    </>
+                  ) : (
+                    <>
+                      <PlaceholderRow label="Bank name" />
+                      <PlaceholderRow label="Account title" />
+                      <PlaceholderRow label="Account / IBAN" />
+                    </>
+                  )}
                 </PaymentMethodCard>
               </div>
 
