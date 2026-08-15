@@ -19,6 +19,7 @@ export const INSTRUCTORS: Instructor[] = [
     id: "ibrahim",
     name: "Ibrahim Sajid Malick",
     title: "Founder, The Digital Tutor — Educator & Technology Leader",
+    photoUrl: "/ibrahim.jpeg",
     bio: "Ibrahim Sajid Malick is an experienced educator, technology executive and founder of The Digital Tutor. He brings more than 25 years of technology and leadership experience to the classroom, including expertise in mathematics, computer science, artificial intelligence, cloud computing, networking and cybersecurity.",
     teaches: [
       "Mathematics",

@@ -27,6 +27,8 @@ export interface Instructor {
   bio: string;
   teaches: string[];
   highlights: string[];
+  /** Optional path under /public, e.g. "/ibrahim.jpg". Falls back to initials if unset. */
+  photoUrl?: string;
 }
 
 export interface Subject {

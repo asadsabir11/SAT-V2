@@ -5,9 +5,18 @@ export function InstructorProfile({ instructor }: { instructor: Instructor }) {
 
   return (
     <div className="card" style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
-      <span style={{ width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg,#155eef,#18a999)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", fontWeight: 900, flexShrink: 0 }}>
-        {initials}
-      </span>
+      {instructor.photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={instructor.photoUrl}
+          alt={instructor.name}
+          style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+        />
+      ) : (
+        <span style={{ width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg,#155eef,#18a999)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", fontWeight: 900, flexShrink: 0 }}>
+          {initials}
+        </span>
+      )}
       <div style={{ flex: 1, minWidth: 240 }}>
         <h3 style={{ margin: 0 }}>{instructor.name}</h3>
         <p style={{ marginTop: 4, marginBottom: 0, color: "var(--blue)", fontSize: ".92rem", fontWeight: 700 }}>{instructor.title}</p>
