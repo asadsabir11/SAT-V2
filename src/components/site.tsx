@@ -88,6 +88,11 @@ export function Header() {
 export function Footer(){
   const pathname = usePathname();
   const isOLevel = pathname?.startsWith("/o-level") ?? false;
+  const [user, setUser] = useState<AuthUser>(null);
+  useEffect(() => {
+    fetch("/api/auth/me").then(r => r.json()).then(d => setUser(d.user ?? null)).catch(() => {});
+  }, []);
+  const isSignedInStudent = user?.role === "student";
   return (
     <footer className="band" style={{padding:0}}>
       <div style={{height:3,background:"linear-gradient(90deg,#155eef 0%,#18a999 100%)"}}/>
@@ -129,12 +134,21 @@ export function Footer(){
           <div>
             <p className="footer-col-title">Get Started</p>
             {isOLevel ? (
-              <>
-                <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
-                  Register free for O Level English Language and Mathematics — pay only when you unlock a subject.
-                </p>
-                <Link href="/o-level#apply" className="footer-cta-btn footer-cta-primary">Register Free →</Link>
-              </>
+              isSignedInStudent ? (
+                <>
+                  <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
+                    Welcome back — head to your dashboard to browse subjects or unlock a new one.
+                  </p>
+                  <Link href="/dashboard" className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
+                </>
+              ) : (
+                <>
+                  <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
+                    Register free for O Level English Language and Mathematics — pay only when you unlock a subject.
+                  </p>
+                  <Link href="/o-level#apply" className="footer-cta-btn footer-cta-primary">Register Free →</Link>
+                </>
+              )
             ) : (
               <>
                 <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>

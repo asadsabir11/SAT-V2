@@ -184,7 +184,11 @@ export default async function OLevelPage() {
             Founding cohorts now enrolling for English Language and Mathematics. Limited to 15 students per class.
           </p>
           <div className="actions">
-            <CTAButton href="#apply" variant="accent">Create Your Free Account</CTAButton>
+            {isSignedInStudent ? (
+              <CTAButton href="/dashboard" variant="accent">Go to My Dashboard</CTAButton>
+            ) : (
+              <CTAButton href="#apply" variant="accent">Create Your Free Account</CTAButton>
+            )}
             <CTAButton href="#subjects" variant="ghost">View Subjects and Schedule</CTAButton>
           </div>
           <div style={{ marginTop: 32, display: "flex", flexWrap: "wrap", gap: 10 }}>
