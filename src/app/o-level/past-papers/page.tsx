@@ -1,9 +1,9 @@
 "use client";
 import { Suspense, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
-import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
+import { LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 type PaperType = "question_paper" | "mark_scheme" | "examiner_report" | "other";
@@ -55,13 +55,13 @@ function PaperCard({ p }: { p: PastPaper }) {
 }
 
 function OLevelPastPapersInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const preselect = searchParams.get("subject") as OLevelCategory | null;
 
   const [papers, setPapers] = useState<PastPaper[]>([]);
   const [access, setAccess] = useState<AccessLevel>("free");
   const [loading, setLoading] = useState(true);
-  const [showUnlock, setShowUnlock] = useState(false);
   const [tab, setTab] = useState<OLevelCategory>(
     preselect && SUBJECTS.some((s) => s.slug === preselect) ? preselect : SUBJECTS[0].slug
   );
@@ -83,19 +83,6 @@ function OLevelPastPapersInner() {
       <PageHero eyebrow="O Level past papers" title="Past Papers" backHref="/o-level" backLabel="O Level">
         Practice with past exam papers, mark schemes, and examiner reports. Unlock a subject to access its papers.
       </PageHero>
-
-      {showUnlock && (
-        <UnlockModal
-          accessLevel={access}
-          onClose={() => setShowUnlock(false)}
-          onSubmitted={() => load(tab)}
-          eyebrow="O Level subject access"
-          title={`Unlock O Level ${subjectName}`}
-          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
-          endpoint="/api/o-level/access/request"
-          requestBody={{ subject: tab }}
-        />
-      )}
 
       <section className="section">
         <div className="container" style={{ maxWidth: 900 }}>
@@ -123,7 +110,7 @@ function OLevelPastPapersInner() {
           {!loading && access !== "unlocked" && (
             <LockedBanner
               accessLevel={access}
-              onUnlock={() => setShowUnlock(true)}
+              onUnlock={() => router.push(`/o-level/unlock?subject=${tab}`)}
               title={`🔒 Unlock ${subjectName}`}
               subtitle="Unlock this subject to access its past papers."
               buttonLabel="Unlock this subject"

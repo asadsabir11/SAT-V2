@@ -61,7 +61,7 @@ export default async function SubjectPage({
         )}
         <p className="lead">{subject.description}</p>
         <div className="actions">
-          <CTAButton href="#enroll" variant="accent">Enroll in the Founding Cohort</CTAButton>
+          <CTAButton href="/o-level#apply" variant="accent">Create Your Free Account</CTAButton>
           <CTAButton href={`/o-level/lectures?subject=${subject.slug}`} variant="secondary">Watch Lessons</CTAButton>
           <CTAButton href={`/o-level/quizzes?subject=${subject.slug}`} variant="secondary">Take a Quiz</CTAButton>
           <CTAButton href={`/o-level/sessions?subject=${subject.slug}`} variant="secondary">Live Sessions</CTAButton>

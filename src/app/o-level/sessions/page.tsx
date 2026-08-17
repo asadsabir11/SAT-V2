@@ -1,9 +1,9 @@
 "use client";
 import { Suspense, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
-import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
+import { LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 type Platform = "zoom" | "google_classroom" | "google_meet" | "other";
@@ -82,13 +82,13 @@ function SessionCard({ s }: { s: LiveSession }) {
 }
 
 function OLevelSessionsInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const preselect = searchParams.get("subject") as OLevelCategory | null;
 
   const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [access, setAccess] = useState<AccessLevel>("free");
   const [loading, setLoading] = useState(true);
-  const [showUnlock, setShowUnlock] = useState(false);
   const [tab, setTab] = useState<OLevelCategory>(
     preselect && SUBJECTS.some((s) => s.slug === preselect) ? preselect : SUBJECTS[0].slug
   );
@@ -113,19 +113,6 @@ function OLevelSessionsInner() {
       <PageHero eyebrow="O Level live sessions" title="Live Sessions" backHref="/o-level" backLabel="O Level">
         Join live classes and office hours with your teacher. Unlock a subject to see its sessions.
       </PageHero>
-
-      {showUnlock && (
-        <UnlockModal
-          accessLevel={access}
-          onClose={() => setShowUnlock(false)}
-          onSubmitted={() => load(tab)}
-          eyebrow="O Level subject access"
-          title={`Unlock O Level ${subjectName}`}
-          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
-          endpoint="/api/o-level/access/request"
-          requestBody={{ subject: tab }}
-        />
-      )}
 
       <section className="section">
         <div className="container" style={{ maxWidth: 760 }}>
@@ -153,7 +140,7 @@ function OLevelSessionsInner() {
           {!loading && access !== "unlocked" && (
             <LockedBanner
               accessLevel={access}
-              onUnlock={() => setShowUnlock(true)}
+              onUnlock={() => router.push(`/o-level/unlock?subject=${tab}`)}
               title={`🔒 Unlock ${subjectName}`}
               subtitle="Unlock this subject to see its live sessions."
               buttonLabel="Unlock this subject"

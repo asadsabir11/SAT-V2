@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { listOLevelAccessRequests, grantOLevelAccess, revokeOLevelAccess } from "@/lib/olevelAccess";
 import { OLEVEL_LECTURE_CATEGORIES } from "@/lib/lectures";
+import { findUserByEmail } from "@/lib/users";
+import { sendOLevelAccessGranted } from "@/lib/email";
+import { sendMetaPurchaseEvent, sendGA4PurchaseEvent } from "@/lib/serverConversions";
 
 export async function GET() {
   const session = await getSession();
@@ -25,6 +28,17 @@ export async function POST(req: NextRequest) {
 
   if (action === "grant") {
     await grantOLevelAccess(email, subject, session.email, notes);
+
+    const student = await findUserByEmail(email);
+    sendOLevelAccessGranted({ email, name: student?.name ?? "there", subject }).catch(console.error);
+
+    const value = subject === "mathematics" || subject === "english-language" ? 10000 : 0;
+    if (value > 0) {
+      const idempotencyKey = `${email}:${subject}`;
+      sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject, value }).catch(console.error);
+      sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject, value }).catch(console.error);
+    }
+
     return NextResponse.json({ ok: true });
   }
   if (action === "revoke") {

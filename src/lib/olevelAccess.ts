@@ -20,6 +20,15 @@ async function ensureTable() {
       UNIQUE(email, subject)
     )
   `;
+  // Payment-proof fields added after this table already existed in
+  // production — must be their own migration, not folded into CREATE TABLE
+  // above (that already burned us once today on olevel_applications).
+  await sql`ALTER TABLE olevel_subject_access ADD COLUMN IF NOT EXISTS payment_method TEXT`;
+  await sql`ALTER TABLE olevel_subject_access ADD COLUMN IF NOT EXISTS amount_paid NUMERIC`;
+  await sql`ALTER TABLE olevel_subject_access ADD COLUMN IF NOT EXISTS transaction_reference TEXT`;
+  await sql`ALTER TABLE olevel_subject_access ADD COLUMN IF NOT EXISTS payment_date DATE`;
+  await sql`ALTER TABLE olevel_subject_access ADD COLUMN IF NOT EXISTS payer_account_name TEXT`;
+  await sql`ALTER TABLE olevel_subject_access ADD COLUMN IF NOT EXISTS payment_screenshot_url TEXT`;
   tableReady = true;
 }
 
@@ -44,15 +53,36 @@ export async function getOLevelAccessMap(email: string): Promise<Record<string, 
   return map;
 }
 
-export async function requestOLevelAccess(email: string, subject: OLevelLectureCategory): Promise<void> {
+export interface PaymentProof {
+  paymentMethod: string;
+  amountPaid: number;
+  transactionReference: string;
+  paymentDate: string;
+  payerAccountName: string;
+  paymentScreenshotUrl: string | null;
+}
+
+export async function requestOLevelAccess(email: string, subject: OLevelLectureCategory, proof: PaymentProof): Promise<void> {
   await ensureTable();
   const normalized = email.toLowerCase().trim();
   await sql`
-    INSERT INTO olevel_subject_access (id, email, subject, status, payment_requested_at)
-    VALUES (${crypto.randomUUID()}, ${normalized}, ${subject}, 'pending', NOW())
+    INSERT INTO olevel_subject_access (
+      id, email, subject, status, payment_requested_at,
+      payment_method, amount_paid, transaction_reference, payment_date, payer_account_name, payment_screenshot_url
+    )
+    VALUES (
+      ${crypto.randomUUID()}, ${normalized}, ${subject}, 'pending', NOW(),
+      ${proof.paymentMethod}, ${proof.amountPaid}, ${proof.transactionReference}, ${proof.paymentDate}, ${proof.payerAccountName}, ${proof.paymentScreenshotUrl}
+    )
     ON CONFLICT (email, subject) DO UPDATE
       SET status = CASE WHEN olevel_subject_access.status = 'unlocked' THEN 'unlocked' ELSE 'pending' END,
-          payment_requested_at = NOW()
+          payment_requested_at = NOW(),
+          payment_method = ${proof.paymentMethod},
+          amount_paid = ${proof.amountPaid},
+          transaction_reference = ${proof.transactionReference},
+          payment_date = ${proof.paymentDate},
+          payer_account_name = ${proof.payerAccountName},
+          payment_screenshot_url = ${proof.paymentScreenshotUrl}
   `;
 }
 
@@ -89,12 +119,19 @@ export interface OLevelAccessRow {
   approved_by: string | null;
   notes: string | null;
   created_at: string;
+  payment_method: string | null;
+  amount_paid: string | null;
+  transaction_reference: string | null;
+  payment_date: string | null;
+  payer_account_name: string | null;
+  payment_screenshot_url: string | null;
 }
 
 export async function listOLevelAccessRequests(): Promise<OLevelAccessRow[]> {
   await ensureTable();
   const rows = await sql`
-    SELECT a.id, a.email, u.name, a.subject, a.status, a.payment_requested_at, a.approved_at, a.approved_by, a.notes, a.created_at
+    SELECT a.id, a.email, u.name, a.subject, a.status, a.payment_requested_at, a.approved_at, a.approved_by, a.notes, a.created_at,
+           a.payment_method, a.amount_paid, a.transaction_reference, a.payment_date, a.payer_account_name, a.payment_screenshot_url
     FROM olevel_subject_access a
     LEFT JOIN users u ON u.email = a.email
     ORDER BY
@@ -102,4 +139,17 @@ export async function listOLevelAccessRequests(): Promise<OLevelAccessRow[]> {
       a.created_at DESC
   `;
   return rows as OLevelAccessRow[];
+}
+
+export async function getOLevelAccessById(id: string): Promise<OLevelAccessRow | null> {
+  await ensureTable();
+  const rows = await sql`
+    SELECT a.id, a.email, u.name, a.subject, a.status, a.payment_requested_at, a.approved_at, a.approved_by, a.notes, a.created_at,
+           a.payment_method, a.amount_paid, a.transaction_reference, a.payment_date, a.payer_account_name, a.payment_screenshot_url
+    FROM olevel_subject_access a
+    LEFT JOIN users u ON u.email = a.email
+    WHERE a.id = ${id}
+    LIMIT 1
+  `;
+  return (rows[0] as OLevelAccessRow) ?? null;
 }

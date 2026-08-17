@@ -1,10 +1,10 @@
 "use client";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
-import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
+import { LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 
@@ -28,6 +28,7 @@ const SUBJECT_ICON: Record<OLevelCategory, string> = {
 const SUBJECTS = getOLevelSubjects().map((s) => ({ slug: s.slug as OLevelCategory, name: s.name }));
 
 function OLevelQuizzesInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const preselect = searchParams.get("subject") as OLevelCategory | null;
 
@@ -37,7 +38,6 @@ function OLevelQuizzesInner() {
   const [quizzes, setQuizzes] = useState<QuizSummary[]>([]);
   const [access, setAccess] = useState<AccessLevel>("free");
   const [loading, setLoading] = useState(true);
-  const [showUnlock, setShowUnlock] = useState(false);
 
   const load = useCallback((subject: OLevelCategory) => {
     setLoading(true);
@@ -56,19 +56,6 @@ function OLevelQuizzesInner() {
       <PageHero eyebrow="O Level quizzes" title="Practice Quizzes" backHref="/o-level" backLabel="O Level">
         Short subject quizzes to check your understanding. Unlock a subject to take its quizzes — your best score is saved.
       </PageHero>
-
-      {showUnlock && (
-        <UnlockModal
-          accessLevel={access}
-          onClose={() => setShowUnlock(false)}
-          onSubmitted={() => load(tab)}
-          eyebrow="O Level subject access"
-          title={`Unlock O Level ${subjectName}`}
-          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
-          endpoint="/api/o-level/access/request"
-          requestBody={{ subject: tab }}
-        />
-      )}
 
       <section className="section">
         <div className="container">
@@ -96,7 +83,7 @@ function OLevelQuizzesInner() {
           {!loading && access !== "unlocked" && (
             <LockedBanner
               accessLevel={access}
-              onUnlock={() => setShowUnlock(true)}
+              onUnlock={() => router.push(`/o-level/unlock?subject=${tab}`)}
               title={`🔒 Unlock ${subjectName}`}
               subtitle="Unlock this subject to take its quizzes and see your scores."
               buttonLabel="Unlock this subject"

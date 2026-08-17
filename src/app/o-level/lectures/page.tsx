@@ -1,10 +1,10 @@
 "use client";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
-import { UnlockModal, LockedBanner, type AccessLevel } from "@/components/unlock-modal";
+import type { AccessLevel } from "@/components/unlock-modal";
 
 type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
 
@@ -77,6 +77,7 @@ function LectureCard({ lec, index, onLockedClick }: { lec: Lecture; index: numbe
 }
 
 function OLevelLecturesInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const preselect = searchParams.get("subject") as OLevelCategory | null;
 
@@ -86,7 +87,6 @@ function OLevelLecturesInner() {
   const [tab, setTab] = useState<OLevelCategory>(
     preselect && SUBJECTS.some((s) => s.slug === preselect) ? preselect : SUBJECTS[0].slug
   );
-  const [unlockSubject, setUnlockSubject] = useState<OLevelCategory | null>(null);
 
   const load = useCallback(() => {
     fetch("/api/lectures")
@@ -102,26 +102,12 @@ function OLevelLecturesInner() {
 
   const byCategory = (cat: OLevelCategory) => lectures.filter((l) => l.category === cat);
   const visible = byCategory(tab);
-  const subjectName = (slug: OLevelCategory) => SUBJECTS.find((s) => s.slug === slug)?.name ?? slug;
 
   return (
     <>
       <PageHero eyebrow="O Level materials" title="Lessons" backHref="/o-level" backLabel="O Level">
         Recorded lessons for each O Level subject — watch on demand, rewatch, and take the quiz after each one. Unlock a subject to access its lessons.
       </PageHero>
-
-      {unlockSubject && (
-        <UnlockModal
-          accessLevel={oLevelAccess[unlockSubject] ?? "free"}
-          onClose={() => setUnlockSubject(null)}
-          onSubmitted={load}
-          eyebrow="O Level subject access"
-          title={`Unlock O Level ${subjectName(unlockSubject)}`}
-          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
-          endpoint="/api/o-level/access/request"
-          requestBody={{ subject: unlockSubject }}
-        />
-      )}
 
       <section className="section">
         <div className="container">
@@ -161,7 +147,7 @@ function OLevelLecturesInner() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
               {visible.map((lec, i) => (
-                <LectureCard key={lec.id} lec={lec} index={i} onLockedClick={() => setUnlockSubject(lec.category)} />
+                <LectureCard key={lec.id} lec={lec} index={i} onLockedClick={() => router.push(`/o-level/unlock?subject=${lec.category}`)} />
               ))}
             </div>
           )}

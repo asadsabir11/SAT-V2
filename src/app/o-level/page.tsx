@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CTAButton, FAQAccordion } from "@/components/site";
-import { OLevelEnrollmentForm } from "@/components/forms";
+import { OLevelRegistrationForm } from "@/components/forms";
 import { InstructorProfile } from "@/components/academy/InstructorProfile";
 import { AcademyPricingTable } from "@/components/academy/AcademyPricingTable";
 import { LearningJourney } from "@/components/academy/LearningJourney";
@@ -10,6 +10,10 @@ import { getInstructor, getCohortForSubject, getSubject } from "@/lib/academy/da
 import { getIntroLecture } from "@/lib/lectures";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
+
+// Fetches intro-lecture data from the DB per request — previously implicit
+// via the searchParams prop, which forced this dynamically without it.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Online O Level Tuition in Pakistan | The Digital Tutor",
@@ -52,7 +56,7 @@ const FAQ_ITEMS: [string, string][] = [
   ["How often are classes held?", "Mathematics meets weekly on Saturdays (6:00–7:00 PM PKT) and English Language meets weekly on Fridays (6:00–7:00 PM PKT), each 1 hour long, plus office hours Monday–Friday from 7:30–8:15 PM PKT."],
   ["Does the program guarantee a particular grade?", "No. The program provides teaching, practice, feedback and structured preparation, but no examination grade can be guaranteed."],
   ["How will parents receive progress updates?", "Parents will receive regular reports covering attendance, homework, current strengths, areas for improvement and recommended next steps."],
-  ["How do I pay?", "Payments are initially accepted through JazzCash, Easypaisa and local bank transfer. Enrollment is confirmed after payment verification."],
+  ["How do I pay?", "Registration is free. When you're ready to unlock a subject, pay via JazzCash, Easypaisa or local bank transfer from your dashboard — that subject unlocks once we verify your payment."],
   ["What is the refund policy?", "If you cancel within 7 days of your first payment, you'll receive a 100% refund. See our full Refund & Cancellation Policy for details."],
   ["Is The Digital Tutor affiliated with Cambridge?", "No. The Digital Tutor is an independent tuition provider and is not affiliated with or endorsed by Cambridge University Press & Assessment."],
 ];
@@ -97,8 +101,8 @@ function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number
           </div>
         ))}
       </div>
-      <Link href={`/o-level?subject=${subject.slug}#apply`} className="btn btn-primary" style={{ marginTop: "auto" }}>
-        Apply for This Cohort
+      <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
+        Register Free to Get Started
       </Link>
     </div>
   );
@@ -122,12 +126,7 @@ function IntroVideoCard({ label, title, videoUrl, thumbnailUrl }: { label: strin
   );
 }
 
-export default async function OLevelPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ subject?: string }>;
-}) {
-  const { subject } = await searchParams;
+export default async function OLevelPage() {
   const instructor = getInstructor("ibrahim");
   const [mathIntro, englishIntro] = await Promise.all([
     getIntroLecture("o-level", "mathematics"),
@@ -153,7 +152,7 @@ export default async function OLevelPage({
             Founding cohorts now enrolling for English Language and Mathematics. Limited to 15 students per class.
           </p>
           <div className="actions">
-            <CTAButton href="#apply" variant="accent">Book a Free Student Assessment</CTAButton>
+            <CTAButton href="#apply" variant="accent">Create Your Free Account</CTAButton>
             <CTAButton href="#subjects" variant="ghost">View Subjects and Schedule</CTAButton>
           </div>
           <div style={{ marginTop: 32, display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -291,40 +290,41 @@ export default async function OLevelPage({
         </div>
       </section>
 
-      {/* 9 — Application form */}
+      {/* 9 — Registration form */}
       <section id="apply" className="section" style={{ scrollMarginTop: 90 }}>
         <div className="container" style={{ maxWidth: 900 }}>
           <div style={{ maxWidth: 720, margin: "0 auto 40px", textAlign: "center" }}>
-            <div className="eyebrow" style={{ justifyContent: "center" }}>Apply now</div>
-            <h2 className="title">Apply for the O Level Founding Cohort</h2>
+            <div className="eyebrow" style={{ justifyContent: "center" }}>Register free</div>
+            <h2 className="title">Create Your Free O Level Account</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
-              Tell us about your student — we&apos;ll show you payment options for the founding cohort next.
+              Registration is free. Browse lectures, quizzes and past papers right away — pay only when you&apos;re
+              ready to unlock a subject.
             </p>
           </div>
-          <OLevelEnrollmentForm defaultSubject={subject} />
+          <OLevelRegistrationForm />
         </div>
       </section>
 
-      {/* 10 — Payment and next steps */}
+      {/* 10 — How unlocking works */}
       <section className="section soft">
         <div className="container" style={{ maxWidth: 780, textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center" }}>What happens next</div>
-          <h2 className="title">Payment and next steps</h2>
+          <h2 className="title">Register free, unlock when you&apos;re ready</h2>
           <div className="grid grid-3" style={{ marginTop: 32, textAlign: "left" }}>
             <div className="card">
               <div className="icon">1</div>
-              <h3>Apply</h3>
-              <p>Submit the application above with your student&apos;s details and subject of interest.</p>
+              <h3>Register free</h3>
+              <p>Create your account above — no payment required. You can sign in and look around right away.</p>
             </div>
             <div className="card">
               <div className="icon">2</div>
-              <h3>Pay &amp; confirm</h3>
-              <p>We&apos;ll show you JazzCash, Easypaisa and bank transfer options to reserve the seat.</p>
+              <h3>Pick a subject to unlock</h3>
+              <p>From your dashboard, choose English Language or Mathematics and submit your payment details for verification.</p>
             </div>
             <div className="card">
               <div className="icon">3</div>
-              <h3>Verified &amp; enrolled</h3>
-              <p>Once your payment is verified, we&apos;ll confirm enrollment and the class schedule by WhatsApp and email.</p>
+              <h3>Verified &amp; unlocked</h3>
+              <p>Once we verify your payment, that subject unlocks and you&apos;ll get an email confirming access — usually within a business day.</p>
             </div>
           </div>
         </div>

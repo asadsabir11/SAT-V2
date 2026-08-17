@@ -14,7 +14,19 @@ interface AccessRow {
   approved_by: string | null;
   notes: string | null;
   created_at: string;
+  payment_method: string | null;
+  amount_paid: string | null;
+  transaction_reference: string | null;
+  payment_date: string | null;
+  payer_account_name: string | null;
+  payment_screenshot_url: string | null;
 }
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  jazzcash: "JazzCash",
+  easypaisa: "Easypaisa",
+  bank_transfer: "Bank Transfer",
+};
 
 type Filter = "all" | "pending" | "unlocked";
 
@@ -197,6 +209,7 @@ export default function AdminOLevelAccess() {
                     <th>Subject</th>
                     <th>Status</th>
                     <th>Requested</th>
+                    <th>Payment details</th>
                     <th>Approved</th>
                     <th>Notes</th>
                     <th>Actions</th>
@@ -219,6 +232,22 @@ export default function AdminOLevelAccess() {
                           </span>
                         </td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(r.payment_requested_at)}</td>
+                        <td style={{ fontSize: ".8rem" }}>
+                          {r.payment_method ? (
+                            <div style={{ display: "grid", gap: 2 }}>
+                              <span style={{ fontWeight: 700, color: "#071b33" }}>
+                                {PAYMENT_METHOD_LABELS[r.payment_method] ?? r.payment_method} · PKR {r.amount_paid ? Number(r.amount_paid).toLocaleString() : "—"}
+                              </span>
+                              <span style={{ color: "#6b7c93" }}>Ref: {r.transaction_reference || "—"}</span>
+                              <span style={{ color: "#6b7c93" }}>{fmtDate(r.payment_date)} · {r.payer_account_name || "—"}</span>
+                              {r.payment_screenshot_url && (
+                                <a href={`/api/admin/o-level-access/${r.id}/screenshot`} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>
+                                  View screenshot →
+                                </a>
+                              )}
+                            </div>
+                          ) : "—"}
+                        </td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(r.approved_at)}</td>
                         <td style={{ fontSize: ".83rem", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={r.notes ?? ""}>{r.notes || "—"}</td>
                         <td>

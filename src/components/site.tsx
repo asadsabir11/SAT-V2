@@ -71,7 +71,7 @@ export function Header() {
           {!user && (
             isOLevel ? (
               <Link href="/o-level#apply" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
-                Join O Level Cohort →
+                Register Free →
               </Link>
             ) : (
               <Link href="/register?plan=Core" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
@@ -131,9 +131,9 @@ export function Footer(){
             {isOLevel ? (
               <>
                 <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
-                  Apply for the O Level Founding Cohort — English Language and Mathematics enrolling now.
+                  Register free for O Level English Language and Mathematics — pay only when you unlock a subject.
                 </p>
-                <Link href="/o-level#apply" className="footer-cta-btn footer-cta-primary">Apply for O Level →</Link>
+                <Link href="/o-level#apply" className="footer-cta-btn footer-cta-primary">Register Free →</Link>
               </>
             ) : (
               <>

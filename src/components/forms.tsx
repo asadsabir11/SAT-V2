@@ -440,7 +440,272 @@ export function ContactForm() {
   );
 }
 
-// ── O-Level Application Form ────────────────────────────────────────────────
+// ── O-Level Registration Form ───────────────────────────────────────────────
+// Self-serve, like SAT: student registers free with a password, browses
+// locked content, then pays to unlock a subject from within the dashboard.
+type OLevelRegFields = {
+  studentName: string; studentEmail: string; password: string; confirmPassword: string;
+  parentName: string; parentEmail: string; parentWhatsapp: string;
+  studentGrade: string; schoolName: string; city: string; targetExamSession: string;
+  source: string; consent: boolean; studyGroupConsent: boolean;
+  website: string; // honeypot — left blank by humans, often filled by bots
+};
+
+const OLEVEL_REG_INIT: OLevelRegFields = {
+  studentName: "", studentEmail: "", password: "", confirmPassword: "",
+  parentName: "", parentEmail: "", parentWhatsapp: "",
+  studentGrade: "", schoolName: "", city: "", targetExamSession: "",
+  source: "", consent: false, studyGroupConsent: false, website: "",
+};
+
+export function OLevelRegistrationForm() {
+  const [fields, setFields] = useState<OLevelRegFields>(OLEVEL_REG_INIT);
+  const [errors, setErrors] = useState<Partial<Record<keyof OLevelRegFields, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof OLevelRegFields, boolean>>>({});
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  function validateField(name: keyof OLevelRegFields, value: string | boolean): string {
+    switch (name) {
+      case "studentName": case "parentName": return vName(value as string);
+      case "studentEmail": return vEmail(value as string);
+      case "parentEmail": {
+        const err = vEmail(value as string);
+        if (err) return err;
+        if ((value as string).trim().toLowerCase() === fields.studentEmail.trim().toLowerCase()) {
+          return "Must be different from the student email";
+        }
+        return "";
+      }
+      case "parentWhatsapp": return vPhone(value as string);
+      case "city": return vCity(value as string);
+      case "studentGrade": return vSelect(value as string);
+      case "targetExamSession": return vSelect(value as string);
+      case "password": return passwordStrengthError(value as string);
+      case "confirmPassword": return (value as string) ? "" : "Required";
+      case "consent": return value ? "" : "You must consent to proceed";
+      default: return "";
+    }
+  }
+
+  function change(name: keyof OLevelRegFields, value: string | boolean) {
+    setFields(f => ({ ...f, [name]: value }));
+    if (touched[name]) setErrors(e => ({ ...e, [name]: validateField(name, value) }));
+  }
+
+  function blur(name: keyof OLevelRegFields) {
+    setTouched(t => ({ ...t, [name]: true }));
+    setErrors(e => ({ ...e, [name]: validateField(name, fields[name]) }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const required: (keyof OLevelRegFields)[] = [
+      "studentName", "studentEmail", "password", "confirmPassword",
+      "parentName", "parentEmail", "parentWhatsapp",
+      "studentGrade", "city", "targetExamSession", "consent",
+    ];
+    const allErrors: Partial<Record<keyof OLevelRegFields, string>> = {};
+    const allTouched: Partial<Record<keyof OLevelRegFields, boolean>> = {};
+    required.forEach(name => {
+      allTouched[name] = true;
+      allErrors[name] = validateField(name, fields[name]);
+    });
+    if (fields.password && fields.confirmPassword && fields.password !== fields.confirmPassword) {
+      allErrors.confirmPassword = "Passwords do not match";
+    }
+    setTouched(allTouched);
+    setErrors(allErrors);
+    if (Object.values(allErrors).some(e => e)) return;
+
+    setStatus("loading");
+    setErrorMessage("");
+    try {
+      const res = await fetch("/api/o-level/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentName: fields.studentName.trim(),
+          studentEmail: fields.studentEmail.trim().toLowerCase(),
+          password: fields.password,
+          parentName: fields.parentName.trim(),
+          parentEmail: fields.parentEmail.trim().toLowerCase(),
+          parentWhatsapp: fields.parentWhatsapp.trim(),
+          studentGrade: fields.studentGrade.trim(),
+          schoolName: fields.schoolName.trim(),
+          city: fields.city.trim(),
+          targetExamSession: fields.targetExamSession,
+          source: fields.source.trim(),
+          consent: "true",
+          studyGroupConsent: fields.studyGroupConsent ? "true" : "false",
+          website: fields.website,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMessage(data.error ?? "Something went wrong. Please try again.");
+        setStatus("error");
+        return;
+      }
+      trackLead({ subject: "o-level-registration" });
+      // Full page reload so the Header re-fetches the session cookie
+      window.location.href = "/dashboard";
+    } catch {
+      setErrorMessage("Something went wrong. Please try again.");
+      setStatus("error");
+    }
+  }
+
+  const text = (name: keyof OLevelRegFields, placeholder?: string) => ({
+    id: name, name,
+    value: fields[name] as string,
+    placeholder,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => change(name, e.target.value),
+    onBlur: () => blur(name),
+    style: errStyle(!!errors[name]),
+  });
+
+  const sel = (name: keyof OLevelRegFields) => ({
+    id: name, name,
+    value: fields[name] as string,
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => change(name, e.target.value),
+    onBlur: () => blur(name),
+    style: errStyle(!!errors[name]),
+  });
+
+  return (
+    <form className="form card" onSubmit={handleSubmit} noValidate>
+      {/* Honeypot — hidden from real users, left blank; bots often fill every field */}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+        <label htmlFor="olevel-reg-website">Leave this field blank</label>
+        <input id="olevel-reg-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={fields.website} onChange={(e) => setFields((f) => ({ ...f, website: e.target.value }))} />
+      </div>
+      <div className="form-grid">
+        <div className="field">
+          <label htmlFor="studentName">Student first name *</label>
+          <input type="text" {...text("studentName", "e.g. Fatima")} />
+          <Err msg={touched.studentName ? errors.studentName : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="studentEmail">Student email *</label>
+          <input type="email" {...text("studentEmail", "student@gmail.com")} />
+          <Err msg={touched.studentEmail ? errors.studentEmail : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="parentName">Parent full name *</label>
+          <input type="text" {...text("parentName", "e.g. Ahmed Khan")} />
+          <Err msg={touched.parentName ? errors.parentName : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="parentEmail">Parent email *</label>
+          <input type="email" {...text("parentEmail", "parent@gmail.com")} />
+          <Err msg={touched.parentEmail ? errors.parentEmail : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="parentWhatsapp">Parent WhatsApp number *</label>
+          <input type="tel" {...text("parentWhatsapp", "+92 300 1234567")} />
+          <Err msg={touched.parentWhatsapp ? errors.parentWhatsapp : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="studentGrade">Student grade / year *</label>
+          <select {...sel("studentGrade")}>
+            <option value="">Select grade</option>
+            {GRADES.map(g => <option key={g}>{g}</option>)}
+          </select>
+          <Err msg={touched.studentGrade ? errors.studentGrade : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="schoolName">School name</label>
+          <input type="text" {...text("schoolName", "Optional")} />
+        </div>
+        <div className="field">
+          <label htmlFor="city">City *</label>
+          <input type="text" {...text("city", "e.g. Lahore")} />
+          <Err msg={touched.city ? errors.city : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="targetExamSession">Target exam session *</label>
+          <select {...sel("targetExamSession")}>
+            <option value="">Select session</option>
+            {TARGET_EXAM_SESSIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <Err msg={touched.targetExamSession ? errors.targetExamSession : undefined} />
+        </div>
+        <div className="field">
+          <label htmlFor="source">How did you hear about us?</label>
+          <input type="text" {...text("source", "e.g. Facebook, Instagram, friend")} />
+        </div>
+      </div>
+
+      <div style={{ borderTop: "1px solid #edf2f7", paddingTop: 20, marginTop: 4 }}>
+        <p style={{ fontWeight: 700, color: "#344054", fontSize: ".88rem", margin: "0 0 14px" }}>
+          Create a password for the student account
+        </p>
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor="password">Password *</label>
+            <input type="password" {...text("password", "Min 8 chars, include a number")} autoComplete="new-password" />
+            <Err msg={touched.password ? errors.password : undefined} />
+          </div>
+          <div className="field">
+            <label htmlFor="confirmPassword">Confirm password *</label>
+            <input type="password" {...text("confirmPassword", "Repeat your password")} autoComplete="new-password" />
+            <Err msg={touched.confirmPassword ? errors.confirmPassword : undefined} />
+          </div>
+        </div>
+      </div>
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", marginTop: 4 }}>
+        <input
+          type="checkbox"
+          name="consent"
+          checked={fields.consent}
+          onChange={e => change("consent", e.target.checked)}
+          onBlur={() => blur("consent")}
+          style={{ marginTop: 3, flexShrink: 0 }}
+        />
+        <span>
+          I agree that The Digital Tutor may contact me by WhatsApp, phone or email regarding the O Level program. I
+          have reviewed the{" "}
+          <a href="/privacy" style={{ color: "#155eef" }}>Privacy Policy</a> and{" "}
+          <a href="/terms" style={{ color: "#155eef" }}>Terms of Service</a>.
+        </span>
+      </label>
+      {touched.consent && <Err msg={errors.consent} />}
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          name="studyGroupConsent"
+          checked={fields.studyGroupConsent}
+          onChange={e => change("studyGroupConsent", e.target.checked)}
+          style={{ marginTop: 3, flexShrink: 0 }}
+        />
+        <span>
+          I would also like to be added to a regional WhatsApp/Telegram study group with other O Level parents and
+          students (optional).
+        </span>
+      </label>
+
+      <button className="btn btn-primary" type="submit" disabled={status === "loading"}>
+        {status === "loading" ? "Creating your account…" : "Create Free Account"}
+      </button>
+
+      {status === "error" && (
+        <div className="note">{errorMessage || "Something went wrong. Please try again or contact us directly."}</div>
+      )}
+
+      <p style={{ textAlign: "center", marginTop: 4, fontSize: ".85rem", color: "#6b7c93" }}>
+        Already registered?{" "}
+        <a href="/login?role=student" style={{ color: "#155eef", fontWeight: 700, textDecoration: "none" }}>
+          Sign in →
+        </a>
+      </p>
+    </form>
+  );
+}
+
+// ── O-Level Application Form (legacy — no longer linked from the site) ─────
 // No password / account creation here — the parent applies, then is sent to
 // /o-level/payment. An account is only created once payment is verified.
 type OLevelAppFields = {

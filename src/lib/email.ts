@@ -256,6 +256,161 @@ export async function sendOLevelAccountWelcome(opts: { email: string; name: stri
   });
 }
 
+export async function sendOLevelRegistrationWelcome(student: { name: string; email: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: student.email,
+    subject: "Welcome to The Digital Tutor — you're in!",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 6px;font-size:1.4rem;">Welcome, ${student.name}! 🎉</h2>
+        <p style="color:#6b7c93;margin:0 0 24px;font-size:.95rem;line-height:1.6;">
+          You've created your free O Level account. Here's how it works:
+        </p>
+        <div style="background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:16px;border:1.5px solid #e8eef6;">
+          <p style="margin:0 0 14px;font-weight:800;color:#071b33;font-size:.95rem;">Your next steps</p>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">1</span>
+                <strong style="color:#071b33;">Browse your subjects</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Lectures, quizzes and past papers are all visible in your dashboard</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">2</span>
+                <strong style="color:#071b33;">Unlock a subject</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Pick English Language or Mathematics, pay, and submit your payment details for verification</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">3</span>
+                <strong style="color:#071b33;">Start learning</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 0 32px;color:#6b7c93;font-size:.85rem;">Once we verify your payment, that subject unlocks — usually within a business day</td>
+            </tr>
+          </table>
+        </div>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/dashboard" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;line-height:1.6;">
+          Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
+          The Digital Tutor · academy.thedigitaltutor.net
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelRegistrationAdminAlert(student: { studentName: string; studentEmail: string; parentName: string; parentEmail: string; city: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || ADMIN_EMAILS.length === 0) return;
+  const resend = new Resend(apiKey);
+
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: ADMIN_EMAILS,
+    subject: `New O Level registration: ${student.studentName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">New O Level student registered 🎉</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:140px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${student.studentName}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Student email</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#155eef;">${student.studentEmail}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Parent</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${student.parentName} · ${student.parentEmail}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">City</td><td style="padding:10px 0;color:#071b33;">${student.city}</td></tr>
+        </table>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/admin" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View in admin →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelUnlockPaymentSubmittedAck(opts: { email: string; name: string; subject: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: opts.email,
+    subject: `Payment received — ${subjectLabel(opts.subject)}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">We've got your payment details, ${opts.name}</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment for <strong>${subjectLabel(opts.subject)}</strong> is under review. Once verified, this
+          subject unlocks automatically and we'll email you — usually within a business day.
+        </p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelUnlockPaymentSubmittedAdminAlert(opts: { email: string; name: string; subject: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || ADMIN_EMAILS.length === 0) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: ADMIN_EMAILS,
+    subject: `Payment submitted for verification: ${opts.name} — ${subjectLabel(opts.subject)}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">Payment awaiting verification 💳</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:100px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.name}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#155eef;">${opts.email}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Subject</td><td style="padding:10px 0;color:#071b33;">${subjectLabel(opts.subject)}</td></tr>
+        </table>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/admin/o-level-access" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">Review and verify →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendOLevelAccessGranted(opts: { email: string; name: string; subject: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: opts.email,
+    subject: `${subjectLabel(opts.subject)} is unlocked! 🎉`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">You're in, ${opts.name}! 🎉</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment has been verified and <strong>${subjectLabel(opts.subject)}</strong> is now unlocked. Lectures,
+          quizzes, live sessions and past papers for this subject are ready in your dashboard.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${APP_URL}/dashboard" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendOLevelApplicationConfirmation(app: OLevelApplication) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;

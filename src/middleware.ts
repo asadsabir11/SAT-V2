@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // /dashboard, /sat, /diagnostic, /ai-tutor, /lectures, /sessions, /quizzes, /o-level/lectures, /o-level/quizzes, /o-level/sessions, /o-level/past-papers — students only
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/sat") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions") || pathname.startsWith("/quizzes") || pathname.startsWith("/o-level/lectures") || pathname.startsWith("/o-level/quizzes") || pathname.startsWith("/o-level/sessions") || pathname.startsWith("/o-level/past-papers")) {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/sat") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions") || pathname.startsWith("/quizzes") || pathname.startsWith("/o-level/lectures") || pathname.startsWith("/o-level/quizzes") || pathname.startsWith("/o-level/sessions") || pathname.startsWith("/o-level/past-papers") || pathname.startsWith("/o-level/unlock")) {
     if (!session || session.role !== "student") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -50,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/sat", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/quizzes", "/quizzes/:path*", "/discussion", "/discussion/:path*", "/o-level/lectures", "/o-level/lectures/:path*", "/o-level/quizzes", "/o-level/quizzes/:path*", "/o-level/sessions", "/o-level/sessions/:path*", "/o-level/past-papers", "/o-level/past-papers/:path*"],
+  matcher: ["/dashboard/:path*", "/sat", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/quizzes", "/quizzes/:path*", "/discussion", "/discussion/:path*", "/o-level/lectures", "/o-level/lectures/:path*", "/o-level/quizzes", "/o-level/quizzes/:path*", "/o-level/sessions", "/o-level/sessions/:path*", "/o-level/past-papers", "/o-level/past-papers/:path*", "/o-level/unlock", "/o-level/unlock/:path*"],
 };
