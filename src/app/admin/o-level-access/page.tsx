@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { getOLevelSubjects } from "@/lib/academy/data";
 
@@ -54,6 +54,7 @@ export default function AdminOLevelAccess() {
   const [grantingId, setGrantingId] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const [showGrantForm, setShowGrantForm] = useState(false);
   const [grantEmail, setGrantEmail] = useState("");
@@ -209,9 +210,7 @@ export default function AdminOLevelAccess() {
                     <th>Subject</th>
                     <th>Status</th>
                     <th>Requested</th>
-                    <th>Payment details</th>
-                    <th>Approved</th>
-                    <th>Notes</th>
+                    <th></th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -221,8 +220,10 @@ export default function AdminOLevelAccess() {
                     const subjMeta = SUBJECT_META[r.subject] ?? { label: r.subject, icon: "📘" };
                     const rowKey = `${r.email}:${r.subject}`;
                     const isGranting = grantingId === r.id;
+                    const isExpanded = expandedId === r.id;
                     return (
-                      <tr key={r.id}>
+                      <Fragment key={r.id}>
+                      <tr>
                         <td style={{ fontWeight: 700, color: "#071b33" }}>{r.name || "—"}</td>
                         <td style={{ fontSize: ".83rem" }}>{r.email}</td>
                         <td style={{ fontSize: ".83rem" }}>{subjMeta.icon} {subjMeta.label}</td>
@@ -232,24 +233,13 @@ export default function AdminOLevelAccess() {
                           </span>
                         </td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(r.payment_requested_at)}</td>
-                        <td style={{ fontSize: ".8rem" }}>
-                          {r.payment_method ? (
-                            <div style={{ display: "grid", gap: 2 }}>
-                              <span style={{ fontWeight: 700, color: "#071b33" }}>
-                                {PAYMENT_METHOD_LABELS[r.payment_method] ?? r.payment_method} · PKR {r.amount_paid ? Number(r.amount_paid).toLocaleString() : "—"}
-                              </span>
-                              <span style={{ color: "#6b7c93" }}>Ref: {r.transaction_reference || "—"}</span>
-                              <span style={{ color: "#6b7c93" }}>{fmtDate(r.payment_date)} · {r.payer_account_name || "—"}</span>
-                              {r.payment_screenshot_url && (
-                                <a href={`/api/admin/o-level-access/${r.id}/screenshot`} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>
-                                  View screenshot →
-                                </a>
-                              )}
-                            </div>
-                          ) : "—"}
+                        <td>
+                          <button
+                            onClick={() => setExpandedId(isExpanded ? null : r.id)}
+                            style={{ padding: "5px 12px", borderRadius: 7, background: isExpanded ? "#eff6ff" : "#f1f5f9", border: "none", color: isExpanded ? "#155eef" : "#6b7c93", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+                            {isExpanded ? "Hide details" : "View details"}
+                          </button>
                         </td>
-                        <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(r.approved_at)}</td>
-                        <td style={{ fontSize: ".83rem", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={r.notes ?? ""}>{r.notes || "—"}</td>
                         <td>
                           {r.status !== "unlocked" ? (
                             isGranting ? (
@@ -287,6 +277,53 @@ export default function AdminOLevelAccess() {
                           )}
                         </td>
                       </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={7} style={{ background: "#f8fafc", padding: "18px 20px" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px 32px" }}>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Payment method</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{r.payment_method ? (PAYMENT_METHOD_LABELS[r.payment_method] ?? r.payment_method) : "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Amount paid</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{r.amount_paid ? `PKR ${Number(r.amount_paid).toLocaleString()}` : "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Transaction reference</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{r.transaction_reference || "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Payment date</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{fmtDate(r.payment_date)}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Name on sending account</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{r.payer_account_name || "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Screenshot</div>
+                                {r.payment_screenshot_url ? (
+                                  <a href={`/api/admin/o-level-access/${r.id}/screenshot`} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>
+                                    View screenshot →
+                                  </a>
+                                ) : (
+                                  <div style={{ color: "#6b7c93" }}>—</div>
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Approved</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{fmtDate(r.approved_at)}{r.approved_by ? ` · ${r.approved_by}` : ""}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Notes</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{r.notes || "—"}</div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                 </tbody>
