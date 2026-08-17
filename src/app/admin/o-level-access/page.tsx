@@ -304,7 +304,7 @@ export default function AdminOLevelAccess() {
                               <div>
                                 <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Screenshot</div>
                                 {r.payment_screenshot_url ? (
-                                  <a href={`/api/admin/o-level-access/${r.id}/screenshot`} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>
+                                  <a href={r.payment_screenshot_url} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>
                                     View screenshot →
                                   </a>
                                 ) : (

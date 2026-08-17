@@ -119,7 +119,7 @@ export default function PaymentPageClient() {
         );
         const blob = await Promise.race([
           upload(file.name, file, {
-            access: "private",
+            access: "public",
             handleUploadUrl: "/api/o-level/applications/upload",
             onUploadProgress: ({ percentage }) => setUploadPct(Math.round(percentage)),
           }),

@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return new NextResponse("Not found", { status: 404 });
   }
 
-  const result = await get(app.payment_screenshot_url, { access: "private" });
+  const result = await get(app.payment_screenshot_url, { access: "public" });
   if (!result || !result.stream) return new NextResponse("Not found", { status: 404 });
 
   return new NextResponse(result.stream, {
