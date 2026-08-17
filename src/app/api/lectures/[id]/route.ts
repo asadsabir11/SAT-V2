@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getLectureById, updateLecture, publishLecture, unpublishLecture, deleteLecture, setFreePreview } from "@/lib/lectures";
+import { getLectureById, updateLecture, publishLecture, unpublishLecture, deleteLecture, setFreePreview, setIntroVideo, clearIntroVideo } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
 import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 
@@ -46,6 +46,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.action === "publish")        { await publishLecture(id);              return NextResponse.json({ ok: true }); }
   if (body.action === "unpublish")      { await unpublishLecture(id);            return NextResponse.json({ ok: true }); }
   if (body.action === "togglePreview")  { await setFreePreview(id, body.value);  return NextResponse.json({ ok: true }); }
+  if (body.action === "toggleIntro") {
+    if (body.value) {
+      const lecture = await getLectureById(id);
+      if (!lecture) return NextResponse.json({ error: "Not found" }, { status: 404 });
+      await setIntroVideo(id, lecture.program, lecture.category);
+    } else {
+      await clearIntroVideo(id);
+    }
+    return NextResponse.json({ ok: true });
+  }
   if (body.title !== undefined) {
     await updateLecture(id, body.title, body.description ?? "", body.category);
     return NextResponse.json({ ok: true });

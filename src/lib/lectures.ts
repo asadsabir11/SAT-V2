@@ -19,6 +19,7 @@ export type Lecture = {
   program: Program;
   category: LectureCategory;
   is_free_preview: boolean;
+  is_intro_video: boolean;
   order_index: number;
   is_published: boolean;
   created_by: string;
@@ -47,6 +48,7 @@ async function ensureTable() {
   await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'math'`;
   await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS is_free_preview BOOLEAN DEFAULT false`;
   await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
+  await sql`ALTER TABLE lectures ADD COLUMN IF NOT EXISTS is_intro_video BOOLEAN DEFAULT false`;
   ready = true;
 }
 
@@ -118,4 +120,26 @@ export async function reorderLecture(id: string, orderIndex: number) {
 export async function setFreePreview(id: string, preview: boolean) {
   await ensureTable();
   await sql`UPDATE lectures SET is_free_preview=${preview}, updated_at=NOW() WHERE id=${id}`;
+}
+
+/** Exclusive per program+category: at most one lecture can be "the" introduction video for a subject. */
+export async function setIntroVideo(id: string, program: Program, category: LectureCategory) {
+  await ensureTable();
+  await sql`UPDATE lectures SET is_intro_video=false, updated_at=NOW() WHERE program=${program} AND category=${category} AND id != ${id}`;
+  await sql`UPDATE lectures SET is_intro_video=true, updated_at=NOW() WHERE id=${id}`;
+}
+
+export async function clearIntroVideo(id: string) {
+  await ensureTable();
+  await sql`UPDATE lectures SET is_intro_video=false, updated_at=NOW() WHERE id=${id}`;
+}
+
+export async function getIntroLecture(program: Program, category: LectureCategory): Promise<Lecture | null> {
+  await ensureTable();
+  const rows = await sql`
+    SELECT * FROM lectures
+    WHERE program=${program} AND category=${category} AND is_intro_video=true AND is_published=true
+    LIMIT 1
+  `;
+  return (rows[0] as Lecture) ?? null;
 }

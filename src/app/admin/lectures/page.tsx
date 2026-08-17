@@ -15,6 +15,7 @@ interface Lecture {
   program: LectureProgram;
   category: LectureCategory;
   is_free_preview: boolean;
+  is_intro_video: boolean;
   order_index: number;
   is_published: boolean;
   created_at: string;
@@ -69,11 +70,14 @@ export default function AdminLectures() {
   // List filter
   const [filterProgram, setFilterProgram] = useState<"all" | LectureProgram>("all");
 
-  useEffect(() => {
-    fetch("/api/lectures")
+  function loadLectures() {
+    return fetch("/api/lectures")
       .then(r => r.json())
-      .then(d => setLectures(d.lectures ?? []))
-      .finally(() => setLoading(false));
+      .then(d => setLectures(d.lectures ?? []));
+  }
+
+  useEffect(() => {
+    loadLectures().finally(() => setLoading(false));
   }, []);
 
   function switchProgram(p: LectureProgram) {
@@ -126,6 +130,7 @@ export default function AdminLectures() {
         thumbnail_url: thumbnailUrl,
         program,
         category,
+        is_intro_video: false,
         is_free_preview: false,
         order_index: lectures.length + 1,
         is_published: false,
@@ -168,6 +173,21 @@ export default function AdminLectures() {
       body: JSON.stringify({ action: "togglePreview", value: next }),
     });
     setLectures(ls => ls.map(l => l.id === lec.id ? { ...l, is_free_preview: next } : l));
+  }
+
+  async function toggleIntro(lec: Lecture) {
+    const next = !lec.is_intro_video;
+    if (next && !confirm(`Set this as the introduction video for ${categoryMeta(lec.category).label}? This replaces the current introduction video for this subject, if one is set.`)) {
+      return;
+    }
+    await fetch(`/api/lectures/${lec.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "toggleIntro", value: next }),
+    });
+    // Setting one lecture's intro flag clears it on any other lecture in the
+    // same subject server-side, so refetch rather than patch local state.
+    await loadLectures();
   }
 
   async function deleteLecture(id: string) {
@@ -478,6 +498,11 @@ export default function AdminLectures() {
                             ✓ Free Preview
                           </span>
                         )}
+                        {lec.is_intro_video && (
+                          <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#faf5ff", color: "#7e22ce" }}>
+                            ★ Introduction video
+                          </span>
+                        )}
                       </div>
                       <p style={{ fontWeight: 700, color: "#071b33", margin: "0 0 2px", fontSize: ".95rem" }}>{lec.title}</p>
                       {lec.description && <p style={{ color: "#6b7c93", fontSize: ".82rem", margin: 0 }}>{lec.description}</p>}
@@ -503,6 +528,13 @@ export default function AdminLectures() {
                         style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", background: lec.is_free_preview ? "#dcfce7" : "#f3f4f6", color: lec.is_free_preview ? "#15803d" : "#6b7c93" }}>
                         {lec.is_free_preview ? "✓ Free Preview" : "Set Free Preview"}
                       </button>
+                      {lec.program === "o-level" && (
+                        <button
+                          onClick={() => toggleIntro(lec)}
+                          style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", background: lec.is_intro_video ? "#faf5ff" : "#f3f4f6", color: lec.is_intro_video ? "#7e22ce" : "#6b7c93" }}>
+                          {lec.is_intro_video ? "★ Introduction" : "Set as introduction"}
+                        </button>
+                      )}
                       <button
                         onClick={() => togglePublish(lec)}
                         style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", background: lec.is_published ? "#fef3c7" : "#d1fae5", color: lec.is_published ? "#92400e" : "#065f46" }}>

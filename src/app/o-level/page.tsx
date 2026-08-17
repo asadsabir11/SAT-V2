@@ -7,6 +7,7 @@ import { AcademyPricingTable } from "@/components/academy/AcademyPricingTable";
 import { LearningJourney } from "@/components/academy/LearningJourney";
 import { TrackViewContent } from "./TrackViewContent";
 import { getInstructor, getCohortForSubject, getSubject } from "@/lib/academy/data";
+import { getIntroLecture } from "@/lib/lectures";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -103,6 +104,24 @@ function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number
   );
 }
 
+function IntroVideoCard({ label, title, videoUrl, thumbnailUrl }: { label: string; title: string; videoUrl: string; thumbnailUrl: string }) {
+  return (
+    <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <video
+        controls
+        preload="metadata"
+        poster={thumbnailUrl || undefined}
+        src={videoUrl}
+        style={{ width: "100%", aspectRatio: "16/9", display: "block", background: "#0c1629" }}
+      />
+      <div style={{ padding: "16px 20px" }}>
+        <div className="eyebrow" style={{ marginBottom: 4 }}>{label}</div>
+        <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>{title}</p>
+      </div>
+    </div>
+  );
+}
+
 export default async function OLevelPage({
   searchParams,
 }: {
@@ -110,6 +129,10 @@ export default async function OLevelPage({
 }) {
   const { subject } = await searchParams;
   const instructor = getInstructor("ibrahim");
+  const [mathIntro, englishIntro] = await Promise.all([
+    getIntroLecture("o-level", "mathematics"),
+    getIntroLecture("o-level", "english-language"),
+  ]);
 
   return (
     <>
@@ -140,6 +163,26 @@ export default async function OLevelPage({
           </div>
         </div>
       </section>
+
+      {/* Introduction videos — only renders once the founder has set at least one */}
+      {(mathIntro || englishIntro) && (
+        <section className="section" style={{ paddingBottom: 0 }}>
+          <div className="container">
+            <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
+              <div className="eyebrow" style={{ justifyContent: "center" }}>See it for yourself</div>
+              <h2 className="title">Meet Your Subjects</h2>
+            </div>
+            <div className={mathIntro && englishIntro ? "grid grid-2" : undefined} style={{ marginTop: 40, ...(!(mathIntro && englishIntro) ? { maxWidth: 640, marginLeft: "auto", marginRight: "auto" } : {}) }}>
+              {englishIntro && (
+                <IntroVideoCard label="English Language" title={englishIntro.title} videoUrl={englishIntro.video_url} thumbnailUrl={englishIntro.thumbnail_url} />
+              )}
+              {mathIntro && (
+                <IntroVideoCard label="Mathematics" title={mathIntro.title} videoUrl={mathIntro.video_url} thumbnailUrl={mathIntro.thumbnail_url} />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 2 — Subjects and schedules */}
       <section id="subjects" className="section soft" style={{ scrollMarginTop: 90 }}>
