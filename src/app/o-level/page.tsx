@@ -74,7 +74,7 @@ const SUBJECT_CLASS_TIME: Record<string, string> = {
   "mathematics": "Saturday, 6:00 PM – 7:00 PM (PKT)",
 };
 
-function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number }) {
+function CohortCard({ subjectSlug, price, isSignedInStudent }: { subjectSlug: string; price: number; isSignedInStudent: boolean }) {
   const subject = getSubject(subjectSlug);
   const cohort = getCohortForSubject(subjectSlug);
   if (!subject) return null;
@@ -90,8 +90,8 @@ function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number
     ["Monthly price", `PKR ${price.toLocaleString()}`],
   ];
 
-  return (
-    <div className="card" style={{ display: "flex", flexDirection: "column" }}>
+  const body = (
+    <>
       <div className="eyebrow">{cohort?.targetExam ?? "May/June 2027"} target</div>
       <h3 style={{ marginTop: 6 }}>O Level {subject.name}</h3>
       <div style={{ display: "grid", gap: 6, margin: "12px 0 18px" }}>
@@ -102,9 +102,26 @@ function CohortCard({ subjectSlug, price }: { subjectSlug: string; price: number
           </div>
         ))}
       </div>
-      <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
-        Register Free to Get Started
+      {isSignedInStudent ? (
+        <span style={{ marginTop: "auto", color: "var(--blue)", fontWeight: 700, fontSize: ".9rem" }}>Unlock this subject →</span>
+      ) : (
+        <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
+          Register Free to Get Started
+        </Link>
+      )}
+    </>
+  );
+
+  if (isSignedInStudent) {
+    return (
+      <Link href={`/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
+        {body}
       </Link>
+    );
+  }
+  return (
+    <div className="card" style={{ display: "flex", flexDirection: "column" }}>
+      {body}
     </div>
   );
 }
@@ -197,8 +214,8 @@ export default async function OLevelPage() {
             </p>
           </div>
           <div className="grid grid-2" style={{ marginTop: 40 }}>
-            <CohortCard subjectSlug="english-language" price={10000} />
-            <CohortCard subjectSlug="mathematics" price={10000} />
+            <CohortCard subjectSlug="english-language" price={10000} isSignedInStudent={isSignedInStudent} />
+            <CohortCard subjectSlug="mathematics" price={10000} isSignedInStudent={isSignedInStudent} />
           </div>
           <div className="card" style={{ marginTop: 24, textAlign: "center", background: "#eaf1ff", borderColor: "#c9dcfb" }}>
             <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>English Language + Mathematics: PKR 18,000 per month</p>
