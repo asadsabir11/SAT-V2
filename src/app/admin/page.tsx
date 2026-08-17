@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardCard, PageHero } from "@/components/site";
 
@@ -28,11 +28,18 @@ export default function Admin() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFounder, setIsFounder] = useState(false);
+  const [expandedOLevelLead, setExpandedOLevelLead] = useState<number | null>(null);
 
   async function deleteStudent(email: string, name: string) {
     if (!confirm(`Delete "${name}" (${email})? This removes their account and all data.`)) return;
     await fetch(`/api/admin/students/${encodeURIComponent(email)}`, { method: "DELETE" });
     setData(d => d ? { ...d, students: d.students.filter(s => s.studentEmail !== email) } : d);
+  }
+
+  async function deleteOLevelLead(email: string, name: string) {
+    if (!confirm(`Delete "${name}" (${email})? This removes their lead record, account, and subject access.`)) return;
+    await fetch(`/api/admin/o-level-leads/${encodeURIComponent(email)}`, { method: "DELETE" });
+    setData(d => d ? { ...d, oLevelLeads: d.oLevelLeads.filter(o => (o.studentEmail || "") !== email) } : d);
   }
 
   async function clearTestData() {
@@ -275,24 +282,81 @@ export default function Admin() {
                       <thead>
                         <tr>
                           <th>Student</th>
+                          <th>Student email</th>
                           <th>Parent</th>
-                          <th>Country</th>
-                          <th>Subjects</th>
                           <th>WhatsApp</th>
+                          <th>City</th>
+                          <th>Grade</th>
                           <th>Registered</th>
+                          <th></th>
+                          <th></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {data?.oLevelLeads.map((o, i) => (
-                          <tr key={i}>
-                            <td>{o.studentName}</td>
-                            <td>{o.parentName}</td>
-                            <td>{o.country}</td>
-                            <td>{o.subject || "—"}</td>
-                            <td>{o.whatsapp}</td>
-                            <td>{new Date(o.createdAt).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
+                        {data?.oLevelLeads.map((o, i) => {
+                          // Backward-compat: a handful of early leads were captured
+                          // by an older form with different field names.
+                          const studentEmail = o.studentEmail || "—";
+                          const parentWhatsapp = o.parentWhatsapp || o.whatsapp || "—";
+                          const city = o.city || o.country || "—";
+                          const isExpanded = expandedOLevelLead === i;
+                          return (
+                            <Fragment key={i}>
+                              <tr>
+                                <td>{o.studentName || "—"}</td>
+                                <td style={{ fontSize: ".85rem" }}>{studentEmail}</td>
+                                <td>{o.parentName || "—"}</td>
+                                <td>{parentWhatsapp}</td>
+                                <td>{city}</td>
+                                <td>{o.studentGrade || "—"}</td>
+                                <td>{new Date(o.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                  <button
+                                    onClick={() => setExpandedOLevelLead(isExpanded ? null : i)}
+                                    style={{ padding: "4px 10px", borderRadius: 6, background: isExpanded ? "#eff6ff" : "#f1f5f9", border: "none", color: isExpanded ? "#155eef" : "#6b7c93", fontWeight: 700, fontSize: ".75rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+                                    {isExpanded ? "Hide details" : "View details"}
+                                  </button>
+                                </td>
+                                <td>
+                                  {studentEmail !== "—" && (
+                                    <button onClick={() => deleteOLevelLead(studentEmail, o.studentName)}
+                                      style={{ padding: "4px 10px", borderRadius: 6, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".75rem", cursor: "pointer" }}>
+                                      Delete
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                              {isExpanded && (
+                                <tr>
+                                  <td colSpan={9} style={{ background: "#f8fafc", padding: "16px 20px" }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px 28px" }}>
+                                      <div>
+                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Parent email</div>
+                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.parentEmail || "—"}</div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>School</div>
+                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.schoolName || "—"}</div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Target exam session</div>
+                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.targetExamSession || "—"}</div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>How they heard about us</div>
+                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.source || "—"}</div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Study group opt-in</div>
+                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{String(o.studyGroupConsent) === "true" ? "Yes" : String(o.studyGroupConsent) === "false" ? "No" : "—"}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </Fragment>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
