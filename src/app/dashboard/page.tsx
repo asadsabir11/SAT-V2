@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { CTAButton, DashboardCard, PageHero } from "@/components/site";
 
@@ -28,10 +28,10 @@ interface OLevelStudentData {
 }
 
 const OLEVEL_MODULES = [
-  { href: "/o-level/lectures", icon: "🎬", title: "Lectures", description: "Watch recorded lessons on demand, anytime." },
-  { href: "/o-level/quizzes", icon: "📝", title: "Quizzes", description: "Practice with subject quizzes and track your best scores." },
-  { href: "/o-level/sessions", icon: "📅", title: "Live Sessions", description: "Join live classes and open office hours." },
-  { href: "/o-level/past-papers", icon: "📄", title: "Past Papers", description: "Practice with past-paper style questions." },
+  { href: "/o-level/lectures", icon: "🎬", title: "Lectures", description: "Watch recorded lessons on demand, anytime.", accent: "#155eef", grad: "linear-gradient(135deg,#155eef,#18a999)", glow: "rgba(21,94,239,.35)" },
+  { href: "/o-level/quizzes", icon: "📝", title: "Quizzes", description: "Practice with subject quizzes and track your best scores.", accent: "#7c3aed", grad: "linear-gradient(135deg,#7c3aed,#a855f7)", glow: "rgba(124,58,237,.35)" },
+  { href: "/o-level/sessions", icon: "📅", title: "Live Sessions", description: "Join live classes and open office hours.", accent: "#059669", grad: "linear-gradient(135deg,#059669,#10b981)", glow: "rgba(5,150,105,.35)" },
+  { href: "/o-level/past-papers", icon: "📄", title: "Past Papers", description: "Practice with past-paper style questions.", accent: "#ea580c", grad: "linear-gradient(135deg,#ea580c,#f59e0b)", glow: "rgba(234,88,12,.35)" },
 ];
 
 interface Announcement {
@@ -173,17 +173,23 @@ export default function Dashboard() {
           <div className="container">
             {announcements.length > 0 && (
               <div style={{ marginBottom: 24 }}>
-                {announcements.map(a => (
-                  <div key={a.id} style={{
+                {announcements.map((a, i) => (
+                  <div key={a.id} className="fade-up" style={{
                     display: "flex", gap: 14, alignItems: "flex-start",
-                    background: "#fffbeb", border: "1.5px solid #fde68a",
-                    borderRadius: 12, padding: "14px 18px", marginBottom: 10,
+                    background: "linear-gradient(135deg,#fffbeb,#fff7ed)", border: "1.5px solid #fde68a",
+                    borderRadius: 16, padding: "16px 20px", marginBottom: 10,
+                    boxShadow: "0 4px 16px rgba(217,119,6,.08)",
+                    animationDelay: `${i * 0.06}s`,
                   }}>
-                    <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>📢</span>
+                    <span style={{
+                      width: 36, height: 36, borderRadius: 11, flexShrink: 0,
+                      display: "grid", placeItems: "center", fontSize: "1.05rem",
+                      background: "linear-gradient(135deg,#f59e0b,#ea580c)", boxShadow: "0 6px 16px rgba(234,88,12,.3)",
+                    }}>📢</span>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontWeight: 800, color: "#92400e", margin: "0 0 3px", fontSize: ".92rem" }}>{a.title}</p>
                       <p style={{ color: "#78350f", fontSize: ".85rem", margin: "0 0 4px", lineHeight: 1.5 }}>{a.body}</p>
-                      <span style={{ color: "#b45309", fontSize: ".72rem" }}>{timeAgo(a.created_at)}</span>
+                      <span style={{ color: "#b45309", fontSize: ".72rem", fontWeight: 700 }}>{timeAgo(a.created_at)}</span>
                     </div>
                   </div>
                 ))}
@@ -191,11 +197,11 @@ export default function Dashboard() {
             )}
 
             {subjects.length > 0 && (
-              <div className="card" style={{ marginBottom: 24 }}>
+              <div className="card fade-up" style={{ marginBottom: 24, background: "linear-gradient(135deg,#f0fdfa,#eff6ff)" }}>
                 <div className="eyebrow">Your subjects</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
                   {subjects.map(s => (
-                    <span className="badge teal" key={s}>{s}</span>
+                    <span className="badge teal" key={s}>✓ {s}</span>
                   ))}
                 </div>
               </div>
@@ -203,12 +209,17 @@ export default function Dashboard() {
 
             <div className="grid grid-3">
               {OLEVEL_MODULES.map((m) => (
-                <Link key={m.href} href={m.href} style={{ textDecoration: "none" }}>
+                <Link
+                  key={m.href}
+                  href={m.href}
+                  className="module-card fade-up"
+                  style={{ "--module-accent": m.accent, "--module-accent-grad": m.grad, "--module-glow": m.glow } as CSSProperties}
+                >
                   <article className="card" style={{ height: "100%" }}>
-                    <div className="icon">{m.icon}</div>
+                    <div className="module-icon">{m.icon}</div>
                     <h3>{m.title}</h3>
                     <p>{m.description}</p>
-                    <span style={{ color: "var(--blue)", fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
+                    <span className="module-arrow" style={{ color: m.accent, fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
                   </article>
                 </Link>
               ))}
