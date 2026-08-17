@@ -74,6 +74,7 @@ export default function PaymentPageClient() {
   const [uploadPct, setUploadPct] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [screenshotSkipped, setScreenshotSkipped] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -102,11 +103,17 @@ export default function PaymentPageClient() {
     }
     setSubmitting(true);
     setError("");
-    try {
-      let screenshotUrl: string | null = null;
-      if (file) {
-        setUploadPct(1);
-        const UPLOAD_TIMEOUT_MS = 45_000;
+
+    // Screenshot upload is best-effort and must never block the payment
+    // record itself from being submitted — it's optional, and an unreliable
+    // connection to Blob storage shouldn't leave someone unable to confirm
+    // a real payment. Falls back to submitting without it and says so.
+    let screenshotUrl: string | null = null;
+    let skippedScreenshot = false;
+    if (file) {
+      setUploadPct(1);
+      try {
+        const UPLOAD_TIMEOUT_MS = 20_000;
         const timeout = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("upload-timeout")), UPLOAD_TIMEOUT_MS)
         );
@@ -119,9 +126,13 @@ export default function PaymentPageClient() {
           timeout,
         ]);
         screenshotUrl = blob.url;
-        setUploadPct(0);
+      } catch {
+        skippedScreenshot = true;
       }
+      setUploadPct(0);
+    }
 
+    try {
       const res = await fetch(`/api/o-level/applications/${applicationId}/payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -142,14 +153,10 @@ export default function PaymentPageClient() {
         return;
       }
       trackPaymentSubmitted({ subject: application.subject, value: Number(amountPaid) });
+      setScreenshotSkipped(skippedScreenshot);
       setSubmitted(true);
-    } catch (err) {
-      setUploadPct(0);
-      if (err instanceof Error && err.message === "upload-timeout") {
-        setError("The screenshot upload is taking too long — check your connection and try again, or remove the file below to submit without it (it's optional).");
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
+    } catch {
+      setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -212,6 +219,12 @@ export default function PaymentPageClient() {
                 Your payment information has been received and is being verified. We will confirm the student&apos;s
                 enrollment through WhatsApp and email. Please allow up to one business day.
               </p>
+              {screenshotSkipped && (
+                <p style={{ color: "#92400e", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 16px", lineHeight: 1.6, maxWidth: 480, margin: "16px auto 0" }}>
+                  Your payment details were submitted, but we couldn&apos;t upload your screenshot (likely a slow connection).
+                  No problem — just send it to us on WhatsApp using the button in the corner of this page.
+                </p>
+              )}
             </div>
           ) : (
             <>
