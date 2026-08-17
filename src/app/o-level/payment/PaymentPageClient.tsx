@@ -106,11 +106,18 @@ export default function PaymentPageClient() {
       let screenshotUrl: string | null = null;
       if (file) {
         setUploadPct(1);
-        const blob = await upload(file.name, file, {
-          access: "private",
-          handleUploadUrl: "/api/o-level/applications/upload",
-          onUploadProgress: ({ percentage }) => setUploadPct(Math.round(percentage)),
-        });
+        const UPLOAD_TIMEOUT_MS = 45_000;
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("upload-timeout")), UPLOAD_TIMEOUT_MS)
+        );
+        const blob = await Promise.race([
+          upload(file.name, file, {
+            access: "private",
+            handleUploadUrl: "/api/o-level/applications/upload",
+            onUploadProgress: ({ percentage }) => setUploadPct(Math.round(percentage)),
+          }),
+          timeout,
+        ]);
         screenshotUrl = blob.url;
         setUploadPct(0);
       }
@@ -136,8 +143,13 @@ export default function PaymentPageClient() {
       }
       trackPaymentSubmitted({ subject: application.subject, value: Number(amountPaid) });
       setSubmitted(true);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setUploadPct(0);
+      if (err instanceof Error && err.message === "upload-timeout") {
+        setError("The screenshot upload is taking too long — check your connection and try again, or remove the file below to submit without it (it's optional).");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -279,6 +291,11 @@ export default function PaymentPageClient() {
                     <button type="button" onClick={() => fileRef.current?.click()} style={{ padding: "8px 14px", border: "1.5px solid #dce5ef", borderRadius: 9, background: "#fff", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#344054" }}>
                       {file ? "Change file" : "Choose file"}
                     </button>
+                    {file && (
+                      <button type="button" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ padding: "8px 14px", border: "none", borderRadius: 9, background: "#fee2e2", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#991b1b" }}>
+                        Remove
+                      </button>
+                    )}
                     {file && <span style={{ fontSize: ".8rem", color: "#344054", fontWeight: 600 }}>{file.name}</span>}
                   </div>
                   {uploadPct > 0 && <p style={{ fontSize: ".75rem", color: "#6b7c93", marginTop: 6 }}>Uploading… {uploadPct}%</p>}
