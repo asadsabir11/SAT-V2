@@ -115,6 +115,10 @@ async function ensureTable() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // study_group_consent was added after this table already existed in
+  // production — CREATE TABLE IF NOT EXISTS is a no-op there, so it needs
+  // its own migration or the column never actually gets added.
+  await sql`ALTER TABLE olevel_applications ADD COLUMN IF NOT EXISTS study_group_consent BOOLEAN NOT NULL DEFAULT FALSE`;
   tableReady = true;
 }
 
