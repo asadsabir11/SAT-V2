@@ -46,7 +46,7 @@ export async function sendParentReport(opts: {
 
   try {
     await resend.emails.send({
-      from: "The Digital Tutor <onboarding@resend.dev>",
+      from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
       to: opts.parentEmail,
       subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
       html: `
@@ -104,7 +104,7 @@ export async function sendNewStudentAlert(student: {
   const resend = new Resend(apiKey);
 
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: ADMIN_EMAILS,
     subject: `New student registered: ${student.name}`,
 
@@ -143,7 +143,7 @@ export async function sendWelcomeEmail(student: { name: string; email: string })
     : "";
 
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: student.email,
     subject: "Welcome to The Digital Tutor — you're in!",
     html: `
@@ -207,7 +207,7 @@ export async function sendPasswordResetEmail(opts: { email: string; name: string
   const resend = new Resend(apiKey);
 
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: opts.email,
     subject: "Reset your password — The Digital Tutor",
     html: `
@@ -233,7 +233,7 @@ export async function sendOLevelAccountWelcome(opts: { email: string; name: stri
   if (!apiKey) return;
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: opts.email,
     subject: "Your enrollment is confirmed — set up your account",
     html: `
@@ -261,7 +261,7 @@ export async function sendOLevelApplicationConfirmation(app: OLevelApplication) 
   if (!apiKey) return;
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: app.parent_email,
     subject: "We Received Your O Level Founding Cohort Application",
     html: `
@@ -288,7 +288,7 @@ export async function sendOLevelApplicationAdminAlert(app: OLevelApplication) {
   if (!apiKey || ADMIN_EMAILS.length === 0) return;
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: ADMIN_EMAILS,
     subject: `New O Level application: ${app.student_name} (${subjectLabel(app.subject)})`,
     html: `
@@ -316,7 +316,7 @@ export async function sendOLevelPaymentSubmittedAck(app: OLevelApplication) {
   if (!apiKey) return;
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: app.parent_email,
     subject: "Payment Information Received — Verification in Progress",
     html: `
@@ -338,7 +338,7 @@ export async function sendOLevelPaymentSubmittedAdminAlert(app: OLevelApplicatio
   if (!apiKey || ADMIN_EMAILS.length === 0) return;
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: ADMIN_EMAILS,
     subject: `Payment submitted: ${app.student_name} — needs verification`,
     html: `
@@ -363,7 +363,7 @@ export async function sendOLevelEnrollmentConfirmed(app: OLevelApplication, opts
   if (!apiKey) return;
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: "The Digital Tutor <onboarding@resend.dev>",
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: app.parent_email,
     subject: "Payment Verified — Welcome to The Digital Tutor",
     html: `
