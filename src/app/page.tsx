@@ -250,9 +250,9 @@ export default function Home() {
       {/* 7 — Pricing */}
       <section className="section soft">
         <div className="container">
-          <div className="eyebrow">Simple founder pricing</div>
-          <h2 className="title">Choose the support level you need</h2>
-          <div className="grid grid-4" style={{ alignItems: "start" }}>
+          <div className="eyebrow">SAT pricing</div>
+          <h2 className="title">Simple SAT Prep Pricing</h2>
+          <div className="grid grid-2" style={{ alignItems: "start", maxWidth: 640 }}>
             <PricingCard
               name="Free"
               price="Free"
@@ -262,21 +262,9 @@ export default function Home() {
             <PricingCard
               recommended
               name="Core Plan"
-              price="$19–$49/mo"
-              href={process.env.NEXT_PUBLIC_STRIPE_FOUNDER_COHORT_PAYMENT_LINK ?? "/register?plan=Founder"}
+              price="$19/mo · ~PKR 5,300/mo"
+              href="/register?plan=Core"
               items={["Weekly live class","AI tutor access","Monthly mock test","Parent progress report","Regional support group"]}
-            />
-            <PricingCard
-              name="Premium"
-              price="$99–$199/mo"
-              href={process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PAYMENT_LINK ?? "/register?plan=Premium"}
-              items={["Small group coaching","Monthly 1:1 review","Score improvement plan","College planning session"]}
-            />
-            <PricingCard
-              name="Sponsored / NGO"
-              price="Custom"
-              href={process.env.NEXT_PUBLIC_SPONSORED_STUDENT_DONATION_LINK ?? "/contact"}
-              items={["Sponsored seats","School or NGO cohort","Group reporting","Partnership support"]}
             />
           </div>
           <div className="actions" style={{ marginTop: 28 }}>

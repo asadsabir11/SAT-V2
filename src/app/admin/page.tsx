@@ -66,7 +66,6 @@ export default function Admin() {
         ["Total registrations", m.totalLeads, "All student leads"],
         ["Free signups", m.freeSignups, "Top of funnel"],
         ["Core Plan students", m.paidFounderCohortStudents, "Goal: 20+"],
-        ["Premium students", m.premiumStudents, "Goal: 10+"],
         ["Webinar registrations", m.parentWebinarRegistrations, "Goal: 30+"],
         ["Partnership leads", m.partnershipLeads, "Schools, NGOs, sponsors"],
         ["Contact messages", m.contactMessages, "Inbound inquiries"],

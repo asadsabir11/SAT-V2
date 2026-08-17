@@ -6,7 +6,7 @@ import { trackLead } from "@/lib/analyticsClient";
 import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 
 const COUNTRIES = ["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","South Korea","Haiti","Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco","Other"];
-const PACKAGES  = ["Free","Core Plan","Premium","Sponsored/NGO"];
+const PACKAGES  = ["Free","Core Plan"];
 const GRADES    = ["Grade 8","Grade 9","Grade 10","Grade 11","Grade 12","College Freshman","College Sophomore","Other"];
 
 // ── Validators ────────────────────────────────────────────────────────────────

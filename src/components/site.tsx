@@ -207,7 +207,7 @@ export function FeatureCard({index,title,children}:{index:string;title:string;ch
 }
 
 export function PricingCard({name,price,items,href,recommended=false}:{name:string;price:string;items:string[];href:string;recommended?:boolean}){
-  const label=name==="Free"?"Start free →":name==="Sponsored / NGO"?"Partner with us →":name==="Premium"?"Apply for premium →":"Enroll now →";
+  const label=name==="Free"?"Start free →":"Enroll now →";
   return (
     <article className={`card${recommended?" recommended":""}`} style={{display:"flex",flexDirection:"column"}}>
       <span className="eyebrow" style={{marginBottom:4}}>{name}</span>
