@@ -8,6 +8,7 @@ import { LearningJourney } from "@/components/academy/LearningJourney";
 import { TrackViewContent } from "./TrackViewContent";
 import { getInstructor, getCohortForSubject, getSubject } from "@/lib/academy/data";
 import { getIntroLecture } from "@/lib/lectures";
+import { getSession } from "@/lib/auth";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -128,10 +129,12 @@ function IntroVideoCard({ label, title, videoUrl, thumbnailUrl }: { label: strin
 
 export default async function OLevelPage() {
   const instructor = getInstructor("ibrahim");
-  const [mathIntro, englishIntro] = await Promise.all([
+  const [mathIntro, englishIntro, session] = await Promise.all([
     getIntroLecture("o-level", "mathematics"),
     getIntroLecture("o-level", "english-language"),
+    getSession(),
   ]);
+  const isSignedInStudent = session?.role === "student";
 
   return (
     <>
@@ -293,15 +296,28 @@ export default async function OLevelPage() {
       {/* 9 — Registration form */}
       <section id="apply" className="section" style={{ scrollMarginTop: 90 }}>
         <div className="container" style={{ maxWidth: 900 }}>
-          <div style={{ maxWidth: 720, margin: "0 auto 40px", textAlign: "center" }}>
-            <div className="eyebrow" style={{ justifyContent: "center" }}>Register free</div>
-            <h2 className="title">Create Your Free O Level Account</h2>
-            <p className="lead" style={{ margin: "0 auto" }}>
-              Registration is free. Browse lectures, quizzes and past papers right away — pay only when you&apos;re
-              ready to unlock a subject.
-            </p>
-          </div>
-          <OLevelRegistrationForm />
+          {isSignedInStudent ? (
+            <div className="card" style={{ maxWidth: 560, margin: "0 auto", textAlign: "center", padding: 40, background: "linear-gradient(135deg,#d4faf5,#eaf4ff)" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>✅</div>
+              <p style={{ fontWeight: 800, color: "#075a50", marginBottom: 8, fontSize: "1.05rem" }}>You&apos;re signed in</p>
+              <p style={{ color: "#2d6b60", lineHeight: 1.65, margin: "0 auto 20px" }}>
+                Head to your dashboard to browse lectures, quizzes and past papers, or unlock a subject.
+              </p>
+              <Link href="/dashboard" className="btn btn-primary">Go to my dashboard →</Link>
+            </div>
+          ) : (
+            <>
+              <div style={{ maxWidth: 720, margin: "0 auto 40px", textAlign: "center" }}>
+                <div className="eyebrow" style={{ justifyContent: "center" }}>Register free</div>
+                <h2 className="title">Create Your Free O Level Account</h2>
+                <p className="lead" style={{ margin: "0 auto" }}>
+                  Registration is free. Browse lectures, quizzes and past papers right away — pay only when you&apos;re
+                  ready to unlock a subject.
+                </p>
+              </div>
+              <OLevelRegistrationForm />
+            </>
+          )}
         </div>
       </section>
 
