@@ -37,7 +37,7 @@ export type QuizAttempt = {
 };
 
 let tablesReady = false;
-async function ensureTables() {
+export async function ensureTables() {
   if (tablesReady) return;
   await sql`
     CREATE TABLE IF NOT EXISTS quizzes (

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { ensureParentTables } from "@/lib/parent-system";
 import { ensureAnalyticsTables } from "@/lib/analytics";
+import { ensureTables as ensureQuizTables } from "@/lib/quiz";
 
 export async function DELETE() {
   const session = await getSession();
@@ -10,13 +11,16 @@ export async function DELETE() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await Promise.all([ensureParentTables(), ensureAnalyticsTables()]);
+  await Promise.all([ensureParentTables(), ensureAnalyticsTables(), ensureQuizTables()]);
 
   // Delete all student leads, diagnostics, users, and quiz results — keeps webinar/partner/contact leads
+  // Note: leads/diagnostics are saved under "leads-student.json"/"diagnostics.json"
+  // (the .json suffix is part of the literal collection key, not a real file);
+  // quiz attempts live in their own quiz_attempts table, not sat_records.
   await Promise.all([
-    sql`DELETE FROM sat_records WHERE collection = 'leads-student'`,
-    sql`DELETE FROM sat_records WHERE collection = 'diagnostics'`,
-    sql`DELETE FROM sat_records WHERE collection = 'quiz_results'`,
+    sql`DELETE FROM sat_records WHERE collection = 'leads-student.json'`,
+    sql`DELETE FROM sat_records WHERE collection = 'diagnostics.json'`,
+    sql`DELETE FROM quiz_attempts`,
     sql`DELETE FROM users WHERE role = 'student'`,
   ]);
 

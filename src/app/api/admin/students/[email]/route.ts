@@ -15,8 +15,8 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const decoded = decodeURIComponent(email);
 
   await Promise.all([
-    deleteByField("leads-student", "studentEmail", decoded),
-    deleteByField("diagnostics", "email", decoded),
+    deleteByField("leads-student.json", "studentEmail", decoded),
+    deleteByField("diagnostics.json", "email", decoded),
     sql`DELETE FROM users WHERE email = ${decoded.toLowerCase().trim()} AND role = 'student'`,
   ]);
 
