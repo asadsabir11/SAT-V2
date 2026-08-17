@@ -5,15 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { PageHero } from "@/components/site";
 import { trackInitiateCheckout, trackPaymentSubmitted } from "@/lib/analyticsClient";
+import { marginalPriceForNextSubject } from "@/lib/academy/data";
 
 type Subject = "mathematics" | "english-language";
 const SUBJECT_LABELS: Record<string, string> = {
   "mathematics": "Mathematics",
   "english-language": "English Language",
-};
-const AMOUNT_DUE: Record<Subject, number> = {
-  "mathematics": 10000,
-  "english-language": 10000,
 };
 
 const BANK_NAME = process.env.NEXT_PUBLIC_OLEVEL_BANK_NAME ?? "";
@@ -52,6 +49,8 @@ function UnlockForm() {
 
   const [loading, setLoading] = useState(true);
   const [currentStatus, setCurrentStatus] = useState<"free" | "pending" | "unlocked">("free");
+  const [amountDue, setAmountDue] = useState(10000);
+  const [unlockedCount, setUnlockedCount] = useState(0);
 
   const [paymentMethod, setPaymentMethod] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
@@ -68,14 +67,19 @@ function UnlockForm() {
 
   useEffect(() => {
     if (!subject) { setLoading(false); return; }
-    setAmountPaid(String(AMOUNT_DUE[subject]));
     fetch("/api/o-level/access")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        const status = d?.access?.[subject] ?? "free";
+        const access = d?.access ?? {};
+        const status = access[subject] ?? "free";
+        const count = Object.values(access).filter((s) => s === "unlocked").length;
+        const due = marginalPriceForNextSubject(count);
         setCurrentStatus(status);
+        setUnlockedCount(count);
+        setAmountDue(due);
+        setAmountPaid(String(due));
         if (status === "free") {
-          trackInitiateCheckout({ subject, value: AMOUNT_DUE[subject] });
+          trackInitiateCheckout({ subject, value: due });
         }
       })
       .finally(() => setLoading(false));
@@ -168,9 +172,18 @@ function UnlockForm() {
           <div className="card" style={{ marginBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
             <div>
               <p style={{ margin: 0, fontWeight: 800, color: "var(--navy)" }}>{SUBJECT_LABELS[subject]}</p>
-              <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: ".85rem" }}>Monthly price</p>
+              <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: ".85rem" }}>
+                Monthly price{unlockedCount > 0 && <span style={{ color: "#15803d", fontWeight: 700 }}> · bundle price</span>}
+              </p>
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--navy)" }}>PKR {AMOUNT_DUE[subject].toLocaleString()}</div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--navy)" }}>PKR {amountDue.toLocaleString()}</div>
+              {unlockedCount > 0 && (
+                <div style={{ fontSize: ".78rem", color: "#15803d", fontWeight: 700 }}>
+                  You already have {unlockedCount} subject{unlockedCount > 1 ? "s" : ""} unlocked
+                </div>
+              )}
+            </div>
           </div>
 
           {currentStatus === "unlocked" ? (

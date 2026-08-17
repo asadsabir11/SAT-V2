@@ -351,6 +351,25 @@ export function getActivePricing(): PricingSchedule {
   );
 }
 
+/** Cumulative price for N subjects, from the active tier table. Flat-rate extrapolation past the last tier. */
+export function cumulativePriceForSubjectCount(count: number): number {
+  const tiers = getActivePricing().tiers;
+  if (count <= 0) return 0;
+  const exact = tiers.find((t) => t.subjects === count);
+  if (exact) return exact.price;
+  const last = tiers[tiers.length - 1];
+  if (count > last.subjects) {
+    const perSubject = last.price / last.subjects;
+    return Math.round(perSubject * count);
+  }
+  return last.price;
+}
+
+/** Marginal price to unlock the next subject, given how many the student already has unlocked. */
+export function marginalPriceForNextSubject(alreadyUnlockedCount: number): number {
+  return cumulativePriceForSubjectCount(alreadyUnlockedCount + 1) - cumulativePriceForSubjectCount(alreadyUnlockedCount);
+}
+
 export function getInstructor(id: string): Instructor | undefined {
   return INSTRUCTORS.find((i) => i.id === id);
 }

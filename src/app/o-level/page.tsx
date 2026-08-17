@@ -6,9 +6,10 @@ import { InstructorProfile } from "@/components/academy/InstructorProfile";
 import { AcademyPricingTable } from "@/components/academy/AcademyPricingTable";
 import { LearningJourney } from "@/components/academy/LearningJourney";
 import { TrackViewContent } from "./TrackViewContent";
-import { getInstructor, getCohortForSubject, getSubject } from "@/lib/academy/data";
+import { getInstructor, getCohortForSubject, getSubject, marginalPriceForNextSubject } from "@/lib/academy/data";
 import { getIntroLecture } from "@/lib/lectures";
 import { getSession } from "@/lib/auth";
+import { getOLevelAccessMap } from "@/lib/olevelAccess";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -74,12 +75,17 @@ const SUBJECT_CLASS_TIME: Record<string, string> = {
   "mathematics": "Saturday, 6:00 PM – 7:00 PM (PKT)",
 };
 
-function CohortCard({ subjectSlug, price, isSignedInStudent }: { subjectSlug: string; price: number; isSignedInStudent: boolean }) {
+function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubjects }: { subjectSlug: string; basePrice: number; isSignedInStudent: boolean; unlockedSubjects: string[] }) {
   const subject = getSubject(subjectSlug);
   const cohort = getCohortForSubject(subjectSlug);
   if (!subject) return null;
 
+  const isUnlocked = unlockedSubjects.includes(subjectSlug);
+  const marginalPrice = isSignedInStudent && !isUnlocked ? marginalPriceForNextSubject(unlockedSubjects.length) : basePrice;
+  const isDiscounted = isSignedInStudent && marginalPrice < basePrice;
+
   const classTime = SUBJECT_CLASS_TIME[subjectSlug];
+  const priceValue = isUnlocked ? "Unlocked ✓" : `PKR ${marginalPrice.toLocaleString()}${isDiscounted ? " (bundle price)" : ""}`;
   const rows: [string, string][] = [
     ["Cohort start date", COHORT_SCHEDULE.startDate],
     ["Registration deadline", COHORT_SCHEDULE.registrationDeadline],
@@ -87,7 +93,7 @@ function CohortCard({ subjectSlug, price, isSignedInStudent }: { subjectSlug: st
     ["Session duration", COHORT_SCHEDULE.sessionDuration],
     ["Weekly office hours", COHORT_SCHEDULE.officeHours],
     ["Maximum students", "15"],
-    ["Monthly price", `PKR ${price.toLocaleString()}`],
+    ["Monthly price", priceValue],
   ];
 
   const body = (
@@ -98,23 +104,27 @@ function CohortCard({ subjectSlug, price, isSignedInStudent }: { subjectSlug: st
         {rows.map(([label, value]) => (
           <div key={label} style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "2px 12px", fontSize: ".85rem", padding: "4px 0", borderBottom: "1px solid #f0f4f8" }}>
             <span style={{ color: "var(--muted)" }}>{label}</span>
-            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" ? "#92400e" : "var(--navy)" }}>{value}</span>
+            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" ? "#92400e" : isUnlocked ? "#15803d" : "var(--navy)" }}>{value}</span>
           </div>
         ))}
       </div>
-      {isSignedInStudent ? (
-        <span style={{ marginTop: "auto", color: "var(--blue)", fontWeight: 700, fontSize: ".9rem" }}>Unlock this subject →</span>
-      ) : (
+      {!isSignedInStudent ? (
         <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
           Register Free to Get Started
         </Link>
+      ) : isUnlocked ? (
+        <span style={{ marginTop: "auto", color: "#15803d", fontWeight: 700, fontSize: ".9rem" }}>View lessons →</span>
+      ) : (
+        <span style={{ marginTop: "auto", color: "var(--blue)", fontWeight: 700, fontSize: ".9rem" }}>
+          Unlock this subject →{isDiscounted && <span style={{ display: "block", fontWeight: 600, fontSize: ".78rem", color: "#15803d" }}>Bundle price — you already have {unlockedSubjects.length} subject{unlockedSubjects.length > 1 ? "s" : ""} unlocked</span>}
+        </span>
       )}
     </>
   );
 
   if (isSignedInStudent) {
     return (
-      <Link href={`/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
+      <Link href={isUnlocked ? `/o-level/lectures?subject=${subjectSlug}` : `/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
         {body}
       </Link>
     );
@@ -152,6 +162,8 @@ export default async function OLevelPage() {
     getSession(),
   ]);
   const isSignedInStudent = session?.role === "student";
+  const accessMap = isSignedInStudent ? await getOLevelAccessMap(session!.email) : {};
+  const unlockedSubjects = Object.entries(accessMap).filter(([, status]) => status === "unlocked").map(([subject]) => subject);
 
   return (
     <>
@@ -214,8 +226,8 @@ export default async function OLevelPage() {
             </p>
           </div>
           <div className="grid grid-2" style={{ marginTop: 40 }}>
-            <CohortCard subjectSlug="english-language" price={10000} isSignedInStudent={isSignedInStudent} />
-            <CohortCard subjectSlug="mathematics" price={10000} isSignedInStudent={isSignedInStudent} />
+            <CohortCard subjectSlug="english-language" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} />
+            <CohortCard subjectSlug="mathematics" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} />
           </div>
           <div className="card" style={{ marginTop: 24, textAlign: "center", background: "#eaf1ff", borderColor: "#c9dcfb" }}>
             <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>English Language + Mathematics: PKR 18,000 per month</p>
