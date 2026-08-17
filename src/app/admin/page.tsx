@@ -102,11 +102,6 @@ export default function Admin() {
                 🔑 O Level access →
               </Link>
             )}
-            {isFounder && (
-              <Link href="/admin/o-level-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #c2410c", background: "#fff7ed", color: "#c2410c" }}>
-                📋 O Level applications →
-              </Link>
-            )}
             <Link href="/admin/past-papers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
               📄 O Level past papers →
             </Link>
