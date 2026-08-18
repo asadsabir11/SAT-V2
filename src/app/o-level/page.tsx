@@ -258,10 +258,6 @@ export default async function OLevelPage() {
             <CohortCard subjectSlug="islamiyat" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
             <CohortCard subjectSlug="pakistan-studies" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
           </div>
-          <p style={{ textAlign: "center", marginTop: 24, color: "var(--muted)", fontSize: ".9rem", maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
-            Additional cohorts in Computer Science, Islamiyat and Pakistan Studies will open based on parent demand —
-            you can join the waiting list for any of these subjects on the application form below.
-          </p>
         </div>
       </section>
 
