@@ -17,7 +17,36 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
   const [parentEmail, setParentEmail] = useState("");
   const [parentName, setParentName]   = useState("");
 
+  const [searchEmail, setSearchEmail]     = useState("");
+  const [searching, setSearching]         = useState(false);
+  const [searchResults, setSearchResults] = useState<Student[] | null>(null);
+  const [searchError, setSearchError]     = useState("");
+
   useEffect(() => { load(); }, []);
+
+  async function searchByParentEmail() {
+    if (!searchEmail.trim()) return;
+    setSearching(true); setSearchError(""); setSearchResults(null);
+    try {
+      const r = await fetch(`/api/admin/parents/search?parentEmail=${encodeURIComponent(searchEmail.trim())}&program=${program}`);
+      const d = await r.json();
+      if (!r.ok) { setSearchError(d.error ?? "Search failed"); return; }
+      setSearchResults(d.students ?? []);
+      if ((d.students ?? []).length === 1) {
+        selectFoundStudent(d.students[0]);
+      }
+    } catch {
+      setSearchError("Search failed. Please try again.");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function selectFoundStudent(s: Student) {
+    setStudentId(s.id);
+    setParentEmail(searchEmail.trim());
+    setSuccess(""); setError("");
+  }
 
   async function load() {
     const d = await fetch(`/api/admin/parents?program=${program}`).then(r => r.json());
@@ -38,6 +67,7 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
     if (!r.ok) { setError(d.error ?? "Failed"); setSaving(false); return; }
     setSuccess(d.emailed ? "Parent account created and linked — they've been emailed a set-password link." : "Existing parent account linked to this student.");
     setStudentId(""); setParentEmail(""); setParentName("");
+    setSearchEmail(""); setSearchResults(null);
     await load();
     setSaving(false);
   }
@@ -54,12 +84,65 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
       <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "8px 0 4px" }}>{title}</h1>
       <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 28px" }}>{description}</p>
 
+      {/* Search by parent email — auto-finds the student from their registration form */}
+      <div className="card" style={{ marginBottom: 20, background: "#f8fafc", border: "2px dashed #cbd5e1" }}>
+        <h3 style={{ margin: "0 0 6px", color: "#071b33", fontSize: "1rem" }}>Find student by parent email</h3>
+        <p style={{ color: "#6b7c93", fontSize: ".82rem", margin: "0 0 14px" }}>
+          Looks up the parent email the student entered on their registration form and matches it to their account —
+          faster than hunting through the dropdown below.
+        </p>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-start" }}>
+          <div className="field" style={{ flex: "1 1 240px" }}>
+            <input
+              type="email"
+              value={searchEmail}
+              onChange={e => setSearchEmail(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); searchByParentEmail(); } }}
+              placeholder="parent@gmail.com"
+            />
+          </div>
+          <button className="btn btn-secondary" onClick={searchByParentEmail} disabled={searching || !searchEmail.trim()} style={{ padding: "0 22px", minHeight: 48 }}>
+            {searching ? "Searching…" : "Search →"}
+          </button>
+        </div>
+        {searchError && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".85rem", margin: "10px 0 0" }}>⚠ {searchError}</p>}
+        {searchResults && searchResults.length === 0 && (
+          <p style={{ color: "#92400e", fontSize: ".85rem", margin: "10px 0 0" }}>
+            No student found with this parent email on file. They may not have registered yet, or used a different email — you can still search the dropdown below.
+          </p>
+        )}
+        {searchResults && searchResults.length > 0 && (
+          <div style={{ marginTop: 14, display: "grid", gap: 8 }}>
+            {searchResults.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => selectFoundStudent(s)}
+                style={{
+                  textAlign: "left", padding: "10px 14px", borderRadius: 9, cursor: "pointer",
+                  border: studentId === s.id ? "2px solid #15803d" : "1.5px solid #dce5ef",
+                  background: studentId === s.id ? "#f0fdf4" : "#fff",
+                }}
+              >
+                <span style={{ fontWeight: 700, color: "#071b33" }}>{studentId === s.id ? "✓ " : ""}{s.name}</span>
+                <span style={{ color: "#6b7c93", fontSize: ".85rem" }}> · {s.email}</span>
+              </button>
+            ))}
+            {searchResults.length > 1 && (
+              <p style={{ color: "#6b7c93", fontSize: ".78rem", margin: 0 }}>
+                {searchResults.length} students share this parent email — pick the right one above.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Create form */}
       <div className="card" style={{ marginBottom: 28, border: "2px solid #e8eef6" }}>
         <h3 style={{ margin: "0 0 18px", color: "#071b33", fontSize: "1rem" }}>Link a new parent</h3>
         <div className="form-grid" style={{ marginBottom: 14 }}>
           <div className="field">
-            <label>Student *</label>
+            <label>Student * <span style={{ color: "#6b7c93", fontWeight: 400 }}>(or use the search above)</span></label>
             <select value={studentId} onChange={e => setStudentId(e.target.value)}>
               <option value="">— Select student —</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}

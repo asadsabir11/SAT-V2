@@ -41,6 +41,19 @@ export async function findByField<T>(collection: string, field: string, value: s
   return (rows[0]?.data ?? null) as T | null;
 }
 
+// Case-insensitive, returns every match — findByField only returns the
+// single most recent one, which isn't right for "find the student(s) whose
+// registration form named this parent email" (siblings can share a parent).
+export async function findAllByFieldCI<T>(collection: string, field: string, value: string): Promise<T[]> {
+  await ensureTables();
+  const rows = await sql`
+    SELECT data FROM sat_records
+    WHERE collection = ${collection} AND LOWER(data->>${field}) = LOWER(${value})
+    ORDER BY created_at DESC
+  `;
+  return rows.map((r) => r.data as T);
+}
+
 export async function readData<T>(collection: string): Promise<T[]> {
   await ensureTables();
   const rows = await sql`
