@@ -171,6 +171,12 @@ export default async function OLevelPage() {
     getSession(),
   ]);
   const isSignedInStudent = session?.role === "student";
+  // Specifically "already has an O-Level account" — a signed-in SAT student
+  // who hasn't registered for O-Level yet should still see the registration
+  // form here, not a dead-end "you're signed in" card. Falls back to true
+  // for any signed-in student on pre-existing tokens that predate the
+  // program field (up to a 7-day rollout window), matching prior behavior.
+  const isSignedInAsOLevel = isSignedInStudent && (session!.program ?? "o-level") === "o-level";
   const accessMap = isSignedInStudent ? await getOLevelAccessMap(session!.email) : {};
   const unlockedSubjects = Object.entries(accessMap).filter(([, status]) => status === "unlocked").map(([subject]) => subject);
 
@@ -347,7 +353,7 @@ export default async function OLevelPage() {
       {/* 9 — Registration form */}
       <section id="apply" className="section" style={{ scrollMarginTop: 90 }}>
         <div className="container" style={{ maxWidth: 900 }}>
-          {isSignedInStudent ? (
+          {isSignedInAsOLevel ? (
             <div className="card" style={{ maxWidth: 560, margin: "0 auto", textAlign: "center", padding: 40, background: "linear-gradient(135deg,#d4faf5,#eaf4ff)" }}>
               <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>✅</div>
               <p style={{ fontWeight: 800, color: "#075a50", marginBottom: 8, fontSize: "1.05rem" }}>You&apos;re signed in</p>

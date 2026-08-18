@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToN8n } from "@/lib/n8n";
 import { appendData } from "@/lib/storage";
-import { createUser, findUserByEmail } from "@/lib/users";
+import { createUser, findUserByEmailAndProgram } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
 import { sendNewStudentAlert, sendWelcomeEmail } from "@/lib/email";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
@@ -78,12 +78,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // Strip password from the lead record before saving
     const { password, confirmPassword: _confirm, website: _website, ...leadData } = payload as Record<string, string>;
 
-    // For registrations that create an account: check duplicate email BEFORE saving anything
+    // For registrations that create an account: check duplicate email BEFORE
+    // saving anything. Scoped to the SAT program specifically — the same
+    // email is allowed to also have a separate O-Level account.
     if (type === "student" && leadData.studentEmail) {
-      const existing = await findUserByEmail(leadData.studentEmail);
+      const existing = await findUserByEmailAndProgram(leadData.studentEmail, "sat");
       if (existing) {
         return NextResponse.json(
-          { error: "An account with this email already exists. Please log in instead." },
+          { error: "A SAT account with this email already exists. Please log in instead." },
           { status: 409 }
         );
       }
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         email: leadData.studentEmail,
         role: "student",
         name: leadData.studentName,
+        program: "sat",
       });
       const res = NextResponse.json({ ok: true });
       res.cookies.set(AUTH_COOKIE, token, {

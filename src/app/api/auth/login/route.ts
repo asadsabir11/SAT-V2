@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserByEmail, verifyPassword } from "@/lib/users";
+import { findUsersByEmailAndRole, verifyPassword } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
 
 const attempts = new Map<string, { count: number; resetAt: number }>();
@@ -24,21 +24,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Too many login attempts. Try again in 15 minutes." }, { status: 429 });
     }
 
-    const { email, password, role } = await request.json();
+    const { email, password, role, program } = await request.json();
     if (!email || !password || !role) {
       return NextResponse.json({ error: "Email, password, and role are required" }, { status: 400 });
     }
-
-    // Students, founders, parents, and teachers are all stored in the users table
-    const user = await findUserByEmail(email);
-    if (!user || user.role !== role) {
-      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
-    }
-    if (!["student", "founder", "parent", "teacher"].includes(user.role)) {
+    if (!["student", "founder", "parent", "teacher"].includes(role)) {
       return NextResponse.json({ error: "Invalid account type" }, { status: 401 });
     }
-    const valid = await verifyPassword(password, user.password_hash);
-    if (!valid) {
+
+    // Students, founders, parents, and teachers are all stored in the users
+    // table. A student can now have two rows sharing an email (one SAT, one
+    // O-Level) — narrow to the requested program if it's given and actually
+    // matches one of the accounts, otherwise fall back to checking all of
+    // them so a single-account student is unaffected either way.
+    const candidates = await findUsersByEmailAndRole(email, role);
+    const scoped = program ? candidates.filter((c) => c.program === program) : [];
+    const pool = scoped.length > 0 ? scoped : candidates;
+
+    let user: (typeof candidates)[number] | null = null;
+    for (const candidate of pool) {
+      if (await verifyPassword(password, candidate.password_hash)) {
+        user = candidate;
+        break;
+      }
+    }
+    if (!user) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
@@ -47,6 +57,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       name: user.name,
+      program: user.program,
     });
     const res = NextResponse.json({ ok: true, role: user.role });
     res.cookies.set(AUTH_COOKIE, token, {

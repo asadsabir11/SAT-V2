@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type Role = "student" | "founder" | "parent" | "teacher";
+type Program = "sat" | "o-level";
 const ROLE_LABELS: Record<Role, string> = { student: "Student", parent: "Parent", founder: "Founder", teacher: "Teacher" };
 
 function LoginForm() {
@@ -11,6 +12,7 @@ function LoginForm() {
   const nextPath = params.get("next");
 
   const [role, setRole] = useState<Role>((params.get("role") as Role) ?? "student");
+  const [program, setProgram] = useState<Program>((params.get("program") as Program) ?? "sat");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -20,6 +22,8 @@ function LoginForm() {
   useEffect(() => {
     const r = params.get("role") as Role;
     if (r === "student" || r === "founder" || r === "parent" || r === "teacher") setRole(r);
+    const p = params.get("program") as Program;
+    if (p === "sat" || p === "o-level") setProgram(p);
   }, [params]);
 
   async function handleSubmit(e: { preventDefault(): void }) {
@@ -31,7 +35,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password, role }),
+        body: JSON.stringify({ email: email.trim(), password, role, program: role === "student" ? program : undefined }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Login failed. Please try again."); return; }
@@ -79,6 +83,36 @@ function LoginForm() {
             </button>
           ))}
         </div>
+
+        {role === "student" && (
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
+              Program
+            </label>
+            <div style={{ display: "flex", gap: 8, background: "#f1f5f9", borderRadius: 10, padding: 4 }}>
+              {([["sat", "SAT Prep"], ["o-level", "O Level"]] as const).map(([p, label]) => (
+                <button
+                  key={p}
+                  type="button"
+                  aria-pressed={program === p}
+                  onClick={() => { setProgram(p); setError(""); }}
+                  style={{
+                    flex: 1, padding: "8px 8px", borderRadius: 7, border: "none", cursor: "pointer",
+                    fontWeight: 700, fontSize: ".8rem", transition: ".15s",
+                    background: program === p ? "#fff" : "transparent",
+                    color: program === p ? "#155eef" : "#6b7c93",
+                    boxShadow: program === p ? "0 1px 6px rgba(7,27,51,.10)" : "none",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p style={{ margin: "6px 0 0", fontSize: ".76rem", color: "#a0aec0" }}>
+              Registered for both? Pick the one you want to sign into.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div style={{ marginBottom: 16 }}>

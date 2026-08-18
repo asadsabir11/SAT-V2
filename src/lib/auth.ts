@@ -12,6 +12,10 @@ export type SessionUser = {
   email: string;
   role: "student" | "founder" | "parent" | "teacher";
   name: string;
+  // Which program this specific account belongs to. Optional because tokens
+  // issued before this field existed (up to 7 days old for students) won't
+  // have it — callers that care should fall back to a DB lookup by id.
+  program?: "sat" | "o-level";
 };
 
 export async function createToken(user: SessionUser): Promise<string> {

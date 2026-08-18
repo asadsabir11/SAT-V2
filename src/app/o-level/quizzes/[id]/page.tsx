@@ -110,7 +110,7 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
       <div className="card" style={{ maxWidth: 400, textAlign: "center", padding: 40 }}>
         <p style={{ fontWeight: 700, marginBottom: 12 }}>Please sign in to continue.</p>
         <p style={{ color: "#6b7c93", fontSize: ".88rem", marginBottom: 16 }}>Your session may have expired.</p>
-        <Link href={`/login?role=student&next=/o-level/quizzes/${id}`} style={{ color: "#155eef", fontWeight: 700 }}>Sign in →</Link>
+        <Link href={`/login?role=student&program=o-level&next=/o-level/quizzes/${id}`} style={{ color: "#155eef", fontWeight: 700 }}>Sign in →</Link>
       </div>
     </div></section>
   );

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createUser, findUserByEmail } from "@/lib/users";
+import { createUser, findUserByEmailAndProgram } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
 import { appendData } from "@/lib/storage";
 import { sendOLevelRegistrationWelcome, sendOLevelRegistrationAdminAlert } from "@/lib/email";
@@ -49,9 +49,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Password: ${pwError}` }, { status: 400 });
     }
 
-    const existing = await findUserByEmail(studentEmail);
+    // Scoped to the O-Level program specifically — the same email is
+    // allowed to also have a separate SAT account.
+    const existing = await findUserByEmailAndProgram(studentEmail, "o-level");
     if (existing) {
-      return NextResponse.json({ error: "An account with this email already exists. Please log in instead." }, { status: 409 });
+      return NextResponse.json({ error: "An O-Level account with this email already exists. Please log in instead." }, { status: 409 });
     }
 
     const studentName = String(body.studentName).trim();
@@ -78,7 +80,7 @@ export async function POST(req: NextRequest) {
     sendOLevelRegistrationWelcome({ email: studentEmail, name: studentName }).catch(console.error);
     sendOLevelRegistrationAdminAlert({ studentName, studentEmail, parentName: record.parentName, parentEmail, city: record.city }).catch(console.error);
 
-    const token = await createToken({ id: userId, email: studentEmail, role: "student", name: studentName });
+    const token = await createToken({ id: userId, email: studentEmail, role: "student", name: studentName, program: "o-level" });
     const res = NextResponse.json({ ok: true });
     res.cookies.set(AUTH_COOKIE, token, {
       httpOnly: true,

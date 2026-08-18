@@ -24,6 +24,12 @@ async function ensureUsersTable() {
   // Migrate role constraint to include 'parent', then 'teacher'
   await sql`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`;
   await sql`ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('student', 'founder', 'parent', 'teacher'))`;
+  // Email used to be globally unique, which blocked the same person from
+  // having a separate SAT and O-Level account. Scope uniqueness to
+  // (email, program) instead — same email, different program is fine; same
+  // email, same program is still a duplicate.
+  await sql`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key`;
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS users_email_program_idx ON users (email, program)`;
   usersReady = true;
 }
 
@@ -40,7 +46,7 @@ export async function createUser(
   await sql`
     INSERT INTO users (id, email, password_hash, role, name, program)
     VALUES (${id}, ${email.toLowerCase().trim()}, ${hash}, ${role}, ${name}, ${program})
-    ON CONFLICT (email) DO NOTHING
+    ON CONFLICT (email, program) DO NOTHING
   `;
   return id;
 }
@@ -59,6 +65,31 @@ export async function findUserByEmail(email: string) {
   return rows[0] ?? null;
 }
 
+// Same person, same email, can hold one account per program (a SAT account
+// and an O-Level account) — this checks whether THIS specific program's
+// account already exists, used by both registration endpoints instead of
+// the global findUserByEmail() so registering for the other program isn't
+// blocked.
+export async function findUserByEmailAndProgram(email: string, program: "sat" | "o-level") {
+  await ensureUsersTable();
+  const rows = await sql`
+    SELECT * FROM users WHERE email = ${email.toLowerCase().trim()} AND program = ${program} LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
+// Login needs every account matching (email, role) — not just one — since a
+// student can now have both a SAT and an O-Level row under the same email.
+// Ordered oldest-first so which account wins is at least deterministic if
+// the caller doesn't disambiguate by program.
+export async function findUsersByEmailAndRole(email: string, role: string) {
+  await ensureUsersTable();
+  const rows = await sql`
+    SELECT * FROM users WHERE email = ${email.toLowerCase().trim()} AND role = ${role} ORDER BY created_at ASC
+  `;
+  return rows;
+}
+
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
@@ -69,9 +100,13 @@ export async function updateUserPassword(email: string, newPassword: string): Pr
   await sql`UPDATE users SET password_hash = ${hash} WHERE email = ${email.toLowerCase().trim()}`;
 }
 
+// access_level is a SAT-only concept (O-Level unlocks per-subject through a
+// separate table) — every query here is scoped to program = 'sat' so a
+// person's O-Level account never shadows or gets shadowed by their SAT
+// account's access state when both share an email.
 export async function getStudentAccessLevel(email: string): Promise<"free" | "pending" | "unlocked"> {
   await ensureUsersTable();
-  const rows = await sql`SELECT access_level FROM users WHERE email = ${email.toLowerCase().trim()} LIMIT 1`;
+  const rows = await sql`SELECT access_level FROM users WHERE email = ${email.toLowerCase().trim()} AND program = 'sat' LIMIT 1`;
   const level = rows[0]?.access_level ?? "free";
   if (level === "pending" || level === "unlocked") return level;
   return "free";
@@ -82,7 +117,7 @@ export async function requestAccess(email: string): Promise<void> {
   await sql`
     UPDATE users
     SET access_level = 'pending', payment_requested_at = NOW()
-    WHERE email = ${email.toLowerCase().trim()} AND access_level = 'free'
+    WHERE email = ${email.toLowerCase().trim()} AND program = 'sat' AND access_level = 'free'
   `;
 }
 
@@ -91,7 +126,7 @@ export async function grantAccess(email: string, approvedBy: string, notes?: str
   await sql`
     UPDATE users
     SET access_level = 'unlocked', approved_at = NOW(), approved_by = ${approvedBy}, notes = ${notes ?? null}
-    WHERE email = ${email.toLowerCase().trim()}
+    WHERE email = ${email.toLowerCase().trim()} AND program = 'sat'
   `;
 }
 
@@ -100,7 +135,7 @@ export async function revokeAccess(email: string): Promise<void> {
   await sql`
     UPDATE users
     SET access_level = 'free', approved_at = NULL, approved_by = NULL, payment_requested_at = NULL
-    WHERE email = ${email.toLowerCase().trim()}
+    WHERE email = ${email.toLowerCase().trim()} AND program = 'sat'
   `;
 }
 
@@ -121,7 +156,7 @@ export async function listStudentsWithAccess(): Promise<StudentAccessRow[]> {
   const rows = await sql`
     SELECT id, email, name, created_at, access_level, payment_requested_at, approved_at, approved_by, notes
     FROM users
-    WHERE role = 'student'
+    WHERE role = 'student' AND program = 'sat'
     ORDER BY
       CASE access_level WHEN 'pending' THEN 0 WHEN 'free' THEN 1 ELSE 2 END,
       created_at DESC

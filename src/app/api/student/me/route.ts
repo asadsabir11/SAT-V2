@@ -10,8 +10,12 @@ export async function GET() {
   }
 
   const email = session.email;
+  // The JWT carries program directly now (set at login/registration), which
+  // is unambiguous even when this email also has an account in the other
+  // program. Older tokens (issued before this field existed, up to 7 days)
+  // won't have it, so fall back to the DB lookup for those.
   const [program, accessLevel] = await Promise.all([
-    getUserProgram(email),
+    session.program ? Promise.resolve(session.program) : getUserProgram(email),
     getStudentAccessLevel(email),
   ]);
 
