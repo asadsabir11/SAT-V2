@@ -73,6 +73,9 @@ const COHORT_SCHEDULE = {
 const SUBJECT_CLASS_TIME: Record<string, string> = {
   "english-language": "Friday, 6:00 PM – 7:00 PM (PKT)",
   "mathematics": "Saturday, 6:00 PM – 7:00 PM (PKT)",
+  "computer-science": "Thursday, 6:00 PM – 7:00 PM (PKT)",
+  "islamiyat": "Wednesday, 6:00 PM – 7:00 PM (PKT)",
+  "pakistan-studies": "Tuesday, 6:00 PM – 7:00 PM (PKT)",
 };
 
 function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubjects, fullyBooked }: { subjectSlug: string; basePrice: number; isSignedInStudent: boolean; unlockedSubjects: string[]; fullyBooked?: boolean }) {
@@ -245,7 +248,6 @@ export default async function OLevelPage() {
           </div>
 
           <div style={{ maxWidth: 720, margin: "56px auto 0", textAlign: "center" }}>
-            <div className="eyebrow" style={{ justifyContent: "center" }}>High demand</div>
             <h2 className="title">Computer Science, Islamiyat and Pakistan Studies</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
               These founding cohorts are fully booked. Join the waiting list below and we&apos;ll notify you as soon
