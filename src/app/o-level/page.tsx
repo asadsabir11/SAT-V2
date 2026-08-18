@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { CTAButton, FAQAccordion } from "@/components/site";
 import { OLevelRegistrationForm } from "@/components/forms";
@@ -71,6 +72,13 @@ const COHORT_SCHEDULE = {
   officeHours: "7:30 PM – 8:15 PM, Monday–Friday (PKT)",
   sessionDuration: "1 hour",
 } as const;
+
+const WORKBOOK_THEMES = [
+  { icon: "📘", accent: "#155eef", grad: "linear-gradient(135deg,#155eef,#18a999)", glow: "rgba(21,94,239,.35)", soft: "#eff6ff" },
+  { icon: "📖", accent: "#7c3aed", grad: "linear-gradient(135deg,#7c3aed,#a855f7)", glow: "rgba(124,58,237,.35)", soft: "#f5f3ff" },
+  { icon: "📗", accent: "#059669", grad: "linear-gradient(135deg,#059669,#10b981)", glow: "rgba(5,150,105,.35)", soft: "#ecfdf5" },
+  { icon: "📙", accent: "#ea580c", grad: "linear-gradient(135deg,#ea580c,#f59e0b)", glow: "rgba(234,88,12,.35)", soft: "#fff7ed" },
+] as const;
 
 const SUBJECT_CLASS_TIME: Record<string, string> = {
   "english-language": "Friday, 6:00 PM – 7:00 PM (PKT)",
@@ -226,23 +234,35 @@ export default async function OLevelPage() {
           <div className="container">
             <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
               <div className="eyebrow" style={{ justifyContent: "center" }}>Free download</div>
-              <h2 className="title">Workbooks</h2>
+              <h2 className="title">Free Masterclass Workbook</h2>
               <p className="lead" style={{ margin: "0 auto" }}>
                 Get a feel for our teaching before you register — free to download, no account required.
               </p>
             </div>
             <div className="grid grid-2" style={{ marginTop: 40, maxWidth: 760, marginLeft: "auto", marginRight: "auto" }}>
-              {workbooks.map((w) => (
-                <div className="card" key={w.id} style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>📘</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: "0 0 8px", fontSize: "1rem" }}>{w.title}</h3>
-                    <a href={w.fileUrl} download={w.fileName} className="btn btn-secondary" style={{ padding: "8px 18px", fontSize: ".85rem" }}>
-                      Download PDF →
-                    </a>
-                  </div>
-                </div>
-              ))}
+              {workbooks.map((w, i) => {
+                const theme = WORKBOOK_THEMES[i % WORKBOOK_THEMES.length];
+                return (
+                  <a
+                    key={w.id}
+                    href={w.fileUrl}
+                    download={w.fileName}
+                    className="module-card fade-up"
+                    style={{ "--module-accent": theme.accent, "--module-accent-grad": theme.grad, "--module-glow": theme.glow } as CSSProperties}
+                  >
+                    <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: theme.grad, opacity: 0.08 }} />
+                      <div className="module-icon">{theme.icon}</div>
+                      <div style={{ display: "inline-block", marginTop: 12, marginBottom: 6, padding: "2px 10px", borderRadius: 999, background: theme.soft, color: theme.accent, fontSize: ".7rem", fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase" }}>
+                        Free PDF
+                      </div>
+                      <h3>{w.title}</h3>
+                      <p>Printable practice pages you can start on today — no account required.</p>
+                      <span className="module-arrow" style={{ color: theme.accent, fontWeight: 700, fontSize: ".85rem" }}>Download PDF →</span>
+                    </article>
+                  </a>
+                );
+              })}
             </div>
           </div>
         </section>
