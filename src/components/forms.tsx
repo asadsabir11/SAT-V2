@@ -400,27 +400,6 @@ export function RegistrationForm() {
   );
 }
 
-// ── Webinar Form ──────────────────────────────────────────────────────────────
-export function WebinarForm() {
-  const { status, submit } = useSubmit("/api/leads/webinar");
-  return (
-    <form className="form card" onSubmit={e => { e.preventDefault(); submit(Object.fromEntries(new FormData(e.currentTarget)) as Record<string,string>); }}>
-      <div className="form-grid">
-        <div className="field"><label>Parent name *</label><input name="parentName" required minLength={2} maxLength={100} /></div>
-        <div className="field"><label>Email *</label><input name="email" type="email" required /></div>
-        <div className="field"><label>WhatsApp *</label><input name="whatsapp" type="tel" required placeholder="+92 300 1234567" /></div>
-        <div className="field"><label>Country *</label><select name="country" required defaultValue=""><option value="" disabled>Select country</option>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select></div>
-        <div className="field"><label>Student grade *</label><select name="studentGrade" required defaultValue=""><option value="" disabled>Select grade</option>{GRADES.map(g=><option key={g}>{g}</option>)}</select></div>
-        <div className="field"><label>Interested package *</label><select name="interestedPackage" required defaultValue=""><option value="" disabled>Select one</option>{PACKAGES.map(p=><option key={p}>{p}</option>)}</select></div>
-      </div>
-      <div className="field"><label>Main concern *</label><textarea name="mainConcern" required minLength={10} placeholder="Tell us what you hope your child will get out of this program…" /></div>
-      <button className="btn btn-primary" disabled={status==="loading"}>{status==="loading"?"Saving your seat…":"Register for free webinar"}</button>
-      {status==="success"&&<div className="success">You&apos;re registered. We&apos;ll send webinar details and a practical parent guide.</div>}
-      {status==="error"&&<div className="note">Could not submit. Please try again.</div>}
-    </form>
-  );
-}
-
 // ── Contact Form ──────────────────────────────────────────────────────────────
 export function ContactForm() {
   const { status, submit } = useSubmit("/api/leads/contact");

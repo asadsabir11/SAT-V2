@@ -391,6 +391,34 @@ export async function sendOLevelAccountWelcome(opts: { email: string; name: stri
   });
 }
 
+export async function sendParentAccountWelcome(opts: { email: string; name: string; studentName: string; setupUrl: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: opts.email,
+    subject: `Your parent account is ready — track ${opts.studentName}'s progress`,
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Welcome, ${opts.name} 👋</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          A parent account has been set up for you so you can follow <strong>${opts.studentName}</strong>&apos;s
+          attendance, homework, and weekly progress reports. Set a password below to get started.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${opts.setupUrl}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Set my password →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.78rem;line-height:1.6;">
+          This link expires in 1 hour. Once set, sign in any time at academy.thedigitaltutor.net/login as a Parent
+          using this email address.<br>
+          The Digital Tutor · academy.thedigitaltutor.net
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendOLevelRegistrationWelcome(student: { name: string; email: string }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;

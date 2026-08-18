@@ -16,7 +16,6 @@ export default function AdminParents() {
   const [studentId, setStudentId]   = useState("");
   const [parentEmail, setParentEmail] = useState("");
   const [parentName, setParentName]   = useState("");
-  const [password, setPassword]       = useState("");
 
   useEffect(() => { load(); }, []);
 
@@ -28,17 +27,17 @@ export default function AdminParents() {
   }
 
   async function createLink() {
-    if (!studentId || !parentEmail || !parentName || !password) { setError("All fields required."); return; }
+    if (!studentId || !parentEmail || !parentName) { setError("All fields required."); return; }
     setSaving(true); setError(""); setSuccess("");
     const r = await fetch("/api/admin/parents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentId, parentEmail, parentName, password }),
+      body: JSON.stringify({ studentId, parentEmail, parentName }),
     });
     const d = await r.json();
     if (!r.ok) { setError(d.error ?? "Failed"); setSaving(false); return; }
-    setSuccess("Parent account created and linked.");
-    setStudentId(""); setParentEmail(""); setParentName(""); setPassword("");
+    setSuccess(d.emailed ? "Parent account created and linked — they've been emailed a set-password link." : "Existing parent account linked to this student.");
+    setStudentId(""); setParentEmail(""); setParentName("");
     await load();
     setSaving(false);
   }
@@ -53,7 +52,7 @@ export default function AdminParents() {
     <section className="section"><div className="container">
       <Link href="/admin" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← Admin</Link>
       <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "8px 0 4px" }}>Parent Accounts</h1>
-      <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 28px" }}>Create parent logins and link them to students. Parents can only see their own child’s data.</p>
+      <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: "0 0 28px" }}>Create parent logins and link them to students. Parents can only see their own child’s data. New parents are emailed a set-password link automatically — nothing to share by hand.</p>
 
       {/* Create form */}
       <div className="card" style={{ marginBottom: 28, border: "2px solid #e8eef6" }}>
@@ -73,10 +72,6 @@ export default function AdminParents() {
           <div className="field">
             <label>Parent email *</label>
             <input type="email" value={parentEmail} onChange={e => setParentEmail(e.target.value)} placeholder="parent@gmail.com" />
-          </div>
-          <div className="field">
-            <label>Temporary password *</label>
-            <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="Share this with the parent" />
           </div>
         </div>
         {error   && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".85rem", marginBottom: 10 }}>⚠ {error}</p>}

@@ -6,6 +6,8 @@ import Link from "next/link";
 function ResetPasswordForm() {
   const params = useSearchParams();
   const token = params.get("token") ?? "";
+  const roleParam = params.get("role");
+  const role = roleParam === "parent" || roleParam === "founder" || roleParam === "teacher" ? roleParam : "student";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -47,7 +49,7 @@ function ResetPasswordForm() {
             <p style={{ color: "#6b7c93", fontSize: ".9rem", margin: "0 0 24px", lineHeight: 1.6 }}>
               Your password has been reset. You can now sign in with your new password.
             </p>
-            <Link href="/login?role=student" className="btn btn-primary" style={{ display: "inline-flex", minHeight: 46, alignItems: "center", justifyContent: "center", width: "100%", fontSize: "1rem", borderRadius: 12, textDecoration: "none", boxSizing: "border-box" }}>
+            <Link href={`/login?role=${role}`} className="btn btn-primary" style={{ display: "inline-flex", minHeight: 46, alignItems: "center", justifyContent: "center", width: "100%", fontSize: "1rem", borderRadius: 12, textDecoration: "none", boxSizing: "border-box" }}>
               Sign in →
             </Link>
           </>
