@@ -88,7 +88,7 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
   const isDiscounted = isSignedInStudent && !fullyBooked && marginalPrice < basePrice;
 
   const classTime = SUBJECT_CLASS_TIME[subjectSlug];
-  const priceValue = fullyBooked ? "Fully booked" : isUnlocked ? "Unlocked ✓" : `PKR ${marginalPrice.toLocaleString()}${isDiscounted ? " (bundle price)" : ""}`;
+  const priceValue = fullyBooked ? `PKR ${basePrice.toLocaleString()}` : isUnlocked ? "Unlocked ✓" : `PKR ${marginalPrice.toLocaleString()}${isDiscounted ? " (bundle price)" : ""}`;
   const rows: [string, string][] = [
     ["Cohort start date", COHORT_SCHEDULE.startDate],
     ["Registration deadline", COHORT_SCHEDULE.registrationDeadline],
