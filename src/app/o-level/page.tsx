@@ -11,6 +11,7 @@ import { getIntroLecture } from "@/lib/lectures";
 import { getSession } from "@/lib/auth";
 import { getOLevelAccessMap } from "@/lib/olevelAccess";
 import { getUserProgram } from "@/lib/users";
+import { listWorkbooks } from "@/lib/workbooks";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -166,10 +167,11 @@ function IntroVideoCard({ label, title, videoUrl, thumbnailUrl }: { label: strin
 
 export default async function OLevelPage() {
   const instructor = getInstructor("ibrahim");
-  const [mathIntro, englishIntro, session] = await Promise.all([
+  const [mathIntro, englishIntro, session, workbooks] = await Promise.all([
     getIntroLecture("o-level", "mathematics"),
     getIntroLecture("o-level", "english-language"),
     getSession(),
+    listWorkbooks(),
   ]);
   const isSignedInStudent = session?.role === "student";
   // Specifically "already has an O-Level account" — a signed-in SAT student
@@ -217,6 +219,34 @@ export default async function OLevelPage() {
           </div>
         </div>
       </section>
+
+      {/* Free workbooks — public, no sign-in required. Only renders once the founder has uploaded at least one. */}
+      {workbooks.length > 0 && (
+        <section className="section soft">
+          <div className="container">
+            <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
+              <div className="eyebrow" style={{ justifyContent: "center" }}>Free download</div>
+              <h2 className="title">Workbooks</h2>
+              <p className="lead" style={{ margin: "0 auto" }}>
+                Get a feel for our teaching before you register — free to download, no account required.
+              </p>
+            </div>
+            <div className="grid grid-2" style={{ marginTop: 40, maxWidth: 760, marginLeft: "auto", marginRight: "auto" }}>
+              {workbooks.map((w) => (
+                <div className="card" key={w.id} style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>📘</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ margin: "0 0 8px", fontSize: "1rem" }}>{w.title}</h3>
+                    <a href={w.fileUrl} download={w.fileName} className="btn btn-secondary" style={{ padding: "8px 18px", fontSize: ".85rem" }}>
+                      Download PDF →
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Introduction videos — only renders once the founder has set at least one */}
       {(mathIntro || englishIntro) && (
