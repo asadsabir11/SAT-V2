@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CTAButton, FeatureCard, PageHero } from "@/components/site";
+import { getSession } from "@/lib/auth";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -26,13 +27,22 @@ const WEEKS = [
   "Full mock test and final score improvement plan",
 ];
 
-export default function SatFoundingCohort() {
+export default async function SatFoundingCohort() {
+  const session = await getSession();
+  const isSignedInSatStudent = session?.role === "student" && (session.program ?? "sat") === "sat";
+
   return (
     <>
       <PageHero
         eyebrow="SAT Prep · The first 8 weeks"
         title="An SAT Prep Cohort for Students Who Need a Plan — and People Who Notice When They Drift."
-        actions={<CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>}
+        actions={
+          isSignedInSatStudent ? (
+            <CTAButton href="/sat">View Material →</CTAButton>
+          ) : (
+            <CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>
+          )
+        }
       >
         Live SAT instruction, AI tutor support, disciplined practice, a regional study group, and clear parent
         reporting — at founder pricing.
@@ -80,12 +90,24 @@ export default function SatFoundingCohort() {
             </p>
           </div>
           <div className="card">
-            <h3>Ready to build SAT momentum?</h3>
-            <p>
-              Register now. We&apos;ll use your country, target SAT date, and preferred time to place you in the
-              right regional group.
-            </p>
-            <CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>
+            {isSignedInSatStudent ? (
+              <>
+                <h3>Ready to keep going?</h3>
+                <p>
+                  Jump back into your Q&amp;A board, live sessions, lectures, diagnostic, and AI tutor.
+                </p>
+                <CTAButton href="/sat">View Material →</CTAButton>
+              </>
+            ) : (
+              <>
+                <h3>Ready to build SAT momentum?</h3>
+                <p>
+                  Register now. We&apos;ll use your country, target SAT date, and preferred time to place you in the
+                  right regional group.
+                </p>
+                <CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>
+              </>
+            )}
           </div>
         </div>
       </section>

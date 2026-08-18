@@ -64,9 +64,6 @@ export function Header() {
           {PUBLIC_NAV.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
-          {!isOLevel && user?.role === "student" && (
-            <Link href="/sat" style={{padding:"8px 12px",borderRadius:10,color:"#155eef",fontWeight:800,transition:".16s",whiteSpace:"nowrap"}}>SAT</Link>
-          )}
           <AuthBadge onUser={setUser} />
           {!user && (
             isOLevel ? (
