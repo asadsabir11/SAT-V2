@@ -116,7 +116,6 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
       {fullyBooked ? (
         <span style={{ marginTop: "auto", color: "#b91c1c", fontWeight: 700, fontSize: ".9rem" }}>
           Fully booked for this cohort
-          <span style={{ display: "block", fontWeight: 600, fontSize: ".78rem", color: "var(--muted)" }}>Join the waiting list below</span>
         </span>
       ) : !isSignedInStudent ? (
         <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
