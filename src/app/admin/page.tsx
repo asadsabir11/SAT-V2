@@ -142,7 +142,10 @@ export default function Admin() {
               📚 Homework →
             </Link>
             <Link href="/admin/reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
-              📊 Parent reports →
+              📊 SAT parent reports →
+            </Link>
+            <Link href="/admin/o-level-reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
+              📊 O Level parent reports →
             </Link>
             <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
               📈 Analytics →

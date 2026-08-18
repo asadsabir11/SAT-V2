@@ -413,7 +413,7 @@ export async function listReportsForStudent(studentId: string) {
 export async function listAllReports() {
   await ensureParentTables();
   const rows = await sql`
-    SELECT pr.*, u.name AS student_name, u.email AS student_email
+    SELECT pr.*, u.name AS student_name, u.email AS student_email, u.program AS student_program
     FROM parent_reports pr
     JOIN users u ON u.id = pr.student_id
     ORDER BY pr.week_no DESC, pr.created_at DESC

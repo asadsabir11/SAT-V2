@@ -14,16 +14,25 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const id = new URL(req.url).searchParams.get("id");
+  const params = new URL(req.url).searchParams;
+  const id = params.get("id");
   if (id) {
     const report = await getReportById(id);
     return NextResponse.json({ report });
   }
 
-  const [reports, students] = await Promise.all([
+  // Optional — the SAT and O-Level admin report pages are separate modules,
+  // each only wanting its own program's students and reports.
+  const program = params.get("program");
+
+  const [allReports, allStudents] = await Promise.all([
     listAllReports(),
     sql`SELECT id, name, email, program FROM users WHERE role = 'student' ORDER BY name`,
   ]);
+
+  const reports = program ? allReports.filter((r) => r.student_program === program) : allReports;
+  const students = program ? allStudents.filter((s) => s.program === program) : allStudents;
+
   return NextResponse.json({ reports, students });
 }
 
