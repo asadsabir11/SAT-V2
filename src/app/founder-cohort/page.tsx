@@ -39,20 +39,33 @@ export default async function SatFoundingCohort() {
 
   return (
     <>
-      <PageHero
-        eyebrow="SAT Prep · The first 8 weeks"
-        title="An SAT Prep Cohort for Students Who Need a Plan — and People Who Notice When They Drift."
-        actions={
-          isSignedInSatStudent ? (
-            <CTAButton href="/sat">View Material →</CTAButton>
-          ) : (
-            <CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>
-          )
-        }
-      >
-        Live SAT instruction, AI tutor support, disciplined practice, a regional study group, and clear parent
-        reporting — at founder pricing.
-      </PageHero>
+      {isSignedInSatStudent ? (
+        <section className="section band">
+          <div className="container">
+            <div className="eyebrow" style={{ color: "#5eead4" }}>SAT Prep · Welcome back</div>
+            <h1 className="display" style={{ color: "#fff", maxWidth: 780 }}>
+              Good to see you, {session!.name.split(" ")[0]}.
+            </h1>
+            <p className="lead" style={{ color: "rgba(255,255,255,.78)" }}>
+              Lectures, live sessions, quizzes, your diagnostic, and your AI tutor are all waiting — pick up right
+              where you left off.
+            </p>
+            <div className="actions">
+              <CTAButton href="/sat" variant="accent">View Material →</CTAButton>
+              <CTAButton href="/dashboard" variant="ghost">Go to Dashboard →</CTAButton>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <PageHero
+          eyebrow="SAT Prep · The first 8 weeks"
+          title="An SAT Prep Cohort for Students Who Need a Plan — and People Who Notice When They Drift."
+          actions={<CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>}
+        >
+          Live SAT instruction, AI tutor support, disciplined practice, a regional study group, and clear parent
+          reporting — at founder pricing.
+        </PageHero>
+      )}
 
       <section className="section">
         <div className="container grid grid-3">
@@ -102,7 +115,10 @@ export default async function SatFoundingCohort() {
                 <p>
                   Jump back into your Q&amp;A board, live sessions, lectures, diagnostic, and AI tutor.
                 </p>
-                <CTAButton href="/sat">View Material →</CTAButton>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <CTAButton href="/sat">View Material →</CTAButton>
+                  <CTAButton href="/dashboard" variant="secondary">Go to Dashboard →</CTAButton>
+                </div>
               </>
             ) : (
               <>
