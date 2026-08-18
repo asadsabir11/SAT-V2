@@ -8,7 +8,7 @@ export default function Contact() {
   return (
     <>
       <PageHero eyebrow="Contact" title="Questions are welcome. Ambition is, too.">
-        Reach out about student enrollment, parent support, regional class times, sponsorship, or institutional partnerships.
+        Reach out about student enrollment, parent support, regional class times, or sponsorship.
       </PageHero>
 
       <section className="section">

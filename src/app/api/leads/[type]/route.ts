@@ -10,7 +10,6 @@ import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 const webhooks: Record<string, string | undefined> = {
   student: process.env.N8N_STUDENT_REGISTRATION_WEBHOOK_URL,
   webinar: process.env.N8N_PARENT_WEBINAR_WEBHOOK_URL,
-  partner: process.env.N8N_PARTNER_INQUIRY_WEBHOOK_URL,
   contact: process.env.N8N_CONTACT_WEBHOOK_URL,
 };
 
@@ -19,7 +18,6 @@ const webhooks: Record<string, string | undefined> = {
 const REQUIRED_FIELDS: Record<string, string[]> = {
   student: ["studentName", "parentName", "studentEmail", "whatsapp", "country", "city", "grade", "packageType", "password"],
   webinar: ["parentName", "email", "whatsapp", "country", "studentGrade", "interestedPackage", "mainConcern"],
-  partner: ["organizationName", "contactName", "email", "country", "organizationType", "message"],
   contact: ["name", "email", "country", "role", "message"],
 };
 
@@ -27,7 +25,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
 const EMAIL_FIELDS: Record<string, string> = {
   student: "studentEmail",
   webinar: "email",
-  partner: "email",
   contact: "email",
 };
 

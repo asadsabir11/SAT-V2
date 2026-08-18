@@ -13,7 +13,7 @@ export async function DELETE() {
 
   await Promise.all([ensureParentTables(), ensureAnalyticsTables(), ensureQuizTables()]);
 
-  // Delete all student leads, diagnostics, users, and quiz results — keeps webinar/partner/contact leads
+  // Delete all student leads, diagnostics, users, and quiz results — keeps webinar/contact leads
   // Note: leads/diagnostics are saved under "leads-student.json"/"diagnostics.json"
   // (the .json suffix is part of the literal collection key, not a real file);
   // quiz attempts live in their own quiz_attempts table, not sat_records.

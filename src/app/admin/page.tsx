@@ -9,7 +9,6 @@ interface Metrics {
   paidFounderCohortStudents: number;
   premiumStudents: number;
   parentWebinarRegistrations: number;
-  partnershipLeads: number;
   contactMessages: number;
   diagnosticCompletions: number;
   diagnosticCompletionRate: number;
@@ -20,7 +19,6 @@ interface AdminData {
   metrics: Metrics;
   students: Record<string, string>[];
   webinar: Record<string, string>[];
-  partners: Record<string, string>[];
   oLevelLeads: Record<string, string>[];
 }
 
@@ -67,7 +65,6 @@ export default function Admin() {
         ["Free signups", m.freeSignups, "Top of funnel"],
         ["Core Plan students", m.paidFounderCohortStudents, "Goal: 20+"],
         ["Webinar registrations", m.parentWebinarRegistrations, "Goal: 30+"],
-        ["Partnership leads", m.partnershipLeads, "Schools, NGOs, sponsors"],
         ["Contact messages", m.contactMessages, "Inbound inquiries"],
         ["Diagnostics taken", m.diagnosticCompletions, "Lead activation"],
         ["Diagnostic rate", `${m.diagnosticCompletionRate}%`, "Completions / registrations"],
@@ -239,38 +236,6 @@ export default function Admin() {
                 </div>
               )}
 
-              {(data?.partners.length ?? 0) > 0 && (
-                <div className="card" style={{ marginTop: 24 }}>
-                  <div className="eyebrow">Partnership leads</div>
-                  <h2 style={{ color: "#071b33" }}>Partner inquiries</h2>
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Organization</th>
-                          <th>Contact</th>
-                          <th>Country</th>
-                          <th>Type</th>
-                          <th>Students</th>
-                          <th>Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data?.partners.map((p, i) => (
-                          <tr key={i}>
-                            <td>{p.organizationName}</td>
-                            <td>{p.contactName}</td>
-                            <td>{p.country}</td>
-                            <td>{p.organizationType}</td>
-                            <td>{p.estimatedStudents ?? "—"}</td>
-                            <td>{new Date(p.createdAt).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
 
               {(data?.oLevelLeads.length ?? 0) > 0 && (
                 <div className="card" style={{ marginTop: 24 }}>

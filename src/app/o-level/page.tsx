@@ -19,18 +19,18 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Online O Level Tuition in Pakistan | The Digital Tutor",
-  description: "Join live online Cambridge O Level and IGCSE classes in English Language and Mathematics, with weekly office hours, past-paper practice and parent progress reports.",
+  description: "Join live online Cambridge O Level and IGCSE classes in English Language and Mathematics, with weekly office hours, past-paper practice and parent progress reports. Computer Science, Islamiyat and Pakistan Studies coming soon.",
   alternates: { canonical: `${BASE_URL}/o-level` },
   openGraph: {
     title: "O Level Founding Cohorts Now Enrolling",
-    description: "Live online English and Mathematics tuition with founder-led classes, office hours and parent progress reporting.",
+    description: "Live online English and Mathematics tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
     url: `${BASE_URL}/o-level`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "O Level Founding Cohorts Now Enrolling",
-    description: "Live online English and Mathematics tuition with founder-led classes, office hours and parent progress reporting.",
+    description: "Live online English and Mathematics tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
   },
 };
 
