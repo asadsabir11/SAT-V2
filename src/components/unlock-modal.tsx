@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export type AccessLevel = "free" | "pending" | "unlocked";
 
-const AMOUNT = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT ?? "Contact us for pricing";
+const AMOUNT = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT ?? "PKR 5,300";
 
 export function UnlockModal({
   accessLevel, onClose,
@@ -94,7 +94,7 @@ export function UnlockModal({
                   disabled={stripeLoading}
                   style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "#155eef", color: "#fff", borderRadius: 9, fontWeight: 800, fontSize: ".88rem", cursor: stripeLoading ? "not-allowed" : "pointer", border: "none", opacity: stripeLoading ? .7 : 1 }}
                 >
-                  {stripeLoading ? "Redirecting…" : `Pay ${AMOUNT} with Card →`}
+                  {stripeLoading ? "Redirecting…" : "Pay with Card →"}
                 </button>
                 {stripeError && <p style={{ color: "#dc2626", fontSize: ".78rem", fontWeight: 700, margin: "8px 0 0" }}>{stripeError}</p>}
               </div>

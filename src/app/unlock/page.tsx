@@ -5,13 +5,14 @@ import { upload } from "@vercel/blob/client";
 import { PageHero } from "@/components/site";
 import { trackInitiateCheckout, trackPaymentSubmitted } from "@/lib/analyticsClient";
 
-const AMOUNT      = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT ?? "Contact us for pricing";
-const WA_URL       = process.env.NEXT_PUBLIC_PAYMENT_WHATSAPP_URL ?? "";
-const BANK_NAME    = process.env.NEXT_PUBLIC_PAYMENT_BANK_NAME ?? "";
-const ACC_TITLE    = process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_TITLE ?? "";
-const ACC_NUM      = process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_NUMBER ?? "";
-const JAZZCASH     = process.env.NEXT_PUBLIC_PAYMENT_JAZZCASH ?? "";
-const EASYPAISA    = process.env.NEXT_PUBLIC_PAYMENT_EASYPAISA ?? "";
+const AMOUNT_DUE = 5300;
+const WA_URL     = process.env.NEXT_PUBLIC_PAYMENT_WHATSAPP_URL ?? "";
+// Same bank account as O-Level — one shared account, not a separate one per program.
+const BANK_NAME        = process.env.NEXT_PUBLIC_OLEVEL_BANK_NAME ?? "";
+const BANK_ACCOUNT_TITLE = process.env.NEXT_PUBLIC_OLEVEL_BANK_ACCOUNT_TITLE ?? "";
+const BANK_IBAN        = process.env.NEXT_PUBLIC_OLEVEL_BANK_IBAN ?? "";
+const JAZZCASH   = process.env.NEXT_PUBLIC_PAYMENT_JAZZCASH ?? "";
+const EASYPAISA  = process.env.NEXT_PUBLIC_PAYMENT_EASYPAISA ?? "";
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
@@ -43,7 +44,7 @@ function UnlockForm() {
   const [currentStatus, setCurrentStatus] = useState<"free" | "pending" | "unlocked">("free");
 
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [amountPaid, setAmountPaid] = useState("");
+  const [amountPaid, setAmountPaid] = useState(String(AMOUNT_DUE));
   const [transactionReference, setTransactionReference] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
   const [payerAccountName, setPayerAccountName] = useState("");
@@ -147,7 +148,7 @@ function UnlockForm() {
               <p style={{ margin: 0, fontWeight: 800, color: "var(--navy)" }}>Full SAT Access</p>
               <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: ".85rem" }}>One-time fee · unlocks every subject, permanently</p>
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--navy)" }}>{AMOUNT}</div>
+            <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--navy)" }}>PKR {AMOUNT_DUE.toLocaleString()}</div>
           </div>
 
           {currentStatus === "unlocked" ? (
@@ -193,17 +194,17 @@ function UnlockForm() {
                   {EASYPAISA ? <DetailRow label="Account" value={EASYPAISA} /> : <PlaceholderRow label="Account" />}
                 </PaymentMethodCard>
                 <PaymentMethodCard title="Bank Transfer" color="#1d4ed8" bg="#eff6ff">
-                  {BANK_NAME && ACC_TITLE && ACC_NUM ? (
+                  {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
                     <>
                       <DetailRow label="Bank" value={BANK_NAME} />
-                      <DetailRow label="Account title" value={ACC_TITLE} />
-                      <DetailRow label="Account no." value={ACC_NUM} />
+                      <DetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
+                      <DetailRow label="IBAN" value={BANK_IBAN} />
                     </>
                   ) : (
                     <>
                       <PlaceholderRow label="Bank name" />
                       <PlaceholderRow label="Account title" />
-                      <PlaceholderRow label="Account no." />
+                      <PlaceholderRow label="Account / IBAN" />
                     </>
                   )}
                 </PaymentMethodCard>
