@@ -127,7 +127,6 @@ export default function LecturesPage() {
         <UnlockModal
           accessLevel={accessLevel}
           onClose={() => setShowModal(false)}
-          onSubmitted={() => { setAccessLevel("pending"); load(); }}
         />
       )}
 

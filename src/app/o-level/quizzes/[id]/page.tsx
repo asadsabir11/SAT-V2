@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { UnlockModal, type AccessLevel } from "@/components/unlock-modal";
+import type { AccessLevel } from "@/components/unlock-modal";
 
 interface Question {
   id: string;
@@ -42,7 +42,6 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
   const [unauthorized, setUnauthorized] = useState(false);
   const [lockedAccess, setLockedAccess] = useState<AccessLevel | null>(null);
   const [quizSubject, setQuizSubject] = useState<string | null>(null);
-  const [showUnlock, setShowUnlock] = useState(false);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [results, setResults] = useState<QuizResult[]>([]);
@@ -117,18 +116,6 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
 
   if (lockedAccess) return (
     <section className="section"><div className="container">
-      {showUnlock && (
-        <UnlockModal
-          accessLevel={lockedAccess}
-          onClose={() => setShowUnlock(false)}
-          onSubmitted={() => setLockedAccess("pending")}
-          eyebrow="O Level subject access"
-          title={`Unlock O Level ${SUBJECT_META[quizSubject ?? ""]?.label ?? quizSubject}`}
-          features={["All lessons", "Practice quizzes", "Live sessions", "Past papers"]}
-          endpoint="/api/o-level/access/request"
-          requestBody={{ subject: quizSubject ?? "" }}
-        />
-      )}
       <div className="card" style={{ maxWidth: 440, textAlign: "center", padding: 40 }}>
         <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>🔒</div>
         <p style={{ fontWeight: 700, marginBottom: 8 }}>This subject is locked.</p>
@@ -136,7 +123,7 @@ export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: strin
           {lockedAccess === "pending" ? "We received your request — your payment is being verified." : "Unlock this subject to take its quizzes."}
         </p>
         {lockedAccess !== "pending" && (
-          <button onClick={() => setShowUnlock(true)} className="btn btn-primary" style={{ marginBottom: 12 }}>Unlock this subject</button>
+          <Link href={`/o-level/unlock?subject=${quizSubject ?? ""}`} className="btn btn-primary" style={{ marginBottom: 12 }}>Unlock this subject</Link>
         )}
         <br />
         <Link href="/o-level/quizzes" style={{ color: "#155eef", fontWeight: 700, fontSize: ".88rem" }}>← All quizzes</Link>

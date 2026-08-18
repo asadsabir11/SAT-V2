@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { grantAccess } from "@/lib/users";
+import { grantAccess, findUserByEmailAndProgram } from "@/lib/users";
+import { sendSatAccessGranted } from "@/lib/email";
+import { sendMetaPurchaseEvent, sendGA4PurchaseEvent } from "@/lib/serverConversions";
 
 // Grants full access on first successful payment. Access is a one-way flip
 // (matches the existing WhatsApp/bank-transfer approval flow — there's no
@@ -31,7 +33,17 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const email = session.metadata?.email ?? session.customer_email;
     if (email) {
-      await grantAccess(email, "stripe", `Stripe payment ${session.id}`);
+      const value = (session.amount_total ?? 0) / 100;
+      await grantAccess(email, "stripe", `Stripe payment ${session.id}`, { sessionId: session.id, amount: value });
+
+      const student = await findUserByEmailAndProgram(email, "sat");
+      sendSatAccessGranted({ email, name: student?.name ?? "there" }).catch(console.error);
+
+      if (value > 0) {
+        const idempotencyKey = `sat:${email}`;
+        sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value, currency: session.currency?.toUpperCase() }).catch(console.error);
+        sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value, currency: session.currency?.toUpperCase() }).catch(console.error);
+      }
     }
   }
 

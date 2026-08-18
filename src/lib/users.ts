@@ -21,6 +21,16 @@ async function ensureUsersTable() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS approved_by TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS notes TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS program TEXT NOT NULL DEFAULT 'sat'`;
+  // Payment-proof fields for the manual (Pakistan) unlock flow, mirroring
+  // olevel_subject_access's columns — added after this table already
+  // existed in production, so a separate migration, not folded into
+  // CREATE TABLE above.
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS amount_paid NUMERIC`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS transaction_reference TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_date DATE`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS payer_account_name TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_screenshot_url TEXT`;
   // Migrate role constraint to include 'parent', then 'teacher'
   await sql`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`;
   await sql`ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('student', 'founder', 'parent', 'teacher'))`;
@@ -112,17 +122,53 @@ export async function getStudentAccessLevel(email: string): Promise<"free" | "pe
   return "free";
 }
 
-export async function requestAccess(email: string): Promise<void> {
+export interface PaymentProof {
+  paymentMethod: string;
+  amountPaid: number;
+  transactionReference: string;
+  paymentDate: string;
+  payerAccountName: string;
+  paymentScreenshotUrl: string | null;
+}
+
+// Manual (Pakistan) unlock path — records payment proof and flips access to
+// 'pending' for the founder to verify. Allowed to run again while already
+// 'pending' (e.g. the student corrects a typo and resubmits), but not once
+// 'unlocked'.
+export async function requestAccess(email: string, proof: PaymentProof): Promise<void> {
   await ensureUsersTable();
   await sql`
     UPDATE users
-    SET access_level = 'pending', payment_requested_at = NOW()
-    WHERE email = ${email.toLowerCase().trim()} AND program = 'sat' AND access_level = 'free'
+    SET access_level = 'pending', payment_requested_at = NOW(),
+        payment_method = ${proof.paymentMethod},
+        amount_paid = ${proof.amountPaid},
+        transaction_reference = ${proof.transactionReference},
+        payment_date = ${proof.paymentDate},
+        payer_account_name = ${proof.payerAccountName},
+        payment_screenshot_url = ${proof.paymentScreenshotUrl}
+    WHERE email = ${email.toLowerCase().trim()} AND program = 'sat' AND access_level != 'unlocked'
   `;
 }
 
-export async function grantAccess(email: string, approvedBy: string, notes?: string): Promise<void> {
+// `stripePayment` is set only by the Stripe webhook path, which skips
+// requestAccess() entirely (no manual proof submission happens for a card
+// payment) — without recording it here, the admin view would show an
+// unlocked account with no payment trail at all for Stripe-granted access.
+export async function grantAccess(
+  email: string, approvedBy: string, notes?: string,
+  stripePayment?: { sessionId: string; amount: number }
+): Promise<void> {
   await ensureUsersTable();
+  if (stripePayment) {
+    await sql`
+      UPDATE users
+      SET access_level = 'unlocked', approved_at = NOW(), approved_by = ${approvedBy}, notes = ${notes ?? null},
+          payment_method = 'stripe', amount_paid = ${stripePayment.amount},
+          transaction_reference = ${stripePayment.sessionId}, payment_date = CURRENT_DATE
+      WHERE email = ${email.toLowerCase().trim()} AND program = 'sat'
+    `;
+    return;
+  }
   await sql`
     UPDATE users
     SET access_level = 'unlocked', approved_at = NOW(), approved_by = ${approvedBy}, notes = ${notes ?? null}
@@ -149,12 +195,19 @@ export interface StudentAccessRow {
   approved_at: string | null;
   approved_by: string | null;
   notes: string | null;
+  payment_method: string | null;
+  amount_paid: string | null;
+  transaction_reference: string | null;
+  payment_date: string | null;
+  payer_account_name: string | null;
+  payment_screenshot_url: string | null;
 }
 
 export async function listStudentsWithAccess(): Promise<StudentAccessRow[]> {
   await ensureUsersTable();
   const rows = await sql`
-    SELECT id, email, name, created_at, access_level, payment_requested_at, approved_at, approved_by, notes
+    SELECT id, email, name, created_at, access_level, payment_requested_at, approved_at, approved_by, notes,
+           payment_method, amount_paid, transaction_reference, payment_date, payer_account_name, payment_screenshot_url
     FROM users
     WHERE role = 'student' AND program = 'sat'
     ORDER BY

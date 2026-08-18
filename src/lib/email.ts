@@ -268,6 +268,74 @@ export async function sendWelcomeEmail(student: { name: string; email: string })
   });
 }
 
+export async function sendSatUnlockPaymentSubmittedAck(opts: { email: string; name: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: opts.email,
+    subject: "Payment received — under review",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">We've got your payment details, ${opts.name}</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment for full SAT access is under review. Once verified, your account unlocks automatically and
+          we'll email you — usually within a business day.
+        </p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendSatUnlockPaymentSubmittedAdminAlert(opts: { email: string; name: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || ADMIN_EMAILS.length === 0) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: ADMIN_EMAILS,
+    subject: `SAT payment submitted for verification: ${opts.name}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">Payment awaiting verification 💳</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:100px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.name}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Email</td><td style="padding:10px 0;color:#155eef;">${opts.email}</td></tr>
+        </table>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/admin/access" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">Review and verify →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendSatAccessGranted(opts: { email: string; name: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: opts.email,
+    subject: "Your SAT access is unlocked! 🎉",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">You're in, ${opts.name}! 🎉</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment has been verified and your account now has full access. All lectures, practice tests, live
+          sessions, the Q&amp;A board, and the AI tutor are ready to go.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${APP_URL}/dashboard" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPasswordResetEmail(opts: { email: string; name: string; resetUrl: string }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;

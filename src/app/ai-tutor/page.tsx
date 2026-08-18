@@ -27,7 +27,6 @@ export default function AITutor() {
         <UnlockModal
           accessLevel={accessLevel}
           onClose={() => setShowModal(false)}
-          onSubmitted={() => { setAccessLevel("pending"); load(); }}
         />
       )}
 

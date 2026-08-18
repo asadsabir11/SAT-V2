@@ -1,35 +1,24 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 export type AccessLevel = "free" | "pending" | "unlocked";
 
-const WA_URL    = process.env.NEXT_PUBLIC_PAYMENT_WHATSAPP_URL ?? "#";
-const AMOUNT    = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT ?? "Contact us for pricing";
-const BANK_NAME = process.env.NEXT_PUBLIC_PAYMENT_BANK_NAME ?? "";
-const ACC_TITLE = process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_TITLE ?? "";
-const ACC_NUM   = process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_NUMBER ?? "";
-const JAZZCASH  = process.env.NEXT_PUBLIC_PAYMENT_JAZZCASH ?? "";
-const EASYPAISA = process.env.NEXT_PUBLIC_PAYMENT_EASYPAISA ?? "";
+const AMOUNT = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT ?? "Contact us for pricing";
 
 export function UnlockModal({
-  accessLevel, onClose, onSubmitted,
+  accessLevel, onClose,
   eyebrow = "Full Access",
   title = "Unlock The Digital Tutor",
   features = ["All Math lectures", "All English lectures", "Live Sessions", "Q&A Board", "AI Tutor", "Practice Tests"],
-  endpoint = "/api/access/request",
-  requestBody,
 }: {
   accessLevel: AccessLevel;
   onClose: () => void;
-  onSubmitted: () => void;
   eyebrow?: string;
   title?: string;
   features?: string[];
-  endpoint?: string;
-  requestBody?: Record<string, string>;
 }) {
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(accessLevel === "pending");
+  const done = accessLevel === "pending";
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeError, setStripeError] = useState("");
 
@@ -49,18 +38,6 @@ export function UnlockModal({
       setStripeError("Network error. Please check your connection and try again.");
       setStripeLoading(false);
     }
-  }
-
-  async function handleSubmit() {
-    setSubmitting(true);
-    await fetch(endpoint, {
-      method: "POST",
-      headers: requestBody ? { "Content-Type": "application/json" } : undefined,
-      body: requestBody ? JSON.stringify(requestBody) : undefined,
-    });
-    setDone(true);
-    setSubmitting(false);
-    onSubmitted();
   }
 
   return (
@@ -90,11 +67,11 @@ export function UnlockModal({
               <div style={{ fontSize: "3rem", marginBottom: 12 }}>⏳</div>
               <h3 style={{ color: "#071b33", marginBottom: 8 }}>Payment under review</h3>
               <p style={{ color: "#6b7c93", lineHeight: 1.65, fontSize: ".92rem" }}>
-                We received your request. Once your payment is verified via WhatsApp, your account will be unlocked — usually within a few hours.
+                We received your payment details. Once verified, your account will be unlocked — usually within a business day.
               </p>
               <p style={{ color: "#6b7c93", fontSize: ".85rem", marginTop: 12 }}>
-                Questions? Message us on{" "}
-                <a href={WA_URL} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>WhatsApp</a>.
+                Need to fix something? You can{" "}
+                <Link href="/unlock" style={{ color: "#155eef", fontWeight: 700 }}>resubmit your payment details</Link>.
               </p>
               <button onClick={onClose} className="btn btn-primary" style={{ marginTop: 20, minWidth: 160 }}>Close</button>
             </div>
@@ -122,51 +99,20 @@ export function UnlockModal({
                 {stripeError && <p style={{ color: "#dc2626", fontSize: ".78rem", fontWeight: 700, margin: "8px 0 0" }}>{stripeError}</p>}
               </div>
 
-              <h4 style={{ color: "#071b33", marginBottom: 14, fontWeight: 800, fontSize: ".95rem" }}>Other payment methods</h4>
-              <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
-                {BANK_NAME && (
-                  <div style={{ padding: "14px 16px", borderRadius: 12, background: "#f8fafc", border: "1.5px solid #e8eef6" }}>
-                    <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6 }}>Bank Transfer</div>
-                    <div style={{ fontSize: ".88rem", color: "#071b33", fontWeight: 700 }}>{BANK_NAME}</div>
-                    {ACC_TITLE && <div style={{ fontSize: ".82rem", color: "#344054" }}>Account Title: <strong>{ACC_TITLE}</strong></div>}
-                    {ACC_NUM   && <div style={{ fontSize: ".82rem", color: "#344054" }}>Account No: <strong>{ACC_NUM}</strong></div>}
-                  </div>
-                )}
-                {JAZZCASH && (
-                  <div style={{ padding: "14px 16px", borderRadius: 12, background: "#fff7ed", border: "1.5px solid #fed7aa" }}>
-                    <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#c2410c", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>JazzCash</div>
-                    <div style={{ fontSize: ".88rem", color: "#071b33", fontWeight: 700 }}>{JAZZCASH}</div>
-                  </div>
-                )}
-                {EASYPAISA && (
-                  <div style={{ padding: "14px 16px", borderRadius: 12, background: "#f0fdf4", border: "1.5px solid #bbf7d0" }}>
-                    <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#065f46", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Easypaisa</div>
-                    <div style={{ fontSize: ".88rem", color: "#071b33", fontWeight: 700 }}>{EASYPAISA}</div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ padding: "16px 18px", borderRadius: 12, background: "#f0fdf4", border: "1.5px solid #86efac", marginBottom: 20 }}>
-                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "1.4rem", lineHeight: 1 }}>💬</div>
-                  <div>
-                    <p style={{ fontWeight: 800, color: "#065f46", margin: "0 0 4px", fontSize: ".9rem" }}>After paying, send your screenshot to WhatsApp</p>
-                    <p style={{ color: "#047857", fontSize: ".82rem", margin: "0 0 10px", lineHeight: 1.5 }}>
-                      Include your registered email with the screenshot so we can match it to your account.
-                    </p>
-                    <a href={WA_URL} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "#22c55e", color: "#fff", borderRadius: 8, fontWeight: 800, fontSize: ".85rem", textDecoration: "none" }}>
-                      Open WhatsApp →
-                    </a>
-                  </div>
+              <div style={{ padding: "16px 18px", borderRadius: 12, background: "#fff7ed", border: "1.5px solid #fed7aa" }}>
+                <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#c2410c", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6 }}>🇵🇰 Pakistan — Bank / JazzCash / Easypaisa</div>
+                <div style={{ fontSize: ".82rem", color: "#9a3412", marginBottom: 12, lineHeight: 1.5 }}>
+                  Pay via bank transfer, JazzCash or Easypaisa, then submit your payment details for verification.
+                  Your account unlocks once we verify it — usually within a business day.
                 </div>
+                <Link
+                  href="/unlock"
+                  onClick={onClose}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "#c2410c", color: "#fff", borderRadius: 9, fontWeight: 800, fontSize: ".88rem", textDecoration: "none" }}
+                >
+                  Submit Payment Details →
+                </Link>
               </div>
-
-              <button className="btn btn-primary" style={{ width: "100%", fontSize: ".95rem" }} onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Submitting…" : "I've sent my payment — notify admin"}
-              </button>
-              <p style={{ color: "#a0aec0", fontSize: ".75rem", textAlign: "center", marginTop: 10 }}>
-                Your account will show &quot;Pending&quot; and the admin will verify your payment.
-              </p>
             </>
           )}
         </div>
@@ -193,7 +139,7 @@ export function LockedBanner({
         <span style={{ fontSize: "1.3rem" }}>⏳</span>
         <div>
           <p style={{ fontWeight: 800, color: "#92400e", margin: "0 0 2px", fontSize: ".92rem" }}>Payment verification in progress</p>
-          <p style={{ color: "#78350f", fontSize: ".83rem", margin: 0 }}>We&apos;re checking your WhatsApp payment. This usually takes a few hours.</p>
+          <p style={{ color: "#78350f", fontSize: ".83rem", margin: 0 }}>We&apos;re verifying your payment. This usually takes a few hours.</p>
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Student {
@@ -12,7 +12,20 @@ interface Student {
   approved_at: string | null;
   approved_by: string | null;
   notes: string | null;
+  payment_method: string | null;
+  amount_paid: string | null;
+  transaction_reference: string | null;
+  payment_date: string | null;
+  payer_account_name: string | null;
+  payment_screenshot_url: string | null;
 }
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  jazzcash: "JazzCash",
+  easypaisa: "Easypaisa",
+  bank_transfer: "Bank Transfer",
+  stripe: "Stripe (Card)",
+};
 
 type Filter = "all" | "free" | "pending" | "unlocked";
 
@@ -35,6 +48,7 @@ export default function AdminAccess() {
   const [grantingId, setGrantingId] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/access")
@@ -137,7 +151,7 @@ export default function AdminAccess() {
                     <th>Status</th>
                     <th>Payment sent</th>
                     <th>Approved</th>
-                    <th>Notes</th>
+                    <th></th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -145,8 +159,10 @@ export default function AdminAccess() {
                   {filtered.map(s => {
                     const meta = STATUS_META[s.access_level];
                     const isGranting = grantingId === s.id;
+                    const isExpanded = expandedId === s.id;
                     return (
-                      <tr key={s.id}>
+                      <Fragment key={s.id}>
+                      <tr>
                         <td style={{ fontWeight: 700, color: "#071b33" }}>{s.name || "—"}</td>
                         <td style={{ fontSize: ".83rem" }}>{s.email}</td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(s.created_at)}</td>
@@ -157,7 +173,13 @@ export default function AdminAccess() {
                         </td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(s.payment_requested_at)}</td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(s.approved_at)}</td>
-                        <td style={{ fontSize: ".83rem", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={s.notes ?? ""}>{s.notes || "—"}</td>
+                        <td>
+                          <button
+                            onClick={() => setExpandedId(isExpanded ? null : s.id)}
+                            style={{ padding: "5px 12px", borderRadius: 7, background: isExpanded ? "#eff6ff" : "#f1f5f9", border: "none", color: isExpanded ? "#155eef" : "#6b7c93", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+                            {isExpanded ? "Hide details" : "View details"}
+                          </button>
+                        </td>
                         <td>
                           {s.access_level !== "unlocked" ? (
                             isGranting ? (
@@ -195,6 +217,53 @@ export default function AdminAccess() {
                           )}
                         </td>
                       </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={8} style={{ background: "#f8fafc", padding: "18px 20px" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px 32px" }}>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Payment method</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{s.payment_method ? (PAYMENT_METHOD_LABELS[s.payment_method] ?? s.payment_method) : "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Amount paid</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{s.amount_paid ? (s.payment_method === "stripe" ? Number(s.amount_paid).toLocaleString() : `PKR ${Number(s.amount_paid).toLocaleString()}`) : "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Transaction reference</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{s.transaction_reference || "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Payment date</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{fmtDate(s.payment_date)}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Name on sending account</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{s.payer_account_name || "—"}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Screenshot</div>
+                                {s.payment_screenshot_url ? (
+                                  <a href={s.payment_screenshot_url} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>
+                                    View screenshot →
+                                  </a>
+                                ) : (
+                                  <div style={{ color: "#6b7c93" }}>—</div>
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Approved</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{fmtDate(s.approved_at)}{s.approved_by ? ` · ${s.approved_by}` : ""}</div>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Notes</div>
+                                <div style={{ fontWeight: 700, color: "#071b33" }}>{s.notes || "—"}</div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                 </tbody>
