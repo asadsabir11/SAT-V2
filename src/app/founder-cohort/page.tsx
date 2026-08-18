@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CTAButton, FeatureCard, PageHero } from "@/components/site";
 import { getSession } from "@/lib/auth";
+import { getUserProgram } from "@/lib/users";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -29,7 +30,12 @@ const WEEKS = [
 
 export default async function SatFoundingCohort() {
   const session = await getSession();
-  const isSignedInSatStudent = session?.role === "student" && (session.program ?? "sat") === "sat";
+  // session.program is only reliable on tokens issued since it was added —
+  // older sessions (up to 7 days) don't have it, so fall back to a real DB
+  // lookup instead of assuming SAT, which would wrongly show O-Level-only
+  // students a "View Material" link into a program they never registered for.
+  const isSignedInSatStudent = session?.role === "student"
+    && (session.program ?? await getUserProgram(session.email)) === "sat";
 
   return (
     <>

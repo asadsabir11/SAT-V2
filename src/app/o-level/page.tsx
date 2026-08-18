@@ -10,6 +10,7 @@ import { getInstructor, getCohortForSubject, getSubject, marginalPriceForNextSub
 import { getIntroLecture } from "@/lib/lectures";
 import { getSession } from "@/lib/auth";
 import { getOLevelAccessMap } from "@/lib/olevelAccess";
+import { getUserProgram } from "@/lib/users";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -173,10 +174,13 @@ export default async function OLevelPage() {
   const isSignedInStudent = session?.role === "student";
   // Specifically "already has an O-Level account" — a signed-in SAT student
   // who hasn't registered for O-Level yet should still see the registration
-  // form here, not a dead-end "you're signed in" card. Falls back to true
-  // for any signed-in student on pre-existing tokens that predate the
-  // program field (up to a 7-day rollout window), matching prior behavior.
-  const isSignedInAsOLevel = isSignedInStudent && (session!.program ?? "o-level") === "o-level";
+  // form here, not a dead-end "you're signed in" card. session.program is
+  // only reliable on tokens issued since it was added — older sessions (up
+  // to 7 days) don't have it, so fall back to a real DB lookup rather than
+  // assuming O-Level, which would wrongly hide the registration form from a
+  // SAT-only student.
+  const isSignedInAsOLevel = isSignedInStudent
+    && (session!.program ?? await getUserProgram(session!.email)) === "o-level";
   const accessMap = isSignedInStudent ? await getOLevelAccessMap(session!.email) : {};
   const unlockedSubjects = Object.entries(accessMap).filter(([, status]) => status === "unlocked").map(([subject]) => subject);
 
