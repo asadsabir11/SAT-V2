@@ -30,6 +30,26 @@ export function UnlockModal({
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(accessLevel === "pending");
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeError, setStripeError] = useState("");
+
+  async function handleStripeCheckout() {
+    setStripeLoading(true);
+    setStripeError("");
+    try {
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const d = await res.json();
+      if (d.url) {
+        window.location.href = d.url;
+      } else {
+        setStripeError(d.error ?? "Could not start payment. Please try again.");
+        setStripeLoading(false);
+      }
+    } catch {
+      setStripeError("Network error. Please check your connection and try again.");
+      setStripeLoading(false);
+    }
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -87,7 +107,22 @@ export function UnlockModal({
                 ))}
               </div>
 
-              <h4 style={{ color: "#071b33", marginBottom: 14, fontWeight: 800, fontSize: ".95rem" }}>Payment methods</h4>
+              <div style={{ padding: "16px 18px", borderRadius: 12, background: "linear-gradient(135deg,#eff6ff,#e0e7ff)", border: "1.5px solid #bfdbfe", marginBottom: 20 }}>
+                <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#1d4ed8", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6 }}>💳 Pay by Card (Instant Access)</div>
+                <div style={{ fontSize: ".82rem", color: "#1e40af", marginBottom: 12, lineHeight: 1.5 }}>
+                  Pay securely online with Stripe. Your account unlocks automatically after payment.
+                </div>
+                <button
+                  onClick={handleStripeCheckout}
+                  disabled={stripeLoading}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", background: "#155eef", color: "#fff", borderRadius: 9, fontWeight: 800, fontSize: ".88rem", cursor: stripeLoading ? "not-allowed" : "pointer", border: "none", opacity: stripeLoading ? .7 : 1 }}
+                >
+                  {stripeLoading ? "Redirecting…" : `Pay ${AMOUNT} with Card →`}
+                </button>
+                {stripeError && <p style={{ color: "#dc2626", fontSize: ".78rem", fontWeight: 700, margin: "8px 0 0" }}>{stripeError}</p>}
+              </div>
+
+              <h4 style={{ color: "#071b33", marginBottom: 14, fontWeight: 800, fontSize: ".95rem" }}>Other payment methods</h4>
               <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
                 {BANK_NAME && (
                   <div style={{ padding: "14px 16px", borderRadius: 12, background: "#f8fafc", border: "1.5px solid #e8eef6" }}>
