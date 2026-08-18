@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
 
-type AuthUser = { name: string; role: "student" | "founder" } | null;
+type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
 
 function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   const [user, setUser] = useState<AuthUser>(null);
@@ -54,6 +54,13 @@ export function Header() {
   const [user, setUser] = useState<AuthUser>(null);
   const pathname = usePathname();
   const isOLevel = pathname?.startsWith("/o-level") ?? false;
+  // A signed-in student only needs a nav link into the program they're NOT
+  // currently in — their own program is already where they are (dashboard,
+  // header badge, etc). Unknown program (older session, or non-student
+  // roles) shows both, same as signed-out visitors.
+  const navItems = user?.role === "student" && user.program
+    ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
+    : PUBLIC_NAV;
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
@@ -61,7 +68,7 @@ export function Header() {
           <span style={{color:"#155eef"}}>The Digital</span> Tutor
         </Link>
         <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
-          {PUBLIC_NAV.map(([label, href]) => (
+          {navItems.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
           <AuthBadge onUser={setUser} />
