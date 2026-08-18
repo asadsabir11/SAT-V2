@@ -75,17 +75,17 @@ const SUBJECT_CLASS_TIME: Record<string, string> = {
   "mathematics": "Saturday, 6:00 PM – 7:00 PM (PKT)",
 };
 
-function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubjects }: { subjectSlug: string; basePrice: number; isSignedInStudent: boolean; unlockedSubjects: string[] }) {
+function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubjects, fullyBooked }: { subjectSlug: string; basePrice: number; isSignedInStudent: boolean; unlockedSubjects: string[]; fullyBooked?: boolean }) {
   const subject = getSubject(subjectSlug);
   const cohort = getCohortForSubject(subjectSlug);
   if (!subject) return null;
 
-  const isUnlocked = unlockedSubjects.includes(subjectSlug);
-  const marginalPrice = isSignedInStudent && !isUnlocked ? marginalPriceForNextSubject(unlockedSubjects.length) : basePrice;
-  const isDiscounted = isSignedInStudent && marginalPrice < basePrice;
+  const isUnlocked = !fullyBooked && unlockedSubjects.includes(subjectSlug);
+  const marginalPrice = isSignedInStudent && !isUnlocked && !fullyBooked ? marginalPriceForNextSubject(unlockedSubjects.length) : basePrice;
+  const isDiscounted = isSignedInStudent && !fullyBooked && marginalPrice < basePrice;
 
   const classTime = SUBJECT_CLASS_TIME[subjectSlug];
-  const priceValue = isUnlocked ? "Unlocked ✓" : `PKR ${marginalPrice.toLocaleString()}${isDiscounted ? " (bundle price)" : ""}`;
+  const priceValue = fullyBooked ? "Fully booked" : isUnlocked ? "Unlocked ✓" : `PKR ${marginalPrice.toLocaleString()}${isDiscounted ? " (bundle price)" : ""}`;
   const rows: [string, string][] = [
     ["Cohort start date", COHORT_SCHEDULE.startDate],
     ["Registration deadline", COHORT_SCHEDULE.registrationDeadline],
@@ -98,17 +98,24 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
 
   const body = (
     <>
-      <div className="eyebrow">{cohort?.targetExam ?? "May/June 2027"} target</div>
+      <div className="eyebrow" style={fullyBooked ? { color: "#b91c1c" } : undefined}>
+        {fullyBooked ? "Fully booked" : `${cohort?.targetExam ?? "May/June 2027"} target`}
+      </div>
       <h3 style={{ marginTop: 6 }}>O Level {subject.name}</h3>
       <div style={{ display: "grid", gap: 6, margin: "12px 0 18px" }}>
         {rows.map(([label, value]) => (
           <div key={label} style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "2px 12px", fontSize: ".85rem", padding: "4px 0", borderBottom: "1px solid #f0f4f8" }}>
             <span style={{ color: "var(--muted)" }}>{label}</span>
-            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" ? "#92400e" : isUnlocked ? "#15803d" : "var(--navy)" }}>{value}</span>
+            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" ? "#92400e" : value === "Fully booked" ? "#b91c1c" : isUnlocked ? "#15803d" : "var(--navy)" }}>{value}</span>
           </div>
         ))}
       </div>
-      {!isSignedInStudent ? (
+      {fullyBooked ? (
+        <span style={{ marginTop: "auto", color: "#b91c1c", fontWeight: 700, fontSize: ".9rem" }}>
+          Fully booked for this cohort
+          <span style={{ display: "block", fontWeight: 600, fontSize: ".78rem", color: "var(--muted)" }}>Join the waiting list below</span>
+        </span>
+      ) : !isSignedInStudent ? (
         <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
           Register Free to Get Started
         </Link>
@@ -122,7 +129,7 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
     </>
   );
 
-  if (isSignedInStudent) {
+  if (isSignedInStudent && !fullyBooked) {
     return (
       <Link href={isUnlocked ? `/o-level/lectures?subject=${subjectSlug}` : `/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
         {body}
@@ -235,6 +242,20 @@ export default async function OLevelPage() {
           </div>
           <div className="card" style={{ marginTop: 24, textAlign: "center", background: "#eaf1ff", borderColor: "#c9dcfb" }}>
             <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>English Language + Mathematics: PKR 18,000 per month</p>
+          </div>
+
+          <div style={{ maxWidth: 720, margin: "56px auto 0", textAlign: "center" }}>
+            <div className="eyebrow" style={{ justifyContent: "center" }}>High demand</div>
+            <h2 className="title">Computer Science, Islamiyat and Pakistan Studies</h2>
+            <p className="lead" style={{ margin: "0 auto" }}>
+              These founding cohorts are fully booked. Join the waiting list below and we&apos;ll notify you as soon
+              as the next cohort opens.
+            </p>
+          </div>
+          <div className="grid grid-3" style={{ marginTop: 40 }}>
+            <CohortCard subjectSlug="computer-science" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
+            <CohortCard subjectSlug="islamiyat" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
+            <CohortCard subjectSlug="pakistan-studies" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
           </div>
           <p style={{ textAlign: "center", marginTop: 24, color: "var(--muted)", fontSize: ".9rem", maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
             Additional cohorts in Computer Science, Islamiyat and Pakistan Studies will open based on parent demand —
