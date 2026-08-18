@@ -1,5 +1,8 @@
 import { sql } from "@/lib/db";
 import { getAITutorUsage, getStrengthsAndFocus } from "@/lib/analytics";
+import { getSubjectPerformanceForStudent } from "@/lib/olevel-quiz";
+import { getOLevelAccessMap } from "@/lib/olevelAccess";
+import { getSubject } from "@/lib/academy/data";
 
 
 let ready = false;
@@ -83,7 +86,7 @@ export async function linkParentToStudent(parentUserId: string, studentId: strin
 export async function getStudentForParent(parentUserId: string) {
   await ensureParentTables();
   const rows = await sql`
-    SELECT u.id, u.name, u.email
+    SELECT u.id, u.name, u.email, u.program
     FROM parent_student_links psl
     JOIN users u ON u.id = psl.student_id
     WHERE psl.parent_user_id = ${parentUserId}
@@ -290,9 +293,81 @@ export async function buildReportMetrics(studentId: string, weekNo: number, peri
   };
 }
 
+// ─── O-Level report metrics (parallel to ReportMetrics above, different shape —
+// O-Level has no single mock score; progress is per-subject quiz performance) ──
+
+export interface OLevelSubjectReportRow {
+  subject: string;
+  subjectLabel: string;
+  attempts: number;
+  avgPercent: number | null;
+}
+
+export interface OLevelReportMetrics {
+  student:    string;
+  week:       number;
+  program:    "o-level";
+  attendance: { status: string; sessionTitle?: string };
+  subjects:   OLevelSubjectReportRow[];
+  strengths:  string[];
+  focusAreas: string[];
+}
+
+export async function buildOLevelReportMetrics(
+  studentId: string, studentEmail: string, weekNo: number, periodStart: string, periodEnd: string
+): Promise<OLevelReportMetrics> {
+  await ensureParentTables();
+
+  const [studentRows, attendanceRows, accessMap, subjectPerf] = await Promise.all([
+    sql`SELECT name FROM users WHERE id = ${studentId}`,
+    sql`
+      SELECT sa.status, ls.title
+      FROM session_attendance sa
+      JOIN live_sessions ls ON ls.id = sa.session_id
+      WHERE sa.student_id = ${studentId}
+        AND ls.scheduled_at >= ${periodStart}
+        AND ls.scheduled_at <= ${periodEnd}
+      ORDER BY ls.scheduled_at DESC LIMIT 1
+    `,
+    getOLevelAccessMap(studentEmail),
+    getSubjectPerformanceForStudent(studentEmail),
+  ]);
+
+  const perfBySubject = new Map(subjectPerf.map((s) => [s.subject, s]));
+  const unlockedSubjects = Object.entries(accessMap).filter(([, status]) => status === "unlocked").map(([s]) => s);
+  const subjectLabel = (slug: string) => getSubject(slug)?.name ?? slug;
+
+  const subjects: OLevelSubjectReportRow[] = unlockedSubjects.map((subject) => {
+    const perf = perfBySubject.get(subject);
+    return {
+      subject,
+      subjectLabel: subjectLabel(subject),
+      attempts: perf?.attempts ?? 0,
+      avgPercent: perf?.avgPercent ?? null,
+    };
+  });
+
+  const strengths = subjectPerf
+    .filter((s) => s.avgPercent !== null && s.avgPercent >= 70)
+    .map((s) => subjectLabel(s.subject));
+  const focusAreas = subjectPerf.flatMap((s) => s.weakTopics).slice(0, 3);
+
+  return {
+    student: (studentRows[0] as { name: string } | undefined)?.name ?? "Student",
+    week: weekNo,
+    program: "o-level",
+    attendance: attendanceRows[0]
+      ? { status: (attendanceRows[0] as { status: string }).status, sessionTitle: (attendanceRows[0] as { title: string }).title }
+      : { status: "not recorded" },
+    subjects,
+    strengths,
+    focusAreas,
+  };
+}
+
 export async function saveReport(
   studentId: string, weekNo: number, periodStart: string, periodEnd: string,
-  metrics: ReportMetrics, coachNote: string, parentAction: string
+  metrics: ReportMetrics | OLevelReportMetrics, coachNote: string, parentAction: string
 ) {
   await ensureParentTables();
   const id = crypto.randomUUID();

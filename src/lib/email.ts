@@ -91,6 +91,73 @@ export async function sendParentReport(opts: {
   }
 }
 
+export async function sendOLevelParentReport(opts: {
+  parentEmail: string;
+  parentName: string;
+  studentName: string;
+  weekNo: number;
+  attendanceStatus: string;
+  subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
+  strengths: string[];
+  focusAreas: string[];
+  coachNote: string;
+  parentAction: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
+
+  const resend = new Resend(apiKey);
+
+  const subjectRows = opts.subjects.map((s) => `
+    <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">${s.subjectLabel}</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${s.attempts > 0 ? `${s.avgPercent}% average · ${s.attempts} quiz${s.attempts !== 1 ? "zes" : ""} attempted` : "No quiz attempts yet"}</td></tr>
+  `).join("");
+
+  try {
+    await resend.emails.send({
+      from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+      to: opts.parentEmail,
+      subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+          <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
+            <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
+            <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
+            <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
+          </div>
+
+          <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
+            <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
+            ${subjectRows}
+          </table>
+
+          ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
+          ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
+
+          <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+            <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
+            <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
+            <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+            <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
+            <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
+          </div>
+
+          <div style="text-align:center;margin-bottom:20px;">
+            <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
+          </div>
+
+          <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment.<br>The Digital Tutor · academy.thedigitaltutor.net</p>
+        </div>
+      `,
+    });
+    return { ok: true, error: undefined };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 export async function sendNewStudentAlert(student: {
   name: string;
   email: string;

@@ -8,13 +8,17 @@ interface SkillAccuracy {
 
 interface Metrics {
   student: string; week: number;
+  program?: string;
   attendance: { status: string; sessionTitle?: string };
   homework: { done: number; assigned: number };
   practice: { aiSessions: number };
   score: { latestMock: number | null; target: number | null; deltaSinceLast: number | null };
   strengths: string[];
   focusAreas: string[];
+  subjects?: OLevelSubjectRow[];
 }
+
+interface OLevelSubjectRow { subject: string; subjectLabel: string; attempts: number; avgPercent: number | null; }
 
 interface Report {
   id: string; week_no: number; period_start: string; period_end: string;
@@ -33,18 +37,23 @@ interface AttItem {
   status: string; marked_at: string; title: string; scheduled_at: string;
 }
 
+interface OLevelSubjectPerf { subject: string; subjectLabel: string; attempts: number; avgPercent: number | null; bestPercent: number | null; weakTopics: string[]; }
+interface OLevelAttempt { id: string; score: number; total: number; completed_at: string; subject: string; title: string; }
+
 function fmt(d: string) { return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); }
 
 export default function ParentPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
-  const [student, setStudent] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [student, setStudent] = useState<{ id: string; name: string; email: string; program?: string } | null>(null);
   const [report, setReport]   = useState<Report | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
   const [homework, setHomework] = useState<HWItem[]>([]);
   const [attendance, setAttendance] = useState<AttItem[]>([]);
   const [skills, setSkills]   = useState<SkillAccuracy[]>([]);
   const [scoreHistory, setScoreHistory] = useState<ScorePoint[]>([]);
+  const [oLevelSubjects, setOLevelSubjects] = useState<OLevelSubjectPerf[]>([]);
+  const [oLevelAttempts, setOLevelAttempts] = useState<OLevelAttempt[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -59,9 +68,13 @@ export default function ParentPortal() {
       setAttendance(d.attendance ?? []);
       setSkills(s.skills ?? []);
       setScoreHistory(d.scoreHistory ?? []);
+      setOLevelSubjects(d.subjects ?? []);
+      setOLevelAttempts(d.recentAttempts ?? []);
     }).catch(() => setError("Failed to load data."))
       .finally(() => setLoading(false));
   }, []);
+
+  const isOLevel = student?.program === "o-level";
 
   if (loading) return (
     <section className="section"><div className="container">
@@ -102,7 +115,7 @@ export default function ParentPortal() {
             )}
           </div>
 
-          {m?.score?.latestMock && (
+          {!isOLevel && m?.score?.latestMock && (
             <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(255,255,255,.07)", borderRadius: 12, border: "1px solid rgba(255,255,255,.1)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
                 <div>
@@ -133,7 +146,7 @@ export default function ParentPortal() {
         </div>
 
         {/* Current week stats */}
-        {m && (
+        {m && !isOLevel && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 24 }}>
             {[
               {
@@ -169,6 +182,24 @@ export default function ParentPortal() {
                 {"sub" in c && c.sub && <div style={{ fontSize: ".75rem", color: "#6b7c93", marginTop: 2 }}>{c.sub}</div>}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Current week stats — O-Level */}
+        {m && isOLevel && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginBottom: 24 }}>
+            <div style={{ background: m.attendance.status === "present" ? "#f0fdf4" : "#fff7ed", border: `1.5px solid ${m.attendance.status === "present" ? "#86efac" : "#fdba74"}`, borderRadius: 16, padding: "18px 20px" }}>
+              <div style={{ fontSize: "1.4rem", marginBottom: 8 }}>{m.attendance.status === "present" ? "✅" : m.attendance.status === "late" ? "🕐" : m.attendance.status === "not recorded" ? "—" : "❌"}</div>
+              <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Attendance</div>
+              <div style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33" }}>
+                {m.attendance.status === "present" ? "Present" : m.attendance.status === "late" ? "Late" : m.attendance.status === "not recorded" ? "Not recorded" : "Absent"}
+              </div>
+            </div>
+            <div style={{ background: "#eff6ff", border: "1.5px solid #bfdbfe", borderRadius: 16, padding: "18px 20px" }}>
+              <div style={{ fontSize: "1.4rem", marginBottom: 8 }}>📖</div>
+              <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Subjects unlocked</div>
+              <div style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33" }}>{(m.subjects ?? oLevelSubjects).length}</div>
+            </div>
           </div>
         )}
 
@@ -223,8 +254,48 @@ export default function ParentPortal() {
           </div>
         )}
 
+        {/* O-Level subject performance */}
+        {isOLevel && oLevelSubjects.length > 0 && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📊 Subject performance</div>
+            {oLevelSubjects.map(s => {
+              const color = s.attempts === 0 ? "#e5e7eb" : (s.avgPercent ?? 0) >= 70 ? "#22c55e" : (s.avgPercent ?? 0) >= 50 ? "#f59e0b" : "#ef4444";
+              return (
+                <div key={s.subject} style={{ marginBottom: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                    <span style={{ fontSize: ".85rem", fontWeight: 600, color: "#344054" }}>{s.subjectLabel}</span>
+                    <span style={{ fontSize: ".8rem", fontWeight: 800, color: s.attempts === 0 ? "#9ca3af" : color }}>
+                      {s.attempts === 0 ? "No quizzes yet" : `${s.avgPercent}% avg · ${s.attempts} attempt${s.attempts !== 1 ? "s" : ""}`}
+                    </span>
+                  </div>
+                  <div style={{ height: 7, background: "#f3f4f6", borderRadius: 99, overflow: "hidden" }}>
+                    {s.attempts > 0 && <div style={{ height: "100%", borderRadius: 99, width: `${s.avgPercent}%`, background: color }} />}
+                  </div>
+                  {s.weakTopics.length > 0 && <div style={{ fontSize: ".72rem", color: "#c2410c", marginTop: 4 }}>⚡ Needs work: {s.weakTopics.join(", ")}</div>}
+                </div>
+              );
+            })}
+            <p style={{ margin: "8px 0 0", fontSize: ".72rem", color: "#9ca3af" }}>Based on unlocked O-Level quiz attempts. Updates after each quiz.</p>
+          </div>
+        )}
+
+        {/* Recent quiz attempts — O-Level */}
+        {isOLevel && oLevelAttempts.length > 0 && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📝 Recent quiz attempts</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {oLevelAttempts.slice(0, 8).map(a => (
+                <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: 10, background: "#f8fafc", border: "1.5px solid #e8eef6" }}>
+                  <div style={{ fontWeight: 700, fontSize: ".88rem", color: "#071b33" }}>{a.title}</div>
+                  <div style={{ fontSize: ".78rem", color: "#6b7c93" }}>{a.total > 0 ? `${Math.round((a.score / a.total) * 100)}%` : "—"} · {fmt(a.completed_at)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Score trend */}
-        {scoreHistory.length > 1 && (
+        {!isOLevel && scoreHistory.length > 1 && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📈 Score trend</div>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 120, padding: "0 4px" }}>
@@ -252,8 +323,12 @@ export default function ParentPortal() {
                     <div style={{ fontSize: ".75rem", color: "#6b7c93" }}>{fmt(r.period_start)} – {fmt(r.period_end)}</div>
                   </div>
                   <div style={{ fontSize: ".78rem", color: "#6b7c93", marginTop: 4 }}>
-                    Attendance: {r.metrics_json?.attendance?.status ?? "—"} · Homework: {r.metrics_json?.homework?.done ?? 0}/{r.metrics_json?.homework?.assigned ?? 0}
-                    {r.metrics_json?.score?.latestMock ? ` · Score: ${r.metrics_json.score.latestMock}` : ""}
+                    {r.metrics_json?.program === "o-level" ? (
+                      <>Attendance: {r.metrics_json?.attendance?.status ?? "—"}{(r.metrics_json?.subjects?.length ?? 0) > 0 ? ` · ${r.metrics_json.subjects!.filter(s => s.attempts > 0).length}/${r.metrics_json.subjects!.length} subjects attempted` : ""}</>
+                    ) : (
+                      <>Attendance: {r.metrics_json?.attendance?.status ?? "—"} · Homework: {r.metrics_json?.homework?.done ?? 0}/{r.metrics_json?.homework?.assigned ?? 0}
+                      {r.metrics_json?.score?.latestMock ? ` · Score: ${r.metrics_json.score.latestMock}` : ""}</>
+                    )}
                   </div>
                   {r.coach_note && <div style={{ fontSize: ".78rem", color: "#344054", fontStyle: "italic", marginTop: 4 }}>“{r.coach_note}”</div>}
                 </div>
@@ -263,7 +338,7 @@ export default function ParentPortal() {
         )}
 
         {/* Skill accuracy bars */}
-        {skills.some(s => s.total > 0) && (
+        {!isOLevel && skills.some(s => s.total > 0) && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📊 Skill breakdown</div>
             {(["Math", "RW"] as const).map(section => {
@@ -336,7 +411,9 @@ export default function ParentPortal() {
         )}
 
         <div style={{ padding: "14px 18px", borderRadius: 12, background: "#fffbeb", border: "1px solid #fde68a", fontSize: ".75rem", color: "#92400e" }}>
-          SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service with no affiliation or score guarantee.
+          {isOLevel
+            ? "Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment."
+            : "SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service with no affiliation or score guarantee."}
         </div>
       </div>
     </section>

@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
-interface Student { id: string; name: string; email: string; }
+interface Student { id: string; name: string; email: string; program: string; }
 interface Report  { id: string; student_id: string; student_name: string; week_no: number; period_start: string; period_end: string; metrics_json: Record<string,unknown>; coach_note: string; parent_action: string; narrative: string | null; status: string; sent_at: string | null; }
 
 const STATUS_META: Record<string, { label: string; bg: string; color: string }> = {
@@ -103,7 +103,7 @@ export default function AdminReports() {
             <label>Student *</label>
             <select value={genForm.studentId} onChange={e => setGenForm(f => ({ ...f, studentId: e.target.value }))}>
               <option value="">— Select student —</option>
-              {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {students.map(s => <option key={s.id} value={s.id}>{s.name} {s.program === "o-level" ? "(O Level)" : "(SAT)"}</option>)}
             </select>
           </div>
           <div className="field">
@@ -184,6 +184,11 @@ export default function AdminReports() {
                       <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: STATUS_META[rpt.status]?.bg ?? "#f3f4f6", color: STATUS_META[rpt.status]?.color ?? "#6b7c93" }}>
                         {STATUS_META[rpt.status]?.label ?? rpt.status}
                       </span>
+                      {rpt.metrics_json?.program === "o-level" && (
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#eef2ff", color: "#4338ca" }}>
+                          O Level
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: ".78rem", color: "#6b7c93" }}>
                       {fmtDate(rpt.period_start)} – {fmtDate(rpt.period_end)}

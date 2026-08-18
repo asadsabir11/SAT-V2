@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import {
-  buildReportMetrics, saveReport, updateReportStatus,
+  buildReportMetrics, buildOLevelReportMetrics, saveReport, updateReportStatus,
   listAllReports, getReportById, updateReportFields
 } from "@/lib/parent-system";
-import { sendParentReport } from "@/lib/email";
+import { sendParentReport, sendOLevelParentReport } from "@/lib/email";
 import { findByField } from "@/lib/storage";
-import { generateReportNarrative, getAITutorUsage } from "@/lib/analytics";
+import { generateReportNarrative, generateOLevelReportNarrative, getAITutorUsage } from "@/lib/analytics";
 import { sql } from "@/lib/db";
 
 
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   const [reports, students] = await Promise.all([
     listAllReports(),
-    sql`SELECT id, name, email FROM users WHERE role = 'student' ORDER BY name`,
+    sql`SELECT id, name, email, program FROM users WHERE role = 'student' ORDER BY name`,
   ]);
   return NextResponse.json({ reports, students });
 }
@@ -39,7 +39,13 @@ export async function POST(req: NextRequest) {
     if (!studentId || !weekNo || !periodStart || !periodEnd) {
       return NextResponse.json({ error: "studentId, weekNo, periodStart, periodEnd required" }, { status: 400 });
     }
-    const metrics = await buildReportMetrics(studentId, Number(weekNo), periodStart, periodEnd);
+    const studentRows = await sql`SELECT email, program FROM users WHERE id = ${studentId}`;
+    const student = studentRows[0] as { email: string; program: string } | undefined;
+    if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
+
+    const metrics = student.program === "o-level"
+      ? await buildOLevelReportMetrics(studentId, student.email, Number(weekNo), periodStart, periodEnd)
+      : await buildReportMetrics(studentId, Number(weekNo), periodStart, periodEnd);
     const id = await saveReport(studentId, Number(weekNo), periodStart, periodEnd, metrics, "", "");
     return NextResponse.json({ ok: true, id, metrics });
   }
@@ -49,6 +55,29 @@ export async function POST(req: NextRequest) {
     const { id } = body;
     const report = await getReportById(id);
     if (!report) return NextResponse.json({ error: "Report not found" }, { status: 404 });
+
+    if ((report.metrics_json as { program?: string }).program === "o-level") {
+      const m = report.metrics_json as {
+        student: string; week: number;
+        attendance: { status: string };
+        subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
+        strengths: string[];
+        focusAreas: string[];
+      };
+
+      const narrative = await generateOLevelReportNarrative({
+        studentName:      m.student,
+        weekNo:           m.week,
+        attendanceStatus: m.attendance?.status ?? "not recorded",
+        subjects:         m.subjects ?? [],
+        strengths:        m.strengths ?? [],
+        focusAreas:       m.focusAreas ?? [],
+        coachNote:        String(report.coach_note ?? ""),
+      });
+
+      await updateReportFields(id, String(report.coach_note ?? ""), String(report.parent_action ?? ""), narrative);
+      return NextResponse.json({ ok: true, narrative });
+    }
 
     const m = report.metrics_json as {
       student: string; week: number;
@@ -116,55 +145,100 @@ export async function POST(req: NextRequest) {
       whatsappNumber = (lead?.whatsapp ?? "").replace(/\D/g, "");
     }
 
-    const metrics = report.metrics_json as {
-      student: string; week: number;
-      attendance: { status: string };
-      homework: { done: number; assigned: number };
-      score: { latestMock: number | null; target: number | null; deltaSinceLast: number | null };
-      strengths: string[];
-      focusAreas: string[];
-    };
+    const isOLevel = (report.metrics_json as { program?: string }).program === "o-level";
 
     let emailResult: { ok: boolean; error?: string } = { ok: false, error: "No parent email linked" };
     let waLink = "";
 
     if (parentLinks.length > 0) {
       const pl = parentLinks[0] as { parent_email: string; parent_name: string };
-      emailResult = await sendParentReport({
-        parentEmail:      pl.parent_email,
-        parentName:       pl.parent_name,
-        studentName:      metrics.student,
-        weekNo:           metrics.week,
-        attendanceStatus: metrics.attendance?.status ?? "not recorded",
-        homeworkDone:     metrics.homework?.done ?? 0,
-        homeworkTotal:    metrics.homework?.assigned ?? 0,
-        latestScore:      metrics.score?.latestMock ?? null,
-        targetScore:      metrics.score?.target ?? null,
-        scoreDelta:       metrics.score?.deltaSinceLast ?? null,
-        strengths:        metrics.strengths ?? [],
-        focusAreas:       metrics.focusAreas ?? [],
-        coachNote:        String(report.coach_note ?? ""),
-        parentAction:     String(report.parent_action ?? ""),
-      });
 
-      // WhatsApp message (formatted for wa.me)
-      const msg = [
-        `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
-        ``,
-        `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
-        `📚 Homework: ${metrics.homework?.done ?? 0}/${metrics.homework?.assigned ?? 0} done`,
-        metrics.score?.latestMock ? `📈 Score: ${metrics.score.latestMock}${metrics.score.deltaSinceLast != null ? ` (${metrics.score.deltaSinceLast >= 0 ? "+" : ""}${metrics.score.deltaSinceLast})` : ""}` : null,
-        metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
-        metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
-        ``,
-        report.coach_note ? `Coach: "${report.coach_note}"` : null,
-        report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
-        ``,
-        `Full report: https://digital-tutor-sat-prep.vercel.app/parent`,
-      ].filter(Boolean).join("\n");
+      if (isOLevel) {
+        const metrics = report.metrics_json as {
+          student: string; week: number;
+          attendance: { status: string };
+          subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
+          strengths: string[];
+          focusAreas: string[];
+        };
 
-      // Without a stored number, wa.me opens WhatsApp's contact picker instead.
-      waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+        emailResult = await sendOLevelParentReport({
+          parentEmail:      pl.parent_email,
+          parentName:       pl.parent_name,
+          studentName:      metrics.student,
+          weekNo:           metrics.week,
+          attendanceStatus: metrics.attendance?.status ?? "not recorded",
+          subjects:         metrics.subjects ?? [],
+          strengths:        metrics.strengths ?? [],
+          focusAreas:       metrics.focusAreas ?? [],
+          coachNote:        String(report.coach_note ?? ""),
+          parentAction:     String(report.parent_action ?? ""),
+        });
+
+        const attempted = (metrics.subjects ?? []).filter((s) => s.attempts > 0);
+        const msg = [
+          `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
+          ``,
+          `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
+          attempted.length
+            ? `📚 Subjects: ${attempted.map((s) => `${s.subjectLabel} (${s.avgPercent}%)`).join(", ")}`
+            : `📚 No quiz attempts yet this week`,
+          metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
+          metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
+          ``,
+          report.coach_note ? `Coach: "${report.coach_note}"` : null,
+          report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
+          ``,
+          `Full report: https://academy.thedigitaltutor.net/parent`,
+        ].filter(Boolean).join("\n");
+
+        waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+      } else {
+        const metrics = report.metrics_json as {
+          student: string; week: number;
+          attendance: { status: string };
+          homework: { done: number; assigned: number };
+          score: { latestMock: number | null; target: number | null; deltaSinceLast: number | null };
+          strengths: string[];
+          focusAreas: string[];
+        };
+
+        emailResult = await sendParentReport({
+          parentEmail:      pl.parent_email,
+          parentName:       pl.parent_name,
+          studentName:      metrics.student,
+          weekNo:           metrics.week,
+          attendanceStatus: metrics.attendance?.status ?? "not recorded",
+          homeworkDone:     metrics.homework?.done ?? 0,
+          homeworkTotal:    metrics.homework?.assigned ?? 0,
+          latestScore:      metrics.score?.latestMock ?? null,
+          targetScore:      metrics.score?.target ?? null,
+          scoreDelta:       metrics.score?.deltaSinceLast ?? null,
+          strengths:        metrics.strengths ?? [],
+          focusAreas:       metrics.focusAreas ?? [],
+          coachNote:        String(report.coach_note ?? ""),
+          parentAction:     String(report.parent_action ?? ""),
+        });
+
+        // WhatsApp message (formatted for wa.me)
+        const msg = [
+          `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
+          ``,
+          `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
+          `📚 Homework: ${metrics.homework?.done ?? 0}/${metrics.homework?.assigned ?? 0} done`,
+          metrics.score?.latestMock ? `📈 Score: ${metrics.score.latestMock}${metrics.score.deltaSinceLast != null ? ` (${metrics.score.deltaSinceLast >= 0 ? "+" : ""}${metrics.score.deltaSinceLast})` : ""}` : null,
+          metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
+          metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
+          ``,
+          report.coach_note ? `Coach: "${report.coach_note}"` : null,
+          report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
+          ``,
+          `Full report: https://academy.thedigitaltutor.net/parent`,
+        ].filter(Boolean).join("\n");
+
+        // Without a stored number, wa.me opens WhatsApp's contact picker instead.
+        waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+      }
     }
 
     if (emailResult.ok) {

@@ -4,7 +4,9 @@ import Link from "next/link";
 
 interface Skill { id: string; label: string; section: string; sort_order: number; }
 interface SkillAccuracy { skillId: string; label: string; section: string; correct: number; total: number; accuracy: number; }
-interface Student { id: string; name: string; email: string; }
+interface Student { id: string; name: string; email: string; program: string; }
+interface OLevelSubjectPerf { subject: string; subjectLabel: string; attempts: number; avgPercent: number | null; bestPercent: number | null; weakTopics: string[]; }
+interface OLevelAttempt { id: string; score: number; total: number; completed_at: string; subject: string; title: string; }
 
 function SkillBar({ s }: { s: SkillAccuracy }) {
   const color = s.total === 0 ? "#e5e7eb" : s.accuracy >= 70 ? "#22c55e" : s.accuracy >= 50 ? "#f59e0b" : "#ef4444";
@@ -23,11 +25,34 @@ function SkillBar({ s }: { s: SkillAccuracy }) {
   );
 }
 
+function SubjectBar({ s }: { s: OLevelSubjectPerf }) {
+  const color = s.attempts === 0 ? "#e5e7eb" : (s.avgPercent ?? 0) >= 70 ? "#22c55e" : (s.avgPercent ?? 0) >= 50 ? "#f59e0b" : "#ef4444";
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+        <span style={{ fontSize: ".85rem", fontWeight: 600, color: "#344054" }}>{s.subjectLabel}</span>
+        <span style={{ fontSize: ".82rem", fontWeight: 800, color: s.attempts === 0 ? "#9ca3af" : color }}>
+          {s.attempts === 0 ? "No data" : `${s.avgPercent}% avg · ${s.attempts} attempt${s.attempts !== 1 ? "s" : ""} · best ${s.bestPercent}%`}
+        </span>
+      </div>
+      <div style={{ height: 8, background: "#f3f4f6", borderRadius: 99, overflow: "hidden" }}>
+        {s.attempts > 0 && <div style={{ height: "100%", borderRadius: 99, width: `${s.avgPercent}%`, background: color }} />}
+      </div>
+      {s.weakTopics.length > 0 && (
+        <p style={{ margin: "6px 0 0", fontSize: ".76rem", color: "#c2410c" }}>⚡ Needs work: {s.weakTopics.join(", ")}</p>
+      )}
+    </div>
+  );
+}
+
 export default function AdminAnalytics() {
   const [skills, setSkills]     = useState<Skill[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [selected, setSelected] = useState<string>("");
+  const [selectedProgram, setSelectedProgram] = useState<string>("sat");
   const [accuracy, setAccuracy] = useState<SkillAccuracy[]>([]);
+  const [oLevelSubjects, setOLevelSubjects] = useState<OLevelSubjectPerf[]>([]);
+  const [oLevelAttempts, setOLevelAttempts] = useState<OLevelAttempt[]>([]);
   const [seeding, setSeeding]   = useState(false);
   const [loadingAcc, setLoadingAcc] = useState(false);
 
@@ -54,7 +79,10 @@ export default function AdminAnalytics() {
     setSelected(studentId);
     setLoadingAcc(true);
     const d = await fetch(`/api/admin/analytics?studentId=${studentId}`).then(r => r.json());
+    setSelectedProgram(d.program ?? "sat");
     setAccuracy(d.skills ?? []);
+    setOLevelSubjects(d.subjects ?? []);
+    setOLevelAttempts(d.recentAttempts ?? []);
     setLoadingAcc(false);
   }
 
@@ -97,13 +125,41 @@ export default function AdminAnalytics() {
           <label>Select student</label>
           <select value={selected} onChange={e => loadAccuracy(e.target.value)}>
             <option value="">— Select a student —</option>
-            {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            {students.map(s => <option key={s.id} value={s.id}>{s.name} {s.program === "o-level" ? "(O Level)" : "(SAT)"}</option>)}
           </select>
         </div>
 
         {loadingAcc && <p style={{ color: "#6b7c93" }}>Loading…</p>}
 
-        {!loadingAcc && selected && accuracy.length > 0 && (
+        {!loadingAcc && selected && selectedProgram === "o-level" && (
+          oLevelSubjects.length > 0 ? (
+            <div>
+              {oLevelSubjects.map(s => <SubjectBar key={s.subject} s={s} />)}
+
+              {oLevelAttempts.length > 0 && (
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ fontSize: ".78rem", fontWeight: 800, color: "#344054", marginBottom: 12, textTransform: "uppercase", letterSpacing: ".06em" }}>
+                    Recent attempts
+                  </div>
+                  {oLevelAttempts.map(a => (
+                    <div key={a.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f3f4f6", fontSize: ".82rem" }}>
+                      <span style={{ color: "#344054" }}>{a.title}</span>
+                      <span style={{ color: "#6b7c93" }}>{a.total > 0 ? `${Math.round((a.score / a.total) * 100)}%` : "—"} · {new Date(a.completed_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p style={{ margin: "16px 0 0", fontSize: ".72rem", color: "#9ca3af" }}>
+                Subject performance is based on unlocked O-Level quiz attempts only.
+              </p>
+            </div>
+          ) : (
+            <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>No quiz data yet for this student. Data populates as they complete O-Level quizzes.</p>
+          )
+        )}
+
+        {!loadingAcc && selected && selectedProgram !== "o-level" && accuracy.length > 0 && (
           <div>
             {(["Math", "RW"] as const).map(sec => {
               const sSkills = accuracy.filter(s => s.section === sec);
@@ -122,7 +178,7 @@ export default function AdminAnalytics() {
           </div>
         )}
 
-        {!loadingAcc && selected && accuracy.every(s => s.total === 0) && (
+        {!loadingAcc && selected && selectedProgram !== "o-level" && accuracy.every(s => s.total === 0) && (
           <p style={{ color: "#6b7c93", fontSize: ".88rem" }}>No quiz data yet for this student. Data populates as they complete quizzes.</p>
         )}
       </div>

@@ -319,3 +319,80 @@ Rules:
     return fallback();
   }
 }
+
+export async function generateOLevelReportNarrative(metrics: {
+  studentName: string;
+  weekNo: number;
+  attendanceStatus: string;
+  subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
+  strengths: string[];
+  focusAreas: string[];
+  coachNote: string;
+}): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  function fallback(): string {
+    const att = metrics.attendanceStatus === "present" ? "attended this week's class" : metrics.attendanceStatus === "late" ? "joined class late this week" : "was not recorded for this week's class";
+    const withAttempts = metrics.subjects.filter((s) => s.attempts > 0);
+    const subj = withAttempts.length
+      ? `completed ${withAttempts.length} quiz attempt${withAttempts.length !== 1 ? "s" : ""} across ${withAttempts.map((s) => s.subjectLabel).join(" and ")}`
+      : "has not attempted a quiz yet this week";
+    const str = metrics.strengths.length ? `showing strength in ${metrics.strengths.slice(0, 2).join(" and ")}` : null;
+    const foc = metrics.focusAreas.length ? `The main focus area this week is ${metrics.focusAreas[0]}.` : "";
+
+    return [
+      `${metrics.studentName} ${att} and ${subj}.`,
+      str ? `${metrics.studentName} is ${str}.` : null,
+      foc,
+    ].filter(Boolean).join(" ");
+  }
+
+  if (!apiKey) return fallback();
+
+  const subjectLines = metrics.subjects
+    .map((s) => `${s.subjectLabel}: ${s.attempts > 0 ? `${s.avgPercent}% average across ${s.attempts} quiz attempt${s.attempts !== 1 ? "s" : ""}` : "no quiz attempts yet"}`)
+    .join("\n");
+
+  const prompt = `You write concise, warm parent progress reports for a Cambridge O Level / IGCSE tuition program.
+
+Write a 2-3 sentence narrative for the weekly report using ONLY these real metrics. Do not invent numbers or guarantee outcomes or exam grades.
+
+Student: ${metrics.studentName}
+Week: ${metrics.weekNo}
+Attendance: ${metrics.attendanceStatus}
+Subjects:
+${subjectLines || "No subjects unlocked yet"}
+Strengths: ${metrics.strengths.length ? metrics.strengths.join(", ") : "none recorded yet"}
+Focus areas: ${metrics.focusAreas.length ? metrics.focusAreas.join(", ") : "none recorded yet"}
+${metrics.coachNote ? `Coach context: ${metrics.coachNote}` : ""}
+
+Rules:
+- 2-3 sentences only
+- Mention effort/behavior before quiz scores
+- Name one strength and one focus area if available
+- Encouraging but honest
+- No grade guarantees, no official Cambridge claims
+- Do not start with "Dear parent" or similar salutation`;
+
+  try {
+    const body = JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.5,
+      max_tokens: 200,
+    });
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey.trim()}` },
+      body,
+      cache: "no-store",
+    });
+
+    const data = await res.json() as { choices?: { message?: { content?: string } }[] };
+    const text = data.choices?.[0]?.message?.content?.trim();
+    return text || fallback();
+  } catch {
+    return fallback();
+  }
+}

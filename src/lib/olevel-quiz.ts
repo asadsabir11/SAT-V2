@@ -181,3 +181,67 @@ export async function getBestAttempt(quizId: string, studentEmail: string): Prom
   `;
   return (rows[0] as { score: number; total: number } | undefined) ?? null;
 }
+
+// ─── Parent-report / analytics support ─────────────────────────────────────
+
+export interface OLevelSubjectPerformance {
+  subject: string;
+  attempts: number;
+  avgPercent: number | null;
+  bestPercent: number | null;
+  weakTopics: string[];
+}
+
+/** Per-subject quiz performance for a student, across all their attempts. */
+export async function getSubjectPerformanceForStudent(studentEmail: string): Promise<OLevelSubjectPerformance[]> {
+  await ensureTables();
+  const email = studentEmail.toLowerCase().trim();
+
+  const rows = await sql`
+    SELECT q.subject,
+           COUNT(a.id)::int AS attempts,
+           AVG(CASE WHEN a.total > 0 THEN a.score::float / a.total * 100 END) AS avg_percent,
+           MAX(CASE WHEN a.total > 0 THEN a.score::float / a.total * 100 END) AS best_percent
+    FROM olevel_quiz_attempts a
+    JOIN olevel_quizzes q ON q.id = a.quiz_id
+    WHERE a.student_email = ${email}
+    GROUP BY q.subject
+  `;
+
+  const topicRows = await sql`
+    SELECT q.subject, a.weak_topics
+    FROM olevel_quiz_attempts a
+    JOIN olevel_quizzes q ON q.id = a.quiz_id
+    WHERE a.student_email = ${email}
+  `;
+  const topicCountsBySubject: Record<string, Record<string, number>> = {};
+  for (const r of topicRows as { subject: string; weak_topics: string[] }[]) {
+    const counts = (topicCountsBySubject[r.subject] ??= {});
+    for (const t of r.weak_topics ?? []) counts[t] = (counts[t] ?? 0) + 1;
+  }
+
+  return (rows as { subject: string; attempts: number; avg_percent: number | null; best_percent: number | null }[]).map((r) => ({
+    subject: r.subject,
+    attempts: r.attempts,
+    avgPercent: r.avg_percent !== null ? Math.round(Number(r.avg_percent)) : null,
+    bestPercent: r.best_percent !== null ? Math.round(Number(r.best_percent)) : null,
+    weakTopics: Object.entries(topicCountsBySubject[r.subject] ?? {})
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([topic]) => topic),
+  }));
+}
+
+/** Recent quiz attempts for a student, most recent first — used for the parent-portal trend chart. */
+export async function getRecentAttemptsForStudent(studentEmail: string, limit = 8) {
+  await ensureTables();
+  const rows = await sql`
+    SELECT a.id, a.score, a.total, a.completed_at, q.subject, q.title
+    FROM olevel_quiz_attempts a
+    JOIN olevel_quizzes q ON q.id = a.quiz_id
+    WHERE a.student_email = ${studentEmail.toLowerCase().trim()}
+    ORDER BY a.completed_at DESC
+    LIMIT ${limit}
+  `;
+  return rows;
+}
