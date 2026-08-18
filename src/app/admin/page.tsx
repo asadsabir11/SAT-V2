@@ -127,7 +127,12 @@ export default function Admin() {
             </Link>
             {isFounder && (
               <Link href="/admin/parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
-                👨‍👩‍👧 Parent accounts →
+                👨‍👩‍👧 SAT parent accounts →
+              </Link>
+            )}
+            {isFounder && (
+              <Link href="/admin/o-level-parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
+                👨‍👩‍👧 O Level parent accounts →
               </Link>
             )}
             {isFounder && (

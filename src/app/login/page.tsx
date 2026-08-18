@@ -35,7 +35,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password, role, program: role === "student" ? program : undefined }),
+        body: JSON.stringify({ email: email.trim(), password, role, program: role === "student" || role === "parent" ? program : undefined }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Login failed. Please try again."); return; }
@@ -84,7 +84,7 @@ function LoginForm() {
           ))}
         </div>
 
-        {role === "student" && (
+        {(role === "student" || role === "parent") && (
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", color: "#344054", marginBottom: 6 }}>
               Program
@@ -109,7 +109,9 @@ function LoginForm() {
               ))}
             </div>
             <p style={{ margin: "6px 0 0", fontSize: ".76rem", color: "#a0aec0" }}>
-              Registered for both? Pick the one you want to sign into.
+              {role === "parent"
+                ? "Have a child in both programs? Pick which child's account to view."
+                : "Registered for both? Pick the one you want to sign into."}
             </p>
           </div>
         )}

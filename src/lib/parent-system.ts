@@ -101,7 +101,7 @@ export async function listParentLinks() {
     SELECT
       psl.id, psl.created_at,
       p.id   AS parent_id,   p.name AS parent_name,   p.email AS parent_email,
-      s.id   AS student_id,  s.name AS student_name,  s.email AS student_email
+      s.id   AS student_id,  s.name AS student_name,  s.email AS student_email, s.program AS student_program
     FROM parent_student_links psl
     JOIN users p ON p.id = psl.parent_user_id
     JOIN users s ON s.id = psl.student_id

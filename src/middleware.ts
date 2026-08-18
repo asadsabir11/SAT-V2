@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     }
     // Founder-only areas: access/payment gatekeeping, parent accounts, teacher
     // accounts, and diagnostic quiz management — teachers get everything else.
-    const FOUNDER_ONLY_PREFIXES = ["/admin/access", "/admin/o-level-access", "/admin/o-level-applications", "/admin/parents", "/admin/teachers", "/admin/quiz"];
+    const FOUNDER_ONLY_PREFIXES = ["/admin/access", "/admin/o-level-access", "/admin/o-level-applications", "/admin/parents", "/admin/o-level-parents", "/admin/teachers", "/admin/quiz"];
     if (session.role === "teacher" && FOUNDER_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin";
