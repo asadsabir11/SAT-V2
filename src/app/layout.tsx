@@ -7,6 +7,7 @@ import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
 import { ChunkErrorRecovery } from "@/components/ChunkErrorRecovery";
 
 const GA_ID    = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const ADS_ID   = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -38,14 +39,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <Header /><main>{children}</main><Footer />
       <WhatsAppFloatingButton />
       <ChunkErrorRecovery />
-      {GA_ID && (
+      {(GA_ID || ADS_ID) && (
         <>
-          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID ?? ADS_ID}`} strategy="afterInteractive" />
           <Script id="ga4-init" strategy="afterInteractive">{`
             window.dataLayer=window.dataLayer||[];
             function gtag(){dataLayer.push(arguments);}
             gtag('js',new Date());
-            gtag('config','${GA_ID}');
+            ${GA_ID ? `gtag('config','${GA_ID}');` : ""}
+            ${ADS_ID ? `gtag('config','${ADS_ID}');` : ""}
           `}</Script>
         </>
       )}
