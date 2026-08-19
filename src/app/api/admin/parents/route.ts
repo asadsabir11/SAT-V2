@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "studentId, parentEmail and parentName are required" }, { status: 400 });
   }
 
-  const studentRows = await sql`SELECT name, program FROM users WHERE id = ${studentId} AND role = 'student'`;
-  const student = studentRows[0] as { name: string; program: "sat" | "o-level" } | undefined;
+  const studentRows = await sql`SELECT name, email, program FROM users WHERE id = ${studentId} AND role = 'student'`;
+  const student = studentRows[0] as { name: string; email: string; program: "sat" | "o-level" } | undefined;
   if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
 
   // Find or create the parent user — scoped to the STUDENT's program, same
@@ -74,7 +74,10 @@ export async function POST(req: NextRequest) {
   if (isNewParent) {
     const token = await createResetToken(parentEmail);
     const setupUrl = `https://academy.thedigitaltutor.net/reset-password?token=${token}&role=parent`;
-    sendParentAccountWelcome({ email: parentEmail, name: parentName, studentName: student.name, setupUrl }).catch(console.error);
+    sendParentAccountWelcome({
+      email: parentEmail, name: parentName, studentName: student.name,
+      studentEmail: student.email, program: student.program, setupUrl,
+    }).catch(console.error);
   }
 
   return NextResponse.json({ ok: true, parentId: parent.id, emailed: isNewParent });
