@@ -39,8 +39,17 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Login failed. Please try again."); return; }
+      const defaultLanding = (data.role === "founder" || data.role === "teacher") ? "/admin" : data.role === "parent" ? "/parent" : "/dashboard";
+      // Only honor ?next= if it was set for the role that actually just
+      // signed in. Middleware stamps next= together with a role= hint when
+      // it bounces someone to /login (e.g. next=/dashboard&role=student) —
+      // if the user then switches tabs and signs in as a different role
+      // (e.g. Parent), blindly following that stale next= sends them
+      // straight into a page middleware immediately bounces them out of
+      // again, which looks exactly like "login did nothing."
+      const nextRoleMatches = params.get("role") === data.role;
       // Full page reload so the Header re-fetches the session cookie
-      window.location.href = nextPath ?? ((data.role === "founder" || data.role === "teacher") ? "/admin" : data.role === "parent" ? "/parent" : "/dashboard");
+      window.location.href = (nextPath && nextRoleMatches) ? nextPath : defaultLanding;
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

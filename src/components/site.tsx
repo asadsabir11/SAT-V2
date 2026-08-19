@@ -32,7 +32,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   }
 
   const first = user.name.split(" ")[0];
-  const href = user.role === "founder" ? "/admin" : "/dashboard";
+  const href = (user.role === "founder" || user.role === "teacher") ? "/admin" : user.role === "parent" ? "/parent" : "/dashboard";
   return (
     <div style={{display:"inline-flex",alignItems:"center",gap:6}}>
       <Link href={href} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,background:"#eaf1ff",color:"#1551c7",fontWeight:800,fontSize:".82rem",border:"1.5px solid #d0e0ff",whiteSpace:"nowrap",textDecoration:"none"}}>
@@ -57,8 +57,12 @@ export function Header() {
   // A signed-in student only needs a nav link into the program they're NOT
   // currently in — their own program is already where they are (dashboard,
   // header badge, etc). Unknown program (older session, or non-student
-  // roles) shows both, same as signed-out visitors.
-  const navItems = user?.role === "student" && user.program
+  // roles) shows both, same as signed-out visitors. A signed-in parent
+  // doesn't need either marketing page at all — they're here for their
+  // child's reports, not to browse cohorts — so only "For Parents" stays.
+  const navItems = user?.role === "parent"
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
+    : user?.role === "student" && user.program
     ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
     : PUBLIC_NAV;
   return (
