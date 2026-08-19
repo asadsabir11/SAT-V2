@@ -13,7 +13,6 @@ export default function AdminTeachers() {
 
   const [name, setName]         = useState("");
   const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
 
   useEffect(() => { load(); }, []);
 
@@ -24,17 +23,17 @@ export default function AdminTeachers() {
   }
 
   async function createTeacher() {
-    if (!name || !email || !password) { setError("All fields required."); return; }
+    if (!name || !email) { setError("All fields required."); return; }
     setSaving(true); setError(""); setSuccess("");
     const r = await fetch("/api/admin/teachers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email }),
     });
     const d = await r.json();
     if (!r.ok) { setError(d.error ?? "Failed"); setSaving(false); return; }
-    setSuccess("Teacher account created.");
-    setName(""); setEmail(""); setPassword("");
+    setSuccess("Teacher account created — they've been emailed a link to set their password.");
+    setName(""); setEmail("");
     await load();
     setSaving(false);
   }
@@ -66,11 +65,10 @@ export default function AdminTeachers() {
             <label>Email *</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="teacher@gmail.com" />
           </div>
-          <div className="field">
-            <label>Temporary password *</label>
-            <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 8 chars, include a number — share this with them" />
-          </div>
         </div>
+        <p style={{ color: "#a0aec0", fontSize: ".8rem", margin: "-6px 0 14px" }}>
+          They&apos;ll be emailed a link to set their own password — no need to share one manually.
+        </p>
         {error   && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".85rem", marginBottom: 10 }}>⚠ {error}</p>}
         {success && <p style={{ color: "#15803d", fontWeight: 600, fontSize: ".85rem", marginBottom: 10 }}>✓ {success}</p>}
         <button className="btn btn-primary" onClick={createTeacher} disabled={saving} style={{ padding: "10px 24px" }}>

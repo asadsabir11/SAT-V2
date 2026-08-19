@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { getSession } from "@/lib/auth";
 import { createUser, findUserByEmail } from "@/lib/users";
+import { createResetToken } from "@/lib/passwordReset";
+import { sendTeacherAccountWelcome } from "@/lib/email";
 import { sql } from "@/lib/db";
-import { isValidEmail, passwordStrengthError } from "@/lib/validators";
+import { isValidEmail } from "@/lib/validators";
 
 export async function GET() {
   const session = await getSession();
@@ -19,16 +22,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { name, email, password } = await req.json();
-  if (!name?.trim() || !email?.trim() || !password) {
-    return NextResponse.json({ error: "Name, email, and password are required" }, { status: 400 });
+  const { name, email } = await req.json();
+  if (!name?.trim() || !email?.trim()) {
+    return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
   }
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
-  }
-  const pwError = passwordStrengthError(password);
-  if (pwError) {
-    return NextResponse.json({ error: `Password: ${pwError}` }, { status: 400 });
   }
 
   const existing = await findUserByEmail(email.trim());
@@ -36,8 +35,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
   }
 
-  await createUser(email.trim(), password, "teacher", name.trim());
+  // Throwaway password — never shared with anyone. The teacher sets their
+  // real one via the emailed reset link, matching how parent accounts work.
+  const throwawayPassword = crypto.randomBytes(24).toString("hex");
+  await createUser(email.trim(), throwawayPassword, "teacher", name.trim());
   const teacher = await findUserByEmail(email.trim());
+
+  const token = await createResetToken(email.trim());
+  const setupUrl = `https://academy.thedigitaltutor.net/reset-password?token=${token}&role=teacher`;
+  sendTeacherAccountWelcome({ email: email.trim(), name: name.trim(), setupUrl }).catch(console.error);
+
   return NextResponse.json({ teacher });
 }
 
