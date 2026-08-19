@@ -41,8 +41,8 @@ export default function Home() {
               for SAT® applicants and Cambridge O Level / IGCSE students who need more than free self-study.
             </p>
             <div className="actions">
-              <CTAButton href="#sat-prep">Explore SAT Prep →</CTAButton>
-              <CTAButton href="/o-level" secondary>Explore O Level →</CTAButton>
+              <CTAButton href="/register">Register for SAT →</CTAButton>
+              <CTAButton href="/o-level#apply" secondary>Register for O Level →</CTAButton>
             </div>
             <div className="trust-strip">
               <span className="trust-item">Free SAT diagnostic — included after sign-up</span>
