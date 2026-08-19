@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   }
 
   const collection = program === "sat" ? "leads-student.json" : "leads-o-level.json";
-  const leads = await findAllByFieldCI<{ studentEmail?: string }>(collection, "parentEmail", parentEmail);
+  const leads = await findAllByFieldCI<{ studentEmail?: string; parentName?: string }>(collection, "parentEmail", parentEmail);
 
   const seen = new Set<string>();
   const students = [];
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     if (!studentEmail || seen.has(studentEmail)) continue;
     seen.add(studentEmail);
     const student = await findUserByEmailAndProgram(studentEmail, program);
-    if (student) students.push({ id: student.id, name: student.name, email: student.email });
+    if (student) students.push({ id: student.id, name: student.name, email: student.email, parentName: lead.parentName ?? "" });
   }
 
   return NextResponse.json({ students });

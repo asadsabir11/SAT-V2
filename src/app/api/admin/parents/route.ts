@@ -5,8 +5,10 @@ import { createUser, findUserByEmailAndProgram } from "@/lib/users";
 import { linkParentToStudent, listParentLinks, deleteParentLink } from "@/lib/parent-system";
 import { createResetToken } from "@/lib/passwordReset";
 import { sendParentAccountWelcome } from "@/lib/email";
+import { findAllByFieldCI } from "@/lib/storage";
 import { sql } from "@/lib/db";
 
+const LEADS_COLLECTION: Record<string, string> = { sat: "leads-student.json", "o-level": "leads-o-level.json" };
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -22,7 +24,15 @@ export async function GET(req: NextRequest) {
   ]);
 
   const links = program ? allLinks.filter((l) => l.student_program === program) : allLinks;
-  const students = program ? allStudents.filter((s) => s.program === program) : allStudents;
+  const studentRows = program ? allStudents.filter((s) => s.program === program) : allStudents;
+
+  // Pre-fill parent name/email from the student's own registration form,
+  // same lead record their parent email search already draws from.
+  const students = await Promise.all(studentRows.map(async (s) => {
+    const collection = LEADS_COLLECTION[s.program as string];
+    const leads = collection ? await findAllByFieldCI<{ parentName?: string; parentEmail?: string }>(collection, "studentEmail", s.email as string) : [];
+    return { ...s, parentName: leads[0]?.parentName ?? "", parentEmail: leads[0]?.parentEmail ?? "" };
+  }));
 
   return NextResponse.json({ links, students });
 }

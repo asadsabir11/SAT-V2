@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Link_ { id: string; parent_id: string; parent_name: string; parent_email: string; student_id: string; student_name: string; student_email: string; created_at: string; }
-interface Student { id: string; name: string; email: string; }
+interface Student { id: string; name: string; email: string; parentName?: string; parentEmail?: string; }
 
 export function AdminParentsPanel({ program, title, description }: { program: "sat" | "o-level"; title: string; description: string }) {
   const [links, setLinks]       = useState<Link_[]>([]);
@@ -45,6 +45,15 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
   function selectFoundStudent(s: Student) {
     setStudentId(s.id);
     setParentEmail(searchEmail.trim());
+    setParentName(s.parentName ?? "");
+    setSuccess(""); setError("");
+  }
+
+  function selectStudentFromDropdown(id: string) {
+    setStudentId(id);
+    const s = students.find(x => x.id === id);
+    setParentName(s?.parentName ?? "");
+    setParentEmail(s?.parentEmail ?? "");
     setSuccess(""); setError("");
   }
 
@@ -143,7 +152,7 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
         <div className="form-grid" style={{ marginBottom: 14 }}>
           <div className="field">
             <label>Student * <span style={{ color: "#6b7c93", fontWeight: 400 }}>(or use the search above)</span></label>
-            <select value={studentId} onChange={e => setStudentId(e.target.value)}>
+            <select value={studentId} onChange={e => selectStudentFromDropdown(e.target.value)}>
               <option value="">— Select student —</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}
             </select>
