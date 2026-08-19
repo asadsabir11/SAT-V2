@@ -55,10 +55,29 @@ export default function ParentPortal() {
   const [oLevelSubjects, setOLevelSubjects] = useState<OLevelSubjectPerf[]>([]);
   const [oLevelAttempts, setOLevelAttempts] = useState<OLevelAttempt[]>([]);
 
+  const [retryKey, setRetryKey] = useState(0);
+  const [timedOut, setTimedOut] = useState(false);
+
   useEffect(() => {
-    Promise.all([
-      fetch("/api/parent/me").then(r => r.json()),
-      fetch("/api/parent/skills").then(r => r.json()).catch(() => ({ skills: [] })),
+    setLoading(true);
+    setError("");
+    setTimedOut(false);
+
+    // Without a timeout, a stalled connection (rather than a clean fetch
+    // failure) leaves this on "Loading your report…" forever — .finally()
+    // never runs because the fetch promise never settles either way.
+    const FETCH_TIMEOUT_MS = 15_000;
+    let timedOutFlag = false;
+    const timeout = new Promise<never>((_, reject) => {
+      setTimeout(() => { timedOutFlag = true; reject(new Error("timeout")); }, FETCH_TIMEOUT_MS);
+    });
+
+    Promise.race([
+      Promise.all([
+        fetch("/api/parent/me").then(r => r.json()),
+        fetch("/api/parent/skills").then(r => r.json()).catch(() => ({ skills: [] })),
+      ]),
+      timeout,
     ]).then(([d, s]) => {
       if (d.error) { setError(d.error); return; }
       setStudent(d.student);
@@ -70,9 +89,15 @@ export default function ParentPortal() {
       setScoreHistory(d.scoreHistory ?? []);
       setOLevelSubjects(d.subjects ?? []);
       setOLevelAttempts(d.recentAttempts ?? []);
-    }).catch(() => setError("Failed to load data."))
-      .finally(() => setLoading(false));
-  }, []);
+    }).catch(() => {
+      if (timedOutFlag) {
+        setTimedOut(true);
+        setError("This is taking longer than expected. Check your connection and try again.");
+      } else {
+        setError("Failed to load data.");
+      }
+    }).finally(() => setLoading(false));
+  }, [retryKey]);
 
   const isOLevel = student?.program === "o-level";
 
@@ -85,9 +110,14 @@ export default function ParentPortal() {
   if (error) return (
     <section className="section"><div className="container">
       <div className="card" style={{ maxWidth: 480, textAlign: "center", padding: "40px 32px" }}>
-        <div style={{ fontSize: "2.5rem", marginBottom: 14 }}>🔒</div>
-        <h2 style={{ color: "#071b33", marginBottom: 10 }}>No student linked yet</h2>
-        <p style={{ color: "#6b7c93", lineHeight: 1.7 }}>{error}</p>
+        <div style={{ fontSize: "2.5rem", marginBottom: 14 }}>{timedOut ? "⚠️" : "🔒"}</div>
+        <h2 style={{ color: "#071b33", marginBottom: 10 }}>{timedOut ? "Couldn't load your report" : "No student linked yet"}</h2>
+        <p style={{ color: "#6b7c93", lineHeight: 1.7, marginBottom: timedOut ? 20 : 0 }}>{error}</p>
+        {timedOut && (
+          <button onClick={() => setRetryKey(k => k + 1)} className="btn btn-primary" style={{ minWidth: 160 }}>
+            Try again
+          </button>
+        )}
       </div>
     </div></section>
   );
