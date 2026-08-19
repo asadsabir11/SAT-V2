@@ -201,7 +201,7 @@ function LoginForm() {
         {role === "student" && (
           <p style={{ textAlign: "center", marginTop: 20, fontSize: ".85rem", color: "#6b7c93" }}>
             Don&apos;t have an account?{" "}
-            <Link href="/register" style={{ color: "#155eef", fontWeight: 700, textDecoration: "none" }}>
+            <Link href="/" style={{ color: "#155eef", fontWeight: 700, textDecoration: "none" }}>
               Register now →
             </Link>
           </p>
