@@ -64,7 +64,6 @@ export default function Admin() {
         ["Total registrations", m.totalLeads, "All student leads"],
         ["Free signups", m.freeSignups, "Top of funnel"],
         ["Core Plan students", m.paidFounderCohortStudents, "Goal: 20+"],
-        ["Webinar registrations", m.parentWebinarRegistrations, "Goal: 30+"],
         ["Contact messages", m.contactMessages, "Inbound inquiries"],
         ["Diagnostics taken", m.diagnosticCompletions, "Lead activation"],
         ["Diagnostic rate", `${m.diagnosticCompletionRate}%`, "Completions / registrations"],
@@ -218,38 +217,6 @@ export default function Admin() {
                   </div>
                 )}
               </div>
-
-              {(data?.webinar.length ?? 0) > 0 && (
-                <div className="card" style={{ marginTop: 24 }}>
-                  <div className="eyebrow">Parent webinar</div>
-                  <h2 style={{ color: "#071b33" }}>Webinar registrations</h2>
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Parent name</th>
-                          <th>Country</th>
-                          <th>Email</th>
-                          <th>Main concern</th>
-                          <th>Registered</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data?.webinar.map((w, i) => (
-                          <tr key={i}>
-                            <td>{w.parentName}</td>
-                            <td>{w.country}</td>
-                            <td>{w.email}</td>
-                            <td>{w.mainConcern?.slice(0, 60)}{(w.mainConcern?.length ?? 0) > 60 ? "…" : ""}</td>
-                            <td>{new Date(w.createdAt).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
 
               {(data?.oLevelLeads.length ?? 0) > 0 && (
                 <div className="card" style={{ marginTop: 24 }}>
