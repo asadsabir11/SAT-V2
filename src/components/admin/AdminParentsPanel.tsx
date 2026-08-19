@@ -24,6 +24,8 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
   const [searchResults, setSearchResults] = useState<Student[] | null>(null);
   const [searchError, setSearchError]     = useState("");
 
+  const [deletingAll, setDeletingAll] = useState(false);
+
   useEffect(() => { load(); }, []);
 
   async function searchByParentEmail() {
@@ -95,6 +97,23 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
     if (!confirm("Remove this parent link?")) return;
     await fetch("/api/admin/parents", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     setLinks(l => l.filter(x => x.id !== id));
+  }
+
+  async function deleteAllParents() {
+    const typed = window.prompt(
+      "This permanently deletes EVERY parent account across BOTH SAT and O-Level, and unlinks them from every student. This cannot be undone.\n\nType DELETE to confirm:"
+    );
+    if (typed !== "DELETE") return;
+    setDeletingAll(true);
+    try {
+      const r = await fetch("/api/admin/parents/delete-all", { method: "POST" });
+      const d = await r.json();
+      if (!r.ok) { alert(d.error ?? "Failed to delete parent accounts."); return; }
+      alert(`Deleted ${d.deletedParents} parent account(s).`);
+      await load();
+    } finally {
+      setDeletingAll(false);
+    }
   }
 
   return (
@@ -245,6 +264,25 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
           ))}
         </div>
       )}
+
+      {/* Danger zone — global, not scoped to this program, since it wipes
+          every parent account in the database regardless of which page it's
+          triggered from. Requires typing DELETE, not just a confirm() click,
+          given how broad and irreversible this specific action is. */}
+      <div className="card" style={{ marginTop: 40, background: "#fef2f2", border: "1.5px solid #fecaca" }}>
+        <h3 style={{ margin: "0 0 4px", color: "#991b1b", fontSize: ".95rem" }}>⚠ Danger zone</h3>
+        <p style={{ color: "#7f1d1d", fontSize: ".82rem", margin: "0 0 14px" }}>
+          Permanently deletes every parent account and every parent-student link, across both SAT and O-Level. Does
+          not touch students, teachers, or founder accounts. This cannot be undone.
+        </p>
+        <button
+          onClick={deleteAllParents}
+          disabled={deletingAll}
+          style={{ padding: "9px 18px", borderRadius: 8, background: "#dc2626", border: "none", color: "#fff", fontWeight: 700, fontSize: ".82rem", cursor: "pointer" }}
+        >
+          {deletingAll ? "Deleting…" : "Delete ALL parent accounts →"}
+        </button>
+      </div>
     </div></section>
   );
 }
