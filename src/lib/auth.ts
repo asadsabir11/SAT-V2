@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { sql } from "@/lib/db";
 
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET ?? "dev-fallback-secret-change-in-production"
@@ -42,5 +43,15 @@ export async function getSession(): Promise<SessionUser | null> {
   const store = await cookies();
   const token = store.get(AUTH_COOKIE)?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const user = await verifyToken(token);
+  if (!user) return null;
+
+  // Staff sessions carry admin-dashboard power — re-check against the DB so a
+  // deleted teacher/founder account stops working on their very next request
+  // instead of staying valid until the JWT naturally expires (up to 24h).
+  if (user.role === "founder" || user.role === "teacher") {
+    const rows = await sql`SELECT id FROM users WHERE id = ${user.id} AND role = ${user.role}`;
+    if (rows.length === 0) return null;
+  }
+  return user;
 }

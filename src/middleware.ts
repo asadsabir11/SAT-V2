@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
+import { sql } from "@/lib/db";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -8,12 +9,21 @@ export async function middleware(request: NextRequest) {
 
   // /admin — founder or teacher (a handful of sub-pages are founder-only, see below)
   if (pathname.startsWith("/admin")) {
-    if (!session || (session.role !== "founder" && session.role !== "teacher")) {
+    // Staff accounts can be deleted from the admin panel while the person is
+    // still signed in elsewhere — re-check they still exist so a deleted
+    // teacher/founder gets bounced to login on their very next navigation
+    // instead of staying "logged in" until the JWT expires.
+    const stillExists = session && (session.role === "founder" || session.role === "teacher")
+      ? (await sql`SELECT id FROM users WHERE id = ${session.id} AND role = ${session.role}`).length > 0
+      : false;
+    if (!session || (session.role !== "founder" && session.role !== "teacher") || !stillExists) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("role", "founder");
       url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      if (session) res.cookies.delete("sat_auth");
+      return res;
     }
     // Founder-only areas: access/payment gatekeeping, parent accounts, teacher
     // accounts, and diagnostic quiz management — teachers get everything else.
