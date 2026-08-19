@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { deleteByField } from "@/lib/storage";
+import { deleteParentsForStudent } from "@/lib/parent-system";
 import { sql } from "@/lib/db";
 
 type Params = { params: Promise<{ email: string }> };
@@ -12,6 +13,11 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   }
   const { email } = await params;
   const decoded = decodeURIComponent(email).toLowerCase().trim();
+
+  const studentRows = await sql`SELECT id FROM users WHERE email = ${decoded} AND role = 'student' AND program = 'o-level'`;
+  for (const row of studentRows as { id: string }[]) {
+    await deleteParentsForStudent(row.id);
+  }
 
   await Promise.all([
     deleteByField("leads-o-level.json", "studentEmail", decoded),

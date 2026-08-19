@@ -131,6 +131,23 @@ export async function deleteParentLink(id: string) {
   await sql`DELETE FROM parent_student_links WHERE id = ${id}`;
 }
 
+// Called when a student account is deleted. Removes every link pointing at
+// that student, then deletes each linked parent account too — but only if
+// that parent has no OTHER linked student left (e.g. a sibling in the same
+// program): a parent covering two children shouldn't lose their account
+// just because one of those children was removed.
+export async function deleteParentsForStudent(studentId: string): Promise<void> {
+  await ensureParentTables();
+  const links = await sql`SELECT id, parent_user_id FROM parent_student_links WHERE student_id = ${studentId}`;
+  for (const link of links as { id: string; parent_user_id: string }[]) {
+    await sql`DELETE FROM parent_student_links WHERE id = ${link.id}`;
+    const remaining = await sql`SELECT 1 FROM parent_student_links WHERE parent_user_id = ${link.parent_user_id} LIMIT 1`;
+    if (remaining.length === 0) {
+      await sql`DELETE FROM users WHERE id = ${link.parent_user_id} AND role = 'parent'`;
+    }
+  }
+}
+
 // ─── Assignments & Homework ───────────────────────────────────────────────────
 
 export async function createAssignment(weekNo: number, title: string, dueAt?: string) {
