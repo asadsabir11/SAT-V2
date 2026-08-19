@@ -17,6 +17,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       onBeforeGenerateToken: async () => ({
         allowedContentTypes: ["application/pdf"],
         maximumSizeInBytes: 50 * 1024 * 1024, // 50 MB
+        addRandomSuffix: true, // two papers can share a filename (e.g. "paper.pdf")
       }),
       onUploadCompleted: async () => {},
     });

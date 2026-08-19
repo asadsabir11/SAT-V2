@@ -20,6 +20,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           "image/jpeg", "image/png", "image/webp", "image/gif",
         ],
         maximumSizeInBytes: 1024 * 1024 * 1024, // 1 GB
+        addRandomSuffix: true, // two lectures can share a filename (e.g. "video.mp4")
       }),
       onUploadCompleted: async () => {},
     });

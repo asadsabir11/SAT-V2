@@ -15,6 +15,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       onBeforeGenerateToken: async () => ({
         allowedContentTypes: ["image/jpeg", "image/png", "application/pdf"],
         maximumSizeInBytes: 10 * 1024 * 1024, // 10 MB
+        addRandomSuffix: true, // payment screenshots very often share a filename (e.g. "IMG_1234.jpg")
       }),
       onUploadCompleted: async () => {},
     });
