@@ -234,12 +234,15 @@ export async function upsertAttendance(studentId: string, sessionId: string, sta
 
 export async function getAttendanceForSession(sessionId: string) {
   await ensureParentTables();
+  // Only students in the same program as the session — otherwise an
+  // O-Level class would list SAT students (and vice versa) as attendees.
   const rows = await sql`
     SELECT u.id AS student_id, u.name AS student_name,
            COALESCE(sa.status, 'absent') AS status
     FROM users u
+    JOIN live_sessions ls ON ls.id = ${sessionId}
     LEFT JOIN session_attendance sa ON sa.student_id = u.id AND sa.session_id = ${sessionId}
-    WHERE u.role = 'student'
+    WHERE u.role = 'student' AND u.program = ls.program
     ORDER BY u.name
   `;
   return rows;

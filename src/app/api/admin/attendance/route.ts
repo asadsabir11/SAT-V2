@@ -32,10 +32,14 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-// List all live sessions for the selector
-export async function OPTIONS() {
+// List live sessions for the selector, optionally scoped to one program
+export async function OPTIONS(req: NextRequest) {
   const session = await getSession();
   if (!session || session.role !== "founder" && session.role !== "teacher") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const sessions = await sql`SELECT id, title, scheduled_at FROM live_sessions ORDER BY scheduled_at DESC LIMIT 50`;
+
+  const program = new URL(req.url).searchParams.get("program");
+  const sessions = program
+    ? await sql`SELECT id, title, scheduled_at FROM live_sessions WHERE program = ${program} ORDER BY scheduled_at DESC LIMIT 50`
+    : await sql`SELECT id, title, scheduled_at FROM live_sessions ORDER BY scheduled_at DESC LIMIT 50`;
   return NextResponse.json({ sessions });
 }
