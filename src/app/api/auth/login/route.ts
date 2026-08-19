@@ -33,13 +33,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Students, founders, parents, and teachers are all stored in the users
-    // table. A student can now have two rows sharing an email (one SAT, one
-    // O-Level) — narrow to the requested program if it's given and actually
-    // matches one of the accounts, otherwise fall back to checking all of
-    // them so a single-account student is unaffected either way.
+    // table. A student or parent can now have two rows sharing an email (one
+    // SAT, one O-Level) — only enforce the program selection when there's
+    // real ambiguity to resolve (more than one account for this email+role).
+    // A single-account person who left the tab on the wrong program still
+    // logs in fine, since there's only one thing they could have meant.
+    // With two accounts, the selection is NOT optional: silently falling
+    // back to "any account, any program" here would let someone requesting
+    // a SAT login that doesn't exist get quietly authenticated into their
+    // O-Level account instead just because the password happened to match
+    // — wrong data, no indication anything was off.
     const candidates = await findUsersByEmailAndRole(email, role);
-    const scoped = program ? candidates.filter((c) => c.program === program) : [];
-    const pool = scoped.length > 0 ? scoped : candidates;
+    const pool = candidates.length > 1 && program ? candidates.filter((c) => c.program === program) : candidates;
 
     let user: (typeof candidates)[number] | null = null;
     for (const candidate of pool) {
