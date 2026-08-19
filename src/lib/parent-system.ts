@@ -110,6 +110,22 @@ export async function listParentLinks() {
   return rows;
 }
 
+// Parent accounts that exist but were never linked to a student — invisible
+// in listParentLinks() since that only reads parent_student_links, so a
+// parent created without finishing the link step (or one whose link got
+// removed) would otherwise disappear from the admin view entirely.
+export async function listUnlinkedParents(program: "sat" | "o-level") {
+  await ensureParentTables();
+  const rows = await sql`
+    SELECT u.id, u.name, u.email, u.created_at
+    FROM users u
+    WHERE u.role = 'parent' AND u.program = ${program}
+      AND NOT EXISTS (SELECT 1 FROM parent_student_links psl WHERE psl.parent_user_id = u.id)
+    ORDER BY u.created_at DESC
+  `;
+  return rows;
+}
+
 export async function deleteParentLink(id: string) {
   await ensureParentTables();
   await sql`DELETE FROM parent_student_links WHERE id = ${id}`;

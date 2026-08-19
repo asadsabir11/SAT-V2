@@ -4,10 +4,12 @@ import Link from "next/link";
 
 interface Link_ { id: string; parent_id: string; parent_name: string; parent_email: string; student_id: string; student_name: string; student_email: string; created_at: string; }
 interface Student { id: string; name: string; email: string; parentName?: string; parentEmail?: string; }
+interface UnlinkedParent { id: string; name: string; email: string; created_at: string; }
 
 export function AdminParentsPanel({ program, title, description }: { program: "sat" | "o-level"; title: string; description: string }) {
   const [links, setLinks]       = useState<Link_[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const [unlinkedParents, setUnlinkedParents] = useState<UnlinkedParent[]>([]);
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState("");
@@ -61,7 +63,15 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
     const d = await fetch(`/api/admin/parents?program=${program}`).then(r => r.json());
     setLinks(d.links ?? []);
     setStudents(d.students ?? []);
+    setUnlinkedParents(d.unlinkedParents ?? []);
     setLoading(false);
+  }
+
+  function linkExistingParent(p: UnlinkedParent) {
+    setParentName(p.name);
+    setParentEmail(p.email);
+    setStudentId("");
+    setSuccess(""); setError("");
   }
 
   async function createLink() {
@@ -176,6 +186,34 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
           {saving ? "Creating…" : "Create parent account →"}
         </button>
       </div>
+
+      {/* Unlinked parent accounts — created but never linked to a student, so
+          they'd otherwise be invisible below (that list only shows links). */}
+      {!loading && unlinkedParents.length > 0 && (
+        <div className="card" style={{ marginBottom: 28, background: "#fffbeb", border: "1.5px solid #fde68a" }}>
+          <h3 style={{ margin: "0 0 4px", color: "#92400e", fontSize: "1rem" }}>⚠ Unlinked parent accounts</h3>
+          <p style={{ color: "#78350f", fontSize: ".82rem", margin: "0 0 14px" }}>
+            These accounts exist but aren&apos;t linked to any student yet — they can sign in, but the portal will
+            say &quot;no student linked.&quot;
+          </p>
+          <div style={{ display: "grid", gap: 8 }}>
+            {unlinkedParents.map(p => (
+              <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, padding: "10px 14px", borderRadius: 9, background: "#fff", border: "1.5px solid #fde68a" }}>
+                <div>
+                  <div style={{ fontWeight: 800, color: "#071b33" }}>{p.name}</div>
+                  <div style={{ fontSize: ".82rem", color: "#6b7c93" }}>{p.email}</div>
+                </div>
+                <button
+                  onClick={() => linkExistingParent(p)}
+                  style={{ padding: "6px 14px", borderRadius: 8, background: "#fef3c7", border: "none", color: "#92400e", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}
+                >
+                  Link to a student →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Existing links */}
       {loading ? <p>Loading…</p> : links.length === 0 ? (

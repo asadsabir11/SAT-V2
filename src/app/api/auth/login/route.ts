@@ -6,6 +6,8 @@ const attempts = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 10;
 
+const programLabel = (p: string) => (p === "o-level" ? "O Level" : "SAT");
+
 function getRateLimit(ip: string): { blocked: boolean } {
   const now = Date.now();
   const entry = attempts.get(ip);
@@ -34,26 +36,35 @@ export async function POST(request: NextRequest) {
 
     // Students, founders, parents, and teachers are all stored in the users
     // table. A student or parent can now have two rows sharing an email (one
-    // SAT, one O-Level) — only enforce the program selection when there's
-    // real ambiguity to resolve (more than one account for this email+role).
-    // A single-account person who left the tab on the wrong program still
-    // logs in fine, since there's only one thing they could have meant.
-    // With two accounts, the selection is NOT optional: silently falling
-    // back to "any account, any program" here would let someone requesting
-    // a SAT login that doesn't exist get quietly authenticated into their
-    // O-Level account instead just because the password happened to match
-    // — wrong data, no indication anything was off.
+    // SAT, one O-Level) — the requested program is always respected, never
+    // silently swapped for whichever account actually exists. Two accounts
+    // must not fall back to "any program" here: requesting a SAT login that
+    // doesn't exist must never quietly authenticate into the O-Level account
+    // instead just because the password happens to match.
     const candidates = await findUsersByEmailAndRole(email, role);
-    const pool = candidates.length > 1 && program ? candidates.filter((c) => c.program === program) : candidates;
+    const wanted = program ? candidates.filter((c) => c.program === program) : candidates;
+    const others = program ? candidates.filter((c) => c.program !== program) : [];
 
     let user: (typeof candidates)[number] | null = null;
-    for (const candidate of pool) {
+    for (const candidate of wanted) {
       if (await verifyPassword(password, candidate.password_hash)) {
         user = candidate;
         break;
       }
     }
     if (!user) {
+      // The password might be correct, just for the OTHER program than the
+      // one selected — only say so to someone who has already proven they
+      // know a valid password for this email (a random guesser gets the
+      // same generic rejection either way, so this reveals nothing to them).
+      for (const candidate of others) {
+        if (await verifyPassword(password, candidate.password_hash)) {
+          return NextResponse.json(
+            { error: `No ${programLabel(program)} account exists for this email. Did you mean to sign in as ${programLabel(candidate.program)}?` },
+            { status: 401 }
+          );
+        }
+      }
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 

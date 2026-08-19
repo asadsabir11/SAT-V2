@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { getSession } from "@/lib/auth";
 import { createUser, findUserByEmailAndProgram } from "@/lib/users";
-import { linkParentToStudent, listParentLinks, deleteParentLink } from "@/lib/parent-system";
+import { linkParentToStudent, listParentLinks, listUnlinkedParents, deleteParentLink } from "@/lib/parent-system";
 import { createResetToken } from "@/lib/passwordReset";
 import { sendParentAccountWelcome } from "@/lib/email";
 import { findAllByFieldCI } from "@/lib/storage";
@@ -18,9 +18,10 @@ export async function GET(req: NextRequest) {
   // modules, each only wanting its own program's students and links.
   const program = new URL(req.url).searchParams.get("program");
 
-  const [allLinks, allStudents] = await Promise.all([
+  const [allLinks, allStudents, unlinkedParents] = await Promise.all([
     listParentLinks(),
     sql`SELECT id, name, email, program FROM users WHERE role = 'student' ORDER BY name`,
+    program === "sat" || program === "o-level" ? listUnlinkedParents(program) : Promise.resolve([]),
   ]);
 
   const links = program ? allLinks.filter((l) => l.student_program === program) : allLinks;
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
     return { ...s, parentName: leads[0]?.parentName ?? "", parentEmail: leads[0]?.parentEmail ?? "" };
   }));
 
-  return NextResponse.json({ links, students });
+  return NextResponse.json({ links, students, unlinkedParents });
 }
 
 export async function POST(req: NextRequest) {
