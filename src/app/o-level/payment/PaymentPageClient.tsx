@@ -24,7 +24,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   "pakistan-studies-waitlist": "Pakistan Studies (waiting list)",
 };
 
-const WA_URL = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL ?? "#";
+const WA_URL = process.env.NEXT_PUBLIC_OLEVEL_WHATSAPP_COMMUNITY_URL ?? "#";
 
 function PaymentMethodCard({ title, color, bg, children }: { title: string; color: string; bg: string; children: React.ReactNode }) {
   return (

@@ -4,6 +4,7 @@ import type { OLevelApplication } from "@/lib/olevelApplications";
 const ADMIN_EMAIL  = process.env.ADMIN_EMAIL ?? "";
 const ADMIN_EMAILS = ADMIN_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
 const WHATSAPP_URL = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL ?? "";
+const OLEVEL_WHATSAPP_URL = process.env.NEXT_PUBLIC_OLEVEL_WHATSAPP_COMMUNITY_URL ?? "";
 const APP_URL      = "https://academy.thedigitaltutor.net";
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -451,6 +452,14 @@ export async function sendOLevelRegistrationWelcome(student: { name: string; ema
   if (!apiKey) return;
   const resend = new Resend(apiKey);
 
+  const waSection = OLEVEL_WHATSAPP_URL
+    ? `<div style="margin:20px 0;padding:16px 20px;background:#dcfce7;border-radius:10px;">
+        <p style="margin:0 0 8px;font-weight:700;color:#166534;">Join our O Level WhatsApp community</p>
+        <p style="margin:0 0 12px;color:#166534;font-size:.88rem;">Get updates, ask questions, and connect with other O Level students.</p>
+        <a href="${OLEVEL_WHATSAPP_URL}" style="display:inline-block;padding:10px 20px;background:#25d366;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.88rem;">Join WhatsApp →</a>
+      </div>`
+    : "";
+
   await resend.emails.send({
     from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
     to: student.email,
@@ -496,6 +505,7 @@ export async function sendOLevelRegistrationWelcome(student: { name: string; ema
         <div style="margin-top:20px;">
           <a href="${APP_URL}/dashboard" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
         </div>
+        ${waSection}
         <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;line-height:1.6;">
           Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
           The Digital Tutor · academy.thedigitaltutor.net
