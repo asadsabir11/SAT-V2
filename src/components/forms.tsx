@@ -409,7 +409,7 @@ export function ContactForm() {
         <div className="field"><label>Name *</label><input name="name" required minLength={2} /></div>
         <div className="field"><label>Email *</label><input name="email" type="email" required /></div>
         <div className="field"><label>Country *</label><select name="country" required defaultValue=""><option value="" disabled>Select country</option>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select></div>
-        <div className="field"><label>I am a… *</label><select name="role" required defaultValue=""><option value="" disabled>Select role</option>{["Student","Parent","Teacher","School","NGO","Sponsor","Other"].map(r=><option key={r}>{r}</option>)}</select></div>
+        <div className="field"><label>I am a… *</label><select name="role" required defaultValue=""><option value="" disabled>Select role</option>{["Student","Parent","Teacher","Other"].map(r=><option key={r}>{r}</option>)}</select></div>
       </div>
       <div className="field"><label>Message *</label><textarea name="message" required minLength={10} placeholder="How can we help you?" /></div>
       <button className="btn btn-primary" disabled={status==="loading"}>{status==="loading"?"Sending…":"Send message"}</button>
