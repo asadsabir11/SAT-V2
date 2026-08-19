@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Footer, Header } from "@/components/site";
 import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
+import { ChunkErrorRecovery } from "@/components/ChunkErrorRecovery";
 
 const GA_ID    = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <body>
       <Header /><main>{children}</main><Footer />
       <WhatsAppFloatingButton />
+      <ChunkErrorRecovery />
       {GA_ID && (
         <>
           <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
