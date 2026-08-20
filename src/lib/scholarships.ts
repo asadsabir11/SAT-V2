@@ -1,41 +1,19 @@
 import { sql } from "@/lib/db";
 
-export type ScholarshipStatus =
-  | "new"
-  | "under_review"
-  | "shortlisted"
-  | "parent_interview"
-  | "approved_full"
-  | "approved_partial"
-  | "waitlisted"
-  | "not_selected"
-  | "active_scholar"
-  | "probation"
-  | "completed";
+// "new" is the default every application starts in, before the founder acts
+// on it — not a manually-chosen outcome, but still a real state so it needs
+// to be a valid value. The scholarship_percentage field (100/75/50) already
+// carries how much was approved, so "approved" doesn't need to be split.
+export type ScholarshipStatus = "new" | "approved" | "waitlisted" | "not_selected";
 
-export const SCHOLARSHIP_STATUSES: ScholarshipStatus[] = [
-  "new", "under_review", "shortlisted", "parent_interview",
-  "approved_full", "approved_partial", "waitlisted", "not_selected",
-  "active_scholar", "probation", "completed",
-];
+export const SCHOLARSHIP_STATUSES: ScholarshipStatus[] = ["new", "approved", "waitlisted", "not_selected"];
 
 export const SCHOLARSHIP_STATUS_LABELS: Record<ScholarshipStatus, string> = {
   new: "New",
-  under_review: "Under Review",
-  shortlisted: "Shortlisted",
-  parent_interview: "Parent Interview",
-  approved_full: "Approved — 100%",
-  approved_partial: "Approved — Partial",
+  approved: "Approved",
   waitlisted: "Waitlisted",
   not_selected: "Not Selected",
-  active_scholar: "Active Scholar",
-  probation: "Scholarship Probation",
-  completed: "Completed",
 };
-
-// Setting status to one of these (from a state where no account exists yet)
-// automatically creates the student's login — see the admin route.
-export const SCHOLARSHIP_ACCOUNT_CREATING_STATUSES: ScholarshipStatus[] = ["approved_full", "approved_partial"];
 
 export type IncomeRange =
   | "under_50k" | "50k_100k" | "100k_150k" | "150k_250k" | "above_250k" | "prefer_not_to_say";

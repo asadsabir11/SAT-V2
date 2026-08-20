@@ -29,38 +29,20 @@ interface Application {
   created_at: string;
 }
 
-const STATUS_OPTIONS = [
-  "new", "under_review", "shortlisted", "parent_interview",
-  "approved_full", "approved_partial", "waitlisted", "not_selected",
-  "active_scholar", "probation", "completed",
-] as const;
+const STATUS_OPTIONS = ["new", "approved", "waitlisted", "not_selected"] as const;
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
-  under_review: "Under Review",
-  shortlisted: "Shortlisted",
-  parent_interview: "Parent Interview",
-  approved_full: "Approved — 100%",
-  approved_partial: "Approved — Partial",
+  approved: "Approved",
   waitlisted: "Waitlisted",
   not_selected: "Not Selected",
-  active_scholar: "Active Scholar",
-  probation: "Scholarship Probation",
-  completed: "Completed",
 };
 
 const STATUS_META: Record<string, { bg: string; color: string }> = {
-  new:              { bg: "#eff6ff", color: "#155eef" },
-  under_review:     { bg: "#fffbeb", color: "#92400e" },
-  shortlisted:      { bg: "#f5f3ff", color: "#7c3aed" },
-  parent_interview: { bg: "#f5f3ff", color: "#7c3aed" },
-  approved_full:    { bg: "#f0fdf4", color: "#15803d" },
-  approved_partial: { bg: "#f0fdf4", color: "#15803d" },
-  waitlisted:       { bg: "#fef3c7", color: "#92400e" },
-  not_selected:     { bg: "#f3f4f6", color: "#6b7c93" },
-  active_scholar:   { bg: "#d1fae5", color: "#065f46" },
-  probation:        { bg: "#fee2e2", color: "#991b1b" },
-  completed:        { bg: "#f3f4f6", color: "#374151" },
+  new:          { bg: "#eff6ff", color: "#155eef" },
+  approved:     { bg: "#f0fdf4", color: "#15803d" },
+  waitlisted:   { bg: "#fef3c7", color: "#92400e" },
+  not_selected: { bg: "#f3f4f6", color: "#6b7c93" },
 };
 
 const INCOME_LABELS: Record<string, string> = {
@@ -293,7 +275,7 @@ export default function AdminScholarships() {
                                 </button>
                               </div>
 
-                              {!a.student_user_id && ["approved_full", "approved_partial", "active_scholar", "probation", "completed"].includes(a.status) && (
+                              {!a.student_user_id && a.status === "approved" && (
                                 <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap", background: "#f0fdf4", padding: "14px 16px", borderRadius: 10, border: "1.5px solid #86efac", marginTop: 12 }}>
                                   <div style={{ width: "100%", fontWeight: 800, color: "#15803d", fontSize: ".85rem", marginBottom: 2 }}>Create student account</div>
                                   <div className="field" style={{ minWidth: 200 }}>
