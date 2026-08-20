@@ -273,6 +273,18 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 7b — Opportunity Scholarship (kept small by design) */}
+      <section className="section" style={{ paddingTop: 40, paddingBottom: 40 }}>
+        <div className="container" style={{ maxWidth: 720, textAlign: "center" }}>
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Education Should Create Opportunity</div>
+          <p className="lead" style={{ margin: "0 auto" }}>
+            For every cohort, The Digital Tutor reserves places for deserving students who demonstrate financial
+            need and a commitment to learning.
+          </p>
+          <Link href="/scholarship" style={{ color: "#155eef", fontWeight: 700, textDecoration: "none" }}>Learn About Opportunity Scholarships →</Link>
+        </div>
+      </section>
+
       {/* 8 — Parent trust */}
       <section className="section">
         <div className="container">

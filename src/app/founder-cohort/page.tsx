@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CTAButton, FeatureCard, PageHero } from "@/components/site";
 import { getSession } from "@/lib/auth";
 import { getUserProgram } from "@/lib/users";
@@ -128,6 +129,10 @@ export default async function SatFoundingCohort() {
                   right regional group.
                 </p>
                 <CTAButton href="/register?plan=Core">Reserve Your SAT Founding Cohort Seat</CTAButton>
+                <p style={{ marginTop: 14, fontSize: ".85rem" }}>
+                  Need financial assistance?{" "}
+                  <Link href="/scholarship" style={{ color: "#5eead4", fontWeight: 700 }}>Apply for an Opportunity Scholarship →</Link>
+                </p>
               </>
             )}
           </div>

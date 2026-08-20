@@ -543,6 +543,38 @@ export async function sendOLevelRegistrationAdminAlert(student: { studentName: s
   });
 }
 
+export async function sendScholarshipApplicationAdminAlert(app: {
+  program: "sat" | "o-level"; studentName: string; age: string; city: string; grade: string;
+  parentName: string; parentEmail: string; parentWhatsapp: string; incomeRange: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || ADMIN_EMAILS.length === 0) return;
+  const resend = new Resend(apiKey);
+  const programLabel = app.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
+
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: ADMIN_EMAILS,
+    subject: `New scholarship application: ${app.studentName} (${programLabel})`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">New Opportunity Scholarship application 🎓</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:140px;">Program</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${programLabel}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.studentName} · Age ${app.age} · Grade ${app.grade}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">City</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.city}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Parent</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${app.parentName} · ${app.parentEmail} · ${app.parentWhatsapp}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Household income</td><td style="padding:10px 0;color:#071b33;">${app.incomeRange}</td></tr>
+        </table>
+        <p style="color:#6b7c93;font-size:.82rem;margin:14px 0 0;">Full application details, including the student's and parent's written answers, are in the admin panel.</p>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/admin/scholarships" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">Review in admin →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
 export async function sendOLevelUnlockPaymentSubmittedAck(opts: { email: string; name: string; subject: string }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;

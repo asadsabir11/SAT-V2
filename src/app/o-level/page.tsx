@@ -370,6 +370,10 @@ export default async function OLevelPage() {
           <div style={{ maxWidth: 900, margin: "40px auto 0" }}>
             <AcademyPricingTable />
           </div>
+          <p style={{ textAlign: "center", marginTop: 28, color: "#6b7c93", fontSize: ".92rem" }}>
+            Need financial assistance?{" "}
+            <Link href="/scholarship" style={{ color: "#155eef", fontWeight: 700 }}>Apply for an Opportunity Scholarship →</Link>
+          </p>
         </div>
       </section>
 

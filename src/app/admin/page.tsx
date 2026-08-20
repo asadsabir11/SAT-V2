@@ -139,6 +139,11 @@ export default function Admin() {
                 👨‍🏫 Teacher accounts →
               </Link>
             )}
+            {isFounder && (
+              <Link href="/admin/scholarships" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                🎓 Scholarship applications →
+              </Link>
+            )}
             <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
               ✅ SAT attendance →
             </Link>
