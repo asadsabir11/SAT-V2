@@ -5,6 +5,8 @@ import Link from "next/link";
 interface Application {
   id: string;
   program: "sat" | "o-level";
+  student_user_id: string;
+  student_email: string;
   student_name: string;
   age: string;
   city: string;
@@ -200,6 +202,7 @@ export default function AdminScholarships() {
                                 <div>
                                   <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Student</div>
                                   <div style={{ fontWeight: 700, color: "#071b33" }}>{a.student_name} · Age {a.age} · Grade {a.grade}</div>
+                                  <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>Account: {a.student_email}</div>
                                   <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>{a.school || "School not given"} · {a.city}</div>
                                   <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>Exam session: {a.exam_session}{a.subjects_required ? ` · Subjects: ${a.subjects_required}` : ""}</div>
                                 </div>
