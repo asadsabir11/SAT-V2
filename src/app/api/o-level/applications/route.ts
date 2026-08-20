@@ -18,12 +18,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    // Honeypot — bots tend to fill every field; humans never see this one.
-    // Pretend success so the bot doesn't learn to avoid it.
-    if (typeof body.hpcheck === "string" && body.hpcheck.trim()) {
-      return NextResponse.json({ id: crypto.randomUUID() });
-    }
-
     const allowed = await checkRateLimit(`o-level-application:${clientIp(req)}`, 5, 60);
     if (!allowed) {
       return NextResponse.json({ error: "Too many submissions. Please try again later or contact us on WhatsApp." }, { status: 429 });

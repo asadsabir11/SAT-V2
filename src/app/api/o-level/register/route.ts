@@ -18,11 +18,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    // Honeypot — bots tend to fill every field; humans never see this one.
-    if (typeof body.hpcheck === "string" && body.hpcheck.trim()) {
-      return NextResponse.json({ ok: true });
-    }
-
     const allowed = await checkRateLimit(`olevel-register:${clientIp(req)}`, 5, 60);
     if (!allowed) {
       return NextResponse.json({ error: "Too many attempts. Please try again later or contact us on WhatsApp." }, { status: 429 });
