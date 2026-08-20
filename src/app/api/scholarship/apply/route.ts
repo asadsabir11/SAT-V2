@@ -74,6 +74,8 @@ export async function POST(req: NextRequest) {
       parent_commitment_agreed: true,
     });
 
+    console.log(`Scholarship application saved: ${application.id} (${application.student_name}, ${application.program})`);
+
     sendScholarshipApplicationAdminAlert({
       program: application.program,
       studentName: application.student_name,
