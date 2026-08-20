@@ -32,6 +32,7 @@ export interface ScholarshipApplication {
   program: "sat" | "o-level";
   student_user_id: string | null;
   student_name: string;
+  student_email: string | null;
   age: string;
   city: string;
   school: string | null;
@@ -64,6 +65,7 @@ async function ensureTable() {
       program TEXT NOT NULL,
       student_user_id TEXT,
       student_name TEXT NOT NULL,
+      student_email TEXT,
       age TEXT NOT NULL,
       city TEXT NOT NULL,
       school TEXT,
@@ -88,18 +90,19 @@ async function ensureTable() {
     )
   `;
   // Applications are submitted with no account yet — student_user_id is only
-  // set once the founder approves and an account gets created. A short-lived
-  // earlier version of this table required it NOT NULL with a student_email
-  // column; both are cleaned up here since neither made sense once account
-  // creation moved to approval time instead of registration time.
+  // set once the founder approves and an account gets created.
   await sql`ALTER TABLE scholarship_applications ALTER COLUMN student_user_id DROP NOT NULL`;
-  await sql`ALTER TABLE scholarship_applications DROP COLUMN IF EXISTS student_email`;
+  // Optional — not every applicant has their own email (younger students may
+  // only have a parent's), but when given it's the better default for the
+  // account-creation email than the parent's, since the account is theirs.
+  await sql`ALTER TABLE scholarship_applications ADD COLUMN IF NOT EXISTS student_email TEXT`;
   tableReady = true;
 }
 
 export type NewScholarshipInput = {
   program: "sat" | "o-level";
   student_name: string;
+  student_email: string | null;
   age: string;
   city: string;
   school: string | null;
@@ -123,12 +126,12 @@ export async function createScholarshipApplication(input: NewScholarshipInput): 
   const id = crypto.randomUUID();
   const rows = await sql`
     INSERT INTO scholarship_applications (
-      id, program, student_name, age, city, school, grade, subjects_required, exam_session,
+      id, program, student_name, student_email, age, city, school, grade, subjects_required, exam_session,
       parent_name, parent_whatsapp, parent_email, parent_occupation,
       income_range, financial_explanation, motivation,
       agrees_attendance_work, agrees_assessments_support, parent_commitment_agreed
     ) VALUES (
-      ${id}, ${input.program}, ${input.student_name}, ${input.age}, ${input.city}, ${input.school}, ${input.grade}, ${input.subjects_required}, ${input.exam_session},
+      ${id}, ${input.program}, ${input.student_name}, ${input.student_email}, ${input.age}, ${input.city}, ${input.school}, ${input.grade}, ${input.subjects_required}, ${input.exam_session},
       ${input.parent_name}, ${input.parent_whatsapp}, ${input.parent_email}, ${input.parent_occupation},
       ${input.income_range}, ${input.financial_explanation}, ${input.motivation},
       ${input.agrees_attendance_work}, ${input.agrees_assessments_support}, ${input.parent_commitment_agreed}

@@ -7,6 +7,7 @@ interface Application {
   program: "sat" | "o-level";
   student_user_id: string | null;
   student_name: string;
+  student_email: string | null;
   age: string;
   city: string;
   school: string | null;
@@ -98,7 +99,7 @@ export default function AdminScholarships() {
 
   async function createAccount(id: string, app: Application) {
     const name = (draftAccountName[id] ?? app.student_name).trim();
-    const email = (draftAccountEmail[id] ?? app.parent_email).trim();
+    const email = (draftAccountEmail[id] ?? app.student_email ?? app.parent_email).trim();
     if (!name || !email) { alert("Name and email are required."); return; }
     setCreatingAccount(id);
     const r = await fetch(`/api/admin/scholarships/${id}/create-account`, {
@@ -202,17 +203,18 @@ export default function AdminScholarships() {
                           <tr>
                             <td colSpan={6} style={{ background: "#f8fafc", padding: "20px 22px" }}>
                               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px 32px", marginBottom: 20 }}>
-                                <div>
-                                  <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Student</div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                                  <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>Student</div>
                                   <div style={{ fontWeight: 700, color: "#071b33" }}>{a.student_name} · Age {a.age} · Grade {a.grade}</div>
-                                  <div style={{ fontSize: ".85rem", fontWeight: 700, color: a.student_user_id ? "#15803d" : "#a0aec0" }}>
-                                    {a.student_user_id ? "✓ Account created" : "No account yet — created automatically when you approve below"}
-                                  </div>
+                                  {a.student_email && <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>{a.student_email}</div>}
                                   <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>{a.school || "School not given"} · {a.city}</div>
                                   <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>Exam session: {a.exam_session}{a.subjects_required ? ` · Subjects: ${a.subjects_required}` : ""}</div>
+                                  <div style={{ fontSize: ".82rem", fontWeight: 700, color: a.student_user_id ? "#15803d" : "#a0aec0", marginTop: 2 }}>
+                                    {a.student_user_id ? "✓ Account created" : "No account yet"}
+                                  </div>
                                 </div>
-                                <div>
-                                  <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Parent / Guardian</div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                                  <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>Parent / Guardian</div>
                                   <div style={{ fontWeight: 700, color: "#071b33" }}>{a.parent_name}</div>
                                   <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>{a.parent_email} · {a.parent_whatsapp}</div>
                                   <div style={{ color: "#6b7c93", fontSize: ".85rem" }}>{a.parent_occupation || "Occupation not given"}</div>
@@ -299,7 +301,7 @@ export default function AdminScholarships() {
                                     <label>Email</label>
                                     <input
                                       type="email"
-                                      value={draftAccountEmail[a.id] ?? a.parent_email}
+                                      value={draftAccountEmail[a.id] ?? a.student_email ?? a.parent_email}
                                       onChange={e => setDraftAccountEmail(d => ({ ...d, [a.id]: e.target.value }))}
                                       placeholder="Student's own email, or the parent's"
                                     />

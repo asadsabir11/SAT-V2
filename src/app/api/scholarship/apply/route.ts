@@ -44,6 +44,11 @@ export async function POST(req: NextRequest) {
     if (!isValidEmail(parentEmail)) {
       return NextResponse.json({ error: "Enter a valid parent email address" }, { status: 400 });
     }
+    const studentEmailRaw = body.studentEmail?.trim();
+    if (studentEmailRaw && !isValidEmail(studentEmailRaw)) {
+      return NextResponse.json({ error: "Enter a valid student email address, or leave it blank" }, { status: 400 });
+    }
+    const studentEmail = studentEmailRaw ? studentEmailRaw.toLowerCase() : null;
     if (body.agreesAttendanceWork !== true || body.agreesAssessmentsSupport !== true || body.parentCommitmentAgreed !== true || body.privacyConsent !== true) {
       return NextResponse.json({ error: "All commitment and consent confirmations are required" }, { status: 400 });
     }
@@ -51,6 +56,7 @@ export async function POST(req: NextRequest) {
     const application = await createScholarshipApplication({
       program: body.program,
       student_name: String(body.studentName).trim(),
+      student_email: studentEmail,
       age: String(body.age).trim(),
       city: String(body.city).trim(),
       school: body.school?.trim() || null,
