@@ -15,7 +15,7 @@ const inputStyle: React.CSSProperties = { width: "100%", padding: "10px 12px", b
 const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical", fontFamily: "inherit" };
 const labelStyle: React.CSSProperties = { display: "block", fontWeight: 700, fontSize: ".85rem", color: "#071b33", marginBottom: 6 };
 
-export function ScholarshipForm({ defaultProgram, studentName: defaultStudentName, studentEmail }: { defaultProgram?: "sat" | "o-level"; studentName?: string; studentEmail?: string }) {
+export function ScholarshipForm({ defaultProgram, studentName: defaultStudentName }: { defaultProgram?: "sat" | "o-level"; studentName?: string }) {
   const [program, setProgram] = useState<"sat" | "o-level">(defaultProgram ?? "sat");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -103,12 +103,6 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
   return (
     <form onSubmit={onSubmit} className="card" style={{ display: "grid", gap: 20 }}>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ position: "absolute", left: "-9999px" }} aria-hidden="true" />
-
-      {studentEmail && (
-        <p style={{ margin: 0, padding: "10px 14px", borderRadius: 8, background: "#f0fdf4", color: "#166534", fontSize: ".82rem", fontWeight: 600 }}>
-          Applying as {studentEmail}
-        </p>
-      )}
 
       <div>
         <label style={labelStyle}>Program *</label>

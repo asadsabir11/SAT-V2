@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { createScholarshipApplication, findScholarshipApplicationByStudentId, type IncomeRange } from "@/lib/scholarships";
+import { createScholarshipApplication, type IncomeRange } from "@/lib/scholarships";
 import { sendScholarshipApplicationAdminAlert } from "@/lib/email";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { isValidEmail } from "@/lib/validators";
@@ -15,21 +14,12 @@ const REQUIRED_FIELDS = [
   "financialExplanation", "motivation",
 ];
 
+// Public by design — a family applying because they can't afford tuition
+// shouldn't have to go through the same registration flow as a paying
+// student first. No account exists yet; the founder creates one (with a
+// one-time password, emailed) only if/when the application is approved.
 export async function POST(req: NextRequest) {
   try {
-    // Scholarship applications require a registered student account —
-    // identity (which account this belongs to) always comes from the
-    // session, never from the request body, so it can't be spoofed.
-    const session = await getSession();
-    if (!session || session.role !== "student") {
-      return NextResponse.json({ error: "Please register or sign in as a student before applying." }, { status: 401 });
-    }
-
-    const existing = await findScholarshipApplicationByStudentId(session.id);
-    if (existing) {
-      return NextResponse.json({ error: "You've already submitted a scholarship application. Our team will be in touch." }, { status: 409 });
-    }
-
     const body = await req.json();
     if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -65,8 +55,6 @@ export async function POST(req: NextRequest) {
 
     const application = await createScholarshipApplication({
       program: body.program,
-      student_user_id: session.id,
-      student_email: session.email,
       student_name: String(body.studentName).trim(),
       age: String(body.age).trim(),
       city: String(body.city).trim(),

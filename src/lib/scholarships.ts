@@ -33,6 +33,10 @@ export const SCHOLARSHIP_STATUS_LABELS: Record<ScholarshipStatus, string> = {
   completed: "Completed",
 };
 
+// Setting status to one of these (from a state where no account exists yet)
+// automatically creates the student's login — see the admin route.
+export const SCHOLARSHIP_ACCOUNT_CREATING_STATUSES: ScholarshipStatus[] = ["approved_full", "approved_partial"];
+
 export type IncomeRange =
   | "under_50k" | "50k_100k" | "100k_150k" | "150k_250k" | "above_250k" | "prefer_not_to_say";
 
@@ -48,8 +52,7 @@ export const INCOME_RANGE_LABELS: Record<IncomeRange, string> = {
 export interface ScholarshipApplication {
   id: string;
   program: "sat" | "o-level";
-  student_user_id: string;
-  student_email: string;
+  student_user_id: string | null;
   student_name: string;
   age: string;
   city: string;
@@ -81,8 +84,7 @@ async function ensureTable() {
     CREATE TABLE IF NOT EXISTS scholarship_applications (
       id TEXT PRIMARY KEY,
       program TEXT NOT NULL,
-      student_user_id TEXT NOT NULL,
-      student_email TEXT NOT NULL,
+      student_user_id TEXT,
       student_name TEXT NOT NULL,
       age TEXT NOT NULL,
       city TEXT NOT NULL,
@@ -107,20 +109,18 @@ async function ensureTable() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
-  // student_user_id/student_email were added after this table already
-  // existed in production (applications originally didn't require an
-  // account) — CREATE TABLE IF NOT EXISTS is a no-op there, so these need
-  // their own migration. DEFAULT '' only ever backfills pre-migration rows;
-  // every real insert always supplies a real value.
-  await sql`ALTER TABLE scholarship_applications ADD COLUMN IF NOT EXISTS student_user_id TEXT NOT NULL DEFAULT ''`;
-  await sql`ALTER TABLE scholarship_applications ADD COLUMN IF NOT EXISTS student_email TEXT NOT NULL DEFAULT ''`;
+  // Applications are submitted with no account yet — student_user_id is only
+  // set once the founder approves and an account gets created. A short-lived
+  // earlier version of this table required it NOT NULL with a student_email
+  // column; both are cleaned up here since neither made sense once account
+  // creation moved to approval time instead of registration time.
+  await sql`ALTER TABLE scholarship_applications ALTER COLUMN student_user_id DROP NOT NULL`;
+  await sql`ALTER TABLE scholarship_applications DROP COLUMN IF EXISTS student_email`;
   tableReady = true;
 }
 
 export type NewScholarshipInput = {
   program: "sat" | "o-level";
-  student_user_id: string;
-  student_email: string;
   student_name: string;
   age: string;
   city: string;
@@ -145,12 +145,12 @@ export async function createScholarshipApplication(input: NewScholarshipInput): 
   const id = crypto.randomUUID();
   const rows = await sql`
     INSERT INTO scholarship_applications (
-      id, program, student_user_id, student_email, student_name, age, city, school, grade, subjects_required, exam_session,
+      id, program, student_name, age, city, school, grade, subjects_required, exam_session,
       parent_name, parent_whatsapp, parent_email, parent_occupation,
       income_range, financial_explanation, motivation,
       agrees_attendance_work, agrees_assessments_support, parent_commitment_agreed
     ) VALUES (
-      ${id}, ${input.program}, ${input.student_user_id}, ${input.student_email}, ${input.student_name}, ${input.age}, ${input.city}, ${input.school}, ${input.grade}, ${input.subjects_required}, ${input.exam_session},
+      ${id}, ${input.program}, ${input.student_name}, ${input.age}, ${input.city}, ${input.school}, ${input.grade}, ${input.subjects_required}, ${input.exam_session},
       ${input.parent_name}, ${input.parent_whatsapp}, ${input.parent_email}, ${input.parent_occupation},
       ${input.income_range}, ${input.financial_explanation}, ${input.motivation},
       ${input.agrees_attendance_work}, ${input.agrees_assessments_support}, ${input.parent_commitment_agreed}
@@ -160,9 +160,9 @@ export async function createScholarshipApplication(input: NewScholarshipInput): 
   return rows[0] as ScholarshipApplication;
 }
 
-export async function findScholarshipApplicationByStudentId(studentUserId: string): Promise<ScholarshipApplication | null> {
+export async function getScholarshipApplicationById(id: string): Promise<ScholarshipApplication | null> {
   await ensureTable();
-  const rows = await sql`SELECT * FROM scholarship_applications WHERE student_user_id = ${studentUserId} ORDER BY created_at DESC LIMIT 1`;
+  const rows = await sql`SELECT * FROM scholarship_applications WHERE id = ${id} LIMIT 1`;
   return (rows[0] as ScholarshipApplication) ?? null;
 }
 
@@ -184,6 +184,11 @@ export async function updateScholarshipStatus(
     RETURNING *
   `;
   return (rows[0] as ScholarshipApplication) ?? null;
+}
+
+export async function linkScholarshipAccount(id: string, studentUserId: string): Promise<void> {
+  await ensureTable();
+  await sql`UPDATE scholarship_applications SET student_user_id = ${studentUserId}, updated_at = NOW() WHERE id = ${id}`;
 }
 
 export async function deleteScholarshipApplication(id: string): Promise<void> {

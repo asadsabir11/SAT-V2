@@ -4,8 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
-const SCHOLARSHIP_NAV_ITEM = ["Scholarships", "/scholarship"] as const;
+const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
 
@@ -61,15 +60,11 @@ export function Header() {
   // roles) shows both, same as signed-out visitors. A signed-in parent
   // doesn't need either marketing page at all — they're here for their
   // child's reports, not to browse cohorts — so only "For Parents" stays.
-  const baseNav = user?.role === "parent"
+  const navItems = user?.role === "parent"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program
     ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
     : PUBLIC_NAV;
-  // Scholarships only shows in-nav once signed in as a student — applying
-  // requires a registered account, so a signed-out visitor sees the program
-  // explained on marketing pages/footer instead, not a persistent nav item.
-  const navItems = user?.role === "student" ? [...baseNav, SCHOLARSHIP_NAV_ITEM] : baseNav;
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>

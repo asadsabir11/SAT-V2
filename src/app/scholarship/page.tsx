@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ScholarshipForm } from "@/components/ScholarshipForm";
-import { getSession } from "@/lib/auth";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 const DESC = "The Digital Tutor Opportunity Scholarship reserves fully funded places in our founding cohorts for students who demonstrate financial need and a genuine commitment to learning.";
@@ -23,10 +21,7 @@ const REQUIREMENTS = [
   "Demonstrate genuine effort and willingness to improve",
 ];
 
-export default async function ScholarshipPage() {
-  const session = await getSession();
-  const isStudent = session?.role === "student";
-
+export default function ScholarshipPage() {
   return (
     <>
       <section className="section band">
@@ -85,36 +80,14 @@ export default async function ScholarshipPage() {
             <div className="eyebrow" style={{ justifyContent: "center" }}>Apply</div>
             <h2 className="title">Opportunity Scholarship application</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
-              Takes a few minutes. No bank statements or financial documents needed at this stage.
+              Takes a few minutes. No account, bank statements, or financial documents needed at this stage.
             </p>
           </div>
-
-          {isStudent ? (
-            <>
-              <ScholarshipForm defaultProgram={session?.program} studentName={session?.name} studentEmail={session?.email} />
-              <p style={{ textAlign: "center", color: "#6b7c93", fontSize: ".85rem", marginTop: 20 }}>
-                Not sure this is the right fit, or ready to pay normal tuition? <Link href="/founder-cohort" style={{ color: "#155eef", fontWeight: 700 }}>Enroll in SAT Prep →</Link>
-                {" "}or <Link href="/o-level" style={{ color: "#155eef", fontWeight: 700 }}>Enroll in O Level →</Link>
-              </p>
-            </>
-          ) : (
-            <div className="card" style={{ textAlign: "center", padding: "40px 32px" }}>
-              <div style={{ fontSize: "2rem", marginBottom: 12 }}>🔑</div>
-              <h3 style={{ margin: "0 0 10px", color: "#071b33" }}>Create a free account first</h3>
-              <p style={{ color: "#344054", lineHeight: 1.7, maxWidth: 480, margin: "0 auto 24px" }}>
-                Scholarship applications are tied to a registered student account, so we can confirm who&apos;s
-                applying and keep you updated. Register free for SAT or O Level, then come back here — you&apos;ll
-                see &quot;Scholarships&quot; in the menu once you&apos;re signed in.
-              </p>
-              <div className="actions" style={{ justifyContent: "center" }}>
-                <Link href="/register" className="btn btn-primary">Register for SAT →</Link>
-                <Link href="/o-level#apply" className="btn btn-secondary">Register for O Level →</Link>
-              </div>
-              <p style={{ color: "#6b7c93", fontSize: ".85rem", marginTop: 20 }}>
-                Already registered? <Link href="/login" style={{ color: "#155eef", fontWeight: 700 }}>Sign in →</Link>
-              </p>
-            </div>
-          )}
+          <ScholarshipForm />
+          <p style={{ textAlign: "center", color: "#6b7c93", fontSize: ".85rem", marginTop: 20 }}>
+            We review every application privately. If approved, we&apos;ll create your account and email you a link
+            to set your password — no need to register separately.
+          </p>
         </div>
       </section>
     </>
