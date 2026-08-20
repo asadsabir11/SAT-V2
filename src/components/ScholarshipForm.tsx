@@ -125,7 +125,7 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
         <h3 style={{ margin: "0 0 12px", color: "#071b33", fontSize: "1rem" }}>Student information</h3>
         <div className="form-grid">
           <div className="field"><label>Student full name *</label><input name="studentName" required defaultValue={defaultStudentName} style={inputStyle} /></div>
-          <div className="field"><label>Student email</label><input type="email" name="studentEmail" placeholder="If the student has their own email" style={inputStyle} /></div>
+          <div className="field"><label>Student email *</label><input type="email" name="studentEmail" required style={inputStyle} /></div>
           <div className="field"><label>Age *</label><input name="age" required style={inputStyle} /></div>
           <div className="field"><label>City *</label><input name="city" required style={inputStyle} /></div>
           <div className="field"><label>School</label><input name="school" style={inputStyle} /></div>

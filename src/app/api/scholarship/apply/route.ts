@@ -9,7 +9,7 @@ const VALID_INCOME_RANGES: IncomeRange[] = [
 ];
 
 const REQUIRED_FIELDS = [
-  "program", "studentName", "age", "city", "grade", "examSession",
+  "program", "studentName", "studentEmail", "age", "city", "grade", "examSession",
   "parentName", "parentWhatsapp", "parentEmail", "incomeRange",
   "financialExplanation", "motivation",
 ];
@@ -44,11 +44,10 @@ export async function POST(req: NextRequest) {
     if (!isValidEmail(parentEmail)) {
       return NextResponse.json({ error: "Enter a valid parent email address" }, { status: 400 });
     }
-    const studentEmailRaw = body.studentEmail?.trim();
-    if (studentEmailRaw && !isValidEmail(studentEmailRaw)) {
-      return NextResponse.json({ error: "Enter a valid student email address, or leave it blank" }, { status: 400 });
+    const studentEmail = String(body.studentEmail).trim().toLowerCase();
+    if (!isValidEmail(studentEmail)) {
+      return NextResponse.json({ error: "Enter a valid student email address" }, { status: 400 });
     }
-    const studentEmail = studentEmailRaw ? studentEmailRaw.toLowerCase() : null;
     if (body.agreesAttendanceWork !== true || body.agreesAssessmentsSupport !== true || body.parentCommitmentAgreed !== true || body.privacyConsent !== true) {
       return NextResponse.json({ error: "All commitment and consent confirmations are required" }, { status: 400 });
     }

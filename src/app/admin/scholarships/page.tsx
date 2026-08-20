@@ -99,7 +99,7 @@ export default function AdminScholarships() {
 
   async function createAccount(id: string, app: Application) {
     const name = (draftAccountName[id] ?? app.student_name).trim();
-    const email = (draftAccountEmail[id] ?? app.student_email ?? app.parent_email).trim();
+    const email = (draftAccountEmail[id] ?? app.student_email ?? "").trim();
     if (!name || !email) { alert("Name and email are required."); return; }
     setCreatingAccount(id);
     const r = await fetch(`/api/admin/scholarships/${id}/create-account`, {
@@ -301,9 +301,9 @@ export default function AdminScholarships() {
                                     <label>Email</label>
                                     <input
                                       type="email"
-                                      value={draftAccountEmail[a.id] ?? a.student_email ?? a.parent_email}
+                                      value={draftAccountEmail[a.id] ?? a.student_email ?? ""}
                                       onChange={e => setDraftAccountEmail(d => ({ ...d, [a.id]: e.target.value }))}
-                                      placeholder="Student's own email, or the parent's"
+                                      placeholder={a.student_email ? undefined : "This older application has no student email on file"}
                                     />
                                   </div>
                                   <button
