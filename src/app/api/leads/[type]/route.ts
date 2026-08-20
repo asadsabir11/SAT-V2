@@ -46,7 +46,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Honeypot — bots tend to fill every field; humans never see this one.
     // Pretend success so the bot doesn't learn to avoid it.
-    if (typeof payload.website === "string" && payload.website.trim()) {
+    if (typeof payload.hpcheck === "string" && payload.hpcheck.trim()) {
       return NextResponse.json({ ok: true });
     }
 
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Strip password from the lead record before saving
-    const { password, confirmPassword: _confirm, website: _website, ...leadData } = payload as Record<string, string>;
+    const { password, confirmPassword: _confirm, hpcheck: _hpcheck, ...leadData } = payload as Record<string, string>;
 
     // For registrations that create an account: check duplicate email BEFORE
     // saving anything. Scoped to the SAT program specifically — the same

@@ -55,7 +55,7 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
       agreesAssessmentsSupport: true,
       parentCommitmentAgreed: true,
       privacyConsent: true,
-      website: fd.get("website"), // honeypot
+      hpcheck: fd.get("hpcheck"), // honeypot
     };
 
     setSubmitting(true);
@@ -102,7 +102,10 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
 
   return (
     <form onSubmit={onSubmit} className="card" style={{ display: "grid", gap: 20 }}>
-      <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ position: "absolute", left: "-9999px" }} aria-hidden="true" />
+      {/* Honeypot — deliberately not named "website"/"url"/etc: Chrome's
+          saved-profile autofill silently fills fields with those names even
+          with autocomplete="off", making real submissions look like bots. */}
+      <input type="text" name="hpcheck" tabIndex={-1} autoComplete="off" style={{ position: "absolute", left: "-9999px" }} aria-hidden="true" />
 
       <div>
         <label style={labelStyle}>Program *</label>

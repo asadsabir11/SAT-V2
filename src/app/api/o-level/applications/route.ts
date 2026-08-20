@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     // Honeypot — bots tend to fill every field; humans never see this one.
     // Pretend success so the bot doesn't learn to avoid it.
-    if (typeof body.website === "string" && body.website.trim()) {
+    if (typeof body.hpcheck === "string" && body.hpcheck.trim()) {
       return NextResponse.json({ id: crypto.randomUUID() });
     }
 

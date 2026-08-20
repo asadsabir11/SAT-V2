@@ -112,7 +112,9 @@ type RegFields = {
   packageType: string; preferredClassTime: string; source: string;
   password: string; confirmPassword: string;
   consent: boolean;
-  website: string; // honeypot — left blank by humans, often filled by bots
+  hpcheck: string; // honeypot — deliberately NOT named "website"/"url"/etc:
+  // Chrome's saved-profile autofill silently fills fields with those names
+  // even with autocomplete="off", making real submissions look like bots
 };
 
 const REG_INIT: RegFields = {
@@ -121,7 +123,7 @@ const REG_INIT: RegFields = {
   targetSatDate: "", currentScore: "", targetScore: "",
   packageType: "Core Plan", preferredClassTime: "", source: "",
   password: "", confirmPassword: "",
-  consent: false, website: "",
+  consent: false, hpcheck: "",
 };
 
 export function RegistrationForm() {
@@ -218,7 +220,7 @@ export function RegistrationForm() {
       source: fields.source.trim(),
       password: fields.password,
       consent: "true",
-      website: fields.website,
+      hpcheck: fields.hpcheck,
     });
   }
 
@@ -260,8 +262,8 @@ export function RegistrationForm() {
     <form className="form card" onSubmit={handleSubmit} noValidate>
       {/* Honeypot — hidden from real users, left blank; bots often fill every field */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
-        <label htmlFor="reg-website">Leave this field blank</label>
-        <input id="reg-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={fields.website} onChange={(e) => setFields((f) => ({ ...f, website: e.target.value }))} />
+        <label htmlFor="reg-hpcheck">Leave this field blank</label>
+        <input id="reg-hpcheck" name="hpcheck" type="text" tabIndex={-1} autoComplete="off" value={fields.hpcheck} onChange={(e) => setFields((f) => ({ ...f, hpcheck: e.target.value }))} />
       </div>
       <div className="form-grid">
 
@@ -427,14 +429,16 @@ type OLevelRegFields = {
   parentName: string; parentEmail: string; parentWhatsapp: string;
   studentGrade: string; schoolName: string; city: string; targetExamSession: string;
   source: string; consent: boolean; studyGroupConsent: boolean;
-  website: string; // honeypot — left blank by humans, often filled by bots
+  hpcheck: string; // honeypot — deliberately NOT named "website"/"url"/etc:
+  // Chrome's saved-profile autofill silently fills fields with those names
+  // even with autocomplete="off", making real submissions look like bots
 };
 
 const OLEVEL_REG_INIT: OLevelRegFields = {
   studentName: "", studentEmail: "", password: "", confirmPassword: "",
   parentName: "", parentEmail: "", parentWhatsapp: "",
   studentGrade: "", schoolName: "", city: "", targetExamSession: "",
-  source: "", consent: false, studyGroupConsent: false, website: "",
+  source: "", consent: false, studyGroupConsent: false, hpcheck: "",
 };
 
 export function OLevelRegistrationForm() {
@@ -517,7 +521,7 @@ export function OLevelRegistrationForm() {
           source: fields.source.trim(),
           consent: "true",
           studyGroupConsent: fields.studyGroupConsent ? "true" : "false",
-          website: fields.website,
+          hpcheck: fields.hpcheck,
         }),
       });
       const data = await res.json();
@@ -556,8 +560,8 @@ export function OLevelRegistrationForm() {
     <form className="form card" onSubmit={handleSubmit} noValidate>
       {/* Honeypot — hidden from real users, left blank; bots often fill every field */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
-        <label htmlFor="olevel-reg-website">Leave this field blank</label>
-        <input id="olevel-reg-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={fields.website} onChange={(e) => setFields((f) => ({ ...f, website: e.target.value }))} />
+        <label htmlFor="olevel-reg-hpcheck">Leave this field blank</label>
+        <input id="olevel-reg-hpcheck" name="hpcheck" type="text" tabIndex={-1} autoComplete="off" value={fields.hpcheck} onChange={(e) => setFields((f) => ({ ...f, hpcheck: e.target.value }))} />
       </div>
       <div className="form-grid">
         <div className="field">
@@ -692,14 +696,16 @@ type OLevelAppFields = {
   studentName: string; studentGrade: string; schoolName: string; city: string;
   subject: string; preferredClassTime: string; targetExamSession: string;
   source: string; consent: boolean; studyGroupConsent: boolean;
-  website: string; // honeypot — left blank by humans, often filled by bots
+  hpcheck: string; // honeypot — deliberately NOT named "website"/"url"/etc:
+  // Chrome's saved-profile autofill silently fills fields with those names
+  // even with autocomplete="off", making real submissions look like bots
 };
 
 const OLEVEL_APP_INIT: OLevelAppFields = {
   parentName: "", parentEmail: "", parentWhatsapp: "",
   studentName: "", studentGrade: "", schoolName: "", city: "",
   subject: "", preferredClassTime: "", targetExamSession: "",
-  source: "", consent: false, studyGroupConsent: false, website: "",
+  source: "", consent: false, studyGroupConsent: false, hpcheck: "",
 };
 
 export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: string }) {
@@ -778,7 +784,7 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
           utm_term: params.get("utm_term") ?? "",
           fbclid: params.get("fbclid") ?? "",
           studyGroupConsent: fields.studyGroupConsent ? "true" : "false",
-          website: fields.website,
+          hpcheck: fields.hpcheck,
         }),
       });
       const data = await res.json();
@@ -816,8 +822,8 @@ export function OLevelEnrollmentForm({ defaultSubject }: { defaultSubject?: stri
     <form className="form card" onSubmit={handleSubmit} noValidate>
       {/* Honeypot — hidden from real users, left blank; bots often fill every field */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
-        <label htmlFor="website">Leave this field blank</label>
-        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={fields.website} onChange={(e) => setFields((f) => ({ ...f, website: e.target.value }))} />
+        <label htmlFor="hpcheck">Leave this field blank</label>
+        <input id="hpcheck" name="hpcheck" type="text" tabIndex={-1} autoComplete="off" value={fields.hpcheck} onChange={(e) => setFields((f) => ({ ...f, hpcheck: e.target.value }))} />
       </div>
       <div className="form-grid">
         <div className="field">

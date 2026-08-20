@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Honeypot — bots tend to fill every field; humans never see this one.
-    if (typeof body.website === "string" && body.website.trim()) {
+    if (typeof body.hpcheck === "string" && body.hpcheck.trim()) {
       return NextResponse.json({ ok: true });
     }
 
