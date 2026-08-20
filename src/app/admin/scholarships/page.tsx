@@ -83,8 +83,10 @@ export default function AdminScholarships() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [draftStatus, setDraftStatus] = useState<Record<string, string>>({});
   const [draftPct, setDraftPct] = useState<Record<string, string>>({});
-  const [draftAccountEmail, setDraftAccountEmail] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const [draftAccountName, setDraftAccountName] = useState<Record<string, string>>({});
+  const [draftAccountEmail, setDraftAccountEmail] = useState<Record<string, string>>({});
+  const [creatingAccount, setCreatingAccount] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/scholarships")
@@ -93,16 +95,15 @@ export default function AdminScholarships() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function save(id: string, app: Application) {
+  async function save(id: string) {
     const status = draftStatus[id];
     const pctRaw = draftPct[id];
     const scholarshipPercentage = pctRaw?.trim() ? Number(pctRaw) : null;
-    const accountEmail = (draftAccountEmail[id] ?? app.parent_email).trim();
     setSaving(id);
     const r = await fetch(`/api/admin/scholarships/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, scholarshipPercentage, accountEmail }),
+      body: JSON.stringify({ status, scholarshipPercentage }),
     });
     const d = await r.json();
     if (r.ok) {
@@ -111,6 +112,25 @@ export default function AdminScholarships() {
       alert(d.error ?? "Failed to save");
     }
     setSaving(null);
+  }
+
+  async function createAccount(id: string, app: Application) {
+    const name = (draftAccountName[id] ?? app.student_name).trim();
+    const email = (draftAccountEmail[id] ?? app.parent_email).trim();
+    if (!name || !email) { alert("Name and email are required."); return; }
+    setCreatingAccount(id);
+    const r = await fetch(`/api/admin/scholarships/${id}/create-account`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      setApps(a => a.map(x => x.id === id ? { ...x, student_user_id: d.studentUserId } : x));
+    } else {
+      alert(d.error ?? "Failed to create account");
+    }
+    setCreatingAccount(null);
   }
 
   async function remove(id: string, name: string) {
@@ -259,19 +279,8 @@ export default function AdminScholarships() {
                                     placeholder="e.g. 100"
                                   />
                                 </div>
-                                {!a.student_user_id && (
-                                  <div className="field" style={{ minWidth: 240 }}>
-                                    <label>Account email (used on approval)</label>
-                                    <input
-                                      type="email"
-                                      value={draftAccountEmail[a.id] ?? a.parent_email}
-                                      onChange={e => setDraftAccountEmail(d => ({ ...d, [a.id]: e.target.value }))}
-                                      placeholder="Defaults to parent email"
-                                    />
-                                  </div>
-                                )}
                                 <button
-                                  onClick={() => save(a.id, a)}
+                                  onClick={() => save(a.id)}
                                   disabled={saving === a.id}
                                   className="btn btn-primary"
                                   style={{ minHeight: 40, padding: "0 18px" }}>
@@ -283,6 +292,35 @@ export default function AdminScholarships() {
                                   Delete
                                 </button>
                               </div>
+
+                              {!a.student_user_id && ["approved_full", "approved_partial", "active_scholar", "probation", "completed"].includes(a.status) && (
+                                <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap", background: "#f0fdf4", padding: "14px 16px", borderRadius: 10, border: "1.5px solid #86efac", marginTop: 12 }}>
+                                  <div style={{ width: "100%", fontWeight: 800, color: "#15803d", fontSize: ".85rem", marginBottom: 2 }}>Create student account</div>
+                                  <div className="field" style={{ minWidth: 200 }}>
+                                    <label>Name</label>
+                                    <input
+                                      value={draftAccountName[a.id] ?? a.student_name}
+                                      onChange={e => setDraftAccountName(d => ({ ...d, [a.id]: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div className="field" style={{ minWidth: 240 }}>
+                                    <label>Email</label>
+                                    <input
+                                      type="email"
+                                      value={draftAccountEmail[a.id] ?? a.parent_email}
+                                      onChange={e => setDraftAccountEmail(d => ({ ...d, [a.id]: e.target.value }))}
+                                      placeholder="Student's own email, or the parent's"
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() => createAccount(a.id, a)}
+                                    disabled={creatingAccount === a.id}
+                                    className="btn btn-primary"
+                                    style={{ minHeight: 40, padding: "0 18px" }}>
+                                    {creatingAccount === a.id ? "Creating…" : "Create account →"}
+                                  </button>
+                                </div>
+                              )}
                             </td>
                           </tr>
                         )}
