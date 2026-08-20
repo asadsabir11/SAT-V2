@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const email = await consumeResetToken(token);
     if (!email) {
-      return NextResponse.json({ error: "This reset link is invalid or has expired. Please request a new one." }, { status: 400 });
+      return NextResponse.json({ error: "This reset link is invalid or has already been used. Please request a new one." }, { status: 400 });
     }
 
     await updateUserPassword(email, password);

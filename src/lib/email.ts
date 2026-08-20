@@ -350,7 +350,7 @@ export async function sendPasswordResetEmail(opts: { email: string; name: string
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
         <h2 style="color:#071b33;margin:0 0 8px;">Reset your password</h2>
         <p style="color:#6b7c93;margin:0 0 24px;font-size:.9rem;line-height:1.6;">
-          Hi ${opts.name}, we received a request to reset the password on your Digital Tutor account. This link expires in 1 hour and can only be used once.
+          Hi ${opts.name}, we received a request to reset the password on your Digital Tutor account. This link can only be used once.
         </p>
         <div style="margin-bottom:20px;">
           <a href="${opts.resetUrl}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Reset my password →</a>
@@ -383,7 +383,7 @@ export async function sendOLevelAccountWelcome(opts: { email: string; name: stri
           <a href="${opts.setupUrl}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Set my password →</a>
         </div>
         <p style="color:#a0aec0;font-size:.78rem;line-height:1.6;">
-          This link expires in 1 hour. Once set, sign in any time at academy.thedigitaltutor.net/login as a Student
+          This link can only be used once. Once set, sign in any time at academy.thedigitaltutor.net/login as a Student
           using this email address.<br>
           The Digital Tutor · academy.thedigitaltutor.net
         </p>
@@ -413,7 +413,7 @@ export async function sendParentAccountWelcome(opts: { email: string; name: stri
           <a href="${opts.setupUrl}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Set my password →</a>
         </div>
         <p style="color:#a0aec0;font-size:.78rem;line-height:1.6;">
-          This link expires in 1 hour. Once set, sign in any time at academy.thedigitaltutor.net/login as a Parent
+          This link can only be used once. Once set, sign in any time at academy.thedigitaltutor.net/login as a Parent
           (Program: ${programLabel}) using this email address.<br>
           The Digital Tutor · academy.thedigitaltutor.net
         </p>
@@ -440,7 +440,7 @@ export async function sendTeacherAccountWelcome(opts: { email: string; name: str
           <a href="${opts.setupUrl}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Set my password →</a>
         </div>
         <p style="color:#a0aec0;font-size:.78rem;line-height:1.6;">
-          This link expires in 1 hour. Once set, sign in any time at academy.thedigitaltutor.net/login as a Teacher
+          This link can only be used once. Once set, sign in any time at academy.thedigitaltutor.net/login as a Teacher
           using this email address.<br>
           The Digital Tutor · academy.thedigitaltutor.net
         </p>

@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
           <>
             <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#071b33", margin: "0 0 6px", letterSpacing: "-.03em" }}>Check your email</h1>
             <p style={{ color: "#6b7c93", fontSize: ".9rem", margin: "0 0 24px", lineHeight: 1.6 }}>
-              If an account exists for <strong>{email.trim()}</strong>, we&apos;ve sent a link to reset your password. It expires in 1 hour.
+              If an account exists for <strong>{email.trim()}</strong>, we&apos;ve sent a link to reset your password. It can only be used once.
             </p>
             <Link href="/login" style={{ color: "#155eef", fontWeight: 700, textDecoration: "none", fontSize: ".9rem" }}>
               ← Back to sign in
