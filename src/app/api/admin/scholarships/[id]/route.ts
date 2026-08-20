@@ -8,6 +8,7 @@ import {
 import { findUserByEmailAndProgram, createUser } from "@/lib/users";
 import { createResetToken } from "@/lib/passwordReset";
 import { sendScholarshipAccountWelcome } from "@/lib/email";
+import { isValidEmail } from "@/lib/validators";
 
 const APP_URL = "https://academy.thedigitaltutor.net";
 
@@ -34,26 +35,45 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Scholarship percentage must be between 0 and 100" }, { status: 400 });
   }
 
-  let updated = await updateScholarshipStatus(id, status, percentage, body.adminNotes);
-  if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
   // Approving (for the first time) creates the student's login — a
   // throwaway password, never shared with anyone, plus an emailed
   // set-password link. Mirrors how teacher/parent accounts are created.
-  // Skipped if this application already has a linked account (e.g. status
-  // toggled back and forth, or a sibling application under the same email
-  // already has one for this program).
-  if (!before.student_user_id && SCHOLARSHIP_ACCOUNT_CREATING_STATUSES.includes(status)) {
-    const existingUser = await findUserByEmailAndProgram(updated.parent_email, updated.program);
+  // The founder controls which email becomes the login (defaults to the
+  // parent's email from the application, but is editable in the admin UI)
+  // because that email may already be taken by a DIFFERENT role in this
+  // program — e.g. the parent already has their own parent-portal account
+  // for an older child. Accounts are unique per (email, program) with no
+  // regard for role, so that collision can't be resolved by silently
+  // reusing the existing row — it belongs to a different person/purpose.
+  const needsAccount = !before.student_user_id && SCHOLARSHIP_ACCOUNT_CREATING_STATUSES.includes(status);
+  let accountEmail = "";
+  if (needsAccount) {
+    accountEmail = String(body.accountEmail ?? before.parent_email).trim().toLowerCase();
+    if (!isValidEmail(accountEmail)) {
+      return NextResponse.json({ error: "Enter a valid account email" }, { status: 400 });
+    }
+    const existingUser = await findUserByEmailAndProgram(accountEmail, before.program);
+    if (existingUser && existingUser.role !== "student") {
+      return NextResponse.json({
+        error: `${accountEmail} already has a ${existingUser.role} account for this program — pick a different email for the student's login (e.g. the student's own email) and save again.`,
+      }, { status: 409 });
+    }
+  }
+
+  let updated = await updateScholarshipStatus(id, status, percentage, body.adminNotes);
+  if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (needsAccount) {
+    const existingUser = await findUserByEmailAndProgram(accountEmail, updated.program);
     let userId: string;
     if (existingUser) {
       userId = existingUser.id;
     } else {
       const throwawayPassword = crypto.randomBytes(24).toString("hex");
-      userId = await createUser(updated.parent_email, throwawayPassword, "student", updated.student_name, updated.program);
-      const token = await createResetToken(updated.parent_email);
+      userId = await createUser(accountEmail, throwawayPassword, "student", updated.student_name, updated.program);
+      const token = await createResetToken(accountEmail);
       const setupUrl = `${APP_URL}/reset-password?token=${token}`;
-      sendScholarshipAccountWelcome({ email: updated.parent_email, name: updated.student_name, program: updated.program, setupUrl }).catch(console.error);
+      sendScholarshipAccountWelcome({ email: accountEmail, name: updated.student_name, program: updated.program, setupUrl }).catch(console.error);
     }
     await linkScholarshipAccount(id, userId);
     updated = { ...updated, student_user_id: userId };
