@@ -37,22 +37,34 @@ export async function middleware(request: NextRequest) {
 
   // /dashboard, /sat, /diagnostic, /ai-tutor, /lectures, /sessions, /quizzes, /unlock, /o-level/lectures, /o-level/quizzes, /o-level/sessions, /o-level/past-papers, /o-level/unlock — students only
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/sat") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions") || pathname.startsWith("/quizzes") || pathname.startsWith("/unlock") || pathname.startsWith("/o-level/lectures") || pathname.startsWith("/o-level/quizzes") || pathname.startsWith("/o-level/sessions") || pathname.startsWith("/o-level/past-papers") || pathname.startsWith("/o-level/unlock")) {
-    if (!session || session.role !== "student") {
+    // A deleted student can otherwise stay "logged in" for up to 7 days —
+    // the JWT alone doesn't know their account was removed.
+    const stillExists = session && session.role === "student"
+      ? (await sql`SELECT id FROM users WHERE id = ${session.id} AND role = 'student'`).length > 0
+      : false;
+    if (!session || session.role !== "student" || !stillExists) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("role", "student");
       url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      if (session) res.cookies.delete("sat_auth");
+      return res;
     }
   }
 
   // /discussion — any logged-in user (students AND founders can access)
   if (pathname.startsWith("/discussion")) {
-    if (!session) {
+    const stillExists = session
+      ? (await sql`SELECT id FROM users WHERE id = ${session.id} AND role = ${session.role}`).length > 0
+      : false;
+    if (!session || !stillExists) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      if (session) res.cookies.delete("sat_auth");
+      return res;
     }
   }
 

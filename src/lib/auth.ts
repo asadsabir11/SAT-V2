@@ -46,12 +46,10 @@ export async function getSession(): Promise<SessionUser | null> {
   const user = await verifyToken(token);
   if (!user) return null;
 
-  // Staff sessions carry admin-dashboard power — re-check against the DB so a
-  // deleted teacher/founder account stops working on their very next request
-  // instead of staying valid until the JWT naturally expires (up to 24h).
-  if (user.role === "founder" || user.role === "teacher") {
-    const rows = await sql`SELECT id FROM users WHERE id = ${user.id} AND role = ${user.role}`;
-    if (rows.length === 0) return null;
-  }
+  // Re-check against the DB so a deleted account (student, parent, teacher,
+  // or founder) stops working on its very next request instead of staying
+  // valid until the JWT naturally expires (up to 7 days for students).
+  const rows = await sql`SELECT id FROM users WHERE id = ${user.id} AND role = ${user.role}`;
+  if (rows.length === 0) return null;
   return user;
 }
