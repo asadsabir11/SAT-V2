@@ -247,7 +247,17 @@ export default function AdminScholarships() {
                                   <label>Status</label>
                                   <select
                                     value={draftStatus[a.id] ?? a.status}
-                                    onChange={e => setDraftStatus(d => ({ ...d, [a.id]: e.target.value }))}
+                                    onChange={e => {
+                                      const value = e.target.value;
+                                      setDraftStatus(d => ({ ...d, [a.id]: value }));
+                                      // Scholarships default to 100% — this founding
+                                      // cohort's public emphasis — so approving doesn't
+                                      // require typing a number every time. Still
+                                      // editable below for a future partial scholarship.
+                                      if (value === "approved" && a.scholarship_percentage == null) {
+                                        setDraftPct(d => ({ ...d, [a.id]: "100" }));
+                                      }
+                                    }}
                                   >
                                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
                                   </select>
