@@ -2,6 +2,14 @@
 import { useState } from "react";
 import Link from "next/link";
 
+const OLEVEL_SUBJECTS: [string, string][] = [
+  ["mathematics", "Mathematics"],
+  ["english-language", "English Language"],
+  ["computer-science", "Computer Science"],
+  ["islamiyat", "Islamiyat"],
+  ["pakistan-studies", "Pakistan Studies"],
+];
+
 const INCOME_OPTIONS: [string, string][] = [
   ["under_50k", "Under PKR 50,000"],
   ["50k_100k", "PKR 50,000–100,000"],
@@ -43,7 +51,9 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
       city: fd.get("city"),
       school: fd.get("school"),
       grade: fd.get("grade"),
-      subjectsRequired: fd.get("subjectsRequired"),
+      subjectsRequired: fd.getAll("subjectsRequired")
+        .map(v => OLEVEL_SUBJECTS.find(([value]) => value === v)?.[1] ?? v)
+        .join(", ") || null,
       examSession: fd.get("examSession"),
       parentName: fd.get("parentName"),
       parentWhatsapp: fd.get("parentWhatsapp"),
@@ -134,7 +144,12 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
           {program === "o-level" && (
             <div className="field" style={{ gridColumn: "1 / -1" }}>
               <label>Subjects required</label>
-              <input name="subjectsRequired" placeholder="e.g. Mathematics, English Language" style={inputStyle} />
+              <select name="subjectsRequired" multiple size={5} style={{ ...inputStyle, height: "auto" }}>
+                {OLEVEL_SUBJECTS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+              <p style={{ margin: "6px 0 0", color: "#a0aec0", fontSize: ".78rem" }}>
+                Hold Ctrl (Windows) or Cmd (Mac) to select more than one.
+              </p>
             </div>
           )}
         </div>
