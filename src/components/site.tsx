@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["For Parents", "/parent-webinar"]] as const;
+const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
 
@@ -47,7 +47,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["Scholarships","/scholarship"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
 export function Header() {
