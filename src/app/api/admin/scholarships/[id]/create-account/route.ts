@@ -49,17 +49,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   let userId: string;
+  let emailResult: { ok: boolean; error?: string };
   if (existingUser) {
     userId = existingUser.id;
-    sendScholarshipApprovedExistingAccount({ email, name, program: application.program }).catch(console.error);
+    emailResult = await sendScholarshipApprovedExistingAccount({ email, name, program: application.program });
   } else {
     const throwawayPassword = crypto.randomBytes(24).toString("hex");
     userId = await createUser(email, throwawayPassword, "student", name, application.program);
     const token = await createResetToken(email);
     const setupUrl = `${APP_URL}/reset-password?token=${token}`;
-    sendScholarshipAccountWelcome({ email, name, program: application.program, setupUrl }).catch(console.error);
+    emailResult = await sendScholarshipAccountWelcome({ email, name, program: application.program, setupUrl });
   }
   await linkScholarshipAccount(id, userId);
 
-  return NextResponse.json({ ok: true, studentUserId: userId });
+  // Account creation itself succeeded even if the email didn't — surface the
+  // email failure to the admin instead of hiding it behind an unqualified
+  // "ok: true", since a fire-and-forget send here previously let the process
+  // freeze mid-send (Vercel serverless functions can be torn down right after
+  // the HTTP response goes out) with no error ever logged anywhere.
+  return NextResponse.json({ ok: true, studentUserId: userId, emailSent: emailResult.ok, emailError: emailResult.error });
 }
