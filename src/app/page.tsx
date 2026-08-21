@@ -50,6 +50,11 @@ export default function Home() {
               <span className="trust-item">16+ countries served</span>
               <span className="trust-item">No score guarantee</span>
             </div>
+            <p style={{ marginTop: 18 }}>
+              <Link href="/scholarship" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#0f4d3f", background: "#e3fbf3", border: "1.5px solid #9fe8cf", borderRadius: 999, padding: "8px 18px", fontWeight: 800, fontSize: ".88rem", textDecoration: "none" }}>
+                🎓 Can&apos;t afford the fees? Apply for an Opportunity Scholarship →
+              </Link>
+            </p>
           </div>
           <div className="hero-panel">
             <div className="eyebrow" style={{ color: "#5eead4", marginBottom: 20 }}>The accountability layer</div>
@@ -273,15 +278,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7b — Opportunity Scholarship (kept small by design) */}
+      {/* 7b — Opportunity Scholarship */}
       <section className="section" style={{ paddingTop: 40, paddingBottom: 40 }}>
-        <div className="container" style={{ maxWidth: 720, textAlign: "center" }}>
-          <div className="eyebrow" style={{ justifyContent: "center" }}>Education Should Create Opportunity</div>
-          <p className="lead" style={{ margin: "0 auto" }}>
-            For every cohort, The Digital Tutor reserves places for deserving students who demonstrate financial
-            need and a commitment to learning.
-          </p>
-          <Link href="/scholarship" style={{ color: "#155eef", fontWeight: 700, textDecoration: "none" }}>Learn About Opportunity Scholarships →</Link>
+        <div className="container">
+          <div className="card" style={{ textAlign: "center", padding: "48px 32px", background: "linear-gradient(135deg,#0f2d54,#0b4a3d)", border: "none" }}>
+            <div style={{ fontSize: "2.2rem", marginBottom: 10 }}>🎓</div>
+            <div className="eyebrow" style={{ justifyContent: "center", color: "#5eead4" }}>The Digital Tutor Opportunity Scholarship</div>
+            <h2 className="title" style={{ color: "#fff", maxWidth: 620, margin: "10px auto 12px" }}>
+              Education should create opportunity — not be blocked by it.
+            </h2>
+            <p className="lead" style={{ margin: "0 auto 28px", maxWidth: 560, color: "rgba(255,255,255,.75)" }}>
+              For every cohort, The Digital Tutor reserves places for deserving students who demonstrate financial
+              need and a commitment to learning. Scholarship students get the same live classes, AI tutor, and
+              parent reports as every other student — free.
+            </p>
+            <Link href="/scholarship" className="btn btn-primary">Apply for a Scholarship →</Link>
+          </div>
         </div>
       </section>
 

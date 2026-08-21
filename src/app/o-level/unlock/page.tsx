@@ -17,27 +17,19 @@ const BANK_NAME = process.env.NEXT_PUBLIC_OLEVEL_BANK_NAME ?? "";
 const BANK_ACCOUNT_TITLE = process.env.NEXT_PUBLIC_OLEVEL_BANK_ACCOUNT_TITLE ?? "";
 const BANK_IBAN = process.env.NEXT_PUBLIC_OLEVEL_BANK_IBAN ?? "";
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function BigDetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: ".85rem", padding: "4px 0" }}>
-      <span style={{ color: "var(--muted)" }}>{label}</span>
-      <span style={{ fontWeight: 700, color: "var(--navy)", textAlign: "right" }}>{value}</span>
+    <div style={{ padding: "14px 0", borderBottom: "1px solid rgba(29,78,216,.15)" }}>
+      <div style={{ color: "#1d4ed8", fontSize: ".8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 4 }}>{label}</div>
+      <div style={{ color: "var(--navy)", fontSize: "1.5rem", fontWeight: 900, wordBreak: "break-word" }}>{value}</div>
     </div>
   );
 }
-function PlaceholderRow({ label }: { label: string }) {
+function BigPlaceholderRow({ label }: { label: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: ".85rem", padding: "4px 0" }}>
-      <span style={{ color: "var(--muted)" }}>{label}</span>
-      <span style={{ fontWeight: 700, color: "#92400e" }}>Pending</span>
-    </div>
-  );
-}
-function PaymentMethodCard({ title, color, bg, children }: { title: string; color: string; bg: string; children: React.ReactNode }) {
-  return (
-    <div className="card" style={{ background: bg, borderColor: color }}>
-      <h3 style={{ color, fontSize: "1rem", marginTop: 0 }}>{title}</h3>
-      {children}
+    <div style={{ padding: "14px 0", borderBottom: "1px solid rgba(29,78,216,.15)" }}>
+      <div style={{ color: "#1d4ed8", fontSize: ".8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 4 }}>{label}</div>
+      <div style={{ color: "#92400e", fontSize: "1.5rem", fontWeight: 900 }}>Pending</div>
     </div>
   );
 }
@@ -52,7 +44,7 @@ function UnlockForm() {
   const [amountDue, setAmountDue] = useState(10000);
   const [unlockedCount, setUnlockedCount] = useState(0);
 
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const paymentMethod = "bank_transfer";
   const [amountPaid, setAmountPaid] = useState("");
   const [transactionReference, setTransactionReference] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
@@ -220,45 +212,29 @@ function UnlockForm() {
                 </div>
               )}
 
-              <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Payment methods</h2>
-              <div className="grid grid-3" style={{ marginBottom: 32 }}>
-                <PaymentMethodCard title="JazzCash" color="#c2410c" bg="#fff7ed">
-                  <PlaceholderRow label="Account title" />
-                  <PlaceholderRow label="Mobile/account number" />
-                </PaymentMethodCard>
-                <PaymentMethodCard title="Easypaisa" color="#15803d" bg="#f0fdf4">
-                  <PlaceholderRow label="Account title" />
-                  <PlaceholderRow label="Mobile/account number" />
-                </PaymentMethodCard>
-                <PaymentMethodCard title="Bank Transfer" color="#1d4ed8" bg="#eff6ff">
+              <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Payment method</h2>
+              <div className="card" style={{ background: "#eff6ff", borderColor: "#1d4ed8", borderWidth: 2, marginBottom: 32, padding: "28px 32px" }}>
+                <h3 style={{ color: "#1d4ed8", fontSize: "1.3rem", marginTop: 0, marginBottom: 18 }}>🏦 Bank Transfer</h3>
+                <div className="grid grid-3" style={{ gap: 32 }}>
                   {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
                     <>
-                      <DetailRow label="Bank" value={BANK_NAME} />
-                      <DetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
-                      <DetailRow label="IBAN" value={BANK_IBAN} />
+                      <BigDetailRow label="Bank" value={BANK_NAME} />
+                      <BigDetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
+                      <BigDetailRow label="IBAN" value={BANK_IBAN} />
                     </>
                   ) : (
                     <>
-                      <PlaceholderRow label="Bank name" />
-                      <PlaceholderRow label="Account title" />
-                      <PlaceholderRow label="Account / IBAN" />
+                      <BigPlaceholderRow label="Bank name" />
+                      <BigPlaceholderRow label="Account title" />
+                      <BigPlaceholderRow label="Account / IBAN" />
                     </>
                   )}
-                </PaymentMethodCard>
+                </div>
               </div>
 
               <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Submit payment for verification</h2>
               <form className="form card" onSubmit={handleSubmit} noValidate>
                 <div className="form-grid">
-                  <div className="field">
-                    <label htmlFor="paymentMethod">Payment method *</label>
-                    <select id="paymentMethod" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                      <option value="">Select method</option>
-                      <option value="jazzcash">JazzCash</option>
-                      <option value="easypaisa">Easypaisa</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                    </select>
-                  </div>
                   <div className="field">
                     <label htmlFor="amountPaid">Amount paid (PKR) *</label>
                     <input id="amountPaid" type="number" min={1} value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} />
