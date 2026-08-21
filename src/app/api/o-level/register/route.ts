@@ -72,8 +72,10 @@ export async function POST(req: NextRequest) {
 
     const userId = await createUser(studentEmail, body.password, "student", studentName, "o-level");
 
-    sendOLevelRegistrationWelcome({ email: studentEmail, name: studentName }).catch(console.error);
-    sendOLevelRegistrationAdminAlert({ studentName, studentEmail, parentName: record.parentName, parentEmail, city: record.city }).catch(console.error);
+    await Promise.all([
+      sendOLevelRegistrationWelcome({ email: studentEmail, name: studentName }).catch(console.error),
+      sendOLevelRegistrationAdminAlert({ studentName, studentEmail, parentName: record.parentName, parentEmail, city: record.city }).catch(console.error),
+    ]);
 
     const token = await createToken({ id: userId, email: studentEmail, role: "student", name: studentName, program: "o-level" });
     const res = NextResponse.json({ ok: true });

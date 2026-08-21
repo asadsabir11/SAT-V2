@@ -46,8 +46,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       await grantOLevelAccess(updated.parent_email, subject, session.email, `O-Level application ${updated.id}`);
     }
     const value = updated.amount_paid ?? amountDueForSubject(updated.subject) ?? 0;
-    sendMetaPurchaseEvent({ applicationId: updated.id, subject: updated.subject, value }).catch(console.error);
-    sendGA4PurchaseEvent({ applicationId: updated.id, subject: updated.subject, value }).catch(console.error);
+    const tasks: Promise<unknown>[] = [
+      sendMetaPurchaseEvent({ applicationId: updated.id, subject: updated.subject, value }).catch(console.error),
+      sendGA4PurchaseEvent({ applicationId: updated.id, subject: updated.subject, value }).catch(console.error),
+    ];
 
     // The application never collects a password (no account until verified,
     // per spec) — so the access just granted above is unreachable until a
@@ -59,8 +61,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       await createUser(updated.parent_email, throwawayPassword, "student", updated.student_name, "o-level");
       const token = await createResetToken(updated.parent_email);
       const setupUrl = `${APP_URL}/reset-password?token=${token}`;
-      sendOLevelAccountWelcome({ email: updated.parent_email, name: updated.student_name, setupUrl, subject: updated.subject }).catch(console.error);
+      tasks.push(sendOLevelAccountWelcome({ email: updated.parent_email, name: updated.student_name, setupUrl, subject: updated.subject }).catch(console.error));
     }
+    await Promise.all(tasks);
   } else if (wasGranted && ACCESS_REVOKING_STATUSES.includes(status)) {
     for (const subject of subjects) {
       await revokeOLevelAccess(updated.parent_email, subject);

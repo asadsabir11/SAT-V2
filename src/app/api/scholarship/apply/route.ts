@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     console.log(`Scholarship application saved: ${application.id} (${application.student_name}, ${application.program})`);
 
-    sendScholarshipApplicationAdminAlert({
+    await sendScholarshipApplicationAdminAlert({
       program: application.program,
       studentName: application.student_name,
       age: application.age,

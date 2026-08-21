@@ -88,18 +88,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const record = { ...leadData, id: crypto.randomUUID(), leadType: type, createdAt: new Date().toISOString() };
 
     await appendData(`leads-${type}.json`, record);
-    sendToN8n(webhooks[type], record).catch(console.error);
+    await sendToN8n(webhooks[type], record).catch(console.error);
 
     if (type === "student" && password && leadData.studentEmail && leadData.studentName) {
       const userId = await createUser(leadData.studentEmail, password, "student", leadData.studentName, "sat");
-      sendNewStudentAlert({
-        name: leadData.studentName,
-        email: leadData.studentEmail,
-        country: leadData.country,
-        packageType: leadData.packageType,
-        grade: leadData.grade,
-      }).catch(console.error);
-      sendWelcomeEmail({ name: leadData.studentName, email: leadData.studentEmail }).catch(console.error);
+      await Promise.all([
+        sendNewStudentAlert({
+          name: leadData.studentName,
+          email: leadData.studentEmail,
+          country: leadData.country,
+          packageType: leadData.packageType,
+          grade: leadData.grade,
+        }).catch(console.error),
+        sendWelcomeEmail({ name: leadData.studentName, email: leadData.studentEmail }).catch(console.error),
+      ]);
       const token = await createToken({
         id: userId,
         email: leadData.studentEmail,

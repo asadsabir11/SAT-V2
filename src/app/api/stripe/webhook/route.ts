@@ -37,13 +37,18 @@ export async function POST(req: NextRequest) {
       await grantAccess(email, "stripe", `Stripe payment ${session.id}`, { sessionId: session.id, amount: value });
 
       const student = await findUserByEmailAndProgram(email, "sat");
-      sendSatAccessGranted({ email, name: student?.name ?? "there" }).catch(console.error);
+      const tasks: Promise<unknown>[] = [
+        sendSatAccessGranted({ email, name: student?.name ?? "there" }).catch(console.error),
+      ];
 
       if (value > 0) {
         const idempotencyKey = `sat:${email}`;
-        sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value, currency: session.currency?.toUpperCase() }).catch(console.error);
-        sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value, currency: session.currency?.toUpperCase() }).catch(console.error);
+        tasks.push(
+          sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value, currency: session.currency?.toUpperCase() }).catch(console.error),
+          sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value, currency: session.currency?.toUpperCase() }).catch(console.error),
+        );
       }
+      await Promise.all(tasks);
     }
   }
 

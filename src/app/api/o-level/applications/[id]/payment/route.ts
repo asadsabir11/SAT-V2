@@ -46,8 +46,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   });
   if (!updated) return NextResponse.json({ error: "Application not found" }, { status: 404 });
 
-  sendOLevelPaymentSubmittedAck(updated).catch(console.error);
-  sendOLevelPaymentSubmittedAdminAlert(updated).catch(console.error);
+  await Promise.all([
+    sendOLevelPaymentSubmittedAck(updated).catch(console.error),
+    sendOLevelPaymentSubmittedAdminAlert(updated).catch(console.error),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

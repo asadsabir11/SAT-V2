@@ -30,14 +30,19 @@ export async function POST(req: NextRequest) {
     await grantOLevelAccess(email, subject, session.email, notes);
 
     const student = await findUserByEmail(email);
-    sendOLevelAccessGranted({ email, name: student?.name ?? "there", subject }).catch(console.error);
+    const tasks: Promise<unknown>[] = [
+      sendOLevelAccessGranted({ email, name: student?.name ?? "there", subject }).catch(console.error),
+    ];
 
     const value = subject === "mathematics" || subject === "english-language" ? 10000 : 0;
     if (value > 0) {
       const idempotencyKey = `${email}:${subject}`;
-      sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject, value }).catch(console.error);
-      sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject, value }).catch(console.error);
+      tasks.push(
+        sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject, value }).catch(console.error),
+        sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject, value }).catch(console.error),
+      );
     }
+    await Promise.all(tasks);
 
     return NextResponse.json({ ok: true });
   }

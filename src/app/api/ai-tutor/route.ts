@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       console.warn("OPENAI_API_KEY not set");
     }
 
-    sendToN8n(process.env.N8N_AI_TUTOR_LOGGING_WEBHOOK_URL, {
+    await sendToN8n(process.env.N8N_AI_TUTOR_LOGGING_WEBHOOK_URL, {
       mode,
       messageLength: lastUserMsg.length,
       createdAt: new Date().toISOString(),

@@ -29,8 +29,10 @@ export async function POST(req: Request) {
     paymentScreenshotUrl: paymentScreenshotUrl || null,
   });
 
-  sendSatUnlockPaymentSubmittedAck({ email: session.email, name: session.name }).catch(console.error);
-  sendSatUnlockPaymentSubmittedAdminAlert({ email: session.email, name: session.name }).catch(console.error);
+  await Promise.all([
+    sendSatUnlockPaymentSubmittedAck({ email: session.email, name: session.name }).catch(console.error),
+    sendSatUnlockPaymentSubmittedAdminAlert({ email: session.email, name: session.name }).catch(console.error),
+  ]);
 
   return NextResponse.json({ ok: true, access_level: "pending" });
 }

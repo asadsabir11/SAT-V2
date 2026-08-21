@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
   if (isNewParent) {
     const token = await createResetToken(parentEmail);
     const setupUrl = `https://academy.thedigitaltutor.net/reset-password?token=${token}&role=parent`;
-    sendParentAccountWelcome({
+    await sendParentAccountWelcome({
       email: parentEmail, name: parentName, studentName: student.name,
       studentEmail: student.email, program: student.program, setupUrl,
     }).catch(console.error);

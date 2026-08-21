@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   const token = await createResetToken(email.trim());
   const setupUrl = `https://academy.thedigitaltutor.net/reset-password?token=${token}&role=teacher`;
-  sendTeacherAccountWelcome({ email: email.trim(), name: name.trim(), setupUrl }).catch(console.error);
+  await sendTeacherAccountWelcome({ email: email.trim(), name: name.trim(), setupUrl }).catch(console.error);
 
   return NextResponse.json({ teacher });
 }

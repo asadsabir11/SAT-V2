@@ -34,8 +34,10 @@ export async function POST(req: NextRequest) {
     paymentScreenshotUrl: paymentScreenshotUrl || null,
   });
 
-  sendOLevelUnlockPaymentSubmittedAck({ email: session.email, name: session.name, subject: sub }).catch(console.error);
-  sendOLevelUnlockPaymentSubmittedAdminAlert({ email: session.email, name: session.name, subject: sub }).catch(console.error);
+  await Promise.all([
+    sendOLevelUnlockPaymentSubmittedAck({ email: session.email, name: session.name, subject: sub }).catch(console.error),
+    sendOLevelUnlockPaymentSubmittedAdminAlert({ email: session.email, name: session.name, subject: sub }).catch(console.error),
+  ]);
 
   return NextResponse.json({ ok: true, status: "pending" });
 }

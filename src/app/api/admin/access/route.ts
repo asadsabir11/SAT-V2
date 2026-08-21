@@ -28,14 +28,19 @@ export async function POST(req: NextRequest) {
     const student = await findUserByEmailAndProgram(email, "sat");
     await grantAccess(email, session.email, notes);
 
-    sendSatAccessGranted({ email, name: student?.name ?? "there" }).catch(console.error);
+    const tasks: Promise<unknown>[] = [
+      sendSatAccessGranted({ email, name: student?.name ?? "there" }).catch(console.error),
+    ];
 
     const value = Number(student?.amount_paid ?? 0);
     if (value > 0) {
       const idempotencyKey = `sat:${email}`;
-      sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value }).catch(console.error);
-      sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value }).catch(console.error);
+      tasks.push(
+        sendMetaPurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value }).catch(console.error),
+        sendGA4PurchaseEvent({ applicationId: idempotencyKey, subject: "SAT Full Access", value }).catch(console.error),
+      );
     }
+    await Promise.all(tasks);
 
     return NextResponse.json({ ok: true });
   }

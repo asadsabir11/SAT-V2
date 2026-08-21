@@ -62,8 +62,10 @@ export async function POST(req: NextRequest) {
       fbclid: body.fbclid?.trim() || null,
     });
 
-    sendOLevelApplicationConfirmation(application).catch(console.error);
-    sendOLevelApplicationAdminAlert(application).catch(console.error);
+    await Promise.all([
+      sendOLevelApplicationConfirmation(application).catch(console.error),
+      sendOLevelApplicationAdminAlert(application).catch(console.error),
+    ]);
 
     return NextResponse.json({ id: application.id });
   } catch (error) {

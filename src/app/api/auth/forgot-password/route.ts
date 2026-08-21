@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (user && user.role === "student") {
       const token = await createResetToken(user.email);
       const resetUrl = `${APP_URL}/reset-password?token=${token}`;
-      sendPasswordResetEmail({ email: user.email, name: user.name ?? "there", resetUrl }).catch(console.error);
+      await sendPasswordResetEmail({ email: user.email, name: user.name ?? "there", resetUrl }).catch(console.error);
     }
 
     return NextResponse.json({ ok: true, message: "If an account exists for that email, we've sent a password reset link." });
