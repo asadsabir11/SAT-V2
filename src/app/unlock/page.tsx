@@ -56,6 +56,10 @@ function UnlockForm() {
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [isScholarshipStudent, setIsScholarshipStudent] = useState(false);
+  const [scholarshipSubmitting, setScholarshipSubmitting] = useState(false);
+  const [scholarshipError, setScholarshipError] = useState("");
+
   useEffect(() => {
     fetch("/api/student/me")
       .then((r) => (r.ok ? r.json() : null))
@@ -131,6 +135,25 @@ function UnlockForm() {
     }
   }
 
+  async function handleScholarshipUnlock() {
+    setScholarshipSubmitting(true);
+    setScholarshipError("");
+    try {
+      const res = await fetch("/api/access/scholarship-unlock", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setScholarshipError(data.error ?? "Something went wrong. Please try again.");
+        setScholarshipSubmitting(false);
+        return;
+      }
+      setCurrentStatus("unlocked");
+    } catch {
+      setScholarshipError("Something went wrong. Please try again.");
+    } finally {
+      setScholarshipSubmitting(false);
+    }
+  }
+
   if (loading) {
     return <section className="section"><div className="container" style={{ textAlign: "center" }}><p>Loading…</p></div></section>;
   }
@@ -185,88 +208,119 @@ function UnlockForm() {
                 </div>
               )}
 
-              <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Payment methods</h2>
-              <div className="grid grid-3" style={{ marginBottom: 32 }}>
-                <PaymentMethodCard title="JazzCash" color="#c2410c" bg="#fff7ed">
-                  {JAZZCASH ? <DetailRow label="Account" value={JAZZCASH} /> : <PlaceholderRow label="Account" />}
-                </PaymentMethodCard>
-                <PaymentMethodCard title="Easypaisa" color="#15803d" bg="#f0fdf4">
-                  {EASYPAISA ? <DetailRow label="Account" value={EASYPAISA} /> : <PlaceholderRow label="Account" />}
-                </PaymentMethodCard>
-                <PaymentMethodCard title="Bank Transfer" color="#1d4ed8" bg="#eff6ff">
-                  {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
-                    <>
-                      <DetailRow label="Bank" value={BANK_NAME} />
-                      <DetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
-                      <DetailRow label="IBAN" value={BANK_IBAN} />
-                    </>
-                  ) : (
-                    <>
-                      <PlaceholderRow label="Bank name" />
-                      <PlaceholderRow label="Account title" />
-                      <PlaceholderRow label="Account / IBAN" />
-                    </>
+              <label style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28, padding: "16px 20px", background: "#fffbeb", border: "1.5px solid #fde68a", borderRadius: 12, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={isScholarshipStudent}
+                  onChange={(e) => { setIsScholarshipStudent(e.target.checked); setScholarshipError(""); }}
+                  style={{ width: 20, height: 20, accentColor: "#b45309" }}
+                />
+                <span style={{ fontWeight: 700, color: "#92400e" }}>
+                  🎓 I am an Opportunity Scholarship student — this should be free for me
+                </span>
+              </label>
+
+              {isScholarshipStudent ? (
+                <div className="card" style={{ padding: "28px 32px" }}>
+                  <p style={{ color: "var(--muted)", lineHeight: 1.65, marginBottom: 20 }}>
+                    We&apos;ll check your account against our approved scholarship students. If you&apos;re on the
+                    list, full SAT access unlocks immediately — no payment needed.
+                  </p>
+                  {scholarshipError && (
+                    <div style={{ background: "#fff2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", color: "#c62828", fontSize: ".85rem", fontWeight: 600, marginBottom: 16 }}>
+                      ⚠ {scholarshipError}
+                    </div>
                   )}
-                </PaymentMethodCard>
-              </div>
-
-              <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Submit payment for verification</h2>
-              <form className="form card" onSubmit={handleSubmit} noValidate>
-                <div className="form-grid">
-                  <div className="field">
-                    <label htmlFor="paymentMethod">Payment method *</label>
-                    <select id="paymentMethod" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                      <option value="">Select method</option>
-                      <option value="jazzcash">JazzCash</option>
-                      <option value="easypaisa">Easypaisa</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="amountPaid">Amount paid (PKR) *</label>
-                    <input id="amountPaid" type="number" min={1} value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="transactionReference">Transaction ID / reference number *</label>
-                    <input id="transactionReference" type="text" value={transactionReference} onChange={(e) => setTransactionReference(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="paymentDate">Payment date *</label>
-                    <input id="paymentDate" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="payerAccountName">Name on the sending account *</label>
-                    <input id="payerAccountName" type="text" value={payerAccountName} onChange={(e) => setPayerAccountName(e.target.value)} />
-                  </div>
+                  <button className="btn btn-primary" type="button" onClick={handleScholarshipUnlock} disabled={scholarshipSubmitting}>
+                    {scholarshipSubmitting ? "Checking…" : "Confirm Scholarship & Unlock"}
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Payment methods</h2>
+                  <div className="grid grid-3" style={{ marginBottom: 32 }}>
+                    <PaymentMethodCard title="JazzCash" color="#c2410c" bg="#fff7ed">
+                      {JAZZCASH ? <DetailRow label="Account" value={JAZZCASH} /> : <PlaceholderRow label="Account" />}
+                    </PaymentMethodCard>
+                    <PaymentMethodCard title="Easypaisa" color="#15803d" bg="#f0fdf4">
+                      {EASYPAISA ? <DetailRow label="Account" value={EASYPAISA} /> : <PlaceholderRow label="Account" />}
+                    </PaymentMethodCard>
+                    <PaymentMethodCard title="Bank Transfer" color="#1d4ed8" bg="#eff6ff">
+                      {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
+                        <>
+                          <DetailRow label="Bank" value={BANK_NAME} />
+                          <DetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
+                          <DetailRow label="IBAN" value={BANK_IBAN} />
+                        </>
+                      ) : (
+                        <>
+                          <PlaceholderRow label="Bank name" />
+                          <PlaceholderRow label="Account title" />
+                          <PlaceholderRow label="Account / IBAN" />
+                        </>
+                      )}
+                    </PaymentMethodCard>
+                  </div>
 
-                <div className="field">
-                  <label>Payment screenshot (optional — JPG, PNG or PDF, max 10MB)</label>
-                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,application/pdf" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    <button type="button" onClick={() => fileRef.current?.click()} style={{ padding: "8px 14px", border: "1.5px solid #dce5ef", borderRadius: 9, background: "#fff", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#344054" }}>
-                      {file ? "Change file" : "Choose file"}
-                    </button>
-                    {file && (
-                      <button type="button" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ padding: "8px 14px", border: "none", borderRadius: 9, background: "#fee2e2", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#991b1b" }}>
-                        Remove
-                      </button>
+                  <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Submit payment for verification</h2>
+                  <form className="form card" onSubmit={handleSubmit} noValidate>
+                    <div className="form-grid">
+                      <div className="field">
+                        <label htmlFor="paymentMethod">Payment method *</label>
+                        <select id="paymentMethod" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                          <option value="">Select method</option>
+                          <option value="jazzcash">JazzCash</option>
+                          <option value="easypaisa">Easypaisa</option>
+                          <option value="bank_transfer">Bank Transfer</option>
+                        </select>
+                      </div>
+                      <div className="field">
+                        <label htmlFor="amountPaid">Amount paid (PKR) *</label>
+                        <input id="amountPaid" type="number" min={1} value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="transactionReference">Transaction ID / reference number *</label>
+                        <input id="transactionReference" type="text" value={transactionReference} onChange={(e) => setTransactionReference(e.target.value)} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="paymentDate">Payment date *</label>
+                        <input id="paymentDate" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="payerAccountName">Name on the sending account *</label>
+                        <input id="payerAccountName" type="text" value={payerAccountName} onChange={(e) => setPayerAccountName(e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label>Payment screenshot (optional — JPG, PNG or PDF, max 10MB)</label>
+                      <input ref={fileRef} type="file" accept="image/jpeg,image/png,application/pdf" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        <button type="button" onClick={() => fileRef.current?.click()} style={{ padding: "8px 14px", border: "1.5px solid #dce5ef", borderRadius: 9, background: "#fff", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#344054" }}>
+                          {file ? "Change file" : "Choose file"}
+                        </button>
+                        {file && (
+                          <button type="button" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ padding: "8px 14px", border: "none", borderRadius: 9, background: "#fee2e2", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#991b1b" }}>
+                            Remove
+                          </button>
+                        )}
+                        {file && <span style={{ fontSize: ".8rem", color: "#344054", fontWeight: 600 }}>{file.name}</span>}
+                      </div>
+                      {uploadPct > 0 && <p style={{ fontSize: ".75rem", color: "#6b7c93", marginTop: 6 }}>Uploading… {uploadPct}%</p>}
+                    </div>
+
+                    {error && (
+                      <div style={{ background: "#fff2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", color: "#c62828", fontSize: ".85rem", fontWeight: 600 }}>
+                        ⚠ {error}
+                      </div>
                     )}
-                    {file && <span style={{ fontSize: ".8rem", color: "#344054", fontWeight: 600 }}>{file.name}</span>}
-                  </div>
-                  {uploadPct > 0 && <p style={{ fontSize: ".75rem", color: "#6b7c93", marginTop: 6 }}>Uploading… {uploadPct}%</p>}
-                </div>
 
-                {error && (
-                  <div style={{ background: "#fff2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", color: "#c62828", fontSize: ".85rem", fontWeight: 600 }}>
-                    ⚠ {error}
-                  </div>
-                )}
-
-                <button className="btn btn-primary" type="submit" disabled={submitting}>
-                  {submitting ? "Submitting…" : "Submit Payment for Verification"}
-                </button>
-              </form>
+                    <button className="btn btn-primary" type="submit" disabled={submitting}>
+                      {submitting ? "Submitting…" : "Submit Payment for Verification"}
+                    </button>
+                  </form>
+                </>
+              )}
             </>
           )}
         </div>
