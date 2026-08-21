@@ -19,10 +19,22 @@ interface AdminData {
   metrics: Metrics;
 }
 
+function BigNavCard({ href, icon, title, count, accent }: { href: string; icon: string; title: string; count: number | string; accent: string }) {
+  return (
+    <Link href={href} className="card" style={{ display: "block", textDecoration: "none", padding: "28px 26px", borderTop: `4px solid ${accent}` }}>
+      <div style={{ fontSize: "2rem", marginBottom: 10 }}>{icon}</div>
+      <div style={{ fontSize: "1.7rem", fontWeight: 900, color: "#071b33" }}>{count}</div>
+      <div style={{ fontWeight: 800, color: "#071b33", fontSize: "1.05rem", margin: "4px 0 6px" }}>{title}</div>
+      <div style={{ color: accent, fontSize: ".85rem", fontWeight: 700 }}>View all →</div>
+    </Link>
+  );
+}
+
 export default function Admin() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFounder, setIsFounder] = useState(false);
+  const [scholarshipStudentCount, setScholarshipStudentCount] = useState<number | null>(null);
 
   async function clearTestData() {
     if (!confirm("⚠️ This will permanently delete ALL student registrations, diagnostics, and quiz results. This cannot be undone. Continue?")) return;
@@ -39,6 +51,10 @@ export default function Admin() {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => setIsFounder(d.user?.role === "founder"))
+      .catch(() => {});
+    fetch("/api/admin/scholarships")
+      .then((r) => r.json())
+      .then((d) => setScholarshipStudentCount((d.applications ?? []).filter((a: { student_user_id: string | null }) => a.student_user_id).length))
       .catch(() => {});
   }, []);
 
@@ -68,12 +84,6 @@ export default function Admin() {
                 Manage diagnostic quizzes →
               </Link>
             )}
-            <Link href="/admin/sat-students" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
-              🎓 SAT registered students →
-            </Link>
-            <Link href="/admin/o-level-leads" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
-              🎓 O Level registered students →
-            </Link>
             <Link href="/admin/quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #1d4ed8", background: "#eff6ff", color: "#1d4ed8" }}>
               📝 SAT quizzes →
             </Link>
@@ -131,7 +141,7 @@ export default function Admin() {
             )}
             {isFounder && (
               <Link href="/admin/scholarships" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
-                🎓 Scholarship students →
+                🎓 Scholarship applications →
               </Link>
             )}
             <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
@@ -164,11 +174,22 @@ export default function Admin() {
               <p>Loading metrics…</p>
             </div>
           ) : (
-            <div className="grid grid-4">
-              {cards.map(([l, v, d]) => (
-                <DashboardCard key={l} label={String(l)} value={String(v)} detail={String(d)} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-4">
+                {cards.map(([l, v, d]) => (
+                  <DashboardCard key={l} label={String(l)} value={String(v)} detail={String(d)} />
+                ))}
+              </div>
+
+              <div style={{ marginTop: 32 }}>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>Registered students</div>
+                <div className="grid grid-3">
+                  <BigNavCard href="/admin/sat-students" icon="🎓" title="SAT Registered Students" count={m?.totalLeads ?? "—"} accent="#155eef" />
+                  <BigNavCard href="/admin/o-level-leads" icon="🎓" title="O Level Registered Students" count={m?.oLevelLeads ?? "—"} accent="#4338ca" />
+                  <BigNavCard href="/admin/scholarship-students" icon="🎓" title="Scholarship Students" count={scholarshipStudentCount ?? "—"} accent="#b45309" />
+                </div>
+              </div>
+            </>
           )}
         </div>
       </section>
