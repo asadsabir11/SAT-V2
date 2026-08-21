@@ -181,6 +181,14 @@ export async function findApprovedScholarshipForStudent(studentUserId: string, p
   return (rows[0] as ScholarshipApplication) ?? null;
 }
 
+// Used by the public /scholarship page to detect a signed-in scholarship
+// student and show their status instead of the application form again.
+export async function getScholarshipByStudentUserId(studentUserId: string): Promise<ScholarshipApplication | null> {
+  await ensureTable();
+  const rows = await sql`SELECT * FROM scholarship_applications WHERE student_user_id = ${studentUserId} LIMIT 1`;
+  return (rows[0] as ScholarshipApplication) ?? null;
+}
+
 export async function linkScholarshipAccount(id: string, studentUserId: string): Promise<void> {
   await ensureTable();
   await sql`UPDATE scholarship_applications SET student_user_id = ${studentUserId}, updated_at = NOW() WHERE id = ${id}`;

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ScholarshipForm } from "@/components/ScholarshipForm";
+import { getSession } from "@/lib/auth";
+import { getScholarshipByStudentUserId } from "@/lib/scholarships";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 const DESC = "The Digital Tutor Opportunity Scholarship reserves fully funded places in our founding cohorts for students who demonstrate financial need and a genuine commitment to learning.";
@@ -21,7 +24,11 @@ const REQUIREMENTS = [
   "Demonstrate genuine effort and willingness to improve",
 ];
 
-export default function ScholarshipPage() {
+export default async function ScholarshipPage() {
+  const session = await getSession();
+  const myScholarship = session?.role === "student" ? await getScholarshipByStudentUserId(session.id) : null;
+  const programLabel = myScholarship?.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
+
   return (
     <>
       <section className="section band">
@@ -41,7 +48,11 @@ export default function ScholarshipPage() {
             Financial circumstances should not determine how far a serious student can go.
           </p>
           <div className="actions">
-            <a href="#apply" className="btn btn-primary">Apply for a 100% Opportunity Scholarship →</a>
+            {myScholarship ? (
+              <Link href="/dashboard" className="btn btn-primary">Go to my dashboard →</Link>
+            ) : (
+              <a href="#apply" className="btn btn-primary">Apply for a 100% Opportunity Scholarship →</a>
+            )}
           </div>
           <p style={{ color: "#9fb3c8", fontSize: ".85rem", marginTop: 16 }}>
             Applications are private, and scholarship students receive the same classes, resources and support as
@@ -76,18 +87,34 @@ export default function ScholarshipPage() {
 
       <section id="apply" className="section" style={{ scrollMarginTop: 90 }}>
         <div className="container" style={{ maxWidth: 780 }}>
-          <div style={{ maxWidth: 720, margin: "0 auto 32px", textAlign: "center" }}>
-            <div className="eyebrow" style={{ justifyContent: "center" }}>Apply</div>
-            <h2 className="title">Opportunity Scholarship application</h2>
-            <p className="lead" style={{ margin: "0 auto" }}>
-              Takes a few minutes. No account, bank statements, or financial documents needed at this stage.
-            </p>
-          </div>
-          <ScholarshipForm />
-          <p style={{ textAlign: "center", color: "#6b7c93", fontSize: ".85rem", marginTop: 20 }}>
-            We review every application privately. If approved, we&apos;ll create your account and email you a link
-            to set your password — no need to register separately.
-          </p>
+          {myScholarship ? (
+            <div className="card" style={{ textAlign: "center", padding: "48px 32px", background: "linear-gradient(135deg,#d4faf5,#eaf4ff)" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>🎓</div>
+              <p style={{ fontWeight: 800, color: "#075a50", marginBottom: 8, fontSize: "1.2rem" }}>
+                Your Opportunity Scholarship is approved!
+              </p>
+              <p style={{ color: "#2d6b60", lineHeight: 1.65, maxWidth: 480, margin: "0 auto 24px" }}>
+                {myScholarship.student_name}, you have a full 100% scholarship for the <strong>{programLabel}</strong> program.
+                There&apos;s nothing further to apply for — head to your dashboard to keep learning.
+              </p>
+              <Link href="/dashboard" className="btn btn-primary">Go to my dashboard →</Link>
+            </div>
+          ) : (
+            <>
+              <div style={{ maxWidth: 720, margin: "0 auto 32px", textAlign: "center" }}>
+                <div className="eyebrow" style={{ justifyContent: "center" }}>Apply</div>
+                <h2 className="title">Opportunity Scholarship application</h2>
+                <p className="lead" style={{ margin: "0 auto" }}>
+                  Takes a few minutes. No account, bank statements, or financial documents needed at this stage.
+                </p>
+              </div>
+              <ScholarshipForm />
+              <p style={{ textAlign: "center", color: "#6b7c93", fontSize: ".85rem", marginTop: 20 }}>
+                We review every application privately. If approved, we&apos;ll create your account and email you a
+                link to set your password — no need to register separately.
+              </p>
+            </>
+          )}
         </div>
       </section>
     </>
