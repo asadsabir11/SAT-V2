@@ -47,7 +47,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["Scholarships","/scholarship"],["Register","/register"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["Scholarships","/scholarship"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
 export function Header() {
@@ -162,8 +162,6 @@ export function Footer(){
                 <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
                   Create a free account to access the diagnostic, AI tutor, and your personal dashboard.
                 </p>
-                <Link href="/register" className="footer-cta-btn footer-cta-primary">Get started free →</Link>
-                <Link href="/register?plan=Core" className="footer-cta-btn footer-cta-secondary">Join the cohort</Link>
               </>
             )}
             <p style={{color:"#4e6a88",fontSize:".78rem",marginTop:16,lineHeight:1.5}}>
