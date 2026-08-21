@@ -20,7 +20,15 @@ export async function GET() {
   ]);
 
   if (program === "o-level") {
-    const student = await findByField("leads-o-level.json", "studentEmail", email);
+    // The lead record only exists for accounts created through the public
+    // registration form. Accounts an admin creates directly (scholarships,
+    // manually-approved applications) have no lead row, so fall back to a
+    // minimal profile built from the account itself — otherwise the
+    // dashboard treats a real, fully-provisioned student as having "no
+    // profile yet" and shows the bare Get Started screen instead of their
+    // subjects/lectures/quizzes.
+    const lead = await findByField("leads-o-level.json", "studentEmail", email);
+    const student = lead ?? { studentName: session.name, country: "", subject: "" };
     return NextResponse.json({ program, student, name: session.name, access_level: accessLevel });
   }
 
