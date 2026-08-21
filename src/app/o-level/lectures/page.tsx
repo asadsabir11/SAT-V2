@@ -18,6 +18,7 @@ interface Lecture {
   order_index: number;
   created_at: string;
   is_locked?: boolean;
+  is_free_preview?: boolean;
 }
 
 const SUBJECT_ICON: Record<OLevelCategory, string> = {
@@ -53,6 +54,9 @@ function LectureCard({ lec, index, onLockedClick }: { lec: Lecture; index: numbe
         <div style={{ position: "absolute", top: 10, left: 12, padding: "3px 10px", borderRadius: 999, background: "rgba(0,0,0,.45)", color: "#fff", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".06em" }}>
           {SUBJECT_ICON[lec.category]} LESSON {index + 1}
         </div>
+        {!lec.is_locked && lec.is_free_preview && (
+          <div style={{ position: "absolute", top: 10, right: 12, padding: "3px 10px", borderRadius: 999, background: "#22c55e", color: "#fff", fontSize: ".68rem", fontWeight: 800 }}>FREE</div>
+        )}
       </div>
       <div style={{ padding: "16px 18px 18px" }}>
         <h3 style={{ color: "#071b33", fontWeight: 800, fontSize: ".95rem", margin: "0 0 6px", lineHeight: 1.35 }}>{lec.title}</h3>

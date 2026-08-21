@@ -18,9 +18,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   // Enforce access for students
   if (session.role === "student") {
     if (lecture.program === "o-level") {
-      const subjectAccess = await getOLevelSubjectAccess(session.email, lecture.category);
-      if (subjectAccess !== "unlocked") {
-        return NextResponse.json({ error: "Access denied. Unlock this subject to watch this lecture." }, { status: 403 });
+      if (!lecture.is_free_preview) {
+        const subjectAccess = await getOLevelSubjectAccess(session.email, lecture.category);
+        if (subjectAccess !== "unlocked") {
+          return NextResponse.json({ error: "Access denied. Unlock this subject to watch this lecture." }, { status: 403 });
+        }
       }
     } else {
       const accessLevel = await getStudentAccessLevel(session.email);

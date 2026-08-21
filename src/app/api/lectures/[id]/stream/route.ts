@@ -21,9 +21,11 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   if (session.role === "student") {
     if (lecture.program === "o-level") {
-      const subjectAccess = await getOLevelSubjectAccess(session.email, lecture.category);
-      if (subjectAccess !== "unlocked") {
-        return new NextResponse("Access denied", { status: 403 });
+      if (!lecture.is_free_preview) {
+        const subjectAccess = await getOLevelSubjectAccess(session.email, lecture.category);
+        if (subjectAccess !== "unlocked") {
+          return new NextResponse("Access denied", { status: 403 });
+        }
       }
     } else {
       const isIntro = lecture.category === "introduction";

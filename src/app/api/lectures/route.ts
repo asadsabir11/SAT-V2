@@ -24,7 +24,7 @@ export async function GET() {
   const lecturesWithLock = lectures.map(({ video_url: _v, ...l }) => ({
     ...l,
     is_locked: l.program === "o-level"
-      ? oLevelAccess[l.category] !== "unlocked"
+      ? !l.is_free_preview && oLevelAccess[l.category] !== "unlocked"
       : l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
   }));
 
