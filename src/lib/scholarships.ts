@@ -167,6 +167,20 @@ export async function updateScholarshipStatus(
   return (rows[0] as ScholarshipApplication) ?? null;
 }
 
+// Used by the O-Level unlock page's "I'm a scholarship student" self-service
+// checkbox — lets a student unlock a subject instantly without an admin
+// manually granting it, as long as their account is actually linked to an
+// approved scholarship for this program.
+export async function findApprovedScholarshipForStudent(studentUserId: string, program: "sat" | "o-level"): Promise<ScholarshipApplication | null> {
+  await ensureTable();
+  const rows = await sql`
+    SELECT * FROM scholarship_applications
+    WHERE student_user_id = ${studentUserId} AND program = ${program} AND status = 'approved'
+    LIMIT 1
+  `;
+  return (rows[0] as ScholarshipApplication) ?? null;
+}
+
 export async function linkScholarshipAccount(id: string, studentUserId: string): Promise<void> {
   await ensureTable();
   await sql`UPDATE scholarship_applications SET student_user_id = ${studentUserId}, updated_at = NOW() WHERE id = ${id}`;

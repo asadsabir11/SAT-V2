@@ -57,6 +57,10 @@ function UnlockForm() {
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [isScholarshipStudent, setIsScholarshipStudent] = useState(false);
+  const [scholarshipSubmitting, setScholarshipSubmitting] = useState(false);
+  const [scholarshipError, setScholarshipError] = useState("");
+
   useEffect(() => {
     if (!subject) { setLoading(false); return; }
     fetch("/api/o-level/access")
@@ -141,6 +145,30 @@ function UnlockForm() {
     }
   }
 
+  async function handleScholarshipUnlock() {
+    if (!subject) return;
+    setScholarshipSubmitting(true);
+    setScholarshipError("");
+    try {
+      const res = await fetch("/api/o-level/access/scholarship-unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setScholarshipError(data.error ?? "Something went wrong. Please try again.");
+        setScholarshipSubmitting(false);
+        return;
+      }
+      setCurrentStatus("unlocked");
+    } catch {
+      setScholarshipError("Something went wrong. Please try again.");
+    } finally {
+      setScholarshipSubmitting(false);
+    }
+  }
+
   if (!subject) {
     return (
       <section className="section"><div className="container" style={{ maxWidth: 640, textAlign: "center" }}>
@@ -212,79 +240,110 @@ function UnlockForm() {
                 </div>
               )}
 
-              <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Payment method</h2>
-              <div className="card" style={{ background: "#eff6ff", borderColor: "#1d4ed8", borderWidth: 2, marginBottom: 32, padding: "28px 32px" }}>
-                <h3 style={{ color: "#1d4ed8", fontSize: "1.3rem", marginTop: 0, marginBottom: 18 }}>🏦 Bank Transfer</h3>
-                <div className="grid grid-3" style={{ gap: 32 }}>
-                  {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
-                    <>
-                      <BigDetailRow label="Bank" value={BANK_NAME} />
-                      <BigDetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
-                      <BigDetailRow label="IBAN" value={BANK_IBAN} />
-                    </>
-                  ) : (
-                    <>
-                      <BigPlaceholderRow label="Bank name" />
-                      <BigPlaceholderRow label="Account title" />
-                      <BigPlaceholderRow label="Account / IBAN" />
-                    </>
+              <label style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28, padding: "16px 20px", background: "#fffbeb", border: "1.5px solid #fde68a", borderRadius: 12, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={isScholarshipStudent}
+                  onChange={(e) => { setIsScholarshipStudent(e.target.checked); setScholarshipError(""); }}
+                  style={{ width: 20, height: 20, accentColor: "#b45309" }}
+                />
+                <span style={{ fontWeight: 700, color: "#92400e" }}>
+                  🎓 I am an Opportunity Scholarship student — this subject should be free for me
+                </span>
+              </label>
+
+              {isScholarshipStudent ? (
+                <div className="card" style={{ padding: "28px 32px" }}>
+                  <p style={{ color: "var(--muted)", lineHeight: 1.65, marginBottom: 20 }}>
+                    We&apos;ll check your account against our approved scholarship students. If you&apos;re on the
+                    list, {SUBJECT_LABELS[subject]} unlocks immediately — no payment needed.
+                  </p>
+                  {scholarshipError && (
+                    <div style={{ background: "#fff2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", color: "#c62828", fontSize: ".85rem", fontWeight: 600, marginBottom: 16 }}>
+                      ⚠ {scholarshipError}
+                    </div>
                   )}
+                  <button className="btn btn-primary" type="button" onClick={handleScholarshipUnlock} disabled={scholarshipSubmitting}>
+                    {scholarshipSubmitting ? "Checking…" : "Confirm Scholarship & Unlock"}
+                  </button>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Payment method</h2>
+                  <div className="card" style={{ background: "#eff6ff", borderColor: "#1d4ed8", borderWidth: 2, marginBottom: 32, padding: "28px 32px" }}>
+                    <h3 style={{ color: "#1d4ed8", fontSize: "1.3rem", marginTop: 0, marginBottom: 18 }}>🏦 Bank Transfer</h3>
+                    <div className="grid grid-3" style={{ gap: 32 }}>
+                      {BANK_NAME && BANK_ACCOUNT_TITLE && BANK_IBAN ? (
+                        <>
+                          <BigDetailRow label="Bank" value={BANK_NAME} />
+                          <BigDetailRow label="Account title" value={BANK_ACCOUNT_TITLE} />
+                          <BigDetailRow label="IBAN" value={BANK_IBAN} />
+                        </>
+                      ) : (
+                        <>
+                          <BigPlaceholderRow label="Bank name" />
+                          <BigPlaceholderRow label="Account title" />
+                          <BigPlaceholderRow label="Account / IBAN" />
+                        </>
+                      )}
+                    </div>
+                  </div>
 
-              <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Submit payment for verification</h2>
-              <form className="form card" onSubmit={handleSubmit} noValidate>
-                <div className="form-grid">
-                  <div className="field">
-                    <label htmlFor="amountPaid">Amount paid (PKR) *</label>
-                    <input id="amountPaid" type="number" min={1} value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="transactionReference">Transaction ID / reference number *</label>
-                    <input id="transactionReference" type="text" value={transactionReference} onChange={(e) => setTransactionReference(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="paymentDate">Payment date *</label>
-                    <input id="paymentDate" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="payerAccountName">Name on the sending account *</label>
-                    <input id="payerAccountName" type="text" value={payerAccountName} onChange={(e) => setPayerAccountName(e.target.value)} />
-                  </div>
-                </div>
+                  <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: 14 }}>Submit payment for verification</h2>
+                  <form className="form card" onSubmit={handleSubmit} noValidate>
+                    <div className="form-grid">
+                      <div className="field">
+                        <label htmlFor="amountPaid">Amount paid (PKR) *</label>
+                        <input id="amountPaid" type="number" min={1} value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="transactionReference">Transaction ID / reference number *</label>
+                        <input id="transactionReference" type="text" value={transactionReference} onChange={(e) => setTransactionReference(e.target.value)} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="paymentDate">Payment date *</label>
+                        <input id="paymentDate" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="payerAccountName">Name on the sending account *</label>
+                        <input id="payerAccountName" type="text" value={payerAccountName} onChange={(e) => setPayerAccountName(e.target.value)} />
+                      </div>
+                    </div>
 
-                <div className="field">
-                  <label>Payment screenshot (optional — JPG, PNG or PDF, max 10MB)</label>
-                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,application/pdf" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    <button type="button" onClick={() => fileRef.current?.click()} style={{ padding: "8px 14px", border: "1.5px solid #dce5ef", borderRadius: 9, background: "#fff", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#344054" }}>
-                      {file ? "Change file" : "Choose file"}
-                    </button>
-                    {file && (
-                      <button type="button" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ padding: "8px 14px", border: "none", borderRadius: 9, background: "#fee2e2", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#991b1b" }}>
-                        Remove
-                      </button>
+                    <div className="field">
+                      <label>Payment screenshot (optional — JPG, PNG or PDF, max 10MB)</label>
+                      <input ref={fileRef} type="file" accept="image/jpeg,image/png,application/pdf" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        <button type="button" onClick={() => fileRef.current?.click()} style={{ padding: "8px 14px", border: "1.5px solid #dce5ef", borderRadius: 9, background: "#fff", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#344054" }}>
+                          {file ? "Change file" : "Choose file"}
+                        </button>
+                        {file && (
+                          <button type="button" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }} style={{ padding: "8px 14px", border: "none", borderRadius: 9, background: "#fee2e2", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", color: "#991b1b" }}>
+                            Remove
+                          </button>
+                        )}
+                        {file && <span style={{ fontSize: ".8rem", color: "#344054", fontWeight: 600 }}>{file.name}</span>}
+                      </div>
+                      {uploadPct > 0 && <p style={{ fontSize: ".75rem", color: "#6b7c93", marginTop: 6 }}>Uploading… {uploadPct}%</p>}
+                    </div>
+
+                    <p style={{ fontSize: ".78rem", color: "#6b7c93", margin: "0 0 4px" }}>
+                      By submitting, you confirm you&apos;ve reviewed our{" "}
+                      <a href="/o-level/refund-policy" target="_blank" rel="noreferrer" style={{ color: "#155eef" }}>Refund &amp; Cancellation Policy</a>.
+                    </p>
+
+                    {error && (
+                      <div style={{ background: "#fff2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", color: "#c62828", fontSize: ".85rem", fontWeight: 600 }}>
+                        ⚠ {error}
+                      </div>
                     )}
-                    {file && <span style={{ fontSize: ".8rem", color: "#344054", fontWeight: 600 }}>{file.name}</span>}
-                  </div>
-                  {uploadPct > 0 && <p style={{ fontSize: ".75rem", color: "#6b7c93", marginTop: 6 }}>Uploading… {uploadPct}%</p>}
-                </div>
 
-                <p style={{ fontSize: ".78rem", color: "#6b7c93", margin: "0 0 4px" }}>
-                  By submitting, you confirm you&apos;ve reviewed our{" "}
-                  <a href="/o-level/refund-policy" target="_blank" rel="noreferrer" style={{ color: "#155eef" }}>Refund &amp; Cancellation Policy</a>.
-                </p>
-
-                {error && (
-                  <div style={{ background: "#fff2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "10px 14px", color: "#c62828", fontSize: ".85rem", fontWeight: 600 }}>
-                    ⚠ {error}
-                  </div>
-                )}
-
-                <button className="btn btn-primary" type="submit" disabled={submitting}>
-                  {submitting ? "Submitting…" : "Submit Payment for Verification"}
-                </button>
-              </form>
+                    <button className="btn btn-primary" type="submit" disabled={submitting}>
+                      {submitting ? "Submitting…" : "Submit Payment for Verification"}
+                    </button>
+                  </form>
+                </>
+              )}
             </>
           )}
         </div>
