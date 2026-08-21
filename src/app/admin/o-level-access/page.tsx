@@ -29,6 +29,7 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 };
 
 type Filter = "all" | "pending" | "unlocked";
+type SubjectFilter = "all" | "mathematics" | "english-language" | "both";
 
 const SUBJECTS = getOLevelSubjects().map((s) => ({ slug: s.slug, name: s.name }));
 const SUBJECT_META: Record<string, { label: string; icon: string }> = Object.fromEntries(
@@ -50,6 +51,7 @@ export default function AdminOLevelAccess() {
   const [rows, setRows] = useState<AccessRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
+  const [subjectFilter, setSubjectFilter] = useState<SubjectFilter>("all");
   const [search, setSearch] = useState("");
   const [grantingId, setGrantingId] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
@@ -112,8 +114,30 @@ export default function AdminOLevelAccess() {
     load();
   }
 
+  // Students currently holding BOTH paid subjects unlocked at once — used by
+  // the "Both" subfilter, a view-only list so admin can see at a glance who's
+  // paying for the 2-subject bundle (relevant when one gets dropped later and
+  // the other's bundle price needs to be re-evaluated).
+  const unlockedSubjectsByEmail: Record<string, Set<string>> = {};
+  rows.forEach(r => {
+    if (r.status !== "unlocked") return;
+    if (r.subject !== "mathematics" && r.subject !== "english-language") return;
+    (unlockedSubjectsByEmail[r.email] ??= new Set()).add(r.subject);
+  });
+  const bothEmails = new Set(
+    Object.entries(unlockedSubjectsByEmail)
+      .filter(([, subjects]) => subjects.has("mathematics") && subjects.has("english-language"))
+      .map(([email]) => email)
+  );
+
   const filtered = rows.filter(r => {
     if (filter !== "all" && r.status !== filter) return false;
+    if (subjectFilter === "mathematics" && r.subject !== "mathematics") return false;
+    if (subjectFilter === "english-language" && r.subject !== "english-language") return false;
+    if (subjectFilter === "both") {
+      if (r.subject !== "mathematics" && r.subject !== "english-language") return false;
+      if (!bothEmails.has(r.email)) return false;
+    }
     if (search) {
       const q = search.toLowerCase();
       return r.email.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q);
@@ -125,6 +149,12 @@ export default function AdminOLevelAccess() {
     all: rows.length,
     pending: rows.filter(r => r.status === "pending").length,
     unlocked: rows.filter(r => r.status === "unlocked").length,
+  };
+
+  const subjectCounts = {
+    mathematics: rows.filter(r => r.subject === "mathematics").length,
+    "english-language": rows.filter(r => r.subject === "english-language").length,
+    both: bothEmails.size,
   };
 
   return (
@@ -192,6 +222,29 @@ export default function AdminOLevelAccess() {
           />
         </div>
 
+        {/* Subject subfilter */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
+          <span style={{ fontSize: ".78rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".04em" }}>Subject:</span>
+          {([
+            ["all", "All subjects"],
+            ["mathematics", `📐 Mathematics (${subjectCounts.mathematics})`],
+            ["english-language", `📖 English Language (${subjectCounts["english-language"]})`],
+            ["both", `🎯 Both (${subjectCounts.both})`],
+          ] as [SubjectFilter, string][]).map(([f, label]) => {
+            const active = subjectFilter === f;
+            return (
+              <button key={f} onClick={() => setSubjectFilter(f)} style={{ padding: "7px 16px", borderRadius: 999, fontWeight: 700, fontSize: ".82rem", cursor: "pointer", border: active ? "2px solid #7c3aed" : "2px solid #e8eef6", background: active ? "#f5f3ff" : "#f8fafc", color: active ? "#7c3aed" : "#6b7c93" }}>
+                {label}
+              </button>
+            );
+          })}
+          {subjectFilter === "both" && (
+            <span style={{ fontSize: ".78rem", color: "#7c3aed", fontWeight: 600 }}>
+              View only — students holding both paid subjects at once. No actions here; use the Mathematics/English tabs to revoke.
+            </span>
+          )}
+        </div>
+
         {/* Table */}
         {loading ? (
           <div className="card"><p>Loading…</p></div>
@@ -241,7 +294,9 @@ export default function AdminOLevelAccess() {
                           </button>
                         </td>
                         <td>
-                          {r.status !== "unlocked" ? (
+                          {subjectFilter === "both" ? (
+                            <span style={{ color: "#a0aec0", fontSize: ".78rem" }}>—</span>
+                          ) : r.status !== "unlocked" ? (
                             isGranting ? (
                               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                                 <input
