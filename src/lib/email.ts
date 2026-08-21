@@ -17,6 +17,40 @@ const SUBJECT_LABELS: Record<string, string> = {
 };
 const subjectLabel = (s: string) => SUBJECT_LABELS[s] ?? s;
 
+type SendEmailPayload = {
+  to: string | string[];
+  subject: string;
+  html: string;
+};
+
+// The Resend SDK does NOT throw on API-level failures (invalid sender,
+// quota/rate limits, restricted key, etc.) — it returns { data, error }.
+// Every call site in this file used to ignore that field entirely, so a
+// failed send looked identical to a successful one: no exception, no log,
+// nothing — the caller (and the person waiting on the email) had no way to
+// know it never went out. Centralizing the send here means every email in
+// this file now actually surfaces a Resend-side failure via console.error
+// instead of failing silently.
+async function sendEmail(payload: SendEmailPayload): Promise<{ ok: boolean; error?: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
+  const resend = new Resend(apiKey);
+  try {
+    const { error } = await resend.emails.send({
+      from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+      ...payload,
+    });
+    if (error) {
+      console.error(`Resend rejected email (to: ${payload.to}, subject: "${payload.subject}"):`, error);
+      return { ok: false, error: error.message ?? String(error) };
+    }
+    return { ok: true };
+  } catch (e) {
+    console.error(`Resend send threw (to: ${payload.to}, subject: "${payload.subject}"):`, e);
+    return { ok: false, error: String(e) };
+  }
+}
+
 export async function sendParentReport(opts: {
   parentEmail: string;
   parentName: string;
@@ -33,11 +67,6 @@ export async function sendParentReport(opts: {
   coachNote: string;
   parentAction: string;
 }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
-
-  const resend = new Resend(apiKey);
-
   const scoreRow = opts.latestScore
     ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:160px;">Latest score</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.latestScore}${opts.scoreDelta !== null ? ` <span style="color:${opts.scoreDelta >= 0 ? "#15803d" : "#dc2626"}">(${opts.scoreDelta >= 0 ? "+" : ""}${opts.scoreDelta})</span>` : ""}</td></tr>`
     : "";
@@ -45,51 +74,45 @@ export async function sendParentReport(opts: {
     ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Target score</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#155eef;">${opts.targetScore}</td></tr>`
     : "";
 
-  try {
-    await resend.emails.send({
-      from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
-      to: opts.parentEmail,
-      subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
-          <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
-            <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
-            <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
-            <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
-          </div>
-
-          <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
-            <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:160px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
-            <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Homework</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.homeworkDone}/${opts.homeworkTotal} assignments completed</td></tr>
-            ${scoreRow}${targetRow}
-          </table>
-
-          ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
-          ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
-
-          <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
-            <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
-            <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
-            <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
-          </div>
-
-          <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
-            <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
-            <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
-          </div>
-
-          <div style="text-align:center;margin-bottom:20px;">
-            <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
-          </div>
-
-          <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service. No score guarantees implied.<br>The Digital Tutor · academy.thedigitaltutor.net</p>
+  return sendEmail({
+    to: opts.parentEmail,
+    subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
+          <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
+          <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
+          <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
         </div>
-      `,
-    });
-    return { ok: true, error: undefined };
-  } catch (e) {
-    return { ok: false, error: String(e) };
-  }
+
+        <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
+          <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:160px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
+          <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Homework</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.homeworkDone}/${opts.homeworkTotal} assignments completed</td></tr>
+          ${scoreRow}${targetRow}
+        </table>
+
+        ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
+        ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
+
+        <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+          <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
+          <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
+          <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+          <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
+          <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
+        </div>
+
+        <div style="text-align:center;margin-bottom:20px;">
+          <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
+        </div>
+
+        <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service. No score guarantees implied.<br>The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
 }
 
 export async function sendOLevelParentReport(opts: {
@@ -104,59 +127,48 @@ export async function sendOLevelParentReport(opts: {
   coachNote: string;
   parentAction: string;
 }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { ok: false, error: "RESEND_API_KEY not configured" };
-
-  const resend = new Resend(apiKey);
-
   const subjectRows = opts.subjects.map((s) => `
     <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">${s.subjectLabel}</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${s.attempts > 0 ? `${s.avgPercent}% average · ${s.attempts} quiz${s.attempts !== 1 ? "zes" : ""} attempted` : "No quiz attempts yet"}</td></tr>
   `).join("");
 
-  try {
-    await resend.emails.send({
-      from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
-      to: opts.parentEmail,
-      subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
-          <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
-            <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
-            <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
-            <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
-          </div>
-
-          <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
-            <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
-            ${subjectRows}
-          </table>
-
-          ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
-          ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
-
-          <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
-            <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
-            <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
-            <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
-          </div>
-
-          <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
-            <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
-            <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
-          </div>
-
-          <div style="text-align:center;margin-bottom:20px;">
-            <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
-          </div>
-
-          <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment.<br>The Digital Tutor · academy.thedigitaltutor.net</p>
+  return sendEmail({
+    to: opts.parentEmail,
+    subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
+          <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
+          <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
+          <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
         </div>
-      `,
-    });
-    return { ok: true, error: undefined };
-  } catch (e) {
-    return { ok: false, error: String(e) };
-  }
+
+        <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
+          <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
+          ${subjectRows}
+        </table>
+
+        ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
+        ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
+
+        <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+          <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
+          <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
+          <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+          <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
+          <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
+        </div>
+
+        <div style="text-align:center;margin-bottom:20px;">
+          <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
+        </div>
+
+        <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment.<br>The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
 }
 
 export async function sendNewStudentAlert(student: {
@@ -166,16 +178,10 @@ export async function sendNewStudentAlert(student: {
   packageType?: string;
   grade?: string;
 }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return; // silently skip if not configured
-
-  const resend = new Resend(apiKey);
-
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `New student registered: ${student.name}`,
-
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
         <h2 style="color:#071b33;margin:0 0 8px;">New student registered 🎉</h2>
@@ -197,11 +203,6 @@ export async function sendNewStudentAlert(student: {
 }
 
 export async function sendWelcomeEmail(student: { name: string; email: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-
-  const resend = new Resend(apiKey);
-
   const waSection = WHATSAPP_URL
     ? `<div style="margin:20px 0;padding:16px 20px;background:#dcfce7;border-radius:10px;">
         <p style="margin:0 0 8px;font-weight:700;color:#166534;">Join our WhatsApp community</p>
@@ -210,8 +211,7 @@ export async function sendWelcomeEmail(student: { name: string; email: string })
       </div>`
     : "";
 
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: student.email,
     subject: "Welcome to The Digital Tutor — you're in!",
     html: `
@@ -270,11 +270,7 @@ export async function sendWelcomeEmail(student: { name: string; email: string })
 }
 
 export async function sendSatUnlockPaymentSubmittedAck(opts: { email: string; name: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: "Payment received — under review",
     html: `
@@ -291,11 +287,8 @@ export async function sendSatUnlockPaymentSubmittedAck(opts: { email: string; na
 }
 
 export async function sendSatUnlockPaymentSubmittedAdminAlert(opts: { email: string; name: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `SAT payment submitted for verification: ${opts.name}`,
     html: `
@@ -314,11 +307,7 @@ export async function sendSatUnlockPaymentSubmittedAdminAlert(opts: { email: str
 }
 
 export async function sendSatAccessGranted(opts: { email: string; name: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: "Your SAT access is unlocked! 🎉",
     html: `
@@ -338,12 +327,7 @@ export async function sendSatAccessGranted(opts: { email: string; name: string }
 }
 
 export async function sendPasswordResetEmail(opts: { email: string; name: string; resetUrl: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: "Reset your password — The Digital Tutor",
     html: `
@@ -365,11 +349,7 @@ export async function sendPasswordResetEmail(opts: { email: string; name: string
 }
 
 export async function sendOLevelAccountWelcome(opts: { email: string; name: string; setupUrl: string; subject: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: "Your enrollment is confirmed — set up your account",
     html: `
@@ -393,12 +373,8 @@ export async function sendOLevelAccountWelcome(opts: { email: string; name: stri
 }
 
 export async function sendParentAccountWelcome(opts: { email: string; name: string; studentName: string; studentEmail: string; program: "sat" | "o-level"; setupUrl: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
   const programLabel = opts.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: `Your parent account is ready — track ${opts.studentName}'s ${programLabel} progress`,
     html: `
@@ -423,12 +399,8 @@ export async function sendParentAccountWelcome(opts: { email: string; name: stri
 }
 
 export async function sendScholarshipAccountWelcome(opts: { email: string; name: string; program: "sat" | "o-level"; setupUrl: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
   const programLabel = opts.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  return sendEmail({
     to: opts.email,
     subject: `Welcome to the ${programLabel} program — you're in!`,
     html: `
@@ -457,12 +429,8 @@ export async function sendScholarshipAccountWelcome(opts: { email: string; name:
 // applying) — there's no new password to set, so this just confirms the
 // scholarship instead of sending a redundant/confusing reset-password link.
 export async function sendScholarshipApprovedExistingAccount(opts: { email: string; name: string; program: "sat" | "o-level" }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
   const programLabel = opts.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  return sendEmail({
     to: opts.email,
     subject: `Your Opportunity Scholarship is approved, ${opts.name}!`,
     html: `
@@ -486,11 +454,7 @@ export async function sendScholarshipApprovedExistingAccount(opts: { email: stri
 }
 
 export async function sendTeacherAccountWelcome(opts: { email: string; name: string; setupUrl: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: "Your teacher account is ready — set your password",
     html: `
@@ -513,10 +477,6 @@ export async function sendTeacherAccountWelcome(opts: { email: string; name: str
 }
 
 export async function sendOLevelRegistrationWelcome(student: { name: string; email: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-
   const waSection = OLEVEL_WHATSAPP_URL
     ? `<div style="margin:20px 0;padding:16px 20px;background:#dcfce7;border-radius:10px;">
         <p style="margin:0 0 8px;font-weight:700;color:#166534;">Join our O Level WhatsApp community</p>
@@ -525,8 +485,7 @@ export async function sendOLevelRegistrationWelcome(student: { name: string; ema
       </div>`
     : "";
 
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: student.email,
     subject: "Welcome to The Digital Tutor — you're in!",
     html: `
@@ -581,12 +540,8 @@ export async function sendOLevelRegistrationWelcome(student: { name: string; ema
 }
 
 export async function sendOLevelRegistrationAdminAlert(student: { studentName: string; studentEmail: string; parentName: string; parentEmail: string; city: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return;
-  const resend = new Resend(apiKey);
-
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `New O Level registration: ${student.studentName}`,
     html: `
@@ -610,13 +565,10 @@ export async function sendScholarshipApplicationAdminAlert(app: {
   program: "sat" | "o-level"; studentName: string; age: string; city: string; grade: string;
   parentName: string; parentEmail: string; parentWhatsapp: string; incomeRange: string;
 }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return;
-  const resend = new Resend(apiKey);
+  if (ADMIN_EMAILS.length === 0) return;
   const programLabel = app.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
 
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `New scholarship application: ${app.studentName} (${programLabel})`,
     html: `
@@ -639,11 +591,7 @@ export async function sendScholarshipApplicationAdminAlert(app: {
 }
 
 export async function sendOLevelUnlockPaymentSubmittedAck(opts: { email: string; name: string; subject: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: `Payment received — ${subjectLabel(opts.subject)}`,
     html: `
@@ -660,11 +608,8 @@ export async function sendOLevelUnlockPaymentSubmittedAck(opts: { email: string;
 }
 
 export async function sendOLevelUnlockPaymentSubmittedAdminAlert(opts: { email: string; name: string; subject: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `Payment submitted for verification: ${opts.name} — ${subjectLabel(opts.subject)}`,
     html: `
@@ -684,12 +629,7 @@ export async function sendOLevelUnlockPaymentSubmittedAdminAlert(opts: { email: 
 }
 
 export async function sendOLevelAccessGranted(opts: { email: string; name: string; subject: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: opts.email,
     subject: `${subjectLabel(opts.subject)} is unlocked! 🎉`,
     html: `
@@ -709,11 +649,7 @@ export async function sendOLevelAccessGranted(opts: { email: string; name: strin
 }
 
 export async function sendOLevelApplicationConfirmation(app: OLevelApplication) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: app.parent_email,
     subject: "We Received Your O Level Founding Cohort Application",
     html: `
@@ -736,11 +672,8 @@ export async function sendOLevelApplicationConfirmation(app: OLevelApplication) 
 }
 
 export async function sendOLevelApplicationAdminAlert(app: OLevelApplication) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `New O Level application: ${app.student_name} (${subjectLabel(app.subject)})`,
     html: `
@@ -764,11 +697,7 @@ export async function sendOLevelApplicationAdminAlert(app: OLevelApplication) {
 }
 
 export async function sendOLevelPaymentSubmittedAck(app: OLevelApplication) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: app.parent_email,
     subject: "Payment Information Received — Verification in Progress",
     html: `
@@ -786,11 +715,8 @@ export async function sendOLevelPaymentSubmittedAck(app: OLevelApplication) {
 }
 
 export async function sendOLevelPaymentSubmittedAdminAlert(app: OLevelApplication) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || ADMIN_EMAILS.length === 0) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
     to: ADMIN_EMAILS,
     subject: `Payment submitted: ${app.student_name} — needs verification`,
     html: `
@@ -811,11 +737,7 @@ export async function sendOLevelPaymentSubmittedAdminAlert(app: OLevelApplicatio
 }
 
 export async function sendOLevelEnrollmentConfirmed(app: OLevelApplication, opts?: { startDate?: string; schedule?: string; orientationDate?: string; nextSteps?: string }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
-  const resend = new Resend(apiKey);
-  await resend.emails.send({
-    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+  await sendEmail({
     to: app.parent_email,
     subject: "Payment Verified — Welcome to The Digital Tutor",
     html: `
