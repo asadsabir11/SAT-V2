@@ -13,14 +13,21 @@ export async function DELETE() {
 
   await Promise.all([ensureParentTables(), ensureAnalyticsTables(), ensureQuizTables()]);
 
-  // Delete all student leads, diagnostics, users, and quiz results — keeps webinar/contact leads
-  // Note: leads/diagnostics are saved under "leads-student.json"/"diagnostics.json"
-  // (the .json suffix is part of the literal collection key, not a real file);
-  // quiz attempts live in their own quiz_attempts table, not sat_records.
+  // Delete all student leads (SAT and O-Level), diagnostics, users, quiz
+  // results, O-Level subject unlocks, and scholarship applications — keeps
+  // webinar/contact leads. Note: leads/diagnostics are saved under
+  // "leads-student.json"/"leads-o-level.json"/"diagnostics.json" (the .json
+  // suffix is part of the literal collection key, not a real file); quiz
+  // attempts live in their own quiz_attempts table, not sat_records.
+  // DELETE FROM users WHERE role = 'student' covers both programs already,
+  // since program isn't part of the role.
   await Promise.all([
     sql`DELETE FROM sat_records WHERE collection = 'leads-student.json'`,
+    sql`DELETE FROM sat_records WHERE collection = 'leads-o-level.json'`,
     sql`DELETE FROM sat_records WHERE collection = 'diagnostics.json'`,
     sql`DELETE FROM quiz_attempts`,
+    sql`DELETE FROM olevel_subject_access`,
+    sql`DELETE FROM scholarship_applications`,
     sql`DELETE FROM users WHERE role = 'student'`,
   ]);
 

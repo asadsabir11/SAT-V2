@@ -29,6 +29,12 @@ export default function AdminScholarshipStudents() {
       .finally(() => setLoading(false));
   }, []);
 
+  async function deleteStudent(id: string, name: string) {
+    if (!confirm(`Delete "${name}"? This removes their account and the scholarship application entirely — cannot be undone.`)) return;
+    await fetch(`/api/admin/scholarship-students/${id}`, { method: "DELETE" });
+    setStudents(s => s.filter(x => x.id !== id));
+  }
+
   const filtered = programFilter === "all" ? students : students.filter(s => s.program === programFilter);
   const satCount = students.filter(s => s.program === "sat").length;
   const oLevelCount = students.filter(s => s.program === "o-level").length;
@@ -74,6 +80,7 @@ export default function AdminScholarshipStudents() {
                     <th>Account email</th>
                     <th>Scholarship</th>
                     <th>Account created</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -84,6 +91,12 @@ export default function AdminScholarshipStudents() {
                       <td style={{ fontSize: ".83rem" }}>{s.student_email || s.parent_email}</td>
                       <td style={{ fontSize: ".83rem" }}>{s.scholarship_percentage != null ? `${s.scholarship_percentage}%` : "—"}</td>
                       <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(s.updated_at)}</td>
+                      <td>
+                        <button onClick={() => deleteStudent(s.id, s.student_name)}
+                          style={{ padding: "4px 10px", borderRadius: 6, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".75rem", cursor: "pointer" }}>
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

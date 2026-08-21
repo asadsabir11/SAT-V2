@@ -37,10 +37,14 @@ export default function Admin() {
   const [scholarshipStudentCount, setScholarshipStudentCount] = useState<number | null>(null);
 
   async function clearTestData() {
-    if (!confirm("⚠️ This will permanently delete ALL student registrations, diagnostics, and quiz results. This cannot be undone. Continue?")) return;
+    const typed = window.prompt(
+      "This permanently deletes EVERY student — SAT registrations, O-Level registrations, and scholarship students alike — plus their diagnostics, quiz results, and O-Level subject unlocks. This is not limited to test accounts; it includes every real registration too. This cannot be undone.\n\nType DELETE to confirm:"
+    );
+    if (typed !== "DELETE") return;
     await fetch("/api/admin/clear-test-data", { method: "DELETE" });
-    setData(d => d ? { ...d, metrics: { ...d.metrics, totalLeads: 0, freeSignups: 0, paidFounderCohortStudents: 0, premiumStudents: 0, diagnosticCompletions: 0, diagnosticCompletionRate: 0 } } : d);
-    alert("Test data cleared. Metrics reset to zero.");
+    setData(d => d ? { ...d, metrics: { ...d.metrics, totalLeads: 0, freeSignups: 0, paidFounderCohortStudents: 0, premiumStudents: 0, diagnosticCompletions: 0, diagnosticCompletionRate: 0, oLevelLeads: 0 } } : d);
+    setScholarshipStudentCount(0);
+    alert("All students cleared. Metrics reset to zero.");
   }
 
   useEffect(() => {
@@ -164,7 +168,7 @@ export default function Admin() {
             </Link>
             {isFounder && (
               <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
-                🗑 Clear test data
+                🗑 Clear ALL students (SAT + O-Level + Scholarships)
               </button>
             )}
           </div>
