@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { getScholarshipApplicationById, linkScholarshipAccount } from "@/lib/scholarships";
 import { findUserByEmailAndProgram, createUser } from "@/lib/users";
 import { createResetToken } from "@/lib/passwordReset";
-import { sendScholarshipAccountWelcome } from "@/lib/email";
+import { sendScholarshipAccountWelcome, sendScholarshipApprovedExistingAccount } from "@/lib/email";
 import { isValidEmail } from "@/lib/validators";
 
 const APP_URL = "https://academy.thedigitaltutor.net";
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let userId: string;
   if (existingUser) {
     userId = existingUser.id;
+    sendScholarshipApprovedExistingAccount({ email, name, program: application.program }).catch(console.error);
   } else {
     const throwawayPassword = crypto.randomBytes(24).toString("hex");
     userId = await createUser(email, throwawayPassword, "student", name, application.program);

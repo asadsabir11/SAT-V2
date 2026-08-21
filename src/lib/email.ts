@@ -452,6 +452,39 @@ export async function sendScholarshipAccountWelcome(opts: { email: string; name:
   });
 }
 
+// Sent instead of sendScholarshipAccountWelcome when the chosen email already
+// has a student account in this program (they registered normally before
+// applying) — there's no new password to set, so this just confirms the
+// scholarship instead of sending a redundant/confusing reset-password link.
+export async function sendScholarshipApprovedExistingAccount(opts: { email: string; name: string; program: "sat" | "o-level" }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const resend = new Resend(apiKey);
+  const programLabel = opts.program === "o-level" ? "Cambridge O Level" : "SAT Prep";
+  await resend.emails.send({
+    from: "The Digital Tutor <noreply@academy.thedigitaltutor.net>",
+    to: opts.email,
+    subject: `Your Opportunity Scholarship is approved, ${opts.name}!`,
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Congratulations, ${opts.name}! 🎉</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your Opportunity Scholarship application has been approved for the <strong>${programLabel}</strong>
+          program. Since you already have an account with this email, there&apos;s nothing new to set up — sign in
+          any time with your existing password to keep going.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${APP_URL}/login" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Sign in →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.78rem;line-height:1.6;">
+          Forgot your password? Use the &quot;Forgot password?&quot; link on the sign-in page.<br>
+          The Digital Tutor · academy.thedigitaltutor.net
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendTeacherAccountWelcome(opts: { email: string; name: string; setupUrl: string }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
