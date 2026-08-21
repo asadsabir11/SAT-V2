@@ -249,7 +249,7 @@ export default function Dashboard() {
         eyebrow="Student dashboard"
         title={`Welcome back, ${firstName}. Your next win is specific.`}
       >
-        {student.packageType} · {student.country} · Current cohort: Global SAT 01
+        {[student.packageType, student.country, "Current cohort: Global SAT 01"].filter(Boolean).join(" · ")}
       </PageHero>
 
       <section className="section soft">

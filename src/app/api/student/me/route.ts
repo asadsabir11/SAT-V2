@@ -32,10 +32,15 @@ export async function GET() {
     return NextResponse.json({ program, student, name: session.name, access_level: accessLevel });
   }
 
-  const [student, diagnostic] = await Promise.all([
+  // Same fallback as O-Level above — accounts created directly by an admin
+  // (scholarships, etc.) have no leads-student.json row, so without this the
+  // dashboard would show the "no profile yet" screen for a fully valid,
+  // provisioned student.
+  const [lead, diagnostic] = await Promise.all([
     findByField("leads-student.json", "studentEmail", email),
     findByField("diagnostics.json", "email", email),
   ]);
+  const student = lead ?? { studentName: session.name, country: "", packageType: "" };
 
   return NextResponse.json({ program, student, diagnostic, name: session.name, access_level: accessLevel });
 }
