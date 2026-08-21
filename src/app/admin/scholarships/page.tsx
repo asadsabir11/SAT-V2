@@ -64,6 +64,7 @@ export default function AdminScholarships() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [programFilter, setProgramFilter] = useState<"all" | "sat" | "o-level">("all");
   const [draftStatus, setDraftStatus] = useState<Record<string, string>>({});
   const [draftPct, setDraftPct] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
@@ -122,8 +123,12 @@ export default function AdminScholarships() {
     setApps(a => a.filter(x => x.id !== id));
   }
 
-  const filtered = statusFilter === "all" ? apps : apps.filter(a => a.status === statusFilter);
+  const filtered = apps
+    .filter(a => statusFilter === "all" || a.status === statusFilter)
+    .filter(a => programFilter === "all" || a.program === programFilter);
   const newCount = apps.filter(a => a.status === "new").length;
+  const satCount = apps.filter(a => a.program === "sat").length;
+  const oLevelCount = apps.filter(a => a.program === "o-level").length;
 
   return (
     <section className="section">
@@ -134,6 +139,17 @@ export default function AdminScholarships() {
           <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: 0 }}>
             {newCount > 0 ? `${newCount} new application${newCount > 1 ? "s" : ""} awaiting review` : "No new applications"}
           </p>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+          {([["all", `All programs (${apps.length})`], ["sat", `SAT (${satCount})`], ["o-level", `O Level (${oLevelCount})`]] as const).map(([value, label]) => {
+            const active = programFilter === value;
+            return (
+              <button key={value} onClick={() => setProgramFilter(value)} style={{ padding: "7px 16px", borderRadius: 999, fontWeight: 700, fontSize: ".82rem", cursor: "pointer", border: active ? "2px solid #b45309" : "2px solid #e8eef6", background: active ? "#fffbeb" : "#fff", color: active ? "#92400e" : "#6b7c93" }}>
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>

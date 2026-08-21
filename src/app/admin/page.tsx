@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardCard, PageHero } from "@/components/site";
 
@@ -17,33 +17,17 @@ interface Metrics {
 
 interface AdminData {
   metrics: Metrics;
-  students: Record<string, string>[];
-  webinar: Record<string, string>[];
-  oLevelLeads: Record<string, string>[];
 }
 
 export default function Admin() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFounder, setIsFounder] = useState(false);
-  const [expandedOLevelLead, setExpandedOLevelLead] = useState<number | null>(null);
-
-  async function deleteStudent(email: string, name: string) {
-    if (!confirm(`Delete "${name}" (${email})? This removes their account and all data.`)) return;
-    await fetch(`/api/admin/students/${encodeURIComponent(email)}`, { method: "DELETE" });
-    setData(d => d ? { ...d, students: d.students.filter(s => s.studentEmail !== email) } : d);
-  }
-
-  async function deleteOLevelLead(email: string, name: string) {
-    if (!confirm(`Delete "${name}" (${email})? This removes their lead record, account, and subject access.`)) return;
-    await fetch(`/api/admin/o-level-leads/${encodeURIComponent(email)}`, { method: "DELETE" });
-    setData(d => d ? { ...d, oLevelLeads: d.oLevelLeads.filter(o => (o.studentEmail || "") !== email) } : d);
-  }
 
   async function clearTestData() {
     if (!confirm("⚠️ This will permanently delete ALL student registrations, diagnostics, and quiz results. This cannot be undone. Continue?")) return;
     await fetch("/api/admin/clear-test-data", { method: "DELETE" });
-    setData(d => d ? { ...d, students: [], metrics: { ...d.metrics, totalLeads: 0, freeSignups: 0, paidFounderCohortStudents: 0, premiumStudents: 0, diagnosticCompletions: 0, diagnosticCompletionRate: 0 } } : d);
+    setData(d => d ? { ...d, metrics: { ...d.metrics, totalLeads: 0, freeSignups: 0, paidFounderCohortStudents: 0, premiumStudents: 0, diagnosticCompletions: 0, diagnosticCompletionRate: 0 } } : d);
     alert("Test data cleared. Metrics reset to zero.");
   }
 
@@ -84,6 +68,12 @@ export default function Admin() {
                 Manage diagnostic quizzes →
               </Link>
             )}
+            <Link href="/admin/sat-students" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+              🎓 SAT registered students →
+            </Link>
+            <Link href="/admin/o-level-leads" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
+              🎓 O Level registered students →
+            </Link>
             <Link href="/admin/quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #1d4ed8", background: "#eff6ff", color: "#1d4ed8" }}>
               📝 SAT quizzes →
             </Link>
@@ -141,7 +131,7 @@ export default function Admin() {
             )}
             {isFounder && (
               <Link href="/admin/scholarships" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
-                🎓 Scholarship applications →
+                🎓 Scholarship students →
               </Link>
             )}
             <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
@@ -174,145 +164,11 @@ export default function Admin() {
               <p>Loading metrics…</p>
             </div>
           ) : (
-            <>
-              <div className="grid grid-4">
-                {cards.map(([l, v, d]) => (
-                  <DashboardCard key={l} label={String(l)} value={String(v)} detail={String(d)} />
-                ))}
-              </div>
-
-              <div className="card" style={{ marginTop: 24 }}>
-                <div className="eyebrow">Registered students</div>
-                <h2 style={{ color: "#071b33" }}>Student registrations</h2>
-                {data?.students.length === 0 ? (
-                  <p>No student registrations yet. Submit the registration form to see data here.</p>
-                ) : (
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Country</th>
-                          <th>Package</th>
-                          <th>Email</th>
-                          <th>Grade</th>
-                          <th>Registered</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data?.students.map((s, i) => (
-                          <tr key={i}>
-                            <td>{s.studentName}</td>
-                            <td>{s.country}</td>
-                            <td>{s.packageType}</td>
-                            <td>{s.studentEmail}</td>
-                            <td>{s.grade ?? "—"}</td>
-                            <td>{new Date(s.createdAt).toLocaleDateString()}</td>
-                            <td>
-                              <button onClick={() => deleteStudent(s.studentEmail, s.studentName)}
-                                style={{ padding: "4px 10px", borderRadius: 6, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".75rem", cursor: "pointer" }}>
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-
-              {(data?.oLevelLeads.length ?? 0) > 0 && (
-                <div className="card" style={{ marginTop: 24 }}>
-                  <div className="eyebrow">Academy — O Level</div>
-                  <h2 style={{ color: "#071b33" }}>O-Level enrollment leads</h2>
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Student</th>
-                          <th>Student email</th>
-                          <th>Parent</th>
-                          <th>WhatsApp</th>
-                          <th>City</th>
-                          <th>Grade</th>
-                          <th>Registered</th>
-                          <th></th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data?.oLevelLeads.map((o, i) => {
-                          // Backward-compat: a handful of early leads were captured
-                          // by an older form with different field names.
-                          const studentEmail = o.studentEmail || "—";
-                          const parentWhatsapp = o.parentWhatsapp || o.whatsapp || "—";
-                          const city = o.city || o.country || "—";
-                          const isExpanded = expandedOLevelLead === i;
-                          return (
-                            <Fragment key={i}>
-                              <tr>
-                                <td>{o.studentName || "—"}</td>
-                                <td style={{ fontSize: ".85rem" }}>{studentEmail}</td>
-                                <td>{o.parentName || "—"}</td>
-                                <td>{parentWhatsapp}</td>
-                                <td>{city}</td>
-                                <td>{o.studentGrade || "—"}</td>
-                                <td>{new Date(o.createdAt).toLocaleDateString()}</td>
-                                <td>
-                                  <button
-                                    onClick={() => setExpandedOLevelLead(isExpanded ? null : i)}
-                                    style={{ padding: "4px 10px", borderRadius: 6, background: isExpanded ? "#eff6ff" : "#f1f5f9", border: "none", color: isExpanded ? "#155eef" : "#6b7c93", fontWeight: 700, fontSize: ".75rem", cursor: "pointer", whiteSpace: "nowrap" }}>
-                                    {isExpanded ? "Hide details" : "View details"}
-                                  </button>
-                                </td>
-                                <td>
-                                  {studentEmail !== "—" && (
-                                    <button onClick={() => deleteOLevelLead(studentEmail, o.studentName)}
-                                      style={{ padding: "4px 10px", borderRadius: 6, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".75rem", cursor: "pointer" }}>
-                                      Delete
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                              {isExpanded && (
-                                <tr>
-                                  <td colSpan={9} style={{ background: "#f8fafc", padding: "16px 20px" }}>
-                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px 28px" }}>
-                                      <div>
-                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Parent email</div>
-                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.parentEmail || "—"}</div>
-                                      </div>
-                                      <div>
-                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>School</div>
-                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.schoolName || "—"}</div>
-                                      </div>
-                                      <div>
-                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Target exam session</div>
-                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.targetExamSession || "—"}</div>
-                                      </div>
-                                      <div>
-                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>How they heard about us</div>
-                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{o.source || "—"}</div>
-                                      </div>
-                                      <div>
-                                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Study group opt-in</div>
-                                        <div style={{ fontWeight: 700, color: "#071b33" }}>{String(o.studyGroupConsent) === "true" ? "Yes" : String(o.studyGroupConsent) === "false" ? "No" : "—"}</div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </>
+            <div className="grid grid-4">
+              {cards.map(([l, v, d]) => (
+                <DashboardCard key={l} label={String(l)} value={String(v)} detail={String(d)} />
+              ))}
+            </div>
           )}
         </div>
       </section>
