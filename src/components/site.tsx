@@ -2,134 +2,34 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { ReactNode, CSSProperties } from "react";
+import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
 
-interface NotificationItem {
-  id: string;
-  type: "challan" | "lecture" | "quiz" | "announcement";
-  title: string;
-  body: string | null;
-  link: string | null;
-  created_at: string;
-}
-
-const NOTIF_ICONS: Record<NotificationItem["type"], string> = {
-  challan: "💰",
-  lecture: "🎬",
-  quiz: "📝",
-  announcement: "📢",
-};
-
-const NOTIF_COLORS: Record<NotificationItem["type"], string> = {
-  challan: "linear-gradient(135deg,#0e7490,#06b6d4)",
-  lecture: "linear-gradient(135deg,#155eef,#18a999)",
-  quiz: "linear-gradient(135deg,#7c3aed,#a855f7)",
-  announcement: "linear-gradient(135deg,#f59e0b,#ea580c)",
-};
-
-function timeAgo(d: string) {
-  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
-
+// Clicking through opens the full /notifications page (LinkedIn-style)
+// rather than a navbar dropdown — this component is just the bell + unread
+// badge. The badge count is fetched once on mount; the /notifications page
+// itself owns marking things seen.
 function NotificationBell() {
-  const [items, setItems] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
-  // Captured once at load, before mark-seen wipes the server-side value —
-  // used to keep each item's unread highlight visible for this whole open
-  // session, Facebook-style, rather than the highlight vanishing the instant
-  // the panel opens.
-  const [lastSeenAt, setLastSeenAt] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     fetch("/api/notifications").then(r => r.json()).then(d => {
-      setItems(d.notifications ?? []);
       setUnread(d.unreadCount ?? 0);
-      setLastSeenAt(d.lastSeenAt ?? null);
-    }).finally(() => setLoaded(true));
+    }).catch(() => {});
   }, []);
 
-  async function toggle() {
-    const next = !open;
-    setOpen(next);
-    if (next && unread > 0) {
-      setUnread(0);
-      await fetch("/api/notifications/mark-seen", { method: "POST" });
-    }
-  }
-
   return (
-    <div style={{ position: "relative" }}>
-      <button onClick={toggle} aria-label="Notifications" className="notif-bell" style={{ position: "relative", width: 36, height: 36, borderRadius: "50%", border: "1.5px solid #e2e8f0", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0, transition: "all .15s" }}>
-        🔔
-        {unread > 0 && (
-          <span style={{ position: "absolute", top: -3, right: -3, minWidth: 17, height: 17, borderRadius: 999, background: "#dc2626", color: "#fff", fontSize: ".62rem", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", border: "2px solid #fff" }}>
-            {unread > 9 ? "9+" : unread}
-          </span>
-        )}
-      </button>
-      {open && (
-        <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
-          <div className="notif-panel" style={{ position: "absolute", top: "calc(100% + 14px)", right: -8, width: 380, maxHeight: 480, overflowY: "auto", background: "#fff", borderRadius: 16, boxShadow: "0 20px 56px rgba(7,27,51,.24)", border: "1px solid #eef2f7", zIndex: 50 }}>
-            <div style={{ position: "absolute", top: -7, right: 20, width: 14, height: 14, background: "#fff", transform: "rotate(45deg)", borderLeft: "1px solid #eef2f7", borderTop: "1px solid #eef2f7", borderRadius: 3 }} />
-            <div style={{ position: "relative", padding: "16px 18px", borderBottom: "1px solid #f0f4f8", background: "#fff", borderRadius: "16px 16px 0 0" }}>
-              <p style={{ margin: 0, fontWeight: 900, color: "#071b33", fontSize: "1.05rem", letterSpacing: "-.01em" }}>Notifications</p>
-            </div>
-            <div style={{ position: "relative" }}>
-              {!loaded ? (
-                <p style={{ padding: 28, color: "#6b7c93", fontSize: ".85rem", textAlign: "center" }}>Loading…</p>
-              ) : items.length === 0 ? (
-                <div style={{ padding: "44px 24px", textAlign: "center" }}>
-                  <div style={{ fontSize: "2.2rem", marginBottom: 10 }}>🔔</div>
-                  <p style={{ color: "#6b7c93", fontSize: ".85rem", margin: 0 }}>Nothing yet — you&apos;re all caught up.</p>
-                </div>
-              ) : (
-                items.map((n, i) => {
-                  const isUnread = !lastSeenAt || new Date(n.created_at) > new Date(lastSeenAt);
-                  const content = (
-                    <div className="notif-item" style={{ padding: "14px 18px", display: "flex", gap: 12, alignItems: "flex-start", background: isUnread ? "#eff6ff" : "#fff", borderBottom: i < items.length - 1 ? "1px solid #f7f9fc" : "none", borderRadius: i === items.length - 1 ? "0 0 16px 16px" : 0 }}>
-                      <span style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, background: NOTIF_COLORS[n.type], display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.15rem", boxShadow: "0 4px 10px rgba(7,27,51,.15)" }}>
-                        {NOTIF_ICONS[n.type]}
-                      </span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ margin: 0, fontWeight: isUnread ? 800 : 600, color: "#071b33", fontSize: ".87rem", lineHeight: 1.4 }}>{n.title}</p>
-                        {n.body && (
-                          <p style={{
-                            margin: "3px 0 0", color: "#6b7c93", fontSize: ".8rem", lineHeight: 1.45,
-                            overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box",
-                            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                          } as CSSProperties}>
-                            {n.body}
-                          </p>
-                        )}
-                        <span style={{ color: "#155eef", fontSize: ".74rem", fontWeight: 700, display: "inline-block", marginTop: 4 }}>{timeAgo(n.created_at)}</span>
-                      </div>
-                      {isUnread && <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#155eef", flexShrink: 0, marginTop: 6 }} />}
-                    </div>
-                  );
-                  return n.link ? (
-                    <Link key={n.id} href={n.link} onClick={() => setOpen(false)} style={{ textDecoration: "none", display: "block" }}>{content}</Link>
-                  ) : (
-                    <div key={n.id}>{content}</div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </>
+    <Link href="/notifications" aria-label="Notifications" className="notif-bell" style={{ position: "relative", width: 36, height: 36, borderRadius: "50%", border: "1.5px solid #e2e8f0", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0, transition: "all .15s", textDecoration: "none" }}>
+      🔔
+      {unread > 0 && (
+        <span style={{ position: "absolute", top: -3, right: -3, minWidth: 17, height: 17, borderRadius: 999, background: "#dc2626", color: "#fff", fontSize: ".62rem", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", border: "2px solid #fff" }}>
+          {unread > 9 ? "9+" : unread}
+        </span>
       )}
-    </div>
+    </Link>
   );
 }
 
