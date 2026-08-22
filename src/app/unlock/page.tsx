@@ -159,9 +159,11 @@ function UnlockForm() {
           <div className="card" style={{ marginBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
             <div>
               <p style={{ margin: 0, fontWeight: 800, color: "var(--navy)" }}>Full SAT Access</p>
-              <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: ".85rem" }}>One-time fee · unlocks every subject, permanently</p>
+              <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: ".85rem" }}>Monthly subscription · renews every month</p>
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--navy)" }}>PKR {AMOUNT_DUE.toLocaleString()}</div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--navy)" }}>PKR {AMOUNT_DUE.toLocaleString()}<span style={{ fontSize: "1rem", fontWeight: 700, color: "var(--muted)" }}>/mo</span></div>
+            </div>
           </div>
 
           {currentStatus === "unlocked" ? (

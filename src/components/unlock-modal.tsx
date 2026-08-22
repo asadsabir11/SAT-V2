@@ -58,6 +58,7 @@ export function UnlockModal({
           <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(255,255,255,.1)", borderRadius: 12, display: "inline-block" }}>
             <span style={{ fontSize: ".8rem", color: "#93c5fd" }}>Fee: </span>
             <span style={{ fontSize: "1.2rem", fontWeight: 900, color: "#fff" }}>{AMOUNT}</span>
+            <span style={{ fontSize: ".85rem", fontWeight: 700, color: "#93c5fd" }}>/mo</span>
           </div>
         </div>
 
