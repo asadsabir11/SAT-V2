@@ -53,3 +53,7 @@ details{border-bottom:1px solid var(--line);padding:20px 0}summary{color:var(--n
 @media(max-width:900px){.grid-4,.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-layout{grid-template-columns:1fr}.footer-main-grid{grid-template-columns:1fr 1fr!important}.stat-row{flex-direction:column}.stat-cell{border-right:0;border-bottom:1px solid var(--line)}.stat-cell:last-child{border-bottom:0}}
 @media(max-width:680px){.section{padding:68px 0}.grid-4,.grid-3,.grid-2,.form-grid{grid-template-columns:1fr}.display{font-size:2.8rem}.hero{padding-top:56px}.footer-main-grid{grid-template-columns:1fr!important}.trust-strip{gap:8px 16px}}
 @media(max-width:480px){.whatsapp-cta-label{display:none}}
+.notif-panel{animation:notif-pop .16s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes notif-pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.notif-item{transition:background .12s}.notif-item:hover{background:#f5f8fc!important}
+.notif-bell:hover{border-color:#c2d2e5;background:#f8fafc}
