@@ -3,6 +3,7 @@ import { marginalPriceForNextSubject } from "@/lib/academy/data";
 import { listStudentsWithAccess } from "@/lib/users";
 import { listOLevelAccessRequests } from "@/lib/olevelAccess";
 import { findApprovedScholarshipForStudent } from "@/lib/scholarships";
+import { createNotification } from "@/lib/notifications";
 
 // Must match the SAT unlock page's AMOUNT_DUE — kept as a separate constant
 // here rather than imported, since that page's constant isn't exported and
@@ -106,6 +107,11 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
       AND student_user_id IN (SELECT student_user_id FROM scholarship_applications WHERE student_user_id IS NOT NULL AND status = 'approved')
   `;
 
+  // One notification per student per run, not one per challan — an O-Level
+  // student with 2 subjects generated this month should get a single "your
+  // fee challan is ready" alert, not two.
+  const notifiedStudentIds = new Set<string>();
+
   const satStudents = await listStudentsWithAccess();
   for (const s of satStudents) {
     if (s.access_level !== "unlocked") continue;
@@ -119,6 +125,7 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
       VALUES (${crypto.randomUUID()}, ${s.id}, ${s.email}, ${s.name}, 'sat', '', ${period}, ${SAT_MONTHLY_FEE})
     `;
     created++;
+    notifiedStudentIds.add(s.id);
   }
 
   const oLevelRows = await listOLevelAccessRequests();
@@ -150,7 +157,17 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
         VALUES (${crypto.randomUUID()}, ${studentUserId}, ${email}, ${info.name}, 'o-level', ${subject}, ${period}, ${price})
       `;
       created++;
+      notifiedStudentIds.add(studentUserId);
     }
+  }
+
+  for (const studentUserId of notifiedStudentIds) {
+    await createNotification({
+      type: "challan",
+      title: `Your fee challan for ${period} is ready`,
+      link: "/fees",
+      studentUserId,
+    }).catch(console.error);
   }
 
   return { created, skipped };

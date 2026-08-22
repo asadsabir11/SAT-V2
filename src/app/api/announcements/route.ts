@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getAnnouncements, createAnnouncement } from "@/lib/announcements";
 import { getUserProgram } from "@/lib/users";
+import { createNotification } from "@/lib/notifications";
 
 export async function GET() {
   const session = await getSession();
@@ -33,5 +34,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "A valid program (SAT or O Level) is required" }, { status: 400 });
   }
   const id = await createAnnouncement({ title: title.trim(), body: body.trim(), created_by: session.email, program });
+  await createNotification({
+    type: "announcement",
+    title: title.trim(),
+    body: body.trim(),
+    program,
+  }).catch(console.error);
   return NextResponse.json({ id });
 }

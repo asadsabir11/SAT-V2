@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { getLectureById, updateLecture, publishLecture, unpublishLecture, deleteLecture, setFreePreview, setIntroVideo, clearIntroVideo } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
 import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -45,7 +46,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
   const { id } = await params;
   const body = await req.json();
-  if (body.action === "publish")        { await publishLecture(id);              return NextResponse.json({ ok: true }); }
+  if (body.action === "publish") {
+    await publishLecture(id);
+    const lecture = await getLectureById(id);
+    if (lecture) {
+      await createNotification({
+        type: "lecture",
+        title: `New lecture: ${lecture.title}`,
+        link: lecture.program === "o-level" ? `/o-level/lectures?subject=${lecture.category}` : `/lectures/${id}`,
+        program: lecture.program,
+        subject: lecture.program === "o-level" ? lecture.category : null,
+      }).catch(console.error);
+    }
+    return NextResponse.json({ ok: true });
+  }
   if (body.action === "unpublish")      { await unpublishLecture(id);            return NextResponse.json({ ok: true }); }
   if (body.action === "togglePreview")  { await setFreePreview(id, body.value);  return NextResponse.json({ ok: true }); }
   if (body.action === "toggleIntro") {

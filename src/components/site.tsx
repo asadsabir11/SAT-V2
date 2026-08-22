@@ -8,6 +8,102 @@ const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["
 
 type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
 
+interface NotificationItem {
+  id: string;
+  type: "challan" | "lecture" | "quiz" | "announcement";
+  title: string;
+  body: string | null;
+  link: string | null;
+  created_at: string;
+}
+
+const NOTIF_ICONS: Record<NotificationItem["type"], string> = {
+  challan: "💰",
+  lecture: "🎬",
+  quiz: "📝",
+  announcement: "📢",
+};
+
+function timeAgo(d: string) {
+  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function NotificationBell() {
+  const [items, setItems] = useState<NotificationItem[]>([]);
+  const [unread, setUnread] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/notifications").then(r => r.json()).then(d => {
+      setItems(d.notifications ?? []);
+      setUnread(d.unreadCount ?? 0);
+    }).finally(() => setLoaded(true));
+  }, []);
+
+  async function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (next && unread > 0) {
+      setUnread(0);
+      await fetch("/api/notifications/mark-seen", { method: "POST" });
+    }
+  }
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button onClick={toggle} aria-label="Notifications" style={{ position: "relative", width: 36, height: 36, borderRadius: "50%", border: "1.5px solid #e2e8f0", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0 }}>
+        🔔
+        {unread > 0 && (
+          <span style={{ position: "absolute", top: -2, right: -2, minWidth: 16, height: 16, borderRadius: 999, background: "#dc2626", color: "#fff", fontSize: ".62rem", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
+          <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, width: 320, maxHeight: 420, overflowY: "auto", background: "#fff", border: "1px solid #e8eef6", borderRadius: 14, boxShadow: "0 12px 40px rgba(7,27,51,.15)", zIndex: 50 }}>
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid #f0f4f8", fontWeight: 800, color: "#071b33", fontSize: ".88rem" }}>Notifications</div>
+            {!loaded ? (
+              <p style={{ padding: 16, color: "#6b7c93", fontSize: ".85rem" }}>Loading…</p>
+            ) : items.length === 0 ? (
+              <p style={{ padding: 16, color: "#6b7c93", fontSize: ".85rem" }}>Nothing yet — you&apos;re all caught up.</p>
+            ) : (
+              items.map(n => {
+                const content = (
+                  <div style={{ padding: "12px 16px", borderBottom: "1px solid #f7f9fc", display: "flex", gap: 10 }}>
+                    <span style={{ fontSize: "1.1rem" }}>{NOTIF_ICONS[n.type]}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontWeight: 700, color: "#071b33", fontSize: ".85rem" }}>{n.title}</p>
+                      {n.body && (
+                        <p style={{ margin: "2px 0 0", color: "#6b7c93", fontSize: ".8rem", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                          {n.body}
+                        </p>
+                      )}
+                      <span style={{ color: "#a0aec0", fontSize: ".72rem" }}>{timeAgo(n.created_at)}</span>
+                    </div>
+                  </div>
+                );
+                return n.link ? (
+                  <Link key={n.id} href={n.link} onClick={() => setOpen(false)} style={{ textDecoration: "none", display: "block" }}>{content}</Link>
+                ) : (
+                  <div key={n.id}>{content}</div>
+                );
+              })
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   const [user, setUser] = useState<AuthUser>(null);
   useEffect(() => {
@@ -75,6 +171,7 @@ export function Header() {
           {navItems.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
+          {user?.role === "student" && <NotificationBell />}
           <AuthBadge onUser={setUser} />
           {!user && (
             isOLevel ? (

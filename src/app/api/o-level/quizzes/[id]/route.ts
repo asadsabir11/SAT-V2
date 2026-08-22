@@ -10,6 +10,7 @@ import {
   getBestAttempt,
 } from "@/lib/olevel-quiz";
 import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -47,7 +48,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params;
   const body = await req.json();
 
-  if (body.action === "publish") { await publishQuiz(id); return NextResponse.json({ ok: true }); }
+  if (body.action === "publish") {
+    await publishQuiz(id);
+    const quiz = await getQuizById(id);
+    if (quiz) {
+      await createNotification({
+        type: "quiz",
+        title: `New quiz: ${quiz.title}`,
+        link: `/o-level/quizzes?subject=${quiz.subject}`,
+        program: "o-level",
+        subject: quiz.subject,
+      }).catch(console.error);
+    }
+    return NextResponse.json({ ok: true });
+  }
   if (body.action === "unpublish") { await unpublishQuiz(id); return NextResponse.json({ ok: true }); }
   if (body.questions !== undefined) { await setQuizQuestions(id, body.questions); return NextResponse.json({ ok: true }); }
   if (body.title !== undefined) {
