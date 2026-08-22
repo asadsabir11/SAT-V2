@@ -35,8 +35,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /dashboard, /sat, /diagnostic, /ai-tutor, /lectures, /sessions, /quizzes, /unlock, /o-level/lectures, /o-level/quizzes, /o-level/sessions, /o-level/past-papers, /o-level/unlock — students only
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/sat") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions") || pathname.startsWith("/quizzes") || pathname.startsWith("/unlock") || pathname.startsWith("/o-level/lectures") || pathname.startsWith("/o-level/quizzes") || pathname.startsWith("/o-level/sessions") || pathname.startsWith("/o-level/past-papers") || pathname.startsWith("/o-level/unlock")) {
+  // /dashboard, /sat, /diagnostic, /ai-tutor, /lectures, /sessions, /quizzes, /unlock, /fees, /o-level/lectures, /o-level/quizzes, /o-level/sessions, /o-level/past-papers, /o-level/unlock — students only
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/sat") || pathname.startsWith("/diagnostic") || pathname.startsWith("/ai-tutor") || pathname.startsWith("/lectures") || pathname.startsWith("/sessions") || pathname.startsWith("/quizzes") || pathname.startsWith("/unlock") || pathname.startsWith("/fees") || pathname.startsWith("/o-level/lectures") || pathname.startsWith("/o-level/quizzes") || pathname.startsWith("/o-level/sessions") || pathname.startsWith("/o-level/past-papers") || pathname.startsWith("/o-level/unlock")) {
     // A deleted student can otherwise stay "logged in" for up to 7 days —
     // the JWT alone doesn't know their account was removed.
     const stillExists = session && session.role === "student"
@@ -72,5 +72,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/sat", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/quizzes", "/quizzes/:path*", "/discussion", "/discussion/:path*", "/unlock", "/unlock/:path*", "/o-level/lectures", "/o-level/lectures/:path*", "/o-level/quizzes", "/o-level/quizzes/:path*", "/o-level/sessions", "/o-level/sessions/:path*", "/o-level/past-papers", "/o-level/past-papers/:path*", "/o-level/unlock", "/o-level/unlock/:path*"],
+  matcher: ["/dashboard/:path*", "/sat", "/admin/:path*", "/diagnostic", "/ai-tutor", "/lectures", "/lectures/:path*", "/sessions", "/sessions/:path*", "/quizzes", "/quizzes/:path*", "/discussion", "/discussion/:path*", "/unlock", "/unlock/:path*", "/fees", "/fees/:path*", "/o-level/lectures", "/o-level/lectures/:path*", "/o-level/quizzes", "/o-level/quizzes/:path*", "/o-level/sessions", "/o-level/sessions/:path*", "/o-level/past-papers", "/o-level/past-papers/:path*", "/o-level/unlock", "/o-level/unlock/:path*"],
 };

@@ -32,6 +32,7 @@ const OLEVEL_MODULES = [
   { href: "/o-level/quizzes", icon: "📝", title: "Quizzes", description: "Practice with subject quizzes and track your best scores.", accent: "#7c3aed", grad: "linear-gradient(135deg,#7c3aed,#a855f7)", glow: "rgba(124,58,237,.35)" },
   { href: "/o-level/sessions", icon: "📅", title: "Live Sessions", description: "Join live classes and open office hours.", accent: "#059669", grad: "linear-gradient(135deg,#059669,#10b981)", glow: "rgba(5,150,105,.35)" },
   { href: "/o-level/past-papers", icon: "📄", title: "Past Papers", description: "Practice with past-paper style questions.", accent: "#ea580c", grad: "linear-gradient(135deg,#ea580c,#f59e0b)", glow: "rgba(234,88,12,.35)" },
+  { href: "/fees", icon: "💰", title: "Fees", description: "View your fee challans and submit payment proof.", accent: "#0e7490", grad: "linear-gradient(135deg,#0e7490,#06b6d4)", glow: "rgba(14,116,144,.35)" },
 ];
 
 interface Announcement {
@@ -308,6 +309,9 @@ export default function Dashboard() {
             </Link>
             <Link href="/sessions" style={{ padding: "10px 20px", background: "#ecfdf5", color: "#065f46", border: "1.5px solid #a7f3d0", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
               📅 Sessions →
+            </Link>
+            <Link href="/fees" style={{ padding: "10px 20px", background: "#ecfeff", color: "#0e7490", border: "1.5px solid #a5f3fc", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
+              💰 Fees →
             </Link>
           </div>
 
