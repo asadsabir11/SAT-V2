@@ -798,6 +798,35 @@ export async function sendChallanSubmissionAdminAlert(opts: { email: string; nam
   });
 }
 
+function fmtPeriod(period: string) {
+  const [y, m] = period.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+}
+
+export async function sendChallanGenerated(opts: { email: string; name: string; period: string }) {
+  const periodLabel = fmtPeriod(opts.period);
+  return sendEmail({
+    to: opts.email,
+    subject: `Your fee challan for ${periodLabel} is ready`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Hi ${opts.name},</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 16px;">
+          Your fee challan for <strong>${periodLabel}</strong> has been generated.
+        </p>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Please check your fee challan on the portal and pay your monthly fee within
+          <strong>5 days</strong> — otherwise your access will be revoked.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${APP_URL}/fees" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Check my fee challan →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendChallanVerified(opts: { email: string; name: string; amountPaid: number; subjects: string }) {
   await sendEmail({
     to: opts.email,

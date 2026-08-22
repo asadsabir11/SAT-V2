@@ -4,6 +4,7 @@ import { listStudentsWithAccess } from "@/lib/users";
 import { listOLevelAccessRequests } from "@/lib/olevelAccess";
 import { findApprovedScholarshipForStudent } from "@/lib/scholarships";
 import { createNotification } from "@/lib/notifications";
+import { sendChallanGenerated } from "@/lib/email";
 
 // Must match the SAT unlock page's AMOUNT_DUE — kept as a separate constant
 // here rather than imported, since that page's constant isn't exported and
@@ -107,10 +108,10 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
       AND student_user_id IN (SELECT student_user_id FROM scholarship_applications WHERE student_user_id IS NOT NULL AND status = 'approved')
   `;
 
-  // One notification per student per run, not one per challan — an O-Level
-  // student with 2 subjects generated this month should get a single "your
-  // fee challan is ready" alert, not two.
-  const notifiedStudentIds = new Set<string>();
+  // One notification/email per student per run, not one per challan — an
+  // O-Level student with 2 subjects generated this month should get a
+  // single "your fee challan is ready" alert, not two.
+  const notifiedStudents = new Map<string, { email: string; name: string }>();
 
   const satStudents = await listStudentsWithAccess();
   for (const s of satStudents) {
@@ -125,7 +126,7 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
       VALUES (${crypto.randomUUID()}, ${s.id}, ${s.email}, ${s.name}, 'sat', '', ${period}, ${SAT_MONTHLY_FEE})
     `;
     created++;
-    notifiedStudentIds.add(s.id);
+    notifiedStudents.set(s.id, { email: s.email, name: s.name });
   }
 
   const oLevelRows = await listOLevelAccessRequests();
@@ -157,17 +158,18 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
         VALUES (${crypto.randomUUID()}, ${studentUserId}, ${email}, ${info.name}, 'o-level', ${subject}, ${period}, ${price})
       `;
       created++;
-      notifiedStudentIds.add(studentUserId);
+      notifiedStudents.set(studentUserId, { email, name: info.name ?? "there" });
     }
   }
 
-  for (const studentUserId of notifiedStudentIds) {
+  for (const [studentUserId, student] of notifiedStudents) {
     await createNotification({
       type: "challan",
       title: `Your fee challan for ${period} is ready`,
       link: "/fees",
       studentUserId,
     }).catch(console.error);
+    await sendChallanGenerated({ email: student.email, name: student.name, period }).catch(console.error);
   }
 
   return { created, skipped };

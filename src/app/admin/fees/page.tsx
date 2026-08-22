@@ -67,6 +67,8 @@ export default function AdminFeesPage() {
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
   const [challanFilter, setChallanFilter] = useState<"all" | Challan["status"]>("all");
   const [periodFilter, setPeriodFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function load() {
     setLoading(true);
@@ -113,10 +115,17 @@ export default function AdminFeesPage() {
 
   const availablePeriods = [...new Set(challans.map(c => c.period))].sort().reverse();
 
+  const q = search.trim().toLowerCase();
+  function matchesSearch(name: string | null, email: string) {
+    if (!q) return true;
+    return (name ?? "").toLowerCase().includes(q) || email.toLowerCase().includes(q);
+  }
+
   const pendingSubmissions = submissions.filter(s => s.status === "pending");
   const filteredChallans = challans.filter(c =>
     (challanFilter === "all" || c.status === challanFilter) &&
-    (periodFilter === "all" || c.period === periodFilter)
+    (periodFilter === "all" || c.period === periodFilter) &&
+    matchesSearch(c.student_name, c.student_email)
   );
 
   // A submission may cover challans from more than one period (e.g. a
@@ -126,7 +135,7 @@ export default function AdminFeesPage() {
     if (periodFilter === "all") return true;
     return s.challan_ids.split(",").filter(Boolean).some(id => challans.find(c => c.id === id)?.period === periodFilter);
   }
-  const filteredSubmissions = submissions.filter(submissionMatchesPeriod);
+  const filteredSubmissions = submissions.filter(s => submissionMatchesPeriod(s) && matchesSearch(s.student_name, s.student_email));
 
   return (
     <section className="section">
@@ -166,7 +175,13 @@ export default function AdminFeesPage() {
               📋 All Challans ({challans.length})
             </button>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search name or email…"
+              style={{ padding: "8px 14px", borderRadius: 10, border: "2px solid #e8eef6", fontSize: ".85rem", minWidth: 200 }}
+            />
             <label style={{ fontSize: ".78rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".04em" }}>Period:</label>
             <select value={periodFilter} onChange={e => setPeriodFilter(e.target.value)} style={{ padding: "8px 12px", borderRadius: 10, border: "2px solid #e8eef6", fontSize: ".85rem", fontWeight: 700, color: "#071b33" }}>
               <option value="all">All periods</option>
@@ -191,6 +206,7 @@ export default function AdminFeesPage() {
                 const label = covers.length > 0
                   ? covers.map(c => `${fmtPeriod(c.period)} — ${SUBJECT_LABELS[c.subject] ?? c.subject}`).join(", ")
                   : "—";
+                const isExpanded = expandedId === s.id;
                 return (
                   <div key={s.id} className="card" style={{ padding: "18px 22px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
@@ -198,54 +214,65 @@ export default function AdminFeesPage() {
                         <p style={{ margin: 0, fontWeight: 800, color: "#071b33" }}>{s.student_name}</p>
                         <p style={{ margin: "2px 0 0", color: "#6b7c93", fontSize: ".83rem" }}>{s.student_email}</p>
                       </div>
-                      <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 800, background: s.status === "pending" ? "#fef3c7" : s.status === "verified" ? "#d1fae5" : "#fee2e2", color: s.status === "pending" ? "#92400e" : s.status === "verified" ? "#065f46" : "#991b1b", height: "fit-content" }}>
-                        {s.status === "pending" ? "Pending" : s.status === "verified" ? "Verified" : "Rejected"}
-                      </span>
-                    </div>
-                    <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px 24px" }}>
-                      <div>
-                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Covers</div>
-                        <div style={{ fontWeight: 700, color: "#071b33", fontSize: ".88rem" }}>{label}</div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Amount paid</div>
-                        <div style={{ fontWeight: 700, color: "#071b33" }}>PKR {Number(s.amount_paid).toLocaleString()}</div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Transaction ref</div>
-                        <div style={{ fontWeight: 700, color: "#071b33" }}>{s.transaction_reference}</div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Submitted</div>
-                        <div style={{ fontWeight: 700, color: "#071b33" }}>{fmtDate(s.submitted_at)}</div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Screenshot</div>
-                        {s.payment_screenshot_url ? (
-                          <a href={s.payment_screenshot_url} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>View →</a>
-                        ) : (
-                          <div style={{ color: "#6b7c93" }}>—</div>
-                        )}
-                      </div>
-                    </div>
-                    {s.status === "pending" ? (
-                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 14, flexWrap: "wrap" }}>
-                        <input
-                          value={notesInput[s.id] ?? ""}
-                          onChange={e => setNotesInput(prev => ({ ...prev, [s.id]: e.target.value }))}
-                          placeholder="Notes (optional)"
-                          style={{ flex: 1, minWidth: 160, padding: "6px 12px", borderRadius: 8, border: "1.5px solid #e8eef6", fontSize: ".82rem" }}
-                        />
-                        <button onClick={() => review(s.id, "verify")} disabled={busy === s.id} style={{ padding: "6px 16px", borderRadius: 8, background: "#22c55e", color: "#fff", border: "none", fontWeight: 800, fontSize: ".8rem", cursor: "pointer" }}>
-                          {busy === s.id ? "…" : "Verify & Unlock"}
-                        </button>
-                        <button onClick={() => review(s.id, "reject")} disabled={busy === s.id} style={{ padding: "6px 16px", borderRadius: 8, background: "#fee2e2", color: "#991b1b", border: "none", fontWeight: 800, fontSize: ".8rem", cursor: "pointer" }}>
-                          Reject
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", height: "fit-content" }}>
+                        <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 800, background: s.status === "pending" ? "#fef3c7" : s.status === "verified" ? "#d1fae5" : "#fee2e2", color: s.status === "pending" ? "#92400e" : s.status === "verified" ? "#065f46" : "#991b1b" }}>
+                          {s.status === "pending" ? "Pending" : s.status === "verified" ? "Verified" : "Rejected"}
+                        </span>
+                        <button
+                          onClick={() => setExpandedId(isExpanded ? null : s.id)}
+                          style={{ padding: "4px 12px", borderRadius: 7, background: isExpanded ? "#eff6ff" : "#f1f5f9", border: "none", color: isExpanded ? "#155eef" : "#6b7c93", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", whiteSpace: "nowrap" }}>
+                          {isExpanded ? "Hide details" : "See details"}
                         </button>
                       </div>
-                    ) : s.admin_notes ? (
-                      <p style={{ marginTop: 12, marginBottom: 0, color: "#6b7c93", fontSize: ".82rem" }}>Note: {s.admin_notes}</p>
-                    ) : null}
+                    </div>
+                    {isExpanded && (
+                      <>
+                        <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px 24px" }}>
+                          <div>
+                            <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Covers</div>
+                            <div style={{ fontWeight: 700, color: "#071b33", fontSize: ".88rem" }}>{label}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Amount paid</div>
+                            <div style={{ fontWeight: 700, color: "#071b33" }}>PKR {Number(s.amount_paid).toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Transaction ref</div>
+                            <div style={{ fontWeight: 700, color: "#071b33" }}>{s.transaction_reference}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Submitted</div>
+                            <div style={{ fontWeight: 700, color: "#071b33" }}>{fmtDate(s.submitted_at)}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em" }}>Screenshot</div>
+                            {s.payment_screenshot_url ? (
+                              <a href={s.payment_screenshot_url} target="_blank" rel="noreferrer" style={{ color: "#155eef", fontWeight: 700 }}>View →</a>
+                            ) : (
+                              <div style={{ color: "#6b7c93" }}>—</div>
+                            )}
+                          </div>
+                        </div>
+                        {s.status === "pending" ? (
+                          <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 14, flexWrap: "wrap" }}>
+                            <input
+                              value={notesInput[s.id] ?? ""}
+                              onChange={e => setNotesInput(prev => ({ ...prev, [s.id]: e.target.value }))}
+                              placeholder="Notes (optional)"
+                              style={{ flex: 1, minWidth: 160, padding: "6px 12px", borderRadius: 8, border: "1.5px solid #e8eef6", fontSize: ".82rem" }}
+                            />
+                            <button onClick={() => review(s.id, "verify")} disabled={busy === s.id} style={{ padding: "6px 16px", borderRadius: 8, background: "#22c55e", color: "#fff", border: "none", fontWeight: 800, fontSize: ".8rem", cursor: "pointer" }}>
+                              {busy === s.id ? "…" : "Verify & Unlock"}
+                            </button>
+                            <button onClick={() => review(s.id, "reject")} disabled={busy === s.id} style={{ padding: "6px 16px", borderRadius: 8, background: "#fee2e2", color: "#991b1b", border: "none", fontWeight: 800, fontSize: ".8rem", cursor: "pointer" }}>
+                              Reject
+                            </button>
+                          </div>
+                        ) : s.admin_notes ? (
+                          <p style={{ marginTop: 12, marginBottom: 0, color: "#6b7c93", fontSize: ".82rem" }}>Note: {s.admin_notes}</p>
+                        ) : null}
+                      </>
+                    )}
                   </div>
                 );
               })}
