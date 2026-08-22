@@ -2,6 +2,7 @@ import { sql } from "@/lib/db";
 import { marginalPriceForNextSubject } from "@/lib/academy/data";
 import { listStudentsWithAccess } from "@/lib/users";
 import { listOLevelAccessRequests } from "@/lib/olevelAccess";
+import { findApprovedScholarshipForStudent } from "@/lib/scholarships";
 
 // Must match the SAT unlock page's AMOUNT_DUE — kept as a separate constant
 // here rather than imported, since that page's constant isn't exported and
@@ -95,9 +96,20 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
   let created = 0;
   let skipped = 0;
 
+  // Scholarship students get 100% free access — they should never be billed.
+  // Prune any still-unpaid challans a past (buggy) run created for them, on
+  // top of skipping them below, so re-running Generate also cleans up
+  // whatever's already there instead of leaving stale rows behind.
+  await sql`
+    DELETE FROM challans
+    WHERE status = 'unpaid'
+      AND student_user_id IN (SELECT student_user_id FROM scholarship_applications WHERE student_user_id IS NOT NULL AND status = 'approved')
+  `;
+
   const satStudents = await listStudentsWithAccess();
   for (const s of satStudents) {
     if (s.access_level !== "unlocked") continue;
+    if (await findApprovedScholarshipForStudent(s.id, "sat")) continue;
     const exists = await sql`
       SELECT id FROM challans WHERE student_user_id = ${s.id} AND program = 'sat' AND subject = '' AND period = ${period} LIMIT 1
     `;
@@ -124,6 +136,7 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
     const userRows = await sql`SELECT id FROM users WHERE email = ${email} AND program = 'o-level' LIMIT 1`;
     const studentUserId = userRows[0]?.id as string | undefined;
     if (!studentUserId) { skipped += sortedSubjects.length; continue; }
+    if (await findApprovedScholarshipForStudent(studentUserId, "o-level")) continue;
 
     for (let i = 0; i < sortedSubjects.length; i++) {
       const subject = sortedSubjects[i].subject;
