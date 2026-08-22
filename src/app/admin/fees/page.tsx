@@ -48,6 +48,10 @@ function fmtPeriod(period: string) {
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
+function currentPeriod() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
 type Tab = "submissions" | "challans";
 
@@ -58,9 +62,11 @@ export default function AdminFeesPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [generateResult, setGenerateResult] = useState<string | null>(null);
+  const [generatePeriod, setGeneratePeriod] = useState(currentPeriod());
   const [busy, setBusy] = useState<string | null>(null);
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
   const [challanFilter, setChallanFilter] = useState<"all" | Challan["status"]>("all");
+  const [periodFilter, setPeriodFilter] = useState<string>("all");
 
   function load() {
     setLoading(true);
@@ -78,7 +84,11 @@ export default function AdminFeesPage() {
   async function generate() {
     setGenerating(true);
     setGenerateResult(null);
-    const res = await fetch("/api/admin/fees/generate", { method: "POST" });
+    const res = await fetch("/api/admin/fees/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ period: generatePeriod }),
+    });
     const data = await res.json();
     setGenerating(false);
     if (res.ok) {
@@ -101,8 +111,22 @@ export default function AdminFeesPage() {
     load();
   }
 
+  const availablePeriods = [...new Set(challans.map(c => c.period))].sort().reverse();
+
   const pendingSubmissions = submissions.filter(s => s.status === "pending");
-  const filteredChallans = challans.filter(c => challanFilter === "all" || c.status === challanFilter);
+  const filteredChallans = challans.filter(c =>
+    (challanFilter === "all" || c.status === challanFilter) &&
+    (periodFilter === "all" || c.period === periodFilter)
+  );
+
+  // A submission may cover challans from more than one period (e.g. a
+  // student catching up on a missed month) — match if ANY covered challan
+  // falls in the selected period.
+  function submissionMatchesPeriod(s: Submission) {
+    if (periodFilter === "all") return true;
+    return s.challan_ids.split(",").filter(Boolean).some(id => challans.find(c => c.id === id)?.period === periodFilter);
+  }
+  const filteredSubmissions = submissions.filter(submissionMatchesPeriod);
 
   return (
     <section className="section">
@@ -118,32 +142,49 @@ export default function AdminFeesPage() {
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
-            <button onClick={generate} disabled={generating} className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
-              {generating ? "Generating…" : "Generate this month's challans"}
-            </button>
-            {generateResult && <p style={{ color: "#6b7c93", fontSize: ".8rem", margin: "8px 0 0", maxWidth: 280 }}>{generateResult}</p>}
+            <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end" }}>
+              <input
+                type="month"
+                value={generatePeriod}
+                onChange={e => setGeneratePeriod(e.target.value)}
+                style={{ padding: "9px 12px", borderRadius: 10, border: "2px solid #e8eef6", fontSize: ".85rem", fontWeight: 700, color: "#071b33" }}
+              />
+              <button onClick={generate} disabled={generating} className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", whiteSpace: "nowrap" }}>
+                {generating ? "Generating…" : "Generate challans"}
+              </button>
+            </div>
+            {generateResult && <p style={{ color: "#6b7c93", fontSize: ".8rem", margin: "8px 0 0", maxWidth: 320 }}>{generateResult}</p>}
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-          <button onClick={() => setTab("submissions")} style={{ padding: "10px 22px", borderRadius: 10, fontWeight: 800, fontSize: ".9rem", cursor: "pointer", border: tab === "submissions" ? "2px solid #155eef" : "2px solid #e8eef6", background: tab === "submissions" ? "#eff6ff" : "#f8fafc", color: tab === "submissions" ? "#155eef" : "#6b7c93" }}>
-            💳 Submissions to verify ({pendingSubmissions.length})
-          </button>
-          <button onClick={() => setTab("challans")} style={{ padding: "10px 22px", borderRadius: 10, fontWeight: 800, fontSize: ".9rem", cursor: "pointer", border: tab === "challans" ? "2px solid #155eef" : "2px solid #e8eef6", background: tab === "challans" ? "#eff6ff" : "#f8fafc", color: tab === "challans" ? "#155eef" : "#6b7c93" }}>
-            📋 All Challans ({challans.length})
-          </button>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={() => setTab("submissions")} style={{ padding: "10px 22px", borderRadius: 10, fontWeight: 800, fontSize: ".9rem", cursor: "pointer", border: tab === "submissions" ? "2px solid #155eef" : "2px solid #e8eef6", background: tab === "submissions" ? "#eff6ff" : "#f8fafc", color: tab === "submissions" ? "#155eef" : "#6b7c93" }}>
+              💳 Submissions to verify ({pendingSubmissions.length})
+            </button>
+            <button onClick={() => setTab("challans")} style={{ padding: "10px 22px", borderRadius: 10, fontWeight: 800, fontSize: ".9rem", cursor: "pointer", border: tab === "challans" ? "2px solid #155eef" : "2px solid #e8eef6", background: tab === "challans" ? "#eff6ff" : "#f8fafc", color: tab === "challans" ? "#155eef" : "#6b7c93" }}>
+              📋 All Challans ({challans.length})
+            </button>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <label style={{ fontSize: ".78rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".04em" }}>Period:</label>
+            <select value={periodFilter} onChange={e => setPeriodFilter(e.target.value)} style={{ padding: "8px 12px", borderRadius: 10, border: "2px solid #e8eef6", fontSize: ".85rem", fontWeight: 700, color: "#071b33" }}>
+              <option value="all">All periods</option>
+              {availablePeriods.map(p => <option key={p} value={p}>{fmtPeriod(p)}</option>)}
+            </select>
+          </div>
         </div>
 
         {loading ? (
           <div className="card"><p>Loading…</p></div>
         ) : tab === "submissions" ? (
-          submissions.length === 0 ? (
+          filteredSubmissions.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: 48, color: "#6b7c93" }}>
-              <p>No fee submissions yet.</p>
+              <p>{periodFilter === "all" ? "No fee submissions yet." : "No fee submissions for this period."}</p>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {submissions.map(s => {
+              {filteredSubmissions.map(s => {
                 const covers = s.challan_ids.split(",").filter(Boolean)
                   .map(id => challans.find(c => c.id === id))
                   .filter((c): c is Challan => !!c);
