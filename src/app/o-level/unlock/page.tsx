@@ -7,10 +7,11 @@ import { PageHero } from "@/components/site";
 import { trackInitiateCheckout, trackPaymentSubmitted } from "@/lib/analyticsClient";
 import { marginalPriceForNextSubject } from "@/lib/academy/data";
 
-type Subject = "mathematics" | "english-language";
+type Subject = "mathematics" | "english-language" | "computer-science";
 const SUBJECT_LABELS: Record<string, string> = {
   "mathematics": "Mathematics",
   "english-language": "English Language",
+  "computer-science": "Computer Science",
 };
 
 const BANK_NAME = process.env.NEXT_PUBLIC_OLEVEL_BANK_NAME ?? "";
@@ -37,7 +38,10 @@ function BigPlaceholderRow({ label }: { label: string }) {
 function UnlockForm() {
   const params = useSearchParams();
   const subjectParam = params.get("subject");
-  const subject: Subject | null = subjectParam === "mathematics" || subjectParam === "english-language" ? subjectParam : null;
+  const subject: Subject | null =
+    subjectParam === "mathematics" || subjectParam === "english-language" || subjectParam === "computer-science"
+      ? subjectParam
+      : null;
 
   const [loading, setLoading] = useState(true);
   const [currentStatus, setCurrentStatus] = useState<"free" | "pending" | "unlocked">("free");

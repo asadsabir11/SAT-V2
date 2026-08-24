@@ -293,28 +293,29 @@ export default async function OLevelPage() {
         <div className="container">
           <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
             <div className="eyebrow" style={{ justifyContent: "center" }}>Founding cohorts</div>
-            <h2 className="title">English Language and Mathematics</h2>
+            <h2 className="title">English Language, Mathematics and Computer Science</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
-              These two subjects are confirmed for the founding cohort, starting September 12, 2026.
+              These three subjects are confirmed for the founding cohort, starting September 12, 2026.
             </p>
           </div>
-          <div className="grid grid-2" style={{ marginTop: 40 }}>
+          <div className="grid grid-3" style={{ marginTop: 40 }}>
             <CohortCard subjectSlug="english-language" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} />
             <CohortCard subjectSlug="mathematics" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} />
+            <CohortCard subjectSlug="computer-science" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} />
           </div>
           <div className="card" style={{ marginTop: 24, textAlign: "center", background: "#eaf1ff", borderColor: "#c9dcfb" }}>
             <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>English Language + Mathematics: PKR 18,000 per month</p>
+            <p style={{ margin: "6px 0 0", fontWeight: 700, color: "var(--navy)" }}>All three subjects: PKR 24,000 per month</p>
           </div>
 
           <div style={{ maxWidth: 720, margin: "56px auto 0", textAlign: "center" }}>
-            <h2 className="title">Computer Science, Islamiyat and Pakistan Studies</h2>
+            <h2 className="title">Islamiyat and Pakistan Studies</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
               These founding cohorts are fully booked. Join the waiting list below and we&apos;ll notify you as soon
               as the next cohort opens.
             </p>
           </div>
-          <div className="grid grid-3" style={{ marginTop: 40 }}>
-            <CohortCard subjectSlug="computer-science" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
+          <div className="grid grid-2" style={{ marginTop: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
             <CohortCard subjectSlug="islamiyat" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
             <CohortCard subjectSlug="pakistan-studies" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
           </div>
