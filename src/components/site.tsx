@@ -10,16 +10,26 @@ type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teache
 
 // Clicking through opens the full /notifications page (LinkedIn-style)
 // rather than a navbar dropdown — this component is just the bell + unread
-// badge. The badge count is fetched once on mount; the /notifications page
-// itself owns marking things seen.
+// badge. The /notifications page owns marking things seen; this refetches
+// the count on every route change (not just mount) so the badge actually
+// clears once the user navigates back out of /notifications instead of
+// staying stuck at its stale mount-time value for the rest of the session.
 function NotificationBell() {
   const [unread, setUnread] = useState(0);
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Landing on /notifications always triggers that page's own mark-seen
+    // call — clear the badge immediately rather than racing a refetch
+    // against that in-flight request (which could still read the old count).
+    if (pathname === "/notifications") {
+      setUnread(0);
+      return;
+    }
     fetch("/api/notifications").then(r => r.json()).then(d => {
       setUnread(d.unreadCount ?? 0);
     }).catch(() => {});
-  }, []);
+  }, [pathname]);
 
   return (
     <Link href="/notifications" aria-label="Notifications" className="notif-bell" style={{ position: "relative", width: 36, height: 36, borderRadius: "50%", border: "1.5px solid #e2e8f0", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0, transition: "all .15s", textDecoration: "none" }}>
