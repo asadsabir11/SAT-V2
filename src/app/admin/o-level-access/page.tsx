@@ -29,7 +29,8 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 };
 
 type Filter = "all" | "pending" | "unlocked";
-type SubjectFilter = "all" | "mathematics" | "english-language" | "both";
+type SubjectFilter = "all" | "mathematics" | "english-language" | "computer-science" | "both";
+const PAID_SUBJECTS = ["mathematics", "english-language", "computer-science"];
 
 const SUBJECTS = getOLevelSubjects().map((s) => ({ slug: s.slug, name: s.name }));
 const SUBJECT_META: Record<string, { label: string; icon: string }> = Object.fromEntries(
@@ -114,19 +115,21 @@ export default function AdminOLevelAccess() {
     load();
   }
 
-  // Students currently holding BOTH paid subjects unlocked at once — used by
-  // the "Both" subfilter, a view-only list so admin can see at a glance who's
-  // paying for the 2-subject bundle (relevant when one gets dropped later and
-  // the other's bundle price needs to be re-evaluated).
+  // Students currently holding 2+ paid subjects unlocked at once — used by
+  // the "Multiple subjects" subfilter, a view-only list so admin can see at
+  // a glance who's paying for a subject bundle (relevant when one gets
+  // dropped later and the remaining subject's bundle price needs to be
+  // re-evaluated). Any pair among the 3 paid subjects counts, not just
+  // Mathematics + English.
   const unlockedSubjectsByEmail: Record<string, Set<string>> = {};
   rows.forEach(r => {
     if (r.status !== "unlocked") return;
-    if (r.subject !== "mathematics" && r.subject !== "english-language") return;
+    if (!PAID_SUBJECTS.includes(r.subject)) return;
     (unlockedSubjectsByEmail[r.email] ??= new Set()).add(r.subject);
   });
   const bothEmails = new Set(
     Object.entries(unlockedSubjectsByEmail)
-      .filter(([, subjects]) => subjects.has("mathematics") && subjects.has("english-language"))
+      .filter(([, subjects]) => subjects.size >= 2)
       .map(([email]) => email)
   );
 
@@ -134,8 +137,9 @@ export default function AdminOLevelAccess() {
     if (filter !== "all" && r.status !== filter) return false;
     if (subjectFilter === "mathematics" && r.subject !== "mathematics") return false;
     if (subjectFilter === "english-language" && r.subject !== "english-language") return false;
+    if (subjectFilter === "computer-science" && r.subject !== "computer-science") return false;
     if (subjectFilter === "both") {
-      if (r.subject !== "mathematics" && r.subject !== "english-language") return false;
+      if (!PAID_SUBJECTS.includes(r.subject)) return false;
       if (!bothEmails.has(r.email)) return false;
     }
     if (search) {
@@ -154,6 +158,7 @@ export default function AdminOLevelAccess() {
   const subjectCounts = {
     mathematics: rows.filter(r => r.subject === "mathematics").length,
     "english-language": rows.filter(r => r.subject === "english-language").length,
+    "computer-science": rows.filter(r => r.subject === "computer-science").length,
     both: bothEmails.size,
   };
 
@@ -229,7 +234,8 @@ export default function AdminOLevelAccess() {
             ["all", "All subjects"],
             ["mathematics", `📐 Mathematics (${subjectCounts.mathematics})`],
             ["english-language", `📖 English Language (${subjectCounts["english-language"]})`],
-            ["both", `🎯 Both (${subjectCounts.both})`],
+            ["computer-science", `💻 Computer Science (${subjectCounts["computer-science"]})`],
+            ["both", `🎯 Multiple subjects (${subjectCounts.both})`],
           ] as [SubjectFilter, string][]).map(([f, label]) => {
             const active = subjectFilter === f;
             return (
@@ -240,7 +246,7 @@ export default function AdminOLevelAccess() {
           })}
           {subjectFilter === "both" && (
             <span style={{ fontSize: ".78rem", color: "#7c3aed", fontWeight: 600 }}>
-              View only — students holding both paid subjects at once. No actions here; use the Mathematics/English tabs to revoke.
+              View only — students holding 2 or more paid subjects at once. No actions here; use the Mathematics/English/Computer Science tabs to revoke.
             </span>
           )}
         </div>
