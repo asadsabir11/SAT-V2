@@ -304,7 +304,7 @@ export default async function OLevelPage() {
             <CohortCard subjectSlug="computer-science" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} />
           </div>
           <div className="card" style={{ marginTop: 24, textAlign: "center", background: "#eaf1ff", borderColor: "#c9dcfb" }}>
-            <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>English Language + Mathematics: PKR 18,000 per month</p>
+            <p style={{ margin: 0, fontWeight: 700, color: "var(--navy)" }}>Any 2 subjects: PKR 18,000 per month</p>
             <p style={{ margin: "6px 0 0", fontWeight: 700, color: "var(--navy)" }}>All three subjects: PKR 24,000 per month</p>
           </div>
 
