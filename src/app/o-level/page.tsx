@@ -23,18 +23,18 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Online O Level Tuition in Pakistan | The Digital Tutor",
-  description: "Join live online Cambridge O Level and IGCSE classes in English Language and Mathematics, with weekly office hours, past-paper practice and parent progress reports. Computer Science, Islamiyat and Pakistan Studies coming soon.",
+  description: "Join live online Cambridge O Level and IGCSE classes in English Language, Mathematics and Computer Science, with weekly office hours, past-paper practice and parent progress reports. Islamiyat, Pakistan Studies and Physics coming soon.",
   alternates: { canonical: `${BASE_URL}/o-level` },
   openGraph: {
     title: "O Level Founding Cohorts Now Enrolling",
-    description: "Live online English and Mathematics tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
+    description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
     url: `${BASE_URL}/o-level`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "O Level Founding Cohorts Now Enrolling",
-    description: "Live online English and Mathematics tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
+    description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
   },
 };
 
@@ -55,14 +55,14 @@ const TRUST_POINTS = [
 ];
 
 const FAQ_ITEMS: [string, string][] = [
-  ["Who will teach the founding cohort?", "The initial English Language and Mathematics cohorts will be taught by Ibrahim Sajid Malick, founder of The Digital Tutor."],
+  ["Who will teach the founding cohort?", "The initial English Language, Mathematics and Computer Science cohorts will be taught by Ibrahim Sajid Malick, founder of The Digital Tutor."],
   ["Are the classes live or recorded?", "Classes are delivered live online."],
   ["What happens if my child misses a class?", "Our missed-class and recording policy will be published here before the founding cohort begins."],
   ["How many students will be in each class?", "The founding cohorts will be limited to a maximum of 15 students per class."],
-  ["How often are classes held?", "Mathematics meets weekly on Saturdays (6:00–7:00 PM PKT) and English Language meets weekly on Fridays (6:00–7:00 PM PKT), each 1 hour long, plus office hours Monday–Friday from 7:30–8:15 PM PKT."],
+  ["How often are classes held?", "Mathematics meets weekly on Saturdays, English Language on Fridays, and Computer Science on Thursdays (each 6:00–7:00 PM PKT, 1 hour long), plus office hours Monday–Friday from 7:30–8:15 PM PKT."],
   ["Does the program guarantee a particular grade?", "No. The program provides teaching, practice, feedback and structured preparation, but no examination grade can be guaranteed."],
   ["How will parents receive progress updates?", "Parents will receive regular reports covering attendance, homework, current strengths, areas for improvement and recommended next steps."],
-  ["How do I pay?", "Registration is free. When you're ready to unlock a subject, pay via JazzCash, Easypaisa or local bank transfer from your dashboard — that subject unlocks once we verify your payment."],
+  ["How do I pay?", "Registration is free. When you're ready to unlock a subject, pay via bank transfer from your dashboard — that subject unlocks once we verify your payment."],
   ["What is the refund policy?", "If you cancel within 7 days of your first payment, you'll receive a 100% refund. See our full Refund & Cancellation Policy for details."],
   ["Is The Digital Tutor affiliated with Cambridge?", "No. The Digital Tutor is an independent tuition provider and is not affiliated with or endorsed by Cambridge University Press & Assessment."],
 ];
@@ -311,15 +311,16 @@ export default async function OLevelPage() {
           </div>
 
           <div style={{ maxWidth: 720, margin: "56px auto 0", textAlign: "center" }}>
-            <h2 className="title">Islamiyat and Pakistan Studies</h2>
+            <h2 className="title">Islamiyat, Pakistan Studies and Physics</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
               These founding cohorts are fully booked. Join the waiting list below and we&apos;ll notify you as soon
               as the next cohort opens.
             </p>
           </div>
-          <div className="grid grid-2" style={{ marginTop: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
+          <div className="grid grid-3" style={{ marginTop: 40 }}>
             <CohortCard subjectSlug="islamiyat" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
             <CohortCard subjectSlug="pakistan-studies" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
+            <CohortCard subjectSlug="physics" basePrice={10000} isSignedInStudent={isSignedInStudent} unlockedSubjects={unlockedSubjects} fullyBooked />
           </div>
         </div>
       </section>

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PageHero } from "@/components/site";
 
-type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 const SUBJECTS: { value: OLevelSubject; label: string; icon: string }[] = [
   { value: "mathematics", label: "Mathematics", icon: "📐" },
@@ -11,6 +11,7 @@ const SUBJECTS: { value: OLevelSubject; label: string; icon: string }[] = [
   { value: "english-language", label: "English Language", icon: "📖" },
   { value: "islamiyat", label: "Islamiyat", icon: "🕌" },
   { value: "pakistan-studies", label: "Pakistan Studies", icon: "🌍" },
+  { value: "physics", label: "Physics", icon: "⚛️" },
 ];
 const subjectMeta = (s: string) => SUBJECTS.find((x) => x.value === s) ?? SUBJECTS[0];
 

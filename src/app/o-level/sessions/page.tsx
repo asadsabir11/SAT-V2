@@ -5,7 +5,7 @@ import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
 import { LockedBanner, type AccessLevel } from "@/components/unlock-modal";
 
-type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 type Platform = "zoom" | "google_classroom" | "google_meet" | "other";
 
 interface LiveSession {
@@ -25,6 +25,7 @@ const SUBJECT_ICON: Record<OLevelCategory, string> = {
   "english-language": "📖",
   islamiyat: "🕌",
   "pakistan-studies": "🌍",
+  physics: "⚛️",
 };
 const SUBJECTS = getOLevelSubjects().map((s) => ({ slug: s.slug as OLevelCategory, name: s.name }));
 

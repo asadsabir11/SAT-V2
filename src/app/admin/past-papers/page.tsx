@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
-type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 type PaperType = "question_paper" | "mark_scheme" | "examiner_report" | "other";
 
 interface PastPaper {
@@ -25,6 +25,7 @@ const SUBJECTS: { value: OLevelSubject; label: string; icon: string }[] = [
   { value: "english-language", label: "English Language", icon: "📖" },
   { value: "islamiyat", label: "Islamiyat", icon: "🕌" },
   { value: "pakistan-studies", label: "Pakistan Studies", icon: "🌍" },
+  { value: "physics", label: "Physics", icon: "⚛️" },
 ];
 const subjectMeta = (s: string) => SUBJECTS.find((x) => x.value === s) ?? SUBJECTS[0];
 

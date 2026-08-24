@@ -4,7 +4,7 @@ import Link from "next/link";
 
 type Platform = "zoom" | "google_classroom" | "google_meet" | "other";
 type Program = "sat" | "o-level";
-type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type OLevelSubject = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 interface LiveSession {
   id: string;
@@ -32,6 +32,7 @@ const OLEVEL_SUBJECTS: { value: OLevelSubject; label: string; icon: string }[] =
   { value: "english-language", label: "English Language", icon: "📖" },
   { value: "islamiyat", label: "Islamiyat", icon: "🕌" },
   { value: "pakistan-studies", label: "Pakistan Studies", icon: "🌍" },
+  { value: "physics", label: "Physics", icon: "⚛️" },
 ];
 const subjectMeta = (s: string | null) => OLEVEL_SUBJECTS.find((x) => x.value === s);
 

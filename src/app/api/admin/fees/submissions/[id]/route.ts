@@ -12,6 +12,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   "computer-science": "Computer Science",
   islamiyat: "Islamiyat",
   "pakistan-studies": "Pakistan Studies",
+  physics: "Physics",
 };
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

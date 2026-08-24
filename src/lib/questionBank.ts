@@ -2,7 +2,7 @@ import { sql } from "@/lib/db";
 
 
 export type BankProgram = "sat" | "o-level";
-export type BankSection = "math" | "reading_writing" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+export type BankSection = "math" | "reading_writing" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 export type BankQuestion = {
   id: string;

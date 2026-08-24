@@ -34,6 +34,7 @@ const SUBJECT_META: Record<string, { label: string; icon: string }> = {
   "english-language": { label: "English Language", icon: "📖" },
   islamiyat: { label: "Islamiyat", icon: "🕌" },
   "pakistan-studies": { label: "Pakistan Studies", icon: "🌍" },
+  physics: { label: "Physics", icon: "⚛️" },
 };
 
 const BLANK_Q: Omit<Question, "id"> = { topic: "", passage: "", text: "", options: ["", "", "", ""], correct: 0, explanation: "" };

@@ -19,6 +19,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   "computer-science": "Computer Science",
   islamiyat: "Islamiyat",
   "pakistan-studies": "Pakistan Studies",
+  physics: "Physics",
 };
 
 const STATUS_META: Record<Challan["status"], { label: string; bg: string; color: string }> = {

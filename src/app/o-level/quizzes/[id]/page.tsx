@@ -33,6 +33,7 @@ const SUBJECT_META: Record<string, { label: string; icon: string }> = {
   "english-language": { label: "English Language", icon: "📖" },
   islamiyat: { label: "Islamiyat", icon: "🕌" },
   "pakistan-studies": { label: "Pakistan Studies", icon: "🌍" },
+  physics: { label: "Physics", icon: "⚛️" },
 };
 
 export default function TakeOLevelQuiz({ params }: { params: Promise<{ id: string }> }) {

@@ -6,7 +6,7 @@ import { PageHero } from "@/components/site";
 import { getOLevelSubjects } from "@/lib/academy/data";
 import type { AccessLevel } from "@/components/unlock-modal";
 
-type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type OLevelCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 interface Lecture {
   id: string;
@@ -27,6 +27,7 @@ const SUBJECT_ICON: Record<OLevelCategory, string> = {
   "english-language": "📖",
   islamiyat: "🕌",
   "pakistan-studies": "🌍",
+  physics: "⚛️",
 };
 
 const SUBJECTS = getOLevelSubjects().map((s) => ({

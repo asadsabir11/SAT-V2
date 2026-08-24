@@ -203,6 +203,39 @@ export const SUBJECTS: Subject[] = [
       "Regular review questions and monthly assessments to track progress.",
     instructorId: "ibrahim",
   },
+  {
+    slug: "physics",
+    name: "Physics",
+    program: "o-level",
+    syllabusRef: "Cambridge O Level Physics",
+    short: "Concept-first physics with worked examples and past-paper practice.",
+    description:
+      "O Level Physics taught with clear concept explanations, worked examples, and past-paper practice to build exam confidence.",
+    forWho: [
+      "Students preparing for Cambridge O Level / IGCSE Physics",
+      "Students who want structure and weekly accountability",
+      "Students who get stuck on homework and need support between classes",
+    ],
+    indicativeTopics: [
+      "General physics",
+      "Thermal physics",
+      "Waves",
+      "Electricity and magnetism",
+      "Atomic physics",
+    ],
+    learningOutcomes: [
+      "Confidence with core concepts and exam technique",
+      "Structured approach to numerical and theory questions",
+      "Familiarity with past-paper question styles",
+    ],
+    classModel: [
+      { title: "Concept class", durationMins: 90, type: "concept", cadence: "Weekly" },
+      { title: "Problem-solving / past-paper workshop", durationMins: 60, type: "workshop", cadence: "Weekly" },
+    ],
+    assessmentApproach:
+      "Regular topical quizzes and monthly assessments to estimate current working level and highlight areas for improvement.",
+    instructorId: "ibrahim",
+  },
 ];
 
 /**
@@ -321,6 +354,17 @@ export const COHORTS: Cohort[] = [
     instructorId: "ibrahim",
     targetExam: "May/June 2027",
     scheduleLabel: "Weekly live lesson + revision sessions",
+    status: "enrolling",
+    capacity: 20,
+    enrolled: 0,
+  },
+  {
+    id: "olevel-physics-mj2027",
+    program: "o-level",
+    subjectSlug: "physics",
+    instructorId: "ibrahim",
+    targetExam: "May/June 2027",
+    scheduleLabel: "Weekly concept class + weekly workshop",
     status: "enrolling",
     capacity: 20,
     enrolled: 0,

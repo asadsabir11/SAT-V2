@@ -3,11 +3,11 @@ import { sql } from "@/lib/db";
 
 export type Program = "sat" | "o-level";
 export type SatLectureCategory = "introduction" | "math" | "english";
-export type OLevelLectureCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+export type OLevelLectureCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 export type LectureCategory = SatLectureCategory | OLevelLectureCategory;
 
 export const OLEVEL_LECTURE_CATEGORIES: OLevelLectureCategory[] = [
-  "mathematics", "computer-science", "english-language", "islamiyat", "pakistan-studies",
+  "mathematics", "computer-science", "english-language", "islamiyat", "pakistan-studies", "physics",
 ];
 
 export type Lecture = {

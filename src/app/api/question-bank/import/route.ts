@@ -27,6 +27,7 @@ const OLEVEL_SECTION_MAP: Record<string, BankSection> = {
   "english language": "english-language", "english-language": "english-language", english: "english-language",
   islamiyat: "islamiyat",
   "pakistan studies": "pakistan-studies", "pakistan-studies": "pakistan-studies",
+  physics: "physics",
 };
 const CORRECT_MAP: Record<string, 0 | 1 | 2 | 3> = { a: 0, b: 1, c: 2, d: 3 };
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
 type LectureProgram = "sat" | "o-level";
-type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 interface Lecture {
   id: string;
@@ -35,6 +35,7 @@ const OLEVEL_CATEGORIES: CategoryMeta[] = [
   { value: "english-language",  label: "English Language",  icon: "📖", color: "#0e7490", bg: "#ecfeff" },
   { value: "islamiyat",         label: "Islamiyat",         icon: "🕌", color: "#15803d", bg: "#dcfce7" },
   { value: "pakistan-studies",  label: "Pakistan Studies",  icon: "🌍", color: "#b45309", bg: "#fef3c7" },
+  { value: "physics",           label: "Physics",           icon: "⚛️", color: "#c2410c", bg: "#fff7ed" },
 ];
 
 const ALL_CATEGORIES = [...SAT_CATEGORIES, ...OLEVEL_CATEGORIES];

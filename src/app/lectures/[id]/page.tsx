@@ -3,7 +3,7 @@ import { useEffect, useState, use, useRef, useCallback } from "react";
 import Link from "next/link";
 
 type LectureProgram = "sat" | "o-level";
-type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 interface Lecture {
   id: string;
@@ -27,6 +27,7 @@ const CATEGORY_LABEL: Record<LectureCategory, string> = {
   "english-language": "📖 English Language",
   islamiyat: "🕌 Islamiyat",
   "pakistan-studies": "🌍 Pakistan Studies",
+  physics: "⚛️ Physics",
 };
 
 interface QuizQuestion {

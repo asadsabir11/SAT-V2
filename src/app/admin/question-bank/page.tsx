@@ -4,7 +4,7 @@ import Link from "next/link";
 import * as XLSX from "xlsx";
 
 type Program = "sat" | "o-level";
-type Section = "math" | "reading_writing" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies";
+type Section = "math" | "reading_writing" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 
 interface BankQuestion {
   id: string;
@@ -31,6 +31,7 @@ const OLEVEL_SECTIONS: SectionMeta[] = [
   { value: "english-language", label: "English Language", color: "#0e7490", bg: "#ecfeff" },
   { value: "islamiyat", label: "Islamiyat", color: "#15803d", bg: "#dcfce7" },
   { value: "pakistan-studies", label: "Pakistan Studies", color: "#b45309", bg: "#fef3c7" },
+  { value: "physics", label: "Physics", color: "#c2410c", bg: "#fff7ed" },
 ];
 const ALL_SECTIONS = [...SAT_SECTIONS, ...OLEVEL_SECTIONS];
 const sectionMeta = (s: Section): SectionMeta => ALL_SECTIONS.find((x) => x.value === s) ?? SAT_SECTIONS[0];
@@ -64,6 +65,7 @@ const OLEVEL_SECTION_MAP: Record<string, Section> = {
   "english language": "english-language", "english-language": "english-language", english: "english-language",
   islamiyat: "islamiyat",
   "pakistan studies": "pakistan-studies", "pakistan-studies": "pakistan-studies",
+  physics: "physics",
 };
 const CORRECT_MAP: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
 

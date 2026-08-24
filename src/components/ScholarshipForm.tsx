@@ -8,6 +8,7 @@ const OLEVEL_SUBJECTS: [string, string][] = [
   ["computer-science", "Computer Science"],
   ["islamiyat", "Islamiyat"],
   ["pakistan-studies", "Pakistan Studies"],
+  ["physics", "Physics"],
 ];
 
 const INCOME_OPTIONS: [string, string][] = [
