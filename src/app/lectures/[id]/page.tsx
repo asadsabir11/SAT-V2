@@ -255,6 +255,24 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
     }).finally(() => setLoading(false));
   }, [id]);
 
+  // Deters casual, non-technical attempts to open dev tools and dig out the
+  // raw stream URL — like the video's disabled right-click/download button,
+  // this stops nothing determined (a real screen recorder ignores all of
+  // it), it just raises the floor for the common case.
+  useEffect(() => {
+    function blockDevToolsShortcuts(e: KeyboardEvent) {
+      const key = e.key.toLowerCase();
+      const isDevToolsCombo =
+        key === "f12" ||
+        (e.ctrlKey && e.shiftKey && ["i", "j", "c"].includes(key)) ||
+        (e.metaKey && e.altKey && ["i", "j", "c"].includes(key)) || // macOS Cmd+Opt+I/J/C
+        ((e.ctrlKey || e.metaKey) && key === "u"); // view-source
+      if (isDevToolsCombo) e.preventDefault();
+    }
+    document.addEventListener("keydown", blockDevToolsShortcuts);
+    return () => document.removeEventListener("keydown", blockDevToolsShortcuts);
+  }, []);
+
   // Track video progress
   const handleTimeUpdate = useCallback(async () => {
     if (markedRef.current) return;
@@ -317,7 +335,7 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
   const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : "/lectures";
 
   return (
-    <section className="section">
+    <section className="section" onContextMenu={e => e.preventDefault()}>
       <div className="container">
         <Link href={libraryHref} style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none", display: "inline-block", marginBottom: 16 }}>← All lectures</Link>
 
