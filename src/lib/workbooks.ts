@@ -1,4 +1,4 @@
-import { appendData, readData, deleteByField } from "@/lib/storage";
+import { appendData, readData, deleteByField, incrementCounter } from "@/lib/storage";
 
 export interface Workbook {
   id: string;
@@ -7,6 +7,7 @@ export interface Workbook {
   fileName: string;
   uploadedBy: string;
   createdAt: string;
+  downloadCount?: number;
 }
 
 const COLLECTION = "workbooks";
@@ -31,4 +32,8 @@ export async function createWorkbook(data: { title: string; fileUrl: string; fil
 
 export async function deleteWorkbook(id: string): Promise<void> {
   await deleteByField(COLLECTION, "id", id);
+}
+
+export async function recordWorkbookDownload(id: string): Promise<number> {
+  return incrementCounter(COLLECTION, id, "downloadCount");
 }

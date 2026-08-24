@@ -66,3 +66,19 @@ export async function deleteByField(collection: string, field: string, value: st
   await ensureTables();
   await sql`DELETE FROM sat_records WHERE collection = ${collection} AND data->>${field} = ${value}`;
 }
+
+// Atomically bumps a numeric counter field inside the record's JSON, e.g.
+// tracking workbook download counts. counterField is always a fixed string
+// literal passed by call sites (never user input), so it's safe to splice
+// into the jsonb_set path directly rather than parameterize.
+export async function incrementCounter(collection: string, id: string, counterField: string): Promise<number> {
+  await ensureTables();
+  const rows = await sql`
+    UPDATE sat_records
+    SET data = jsonb_set(data, ARRAY[${counterField}], (COALESCE((data->>${counterField})::int, 0) + 1)::text::jsonb)
+    WHERE collection = ${collection} AND id = ${id}
+    RETURNING data
+  `;
+  const updated = rows[0]?.data as Record<string, unknown> | undefined;
+  return (updated?.[counterField] as number) ?? 0;
+}

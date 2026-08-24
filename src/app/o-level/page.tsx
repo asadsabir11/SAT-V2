@@ -13,6 +13,7 @@ import { getSession } from "@/lib/auth";
 import { getOLevelAccessMap } from "@/lib/olevelAccess";
 import { getUserProgram } from "@/lib/users";
 import { listWorkbooks } from "@/lib/workbooks";
+import { WorkbookDownloadLink } from "@/components/WorkbookDownloadLink";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -243,10 +244,11 @@ export default async function OLevelPage() {
               {workbooks.map((w, i) => {
                 const theme = WORKBOOK_THEMES[i % WORKBOOK_THEMES.length];
                 return (
-                  <a
+                  <WorkbookDownloadLink
                     key={w.id}
+                    id={w.id}
                     href={w.fileUrl}
-                    download={w.fileName}
+                    fileName={w.fileName}
                     className="module-card fade-up"
                     style={{ "--module-accent": theme.accent, "--module-accent-grad": theme.grad, "--module-glow": theme.glow } as CSSProperties}
                   >
@@ -260,7 +262,7 @@ export default async function OLevelPage() {
                       <p>Printable practice pages you can start on today — no account required.</p>
                       <span className="module-arrow" style={{ color: theme.accent, fontWeight: 700, fontSize: ".85rem" }}>Download PDF →</span>
                     </article>
-                  </a>
+                  </WorkbookDownloadLink>
                 );
               })}
             </div>

@@ -9,6 +9,7 @@ interface Workbook {
   fileUrl: string;
   fileName: string;
   createdAt: string;
+  downloadCount?: number;
 }
 
 function fmtDate(d: string) {
@@ -152,6 +153,10 @@ export default function AdminWorkbooks() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontWeight: 700, color: "#071b33", margin: "0 0 2px", fontSize: ".95rem" }}>{w.title}</p>
                     <p style={{ color: "#6b7c93", fontSize: ".82rem", margin: 0 }}>{w.fileName} · Uploaded {fmtDate(w.createdAt)}</p>
+                  </div>
+                  <div style={{ textAlign: "center", flexShrink: 0, padding: "0 8px" }}>
+                    <div style={{ fontWeight: 900, color: "#155eef", fontSize: "1.1rem" }}>{w.downloadCount ?? 0}</div>
+                    <div style={{ color: "#a0aec0", fontSize: ".68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>Downloads</div>
                   </div>
                   <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                     <a href={w.fileUrl} target="_blank" rel="noreferrer" style={{ padding: "6px 12px", borderRadius: 8, background: "#f1f5f9", border: "none", fontWeight: 700, fontSize: ".78rem", color: "#344054", textDecoration: "none" }}>View</a>
