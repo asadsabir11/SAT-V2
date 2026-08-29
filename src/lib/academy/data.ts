@@ -49,6 +49,9 @@ export const SUBJECTS: Subject[] = [
     name: "Mathematics",
     program: "o-level",
     syllabusRef: "Cambridge O Level Mathematics",
+    syllabusCode: "4024",
+    seoTitle: "Online O Level Maths Tuition in Pakistan | Cambridge 4024",
+    seoH1: "Cambridge O Level Mathematics Tuition Online in Pakistan",
     short: "Concept-first maths with weekly problem-solving workshops.",
     description:
       "Build genuine understanding of O Level Mathematics through concept classes and past-paper problem-solving, with help available between lessons.",
@@ -77,12 +80,37 @@ export const SUBJECTS: Subject[] = [
     assessmentApproach:
       "Regular topical quizzes and monthly assessments to estimate current working level and highlight areas for improvement.",
     instructorId: "ibrahim",
+    faqs: [
+      {
+        q: "How much does O Level Maths tuition cost in Pakistan?",
+        a: "Founding cohort pricing starts at PKR 10,000/month for one subject, with a lower per-subject rate if you add more subjects — see current pricing in the Enroll section below.",
+      },
+      {
+        q: "Is this Cambridge O Level Mathematics (4024) or IGCSE Maths?",
+        a: "This course is built for Cambridge O Level Mathematics (syllabus 4024). If your school follows IGCSE Mathematics instead, message us on WhatsApp first to confirm fit.",
+      },
+      {
+        q: "Do you cover past papers for O Level Maths?",
+        a: "Yes — every week pairs a concept class with a problem-solving/past-paper workshop, so past-paper technique is built in from the start rather than left until closer to the exam.",
+      },
+      {
+        q: "What if my child gets stuck on Maths homework between classes?",
+        a: "Open office hours run between lessons specifically for this — students can bring a stuck question and get help without waiting for the next scheduled class.",
+      },
+      {
+        q: "Is O Level Maths tuition online or in-person?",
+        a: "Fully online and live (not pre-recorded) — students in Pakistan and abroad join the same weekly concept class and workshop, plus asynchronous support between classes.",
+      },
+    ],
   },
   {
     slug: "computer-science",
     name: "Computer Science",
     program: "o-level",
     syllabusRef: "Cambridge O Level Computer Science",
+    syllabusCode: "2210",
+    seoTitle: "Online O Level Computer Science Tuition in Pakistan | Cambridge 2210",
+    seoH1: "Cambridge O Level Computer Science Tuition Online in Pakistan",
     short: "Exam content connected to real-world technology.",
     description:
       "O Level Computer Science taught by a technology professional — exam-aligned, with concepts connected to how real systems actually work.",
@@ -111,12 +139,33 @@ export const SUBJECTS: Subject[] = [
     assessmentApproach:
       "Topical quizzes plus monthly assessments focused on exam-style questions.",
     instructorId: "ibrahim",
+    faqs: [
+      {
+        q: "Who teaches O Level Computer Science?",
+        a: "Ibrahim Sajid Malick, a technology executive with 25+ years of industry experience in software, cloud, networking and cybersecurity — concepts are taught with real-world context, not just exam theory.",
+      },
+      {
+        q: "Is this Cambridge O Level Computer Science (2210)?",
+        a: "Yes — the course is built around the Cambridge O Level Computer Science syllabus (2210), covering data representation, computer systems, networking, algorithms/programming concepts, databases and security fundamentals.",
+      },
+      {
+        q: "Do I need prior programming experience?",
+        a: "No — the course starts from core theory and terminology and builds up, with programming/algorithm concepts introduced and practiced through exam-style questions.",
+      },
+      {
+        q: "How much does O Level Computer Science tuition cost in Pakistan?",
+        a: "Founding cohort pricing starts at PKR 10,000/month for one subject, with a lower per-subject rate if you add more subjects — see current pricing in the Enroll section below.",
+      },
+    ],
   },
   {
     slug: "english-language",
     name: "English Language",
     program: "o-level",
     syllabusRef: "Cambridge O Level English Language",
+    syllabusCode: "1123",
+    seoTitle: "Online O Level English Tuition in Pakistan | Cambridge 1123",
+    seoH1: "Cambridge O Level English Language Tuition Online in Pakistan",
     short: "Reading, writing, and exam technique with weekly writing workshops.",
     description:
       "Develop clear writing and confident comprehension for O Level English Language, with weekly writing practice and feedback.",
@@ -144,6 +193,24 @@ export const SUBJECTS: Subject[] = [
     assessmentApproach:
       "Regular writing tasks with feedback and monthly assessments.",
     instructorId: "ibrahim",
+    faqs: [
+      {
+        q: "Is this Cambridge O Level English Language (1123)?",
+        a: "Yes — the course is built around the Cambridge O Level English Language syllabus (1123), covering directed writing, composition, comprehension and summary skills.",
+      },
+      {
+        q: "How does the writing feedback work?",
+        a: "Weekly writing tasks get individual feedback, alongside a dedicated writing/exam workshop each week — the goal is consistent, structured practice rather than one big essay close to the exam.",
+      },
+      {
+        q: "Does this help with university application writing later, not just the O Level exam?",
+        a: "The comprehension, summary and structured-writing skills built here carry over — it's a common reason students continue past the O Level exam itself.",
+      },
+      {
+        q: "How much does O Level English tuition cost in Pakistan?",
+        a: "Founding cohort pricing starts at PKR 10,000/month for one subject, with a lower per-subject rate if you add more subjects — see current pricing in the Enroll section below.",
+      },
+    ],
   },
   {
     slug: "islamiyat",

@@ -23,9 +23,13 @@ export async function generateMetadata({
   const { subject: slug } = await params;
   const subject = getSubject(slug);
   if (!subject) return { title: "Subject not found" };
+  const title = subject.seoTitle ?? `O Level ${subject.name}`;
+  const description = `${subject.short} Live classes, office hours, past-paper practice, and progress reporting for Cambridge O Level ${subject.name}.`;
   return {
-    title: `O Level ${subject.name}`,
-    description: `${subject.short} Live classes, office hours, past-paper practice, and progress reporting for Cambridge O Level ${subject.name}.`,
+    title,
+    description,
+    alternates: { canonical: `/o-level/${slug}` },
+    openGraph: { title, description, url: `/o-level/${slug}`, type: "website" },
   };
 }
 
@@ -41,8 +45,30 @@ export default async function SubjectPage({
   const instructor = getInstructor(subject.instructorId);
   const cohort = getCohortForSubject(subject.slug);
 
+  const BASE_URL = "https://academy.thedigitaltutor.net";
+  const courseSchema = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: `Cambridge O Level ${subject.name}${subject.syllabusCode ? ` (${subject.syllabusCode})` : ""}`,
+    description: subject.description,
+    provider: { "@type": "EducationalOrganization", name: "The Digital Tutor", sameAs: BASE_URL },
+    url: `${BASE_URL}/o-level/${subject.slug}`,
+    ...(instructor ? { instructor: { "@type": "Person", name: instructor.name } } : {}),
+  };
+  const faqSchema = subject.faqs && subject.faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: subject.faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  } : null;
+
   return (
     <section className="section">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       <div className="container" style={{ maxWidth: 880 }}>
         <nav style={{ marginBottom: 20, color: "var(--muted)", fontSize: ".85rem" }}>
           <Link href="/" style={{ color: "var(--muted)" }}>Home</Link>
@@ -53,7 +79,7 @@ export default async function SubjectPage({
         </nav>
 
         <div className="eyebrow">Cambridge O Level / IGCSE</div>
-        <h1 className="title" style={{ marginTop: 8 }}>O Level {subject.name}</h1>
+        <h1 className="title" style={{ marginTop: 8 }}>{subject.seoH1 ?? `O Level ${subject.name}`}</h1>
         {subject.syllabusRef && (
           <p style={{ marginTop: -4, color: "var(--blue)", fontSize: ".92rem", fontWeight: 700 }}>
             {subject.syllabusRef}{subject.syllabusCode ? ` · ${subject.syllabusCode}` : ""}

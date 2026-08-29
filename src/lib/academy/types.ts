@@ -50,6 +50,9 @@ export interface Subject {
   instructorId: string;
   comingSoon?: boolean;
   faqs?: { q: string; a: string }[];
+  /** Optional overrides for search-targeted title/H1 (falls back to a generic "O Level {name}" pattern when unset). */
+  seoTitle?: string;
+  seoH1?: string;
 }
 
 export type ExamSession = string; // e.g. "May/June 2027"
