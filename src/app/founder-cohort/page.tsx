@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     description: "Live weekly SAT classes, AI tutor access, original mocks, and parent progress reporting at founder pricing.",
     url: `${BASE_URL}/founder-cohort`,
     type: "website",
+    images: ["/opengraph-image"],
   },
 };
 

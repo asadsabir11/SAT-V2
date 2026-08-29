@@ -30,9 +30,14 @@ export const metadata: Metadata = {
     description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
     url: `${BASE_URL}/o-level`,
     type: "website",
+    // Declaring an openGraph block here overrides the root layout's, which
+    // drops the file-based /opengraph-image — it has to be named explicitly
+    // on every page that sets its own openGraph.
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/opengraph-image"],
     title: "O Level Founding Cohorts Now Enrolling",
     description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
   },

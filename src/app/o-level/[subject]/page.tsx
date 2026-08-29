@@ -29,7 +29,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: `/o-level/${slug}` },
-    openGraph: { title, description, url: `/o-level/${slug}`, type: "website" },
+    openGraph: { title, description, url: `/o-level/${slug}`, type: "website", images: ["/opengraph-image"] },
   };
 }
 

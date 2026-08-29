@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     description: "Weekly progress reports and clear visibility into your child's SAT or O Level prep, without micromanaging every worksheet.",
     url: `${BASE_URL}/parent-webinar`,
     type: "website",
+    images: ["/opengraph-image"],
   },
 };
 

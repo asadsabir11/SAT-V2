@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Opportunity Scholarship — The Digital Tutor",
   description: DESC,
   alternates: { canonical: `${BASE_URL}/scholarship` },
-  openGraph: { title: "The Digital Tutor Opportunity Scholarship", description: DESC, url: `${BASE_URL}/scholarship`, type: "website" },
+  openGraph: { title: "The Digital Tutor Opportunity Scholarship", description: DESC, url: `${BASE_URL}/scholarship`, type: "website", images: ["/opengraph-image"] },
 };
 
 const REQUIREMENTS = [
