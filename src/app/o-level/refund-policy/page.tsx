@@ -4,6 +4,7 @@ import { PageHero } from "@/components/site";
 export const metadata: Metadata = {
   title: "Refund & Cancellation Policy",
   description: "Refund and cancellation policy for The Digital Tutor's O Level Founding Cohort.",
+  alternates: { canonical: "/o-level/refund-policy" },
 };
 
 const SECTIONS: [string, string | null][] = [

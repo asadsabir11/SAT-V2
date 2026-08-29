@@ -193,7 +193,7 @@ export function Footer(){
               ) : (
                 <>
                   <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
-                    Register free for O Level English Language and Mathematics — pay only when you unlock a subject.
+                    Register free for O Level English Language, Mathematics and Computer Science — pay only when you unlock a subject.
                   </p>
                   <Link href="/o-level#apply" className="footer-cta-btn footer-cta-primary">Register Free →</Link>
                 </>

@@ -1,6 +1,13 @@
 import Link from "next/link";
 
-export const metadata = { title: "Privacy Policy — The Digital Tutor" };
+// Title is just "Privacy Policy" — the root layout appends
+// "| The Digital Tutor" via its template, so repeating the brand here
+// rendered as "Privacy Policy — The Digital Tutor | The Digital Tutor".
+export const metadata = {
+  title: "Privacy Policy",
+  description: "How The Digital Tutor collects, uses, and protects the personal information of students and parents.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPolicy() {
   const updated = "July 16, 2026";

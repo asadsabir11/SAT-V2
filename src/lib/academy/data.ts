@@ -33,7 +33,7 @@ export const INSTRUCTORS: Instructor[] = [
       "25+ years of technology and leadership experience",
       "Experienced online educator and course creator",
       "Founder of The Digital Tutor",
-      "Personally teaching the initial English and Mathematics cohorts",
+      "Personally teaching the initial English Language, Mathematics and Computer Science cohorts",
     ],
   },
 ];

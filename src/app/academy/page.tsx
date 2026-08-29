@@ -28,7 +28,7 @@ const PROGRAMS = [
     key: "o-level",
     name: "O Level / IGCSE",
     tagline: "For students preparing for Cambridge exams",
-    description: "Founder-led classes in English Language and Mathematics, weekly office hours, and past-paper practice — more subjects opening soon.",
+    description: "Founder-led classes in English Language, Mathematics and Computer Science, weekly office hours, and past-paper practice — more subjects opening soon.",
     href: "/o-level",
     accent: "#7c3aed",
     grad: "linear-gradient(135deg,#7c3aed,#a855f7)",

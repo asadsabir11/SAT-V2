@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { CTAButton, FAQAccordion, FeatureCard, PricingCard, VideoBox } from "@/components/site";
 import Link from "next/link";
+
+// Title/description are inherited from the root layout — this only pins the
+// canonical, which the homepage was previously missing entirely.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 // ─── To add Ibrahim's welcome video ───────────────────────────────────────────
 // 1. Upload the video to YouTube

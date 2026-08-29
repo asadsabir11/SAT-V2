@@ -5,6 +5,9 @@ import { PageHero } from "@/components/site";
 export const metadata: Metadata = {
   title: "SAT",
   description: "Everything for your SAT prep in one place — Q&A, live sessions, lectures, diagnostic, and AI tutor.",
+  // Signed-in students only — middleware 307s anonymous visitors (including
+  // crawlers) to /login, so this must not be offered to the index.
+  robots: { index: false, follow: false },
 };
 
 const MODULES = [

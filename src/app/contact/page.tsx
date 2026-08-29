@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { ContactForm } from "@/components/forms";
 import { PageHero } from "@/components/site";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Questions about enrollment, parent support, regional class times, or sponsorship? Get in touch with The Digital Tutor.",
+  alternates: { canonical: "/contact" },
+};
 
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@thedigitaltutor.net";
 const SAT_WHATSAPP_URL    = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL || "";

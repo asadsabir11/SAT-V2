@@ -211,7 +211,7 @@ export default async function OLevelPage() {
             students preparing for Cambridge O Level and IGCSE examinations.
           </p>
           <p style={{ color: "#5eead4", fontWeight: 700, fontSize: ".95rem" }}>
-            Founding cohorts now enrolling for English Language and Mathematics. Limited to 15 students per class.
+            Founding cohorts now enrolling for English Language, Mathematics and Computer Science. Limited to 15 students per class.
           </p>
           <div className="actions">
             {isSignedInStudent ? (

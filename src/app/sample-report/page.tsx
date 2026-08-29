@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Sample Parent Progress Report",
   description: "See exactly what parents receive every week — attendance, homework, scores, strengths, focus areas, and one parent action.",
+  alternates: { canonical: "/sample-report" },
 };
 
 const STRENGTHS = ["Algebra", "Vocabulary in context"];

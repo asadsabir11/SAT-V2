@@ -1,6 +1,12 @@
 import Link from "next/link";
 
-export const metadata = { title: "Terms of Service — The Digital Tutor" };
+// See the note in privacy/page.tsx — the brand is appended by the root
+// layout's title template, so it must not be repeated here.
+export const metadata = {
+  title: "Terms of Service",
+  description: "The terms governing use of The Digital Tutor platform, enrollment, payments, and student accounts.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsOfService() {
   const updated = "July 16, 2026";
