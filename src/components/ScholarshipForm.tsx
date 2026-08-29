@@ -83,8 +83,11 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
         setSubmitting(false);
         return;
       }
-      trackScholarshipApplication({ program });
+      // Confirm to the applicant first, then report — the application is
+      // already saved at this point, so nothing about analytics should be
+      // able to send them back to an error state and have them submit twice.
       setSubmitted(true);
+      trackScholarshipApplication({ program });
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

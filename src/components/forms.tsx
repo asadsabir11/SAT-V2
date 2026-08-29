@@ -91,12 +91,22 @@ export function useSubmit(endpoint: string, onSuccess?: (p: Record<string, strin
       if (!r.ok) {
         const data = await r.json().catch(() => ({}));
         setErrorMessage(data.error ?? "");
-        throw new Error();
+        setStatus("error");
+        return;
       }
-      setStatus("success");
-      onSuccess?.(payload);
     } catch {
       setStatus("error");
+      return;
+    }
+    setStatus("success");
+    // Deliberately outside the try above: the submission has already
+    // succeeded server-side by this point, so a throw in the hook (analytics,
+    // or localStorage.setItem — which throws in Safari private mode) must not
+    // report a completed registration back to the user as a failure.
+    try {
+      onSuccess?.(payload);
+    } catch (err) {
+      console.error("post-submit hook failed (non-fatal):", err);
     }
   }
   return { status, submit, errorMessage };

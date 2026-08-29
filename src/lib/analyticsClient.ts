@@ -12,28 +12,47 @@ declare global {
   }
 }
 
-export function trackViewContent(params: { content_name: string; content_category?: string }) {
+// Analytics must never be able to break a user flow. Several of these are
+// called from inside form submit handlers whose catch block shows the user an
+// error — without this guard, a throwing beacon (an ad blocker or extension
+// replacing window.fbq with something unhappy) would turn a *successful*
+// registration or scholarship application into a visible failure, and could
+// prompt the user to submit again. A failed beacon should be invisible.
+function safely(send: () => void) {
   if (typeof window === "undefined") return;
-  window.fbq?.("track", "ViewContent", params);
-  window.gtag?.("event", "view_item", { item_name: params.content_name, item_category: params.content_category });
+  try {
+    send();
+  } catch (err) {
+    console.error("analytics beacon failed (non-fatal):", err);
+  }
+}
+
+export function trackViewContent(params: { content_name: string; content_category?: string }) {
+  safely(() => {
+    window.fbq?.("track", "ViewContent", params);
+    window.gtag?.("event", "view_item", { item_name: params.content_name, item_category: params.content_category });
+  });
 }
 
 export function trackLead(params: { subject: string; value?: number; currency?: string }) {
-  if (typeof window === "undefined") return;
-  window.fbq?.("track", "Lead", { content_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
-  window.gtag?.("event", "generate_lead", { item_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+  safely(() => {
+    window.fbq?.("track", "Lead", { content_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+    window.gtag?.("event", "generate_lead", { item_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+  });
 }
 
 export function trackInitiateCheckout(params: { subject: string; value?: number; currency?: string }) {
-  if (typeof window === "undefined") return;
-  window.fbq?.("track", "InitiateCheckout", { content_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
-  window.gtag?.("event", "begin_checkout", { item_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+  safely(() => {
+    window.fbq?.("track", "InitiateCheckout", { content_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+    window.gtag?.("event", "begin_checkout", { item_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+  });
 }
 
 export function trackPaymentSubmitted(params: { subject: string; value?: number; currency?: string }) {
-  if (typeof window === "undefined") return;
-  window.fbq?.("trackCustom", "PaymentSubmitted", { content_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
-  window.gtag?.("event", "payment_submitted", { item_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+  safely(() => {
+    window.fbq?.("trackCustom", "PaymentSubmitted", { content_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+    window.gtag?.("event", "payment_submitted", { item_name: params.subject, value: params.value, currency: params.currency ?? "PKR" });
+  });
 }
 
 // Fired once, when someone first types into a registration form — the top of
@@ -49,28 +68,33 @@ export function trackRegistrationStarted(params: { program: "sat" | "o-level" })
   if (typeof window === "undefined") return;
   if (startedPrograms.has(params.program)) return;
   startedPrograms.add(params.program);
-  window.fbq?.("trackCustom", "RegistrationStarted", { content_name: `${params.program}-registration` });
-  window.gtag?.("event", "registration_started", { item_name: `${params.program}-registration` });
+  safely(() => {
+    window.fbq?.("trackCustom", "RegistrationStarted", { content_name: `${params.program}-registration` });
+    window.gtag?.("event", "registration_started", { item_name: `${params.program}-registration` });
+  });
 }
 
 export function trackScholarshipApplication(params: { program: "sat" | "o-level" }) {
-  if (typeof window === "undefined") return;
-  window.fbq?.("trackCustom", "ScholarshipApplication", { content_name: `${params.program}-scholarship` });
-  window.gtag?.("event", "scholarship_application", { item_name: `${params.program}-scholarship` });
+  safely(() => {
+    window.fbq?.("trackCustom", "ScholarshipApplication", { content_name: `${params.program}-scholarship` });
+    window.gtag?.("event", "scholarship_application", { item_name: `${params.program}-scholarship` });
+  });
 }
 
 // Workbook downloads already increment an internal counter; this reports the
 // same click to GA4/Meta so it can be attributed to an organic landing page.
 export function trackWorkbookDownload(params: { title: string }) {
-  if (typeof window === "undefined") return;
-  window.fbq?.("trackCustom", "WorkbookDownload", { content_name: params.title });
-  window.gtag?.("event", "workbook_download", { item_name: params.title });
+  safely(() => {
+    window.fbq?.("trackCustom", "WorkbookDownload", { content_name: params.title });
+    window.gtag?.("event", "workbook_download", { item_name: params.title });
+  });
 }
 
 // channel distinguishes the floating WhatsApp CTA from the contact form, so
 // "which page produced a conversation" is answerable.
 export function trackContactAction(params: { channel: "whatsapp" | "contact_form" }) {
-  if (typeof window === "undefined") return;
-  window.fbq?.("trackCustom", "Contact", { content_name: params.channel });
-  window.gtag?.("event", "contact", { method: params.channel });
+  safely(() => {
+    window.fbq?.("trackCustom", "Contact", { content_name: params.channel });
+    window.gtag?.("event", "contact", { method: params.channel });
+  });
 }
