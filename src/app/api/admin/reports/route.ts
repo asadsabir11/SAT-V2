@@ -7,7 +7,127 @@ import {
 import { sendParentReport, sendOLevelParentReport } from "@/lib/email";
 import { findByField } from "@/lib/storage";
 import { generateReportNarrative, generateOLevelReportNarrative, getAITutorUsage } from "@/lib/analytics";
-import { sql } from "@/lib/db";
+import { sql, type Row } from "@/lib/db";
+
+// Shared by the single "send" action and bulk send — looks up the parent
+// link + WhatsApp number, fires the right program's email template, and
+// builds the wa.me link. Does NOT flip status; callers do that based on
+// whether the email actually succeeded.
+async function sendReportToParent(report: Row): Promise<{ emailResult: { ok: boolean; error?: string }; waLink: string }> {
+  const [parentLinks, studentRows] = await Promise.all([
+    sql`
+      SELECT u.email AS parent_email, u.name AS parent_name
+      FROM parent_student_links psl
+      JOIN users u ON u.id = psl.parent_user_id
+      WHERE psl.student_id = ${report.student_id}
+      LIMIT 1
+    `,
+    sql`SELECT email FROM users WHERE id = ${report.student_id} LIMIT 1`,
+  ]);
+
+  let whatsappNumber = "";
+  const studentEmail = (studentRows[0] as { email: string } | undefined)?.email;
+  if (studentEmail) {
+    const lead = await findByField<{ whatsapp?: string }>("leads-student", "studentEmail", studentEmail);
+    whatsappNumber = (lead?.whatsapp ?? "").replace(/\D/g, "");
+  }
+
+  const isOLevel = (report.metrics_json as { program?: string }).program === "o-level";
+
+  let emailResult: { ok: boolean; error?: string } = { ok: false, error: "No parent email linked" };
+  let waLink = "";
+
+  if (parentLinks.length > 0) {
+    const pl = parentLinks[0] as { parent_email: string; parent_name: string };
+
+    if (isOLevel) {
+      const metrics = report.metrics_json as {
+        student: string; week: number;
+        attendance: { status: string };
+        subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
+        strengths: string[];
+        focusAreas: string[];
+      };
+
+      emailResult = await sendOLevelParentReport({
+        parentEmail:      pl.parent_email,
+        parentName:       pl.parent_name,
+        studentName:      metrics.student,
+        weekNo:           metrics.week,
+        attendanceStatus: metrics.attendance?.status ?? "not recorded",
+        subjects:         metrics.subjects ?? [],
+        strengths:        metrics.strengths ?? [],
+        focusAreas:       metrics.focusAreas ?? [],
+        coachNote:        String(report.coach_note ?? ""),
+        parentAction:     String(report.parent_action ?? ""),
+      });
+
+      const attempted = (metrics.subjects ?? []).filter((s) => s.attempts > 0);
+      const msg = [
+        `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
+        ``,
+        `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
+        attempted.length
+          ? `📚 Subjects: ${attempted.map((s) => `${s.subjectLabel} (${s.avgPercent}%)`).join(", ")}`
+          : `📚 No quiz attempts yet this week`,
+        metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
+        metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
+        ``,
+        report.coach_note ? `Coach: "${report.coach_note}"` : null,
+        report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
+        ``,
+        `Full report: https://academy.thedigitaltutor.net/parent`,
+      ].filter(Boolean).join("\n");
+
+      waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    } else {
+      const metrics = report.metrics_json as {
+        student: string; week: number;
+        attendance: { status: string };
+        homework: { done: number; assigned: number };
+        score: { latestMock: number | null; target: number | null; deltaSinceLast: number | null };
+        strengths: string[];
+        focusAreas: string[];
+      };
+
+      emailResult = await sendParentReport({
+        parentEmail:      pl.parent_email,
+        parentName:       pl.parent_name,
+        studentName:      metrics.student,
+        weekNo:           metrics.week,
+        attendanceStatus: metrics.attendance?.status ?? "not recorded",
+        homeworkDone:     metrics.homework?.done ?? 0,
+        homeworkTotal:    metrics.homework?.assigned ?? 0,
+        latestScore:      metrics.score?.latestMock ?? null,
+        targetScore:      metrics.score?.target ?? null,
+        scoreDelta:       metrics.score?.deltaSinceLast ?? null,
+        strengths:        metrics.strengths ?? [],
+        focusAreas:       metrics.focusAreas ?? [],
+        coachNote:        String(report.coach_note ?? ""),
+        parentAction:     String(report.parent_action ?? ""),
+      });
+
+      const msg = [
+        `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
+        ``,
+        `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
+        `📚 Homework: ${metrics.homework?.done ?? 0}/${metrics.homework?.assigned ?? 0} done`,
+        metrics.score?.latestMock ? `📈 Score: ${metrics.score.latestMock}${metrics.score.deltaSinceLast != null ? ` (${metrics.score.deltaSinceLast >= 0 ? "+" : ""}${metrics.score.deltaSinceLast})` : ""}` : null,
+        metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
+        metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
+        ``,
+        report.coach_note ? `Coach: "${report.coach_note}"` : null,
+        report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
+        ``,
+        `Full report: https://academy.thedigitaltutor.net/parent`,
+      ].filter(Boolean).join("\n");
+
+      waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+    }
+  }
+
+  return { emailResult, waLink };
+}
 
 
 export async function GET(req: NextRequest) {
@@ -134,127 +254,91 @@ export async function POST(req: NextRequest) {
     const report = await getReportById(id);
     if (!report) return NextResponse.json({ error: "Report not found" }, { status: 404 });
 
-    // Get parent email via parent_student_links, plus the WhatsApp number
-    // captured on the student's registration record.
-    const [parentLinks, studentRows] = await Promise.all([
-      sql`
-        SELECT u.email AS parent_email, u.name AS parent_name
-        FROM parent_student_links psl
-        JOIN users u ON u.id = psl.parent_user_id
-        WHERE psl.student_id = ${report.student_id}
-        LIMIT 1
-      `,
-      sql`SELECT email FROM users WHERE id = ${report.student_id} LIMIT 1`,
-    ]);
-
-    let whatsappNumber = "";
-    const studentEmail = (studentRows[0] as { email: string } | undefined)?.email;
-    if (studentEmail) {
-      const lead = await findByField<{ whatsapp?: string }>("leads-student", "studentEmail", studentEmail);
-      whatsappNumber = (lead?.whatsapp ?? "").replace(/\D/g, "");
-    }
-
-    const isOLevel = (report.metrics_json as { program?: string }).program === "o-level";
-
-    let emailResult: { ok: boolean; error?: string } = { ok: false, error: "No parent email linked" };
-    let waLink = "";
-
-    if (parentLinks.length > 0) {
-      const pl = parentLinks[0] as { parent_email: string; parent_name: string };
-
-      if (isOLevel) {
-        const metrics = report.metrics_json as {
-          student: string; week: number;
-          attendance: { status: string };
-          subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
-          strengths: string[];
-          focusAreas: string[];
-        };
-
-        emailResult = await sendOLevelParentReport({
-          parentEmail:      pl.parent_email,
-          parentName:       pl.parent_name,
-          studentName:      metrics.student,
-          weekNo:           metrics.week,
-          attendanceStatus: metrics.attendance?.status ?? "not recorded",
-          subjects:         metrics.subjects ?? [],
-          strengths:        metrics.strengths ?? [],
-          focusAreas:       metrics.focusAreas ?? [],
-          coachNote:        String(report.coach_note ?? ""),
-          parentAction:     String(report.parent_action ?? ""),
-        });
-
-        const attempted = (metrics.subjects ?? []).filter((s) => s.attempts > 0);
-        const msg = [
-          `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
-          ``,
-          `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
-          attempted.length
-            ? `📚 Subjects: ${attempted.map((s) => `${s.subjectLabel} (${s.avgPercent}%)`).join(", ")}`
-            : `📚 No quiz attempts yet this week`,
-          metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
-          metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
-          ``,
-          report.coach_note ? `Coach: "${report.coach_note}"` : null,
-          report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
-          ``,
-          `Full report: https://academy.thedigitaltutor.net/parent`,
-        ].filter(Boolean).join("\n");
-
-        waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-      } else {
-        const metrics = report.metrics_json as {
-          student: string; week: number;
-          attendance: { status: string };
-          homework: { done: number; assigned: number };
-          score: { latestMock: number | null; target: number | null; deltaSinceLast: number | null };
-          strengths: string[];
-          focusAreas: string[];
-        };
-
-        emailResult = await sendParentReport({
-          parentEmail:      pl.parent_email,
-          parentName:       pl.parent_name,
-          studentName:      metrics.student,
-          weekNo:           metrics.week,
-          attendanceStatus: metrics.attendance?.status ?? "not recorded",
-          homeworkDone:     metrics.homework?.done ?? 0,
-          homeworkTotal:    metrics.homework?.assigned ?? 0,
-          latestScore:      metrics.score?.latestMock ?? null,
-          targetScore:      metrics.score?.target ?? null,
-          scoreDelta:       metrics.score?.deltaSinceLast ?? null,
-          strengths:        metrics.strengths ?? [],
-          focusAreas:       metrics.focusAreas ?? [],
-          coachNote:        String(report.coach_note ?? ""),
-          parentAction:     String(report.parent_action ?? ""),
-        });
-
-        // WhatsApp message (formatted for wa.me)
-        const msg = [
-          `📊 *Week ${metrics.week} Report — ${metrics.student}*`,
-          ``,
-          `✅ Attendance: ${metrics.attendance?.status ?? "not recorded"}`,
-          `📚 Homework: ${metrics.homework?.done ?? 0}/${metrics.homework?.assigned ?? 0} done`,
-          metrics.score?.latestMock ? `📈 Score: ${metrics.score.latestMock}${metrics.score.deltaSinceLast != null ? ` (${metrics.score.deltaSinceLast >= 0 ? "+" : ""}${metrics.score.deltaSinceLast})` : ""}` : null,
-          metrics.strengths?.length ? `💪 Strengths: ${metrics.strengths.join(", ")}` : null,
-          metrics.focusAreas?.length ? `⚡ Focus: ${metrics.focusAreas.join(", ")}` : null,
-          ``,
-          report.coach_note ? `Coach: "${report.coach_note}"` : null,
-          report.parent_action ? `⭐ Your action: ${report.parent_action}` : null,
-          ``,
-          `Full report: https://academy.thedigitaltutor.net/parent`,
-        ].filter(Boolean).join("\n");
-
-        // Without a stored number, wa.me opens WhatsApp's contact picker instead.
-        waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-      }
-    }
-
+    const { emailResult, waLink } = await sendReportToParent(report);
     if (emailResult.ok) {
       await updateReportStatus(id, "sent");
     }
 
     return NextResponse.json({ ok: emailResult.ok, emailResult, waLink });
+  }
+
+  // Bulk: generate + (optionally) AI-write a coach note + send, for many
+  // students in one action instead of the single-report flow repeated by
+  // hand. Continues past individual failures (e.g. a student with no
+  // parent account linked yet) so one bad row doesn't block the rest of
+  // the batch — each student's outcome is reported back individually.
+  if (body.action === "bulk_generate_and_send") {
+    const { studentIds, weekNo, periodStart, periodEnd, useAINarrative } = body;
+    if (!Array.isArray(studentIds) || studentIds.length === 0 || !weekNo || !periodStart || !periodEnd) {
+      return NextResponse.json({ error: "studentIds, weekNo, periodStart, periodEnd required" }, { status: 400 });
+    }
+
+    const results: { studentId: string; studentName: string; status: "sent" | "skipped" | "failed"; reason?: string }[] = [];
+
+    for (const studentId of studentIds) {
+      try {
+        const studentRows = await sql`SELECT name, email, program FROM users WHERE id = ${studentId}`;
+        const student = studentRows[0] as { name: string; email: string; program: string } | undefined;
+        if (!student) {
+          results.push({ studentId, studentName: "Unknown", status: "failed", reason: "Student not found" });
+          continue;
+        }
+
+        const metrics = student.program === "o-level"
+          ? await buildOLevelReportMetrics(studentId, student.email, Number(weekNo), periodStart, periodEnd)
+          : await buildReportMetrics(studentId, Number(weekNo), periodStart, periodEnd);
+        const id = await saveReport(studentId, Number(weekNo), periodStart, periodEnd, metrics, "", "");
+
+        let coachNote = "";
+        let narrative: string | undefined;
+        if (useAINarrative) {
+          try {
+            if (student.program === "o-level") {
+              const m = metrics as import("@/lib/parent-system").OLevelReportMetrics;
+              narrative = await generateOLevelReportNarrative({
+                studentName: m.student, weekNo: m.week,
+                attendanceStatus: m.attendance?.status ?? "not recorded",
+                subjects: m.subjects ?? [], strengths: m.strengths ?? [], focusAreas: m.focusAreas ?? [],
+                coachNote: "",
+              });
+            } else {
+              const m = metrics as import("@/lib/parent-system").ReportMetrics;
+              const aiUsage = await getAITutorUsage(studentId);
+              narrative = await generateReportNarrative({
+                studentName: m.student, weekNo: m.week,
+                attendanceStatus: m.attendance?.status ?? "not recorded",
+                homeworkDone: m.homework?.done ?? 0, homeworkTotal: m.homework?.assigned ?? 0,
+                aiSessions: m.practice?.aiSessions ?? Number(aiUsage.session_count ?? 0),
+                aiHours: Number(aiUsage.total_hours ?? 0),
+                latestScore: m.score?.latestMock ?? null, targetScore: m.score?.target ?? null, scoreDelta: m.score?.deltaSinceLast ?? null,
+                strengths: m.strengths ?? [], focusAreas: m.focusAreas ?? [],
+                coachNote: "",
+              });
+            }
+            coachNote = narrative;
+          } catch (narrativeErr) {
+            console.error(`AI narrative failed for ${studentId} (non-fatal, sending without it):`, narrativeErr);
+          }
+        }
+
+        await updateReportFields(id, coachNote, "", narrative);
+        await updateReportStatus(id, "approved");
+
+        const savedReport = await getReportById(id);
+        const { emailResult } = await sendReportToParent(savedReport!);
+        if (emailResult.ok) {
+          await updateReportStatus(id, "sent");
+          results.push({ studentId, studentName: student.name, status: "sent" });
+        } else {
+          results.push({ studentId, studentName: student.name, status: "skipped", reason: emailResult.error ?? "Email not sent" });
+        }
+      } catch (err) {
+        console.error(`Bulk report failed for student ${studentId}:`, err);
+        results.push({ studentId, studentName: "—", status: "failed", reason: String(err) });
+      }
+    }
+
+    return NextResponse.json({ ok: true, results });
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

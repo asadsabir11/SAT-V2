@@ -26,6 +26,14 @@ export function AdminReportsPanel({ program, title, description }: { program: "s
   const [genNarrative, setGenNarrative] = useState<string | null>(null);
   const [genNarrativeId, setGenNarrativeId] = useState<string | null>(null);
 
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkIds, setBulkIds] = useState<Set<string>>(new Set());
+  const [bulkForm, setBulkForm] = useState({ weekNo: "", periodStart: "", periodEnd: "" });
+  const [bulkUseAI, setBulkUseAI] = useState(true);
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [bulkError, setBulkError] = useState("");
+  const [bulkResults, setBulkResults] = useState<{ studentId: string; studentName: string; status: "sent" | "skipped" | "failed"; reason?: string }[] | null>(null);
+
   const load = useCallback(async () => {
     const d = await fetch(`/api/admin/reports?program=${program}`).then(r => r.json());
     setReports(d.reports ?? []);
@@ -89,6 +97,39 @@ export function AdminReportsPanel({ program, title, description }: { program: "s
     setSending(null);
   }
 
+  function toggleBulkId(id: string) {
+    setBulkIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleBulkAll() {
+    setBulkIds(prev => prev.size === students.length ? new Set() : new Set(students.map(s => s.id)));
+  }
+
+  async function runBulk() {
+    const { weekNo, periodStart, periodEnd } = bulkForm;
+    if (bulkIds.size === 0 || !weekNo || !periodStart || !periodEnd) { setBulkError("Select at least one student and fill in week/period."); return; }
+    setBulkRunning(true); setBulkError(""); setBulkResults(null);
+    const r = await fetch("/api/admin/reports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "bulk_generate_and_send",
+        studentIds: Array.from(bulkIds),
+        weekNo: Number(weekNo), periodStart, periodEnd,
+        useAINarrative: bulkUseAI,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) { setBulkError(d.error ?? "Bulk send failed"); setBulkRunning(false); return; }
+    setBulkResults(d.results ?? []);
+    await load();
+    setBulkRunning(false);
+  }
+
   return (
     <section className="section"><div className="container">
       <Link href="/admin" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← Admin</Link>
@@ -123,6 +164,91 @@ export function AdminReportsPanel({ program, title, description }: { program: "s
         <button className="btn btn-primary" onClick={generate} disabled={generating} style={{ padding: "10px 24px" }}>
           {generating ? "Generating…" : "Generate report →"}
         </button>
+      </div>
+
+      {/* Bulk generate & send */}
+      <div className="card" style={{ marginBottom: 28, border: "2px solid #e8eef6" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: bulkOpen ? 16 : 0 }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: ".95rem", color: "#071b33" }}>Bulk generate & send</h3>
+            <p style={{ margin: "4px 0 0", fontSize: ".82rem", color: "#6b7c93" }}>Generate, approve, and send reports for many students at once — for the same week.</p>
+          </div>
+          <button onClick={() => setBulkOpen(o => !o)} style={{ padding: "8px 16px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", flexShrink: 0 }}>
+            {bulkOpen ? "Hide" : "Open"}
+          </button>
+        </div>
+
+        {bulkOpen && (
+          <div>
+            <div className="form-grid" style={{ marginBottom: 14 }}>
+              <div className="field">
+                <label>Week number *</label>
+                <input type="number" min={1} max={52} value={bulkForm.weekNo} onChange={e => setBulkForm(f => ({ ...f, weekNo: e.target.value }))} placeholder="e.g. 4" />
+              </div>
+              <div className="field">
+                <label>Period start *</label>
+                <input type="date" value={bulkForm.periodStart} onChange={e => setBulkForm(f => ({ ...f, periodStart: e.target.value }))} />
+              </div>
+              <div className="field">
+                <label>Period end *</label>
+                <input type="date" value={bulkForm.periodEnd} onChange={e => setBulkForm(f => ({ ...f, periodEnd: e.target.value }))} />
+              </div>
+            </div>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: ".85rem", color: "#344054", marginBottom: 14, cursor: "pointer" }}>
+              <input type="checkbox" checked={bulkUseAI} onChange={e => setBulkUseAI(e.target.checked)} />
+              Write each parent&apos;s coach note with AI (based on that student&apos;s own metrics)
+            </label>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <label style={{ margin: 0 }}>Students * ({bulkIds.size} selected)</label>
+                <button onClick={toggleBulkAll} style={{ background: "none", border: "none", color: "#155eef", fontSize: ".8rem", fontWeight: 700, cursor: "pointer" }}>
+                  {bulkIds.size === students.length ? "Deselect all" : "Select all"}
+                </button>
+              </div>
+              <div style={{ maxHeight: 220, overflowY: "auto", border: "1.5px solid #e8eef6", borderRadius: 10, padding: 10 }}>
+                {students.map(s => (
+                  <label key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 4px", fontSize: ".85rem", color: "#344054", cursor: "pointer" }}>
+                    <input type="checkbox" checked={bulkIds.has(s.id)} onChange={() => toggleBulkId(s.id)} />
+                    {s.name} <span style={{ color: "#9aa8bd" }}>({s.email})</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {bulkError && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".85rem", marginBottom: 10 }}>⚠ {bulkError}</p>}
+
+            <button className="btn btn-primary" onClick={runBulk} disabled={bulkRunning} style={{ padding: "10px 24px" }}>
+              {bulkRunning ? `Sending to ${bulkIds.size} students…` : `Generate & send to ${bulkIds.size || ""} students →`}
+            </button>
+
+            {bulkResults && (
+              <div style={{ marginTop: 18 }}>
+                <p style={{ fontWeight: 800, color: "#071b33", marginBottom: 10 }}>
+                  {bulkResults.filter(r => r.status === "sent").length} sent ·{" "}
+                  {bulkResults.filter(r => r.status === "skipped").length} skipped ·{" "}
+                  {bulkResults.filter(r => r.status === "failed").length} failed
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {bulkResults.map(r => {
+                    const meta = r.status === "sent"
+                      ? { bg: "#f0fdf4", color: "#15803d", icon: "✓" }
+                      : r.status === "skipped"
+                      ? { bg: "#fffbeb", color: "#92400e", icon: "⚠" }
+                      : { bg: "#fef2f2", color: "#b91c1c", icon: "✕" };
+                    return (
+                      <div key={r.studentId} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "8px 12px", borderRadius: 8, background: meta.bg, fontSize: ".82rem" }}>
+                        <span style={{ fontWeight: 700, color: "#071b33" }}>{meta.icon} {r.studentName}</span>
+                        <span style={{ color: meta.color, fontWeight: 600, textAlign: "right" }}>{r.status}{r.reason ? ` — ${r.reason}` : ""}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* AI narrative preview */}
