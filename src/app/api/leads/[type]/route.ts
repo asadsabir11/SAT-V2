@@ -6,6 +6,7 @@ import { createToken, AUTH_COOKIE } from "@/lib/auth";
 import { sendNewStudentAlert, sendWelcomeEmail } from "@/lib/email";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { isValidEmail, passwordStrengthError } from "@/lib/validators";
+import { createNotification } from "@/lib/notifications";
 
 const webhooks: Record<string, string | undefined> = {
   student: process.env.N8N_STUDENT_REGISTRATION_WEBHOOK_URL,
@@ -101,6 +102,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           grade: leadData.grade,
         }).catch(console.error),
         sendWelcomeEmail({ name: leadData.studentName, email: leadData.studentEmail }).catch(console.error),
+        createNotification({
+          type: "registration",
+          audience: "admin",
+          title: `New SAT registration: ${leadData.studentName}`,
+          body: `${leadData.studentEmail} · ${leadData.country ?? ""}`.trim(),
+          link: "/admin/sat-students",
+          program: "sat",
+        }).catch(console.error),
       ]);
       const token = await createToken({
         id: userId,

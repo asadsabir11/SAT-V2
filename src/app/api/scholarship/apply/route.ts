@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createScholarshipApplication, type IncomeRange } from "@/lib/scholarships";
 import { sendScholarshipApplicationAdminAlert } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { isValidEmail } from "@/lib/validators";
 
@@ -76,17 +77,27 @@ export async function POST(req: NextRequest) {
 
     console.log(`Scholarship application saved: ${application.id} (${application.student_name}, ${application.program})`);
 
-    await sendScholarshipApplicationAdminAlert({
-      program: application.program,
-      studentName: application.student_name,
-      age: application.age,
-      city: application.city,
-      grade: application.grade,
-      parentName: application.parent_name,
-      parentEmail: application.parent_email,
-      parentWhatsapp: application.parent_whatsapp,
-      incomeRange: application.income_range,
-    }).catch(console.error);
+    await Promise.all([
+      sendScholarshipApplicationAdminAlert({
+        program: application.program,
+        studentName: application.student_name,
+        age: application.age,
+        city: application.city,
+        grade: application.grade,
+        parentName: application.parent_name,
+        parentEmail: application.parent_email,
+        parentWhatsapp: application.parent_whatsapp,
+        incomeRange: application.income_range,
+      }).catch(console.error),
+      createNotification({
+        type: "scholarship",
+        audience: "admin",
+        title: `New scholarship application: ${application.student_name}`,
+        body: `${application.program === "o-level" ? "O-Level" : "SAT"} · ${application.city}`,
+        link: "/admin/scholarships",
+        program: application.program,
+      }).catch(console.error),
+    ]);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

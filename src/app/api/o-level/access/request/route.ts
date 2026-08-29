@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { requestOLevelAccess, getOLevelSubjectAccess } from "@/lib/olevelAccess";
 import { OLEVEL_LECTURE_CATEGORIES, type OLevelLectureCategory } from "@/lib/lectures";
 import { sendOLevelUnlockPaymentSubmittedAck, sendOLevelUnlockPaymentSubmittedAdminAlert } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -37,6 +38,14 @@ export async function POST(req: NextRequest) {
   await Promise.all([
     sendOLevelUnlockPaymentSubmittedAck({ email: session.email, name: session.name, subject: sub }).catch(console.error),
     sendOLevelUnlockPaymentSubmittedAdminAlert({ email: session.email, name: session.name, subject: sub }).catch(console.error),
+    createNotification({
+      type: "access_request",
+      audience: "admin",
+      title: `O-Level access request: ${session.name}`,
+      body: `${sub} · PKR ${Number(amountPaid).toLocaleString()}`,
+      link: "/admin/o-level-access",
+      program: "o-level",
+    }).catch(console.error),
   ]);
 
   return NextResponse.json({ ok: true, status: "pending" });

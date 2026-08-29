@@ -8,31 +8,35 @@ const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["
 
 type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
 
-// Clicking through opens the full /notifications page (LinkedIn-style)
+// Clicking through opens the full notifications page (LinkedIn-style)
 // rather than a navbar dropdown — this component is just the bell + unread
-// badge. The /notifications page owns marking things seen; this refetches
-// the count on every route change (not just mount) so the badge actually
-// clears once the user navigates back out of /notifications instead of
-// staying stuck at its stale mount-time value for the rest of the session.
-function NotificationBell() {
+// badge. Students and admin (founder/teacher) get separate feeds, same
+// mechanism — the target page owns marking things seen; this refetches the
+// count on every route change (not just mount) so the badge actually
+// clears once the user navigates back out instead of staying stuck at its
+// stale mount-time value for the rest of the session.
+function NotificationBell({ isAdmin }: { isAdmin: boolean }) {
   const [unread, setUnread] = useState(0);
   const pathname = usePathname();
+  const href = isAdmin ? "/admin/notifications" : "/notifications";
+  const apiUrl = isAdmin ? "/api/admin/notifications" : "/api/notifications";
 
   useEffect(() => {
-    // Landing on /notifications always triggers that page's own mark-seen
-    // call — clear the badge immediately rather than racing a refetch
-    // against that in-flight request (which could still read the old count).
-    if (pathname === "/notifications") {
+    // Landing on the notifications page always triggers that page's own
+    // mark-seen call — clear the badge immediately rather than racing a
+    // refetch against that in-flight request (which could still read the
+    // old count).
+    if (pathname === href) {
       setUnread(0);
       return;
     }
-    fetch("/api/notifications").then(r => r.json()).then(d => {
+    fetch(apiUrl).then(r => r.json()).then(d => {
       setUnread(d.unreadCount ?? 0);
     }).catch(() => {});
-  }, [pathname]);
+  }, [pathname, href, apiUrl]);
 
   return (
-    <Link href="/notifications" aria-label="Notifications" className="notif-bell" style={{ position: "relative", width: 36, height: 36, borderRadius: "50%", border: "1.5px solid #e2e8f0", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0, transition: "all .15s", textDecoration: "none" }}>
+    <Link href={href} aria-label="Notifications" className="notif-bell" style={{ position: "relative", width: 36, height: 36, borderRadius: "50%", border: "1.5px solid #e2e8f0", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.05rem", flexShrink: 0, transition: "all .15s", textDecoration: "none" }}>
       🔔
       {unread > 0 && (
         <span style={{ position: "absolute", top: -3, right: -3, minWidth: 17, height: 17, borderRadius: 999, background: "#dc2626", color: "#fff", fontSize: ".62rem", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", border: "2px solid #fff" }}>
@@ -110,7 +114,8 @@ export function Header() {
           {navItems.map(([label, href]) => (
             <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
           ))}
-          {user?.role === "student" && <NotificationBell />}
+          {user?.role === "student" && <NotificationBell isAdmin={false} />}
+          {(user?.role === "founder" || user?.role === "teacher") && <NotificationBell isAdmin />}
           <AuthBadge onUser={setUser} />
           {!user && (
             isOLevel ? (

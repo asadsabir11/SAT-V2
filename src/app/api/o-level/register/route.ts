@@ -5,6 +5,7 @@ import { appendData } from "@/lib/storage";
 import { sendOLevelRegistrationWelcome, sendOLevelRegistrationAdminAlert } from "@/lib/email";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { isValidEmail, passwordStrengthError } from "@/lib/validators";
+import { createNotification } from "@/lib/notifications";
 
 const REQUIRED_FIELDS = [
   "studentName", "studentEmail", "parentName", "parentEmail", "parentWhatsapp",
@@ -75,6 +76,14 @@ export async function POST(req: NextRequest) {
     await Promise.all([
       sendOLevelRegistrationWelcome({ email: studentEmail, name: studentName }).catch(console.error),
       sendOLevelRegistrationAdminAlert({ studentName, studentEmail, parentName: record.parentName, parentEmail, city: record.city }).catch(console.error),
+      createNotification({
+        type: "registration",
+        audience: "admin",
+        title: `New O-Level registration: ${studentName}`,
+        body: `${studentEmail} · ${record.city}`,
+        link: "/admin/o-level-leads",
+        program: "o-level",
+      }).catch(console.error),
     ]);
 
     const token = await createToken({ id: userId, email: studentEmail, role: "student", name: studentName, program: "o-level" });

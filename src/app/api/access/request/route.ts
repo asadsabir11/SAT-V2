@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { requestAccess, getStudentAccessLevel } from "@/lib/users";
 import { sendSatUnlockPaymentSubmittedAck, sendSatUnlockPaymentSubmittedAdminAlert } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -32,6 +33,14 @@ export async function POST(req: Request) {
   await Promise.all([
     sendSatUnlockPaymentSubmittedAck({ email: session.email, name: session.name }).catch(console.error),
     sendSatUnlockPaymentSubmittedAdminAlert({ email: session.email, name: session.name }).catch(console.error),
+    createNotification({
+      type: "access_request",
+      audience: "admin",
+      title: `SAT access request: ${session.name}`,
+      body: `PKR ${Number(amountPaid).toLocaleString()} · ${paymentMethod}`,
+      link: "/admin/access",
+      program: "sat",
+    }).catch(console.error),
   ]);
 
   return NextResponse.json({ ok: true, access_level: "pending" });
