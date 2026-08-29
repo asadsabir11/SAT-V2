@@ -513,7 +513,7 @@ export async function sendOLevelRegistrationWelcome(student: { name: string; ema
               </td>
             </tr>
             <tr>
-              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Pick English Language or Mathematics, pay, and submit your payment details for verification</td>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Pick English Language, Mathematics or Computer Science, pay, and submit your payment details for verification</td>
             </tr>
             <tr>
               <td style="padding:8px 0;vertical-align:top;">

@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const BASE = "https://digital-tutor-sat-prep.vercel.app";
+const BASE = "https://academy.thedigitaltutor.net";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const publicRoutes = [

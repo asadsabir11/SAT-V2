@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://digital-tutor-sat-prep.vercel.app/sitemap.xml
+Sitemap: https://academy.thedigitaltutor.net/sitemap.xml

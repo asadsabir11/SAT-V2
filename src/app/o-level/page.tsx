@@ -454,7 +454,7 @@ export default async function OLevelPage() {
             <div className="card">
               <div className="icon">2</div>
               <h3>Pick a subject to unlock</h3>
-              <p>From your dashboard, choose English Language or Mathematics and submit your payment details for verification.</p>
+              <p>From your dashboard, choose English Language, Mathematics or Computer Science and submit your payment details for verification.</p>
             </div>
             <div className="card">
               <div className="icon">3</div>
