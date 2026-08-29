@@ -249,6 +249,7 @@ export default async function OLevelPage() {
                     id={w.id}
                     href={w.fileUrl}
                     fileName={w.fileName}
+                    title={w.title}
                     className="module-card fade-up"
                     style={{ "--module-accent": theme.accent, "--module-accent-grad": theme.grad, "--module-glow": theme.glow } as CSSProperties}
                   >

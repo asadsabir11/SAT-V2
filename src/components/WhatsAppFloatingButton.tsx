@@ -1,5 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
+import { trackContactAction } from "@/lib/analyticsClient";
 
 const NUMBER = process.env.NEXT_PUBLIC_OLEVEL_WHATSAPP_NUMBER;
 const MESSAGE = "Assalamu Alaikum. I would like information about The Digital Tutor's O Level founding cohort for my child.";
@@ -18,6 +19,7 @@ export function WhatsAppFloatingButton() {
       href={href}
       target="_blank"
       rel="noreferrer"
+      onClick={() => trackContactAction({ channel: "whatsapp" })}
       aria-label="Ask About the O Level Founding Cohort on WhatsApp"
       style={{
         position: "fixed",

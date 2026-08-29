@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SUBJECT_OPTIONS, TARGET_EXAM_SESSIONS, amountDueForSubject, type SubjectOption } from "@/lib/olevelApplicationOptions";
-import { trackLead } from "@/lib/analyticsClient";
+import { trackLead, trackRegistrationStarted, trackContactAction } from "@/lib/analyticsClient";
 import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 
 const COUNTRIES = ["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","South Korea","Haiti","Vietnam","Nepal","Ghana","Kenya","Philippines","Egypt","Sri Lanka","India","Morocco","Other"];
@@ -125,6 +125,9 @@ const REG_INIT: RegFields = {
 
 export function RegistrationForm() {
   const { status, submit, errorMessage } = useSubmit("/api/leads/student", (p) => {
+    // SAT registrations previously fired no analytics event at all, so organic
+    // SAT signups were invisible next to the O-Level ones.
+    trackLead({ subject: "sat-registration" });
     localStorage.setItem("sat_student_email", p.studentEmail);
     localStorage.setItem("sat_student_name", p.studentName);
     localStorage.setItem("sat_student_data", JSON.stringify({
@@ -156,6 +159,7 @@ export function RegistrationForm() {
   }
 
   function change(name: keyof RegFields, value: string | boolean) {
+    trackRegistrationStarted({ program: "sat" }); // no-ops after the first call
     setFields(f => ({ ...f, [name]: value }));
     if (touched[name]) {
       setErrors(e => ({ ...e, [name]: validateField(name, value) }));
@@ -395,7 +399,7 @@ export function RegistrationForm() {
 
 // ── Contact Form ──────────────────────────────────────────────────────────────
 export function ContactForm() {
-  const { status, submit } = useSubmit("/api/leads/contact");
+  const { status, submit } = useSubmit("/api/leads/contact", () => trackContactAction({ channel: "contact_form" }));
   return (
     <form className="form card" onSubmit={e => { e.preventDefault(); submit(Object.fromEntries(new FormData(e.currentTarget)) as Record<string,string>); }}>
       <div className="form-grid">
@@ -460,6 +464,7 @@ export function OLevelRegistrationForm() {
   }
 
   function change(name: keyof OLevelRegFields, value: string | boolean) {
+    trackRegistrationStarted({ program: "o-level" }); // no-ops after the first call
     setFields(f => ({ ...f, [name]: value }));
     if (touched[name]) setErrors(e => ({ ...e, [name]: validateField(name, value) }));
   }

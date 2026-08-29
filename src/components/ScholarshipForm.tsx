@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { trackScholarshipApplication } from "@/lib/analyticsClient";
 
 const OLEVEL_SUBJECTS: [string, string][] = [
   ["mathematics", "Mathematics"],
@@ -82,6 +83,7 @@ export function ScholarshipForm({ defaultProgram, studentName: defaultStudentNam
         setSubmitting(false);
         return;
       }
+      trackScholarshipApplication({ program });
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");
