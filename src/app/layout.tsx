@@ -33,9 +33,28 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+// Site-wide Organization/EducationalOrganization schema — helps Google
+// interpret who The Digital Tutor is independent of any one page's copy.
+// Kept to verifiable facts already stated elsewhere on the site (no
+// fabricated social profile links).
+const ORG_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "The Digital Tutor",
+  url: BASE_URL,
+  logo: `${BASE_URL}/icon.png`,
+  description: DESC,
+  founder: {
+    "@type": "Person",
+    name: "Ibrahim Sajid Malick",
+  },
+  areaServed: ["Pakistan", "Bangladesh", "Nigeria"],
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
     <body>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }} />
       <Header /><main>{children}</main><Footer />
       <WhatsAppFloatingButton />
       <ChunkErrorRecovery />
