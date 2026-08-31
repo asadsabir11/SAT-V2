@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { getOLevelSubjects } from "@/lib/academy/data";
 import { GUIDES } from "@/lib/guides/data";
+import { WORKBOOK_PAGES } from "@/lib/guides/workbooks";
 
 const BASE = "https://academy.thedigitaltutor.net";
 
@@ -29,6 +30,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Parent guides — informational pages targeting near-purchase parent
     // queries, feeding the commercial O Level pages (SEO Phase 2 §23).
     ...GUIDES.map((g) => ({ url: `${BASE}/guides/${g.slug}`, priority: 0.7 })),
+    // Free-workbook landing pages. Google ranks the HTML page; the student
+    // still gets the PDF from it (SEO Phase 2 §22).
+    ...WORKBOOK_PAGES.map((w) => ({ url: `${BASE}/resources/${w.slug}`, priority: 0.7 })),
   ];
   return publicRoutes.map(r => ({
     url: r.url,

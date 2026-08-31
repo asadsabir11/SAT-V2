@@ -14,6 +14,7 @@ import { getOLevelAccessMap } from "@/lib/olevelAccess";
 import { getUserProgram } from "@/lib/users";
 import { listWorkbooks } from "@/lib/workbooks";
 import { WorkbookDownloadLink } from "@/components/WorkbookDownloadLink";
+import { getWorkbookPageForTitle } from "@/lib/guides/workbooks";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
@@ -270,15 +271,16 @@ export default async function OLevelPage() {
             <div className="grid grid-2" style={{ marginTop: 40, maxWidth: 760, marginLeft: "auto", marginRight: "auto" }}>
               {workbooks.map((w, i) => {
                 const theme = WORKBOOK_THEMES[i % WORKBOOK_THEMES.length];
+                const landing = getWorkbookPageForTitle(w.title);
                 return (
+                  <div key={w.id} style={{ display: "flex", flexDirection: "column" }}>
                   <WorkbookDownloadLink
-                    key={w.id}
                     id={w.id}
                     href={w.fileUrl}
                     fileName={w.fileName}
                     title={w.title}
                     className="module-card fade-up"
-                    style={{ "--module-accent": theme.accent, "--module-accent-grad": theme.grad, "--module-glow": theme.glow } as CSSProperties}
+                    style={{ "--module-accent": theme.accent, "--module-accent-grad": theme.grad, "--module-glow": theme.glow, flex: 1 } as CSSProperties}
                   >
                     <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
                       <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: theme.grad, opacity: 0.08 }} />
@@ -291,6 +293,12 @@ export default async function OLevelPage() {
                       <span className="module-arrow" style={{ color: theme.accent, fontWeight: 700, fontSize: ".85rem" }}>Download PDF →</span>
                     </article>
                   </WorkbookDownloadLink>
+                  {landing && (
+                    <Link href={`/resources/${landing.slug}`} style={{ display: "block", marginTop: 10, textAlign: "center", color: theme.accent, fontWeight: 700, fontSize: ".82rem", textDecoration: "none" }}>
+                      What is inside this workbook →
+                    </Link>
+                  )}
+                  </div>
                 );
               })}
             </div>
