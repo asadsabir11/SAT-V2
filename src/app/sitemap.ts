@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { getOLevelSubjects } from "@/lib/academy/data";
+import { GUIDES } from "@/lib/guides/data";
 
 const BASE = "https://academy.thedigitaltutor.net";
 
@@ -16,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/sample-report`, priority: 0.6 },
     { url: `${BASE}/contact`, priority: 0.6 },
     { url: `${BASE}/materials`, priority: 0.6 },
+    { url: `${BASE}/guides`, priority: 0.7 },
     { url: `${BASE}/privacy`, priority: 0.4 },
     { url: `${BASE}/terms`, priority: 0.4 },
     // Cambridge O Level subject pages — the commercial money pages Google
@@ -24,6 +26,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${BASE}/o-level/${s.slug}`,
       priority: s.slug === "mathematics" || s.slug === "english-language" || s.slug === "computer-science" ? 0.85 : 0.5,
     })),
+    // Parent guides — informational pages targeting near-purchase parent
+    // queries, feeding the commercial O Level pages (SEO Phase 2 §23).
+    ...GUIDES.map((g) => ({ url: `${BASE}/guides/${g.slug}`, priority: 0.7 })),
   ];
   return publicRoutes.map(r => ({
     url: r.url,

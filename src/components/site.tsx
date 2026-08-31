@@ -86,7 +86,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["Scholarships","/scholarship"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["Scholarships","/scholarship"],["Guides for Parents","/guides"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
 export function Header() {
