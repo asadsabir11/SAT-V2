@@ -174,7 +174,15 @@ export function Footer(){
                 <Link className="footer-link" key={label} href={href}>{label}</Link>
               ))}
               {isOLevel && (
-                <Link className="footer-link" href="/o-level/refund-policy">Refund & Cancellation Policy</Link>
+                <>
+                  {/* Subject pages had no inbound internal links anywhere on the
+                      site, so Google never discovered them. These give every
+                      O Level page a crawl path to the three live subjects. */}
+                  <Link className="footer-link" href="/o-level/mathematics">O Level Mathematics</Link>
+                  <Link className="footer-link" href="/o-level/english-language">O Level English Language</Link>
+                  <Link className="footer-link" href="/o-level/computer-science">O Level Computer Science</Link>
+                  <Link className="footer-link" href="/o-level/refund-policy">Refund & Cancellation Policy</Link>
+                </>
               )}
             </nav>
           </div>

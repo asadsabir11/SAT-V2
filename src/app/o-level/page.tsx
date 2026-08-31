@@ -147,16 +147,32 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
     </>
   );
 
-  if (isSignedInStudent && !fullyBooked) {
-    return (
-      <Link href={isUnlocked ? `/o-level/lectures?subject=${subjectSlug}` : `/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
-        {body}
-      </Link>
-    );
-  }
-  return (
-    <div className="card" style={{ display: "flex", flexDirection: "column" }}>
+  // The card itself is unchanged — the signed-in student still gets the whole
+  // card as a link into lectures/unlock, and the anonymous visitor still gets
+  // the "Register Free" CTA.
+  const card = isSignedInStudent && !fullyBooked ? (
+    <Link href={isUnlocked ? `/o-level/lectures?subject=${subjectSlug}` : `/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none", flex: 1 }}>
       {body}
+    </Link>
+  ) : (
+    <div className="card" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+      {body}
+    </div>
+  );
+
+  // Nothing on the site linked to /o-level/<subject> until now — they were
+  // orphan pages reachable only through the sitemap, which is why Google had
+  // not discovered them. This link sits OUTSIDE the card so it never nests
+  // inside the signed-in student's whole-card anchor.
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {card}
+      <Link
+        href={`/o-level/${subjectSlug}`}
+        style={{ display: "block", marginTop: 10, textAlign: "center", color: "var(--blue)", fontWeight: 700, fontSize: ".82rem", textDecoration: "none" }}
+      >
+        Full syllabus, FAQs &amp; class model →
+      </Link>
     </div>
   );
 }
