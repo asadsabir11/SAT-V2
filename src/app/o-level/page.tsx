@@ -22,7 +22,7 @@ const BASE_URL = "https://academy.thedigitaltutor.net";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Online O Level Tuition in Pakistan | The Digital Tutor",
+  title: "Online O Level Tuition in Pakistan",
   description: "Join live online Cambridge O Level and IGCSE classes in English Language, Mathematics and Computer Science, with weekly office hours, past-paper practice and parent progress reports. Islamiyat, Pakistan Studies and Physics coming soon.",
   alternates: { canonical: `${BASE_URL}/o-level` },
   openGraph: {
@@ -209,8 +209,14 @@ export default async function OLevelPage() {
         <div className="container">
           <div className="eyebrow" style={{ color: "#5eead4" }}>Cambridge O Level / IGCSE · Live Online Tuition</div>
           <h1 className="display" style={{ color: "#fff", maxWidth: 780 }}>
-            O Level Tuition Where Students Are Never Left Stuck
+            Online O Level Tuition in Pakistan — Live Cambridge Classes
           </h1>
+          {/* The old H1. Kept verbatim as the sub-headline so the positioning
+              survives, while the H1 itself now carries the query people
+              actually search. */}
+          <p style={{ color: "#5eead4", fontSize: "clamp(1.15rem,2.2vw,1.6rem)", fontWeight: 800, letterSpacing: "-.02em", margin: "-8px 0 16px", maxWidth: 780 }}>
+            Where students are never left stuck.
+          </p>
           <p className="lead" style={{ color: "rgba(255,255,255,.78)" }}>
             Live online classes, weekly office hours, past-paper practice and regular parent progress reports for
             students preparing for Cambridge O Level and IGCSE examinations.

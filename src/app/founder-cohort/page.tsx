@@ -7,7 +7,7 @@ import { getUserProgram } from "@/lib/users";
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
 export const metadata: Metadata = {
-  title: "SAT Prep Founding Cohort | The Digital Tutor",
+  title: "SAT Prep Founding Cohort",
   description: "Live online SAT prep with weekly classes, a 24/7 AI tutor, original mock tests, and weekly parent progress reports — founder pricing for the founding cohort.",
   alternates: { canonical: `${BASE_URL}/founder-cohort` },
   openGraph: {

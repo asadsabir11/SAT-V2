@@ -5,7 +5,7 @@ import { CTAButton, PageHero } from "@/components/site";
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
 export const metadata: Metadata = {
-  title: "For Parents | The Digital Tutor",
+  title: "For Parents",
   description: "How The Digital Tutor keeps parents in the loop — weekly progress reports, attendance, and how your parent account gets set up.",
   alternates: { canonical: `${BASE_URL}/parent-webinar` },
   openGraph: {

@@ -109,7 +109,7 @@ export const SUBJECTS: Subject[] = [
     program: "o-level",
     syllabusRef: "Cambridge O Level Computer Science",
     syllabusCode: "2210",
-    seoTitle: "Online O Level Computer Science Tuition in Pakistan | Cambridge 2210",
+    seoTitle: "O Level Computer Science Tuition Pakistan | Cambridge 2210",
     seoH1: "Cambridge O Level Computer Science Tuition Online in Pakistan",
     short: "Exam content connected to real-world technology.",
     description:

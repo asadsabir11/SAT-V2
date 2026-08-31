@@ -6,7 +6,7 @@ import { PageHero } from "@/components/site";
 const BASE_URL = "https://academy.thedigitaltutor.net";
 
 export const metadata: Metadata = {
-  title: "The Digital Tutor Academy — Choose Your Program",
+  title: "Academy — Choose Your Program",
   description: "The Digital Tutor Academy offers live, founder-led SAT prep and Cambridge O Level / IGCSE tuition. Choose your program to get started.",
   alternates: { canonical: `${BASE_URL}/academy` },
 };

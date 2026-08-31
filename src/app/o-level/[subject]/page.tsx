@@ -26,7 +26,10 @@ export async function generateMetadata({
   const title = subject.seoTitle ?? `O Level ${subject.name}`;
   const description = `${subject.short} Live classes, office hours, past-paper practice, and progress reporting for Cambridge O Level ${subject.name}.`;
   return {
-    title,
+    // absolute: these titles already carry brand-free keyword + syllabus code.
+    // Letting the root layout append " | The Digital Tutor" pushed them past
+    // ~75 chars, so Google truncated the syllabus code off the end.
+    title: subject.seoTitle ? { absolute: subject.seoTitle } : title,
     description,
     alternates: { canonical: `/o-level/${slug}` },
     openGraph: { title, description, url: `/o-level/${slug}`, type: "website", images: ["/opengraph-image"] },

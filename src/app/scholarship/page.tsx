@@ -8,7 +8,7 @@ const BASE_URL = "https://academy.thedigitaltutor.net";
 const DESC = "The Digital Tutor Opportunity Scholarship reserves fully funded places in our founding cohorts for students who demonstrate financial need and a genuine commitment to learning.";
 
 export const metadata: Metadata = {
-  title: "Opportunity Scholarship — The Digital Tutor",
+  title: "Opportunity Scholarship",
   description: DESC,
   alternates: { canonical: `${BASE_URL}/scholarship` },
   openGraph: { title: "The Digital Tutor Opportunity Scholarship", description: DESC, url: `${BASE_URL}/scholarship`, type: "website", images: ["/opengraph-image"] },

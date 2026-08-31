@@ -14,6 +14,30 @@ function ResetPasswordForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [error, setError] = useState("");
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
     if (!token) { setError("This reset link is missing its token. Please request a new one."); return; }
