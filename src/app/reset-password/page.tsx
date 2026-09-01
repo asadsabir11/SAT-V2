@@ -2,6 +2,7 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { passwordStrengthError } from "@/lib/validators";
 
 function ResetPasswordForm() {
   const params = useSearchParams();
@@ -13,35 +14,11 @@ function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [error, setError] = useState("");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
     if (!token) { setError("This reset link is missing its token. Please request a new one."); return; }
-    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    const pwError = passwordStrengthError(password);
+    if (pwError) { setError(pwError); return; }
     if (password !== confirmPassword) { setError("Passwords do not match."); return; }
     setError("");
     setStatus("loading");
