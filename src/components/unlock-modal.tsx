@@ -4,7 +4,13 @@ import Link from "next/link";
 
 export type AccessLevel = "free" | "pending" | "unlocked";
 
+// Two separate amounts because the two payment paths charge in different
+// currencies: the manual Pakistan flow (bank/JazzCash/Easypaisa) collects
+// PKR, while the Stripe card option charges USD — showing only one price
+// let a Pakistani student expect PKR 5,300 and land on a $19 USD Stripe
+// checkout instead. Keep USD in sync with STRIPE_PRICE_ID's actual amount.
 const AMOUNT = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT ?? "PKR 5,300";
+const AMOUNT_USD = process.env.NEXT_PUBLIC_PAYMENT_AMOUNT_USD ?? "$19";
 
 export function UnlockModal({
   accessLevel, onClose,
@@ -55,10 +61,15 @@ export function UnlockModal({
             </div>
             <button onClick={onClose} style={{ background: "rgba(255,255,255,.15)", border: "none", color: "#fff", borderRadius: 8, width: 32, height: 32, cursor: "pointer", fontSize: "1rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✕</button>
           </div>
-          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(255,255,255,.1)", borderRadius: 12, display: "inline-block" }}>
-            <span style={{ fontSize: ".8rem", color: "#93c5fd" }}>Fee: </span>
-            <span style={{ fontSize: "1.2rem", fontWeight: 900, color: "#fff" }}>{AMOUNT}</span>
-            <span style={{ fontSize: ".85rem", fontWeight: 700, color: "#93c5fd" }}>/mo</span>
+          <div style={{ marginTop: 16, padding: "12px 16px", background: "rgba(255,255,255,.1)", borderRadius: 12, display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ fontSize: ".8rem", color: "#93c5fd" }}>Fee:</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: 900, color: "#fff" }}>
+              {AMOUNT}<span style={{ fontSize: ".85rem", fontWeight: 700, color: "#93c5fd" }}>/mo</span>
+            </span>
+            <span style={{ fontSize: ".8rem", color: "#93c5fd" }}>·</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: 900, color: "#fff" }}>
+              {AMOUNT_USD}<span style={{ fontSize: ".85rem", fontWeight: 700, color: "#93c5fd" }}>/mo</span>
+            </span>
           </div>
         </div>
 
