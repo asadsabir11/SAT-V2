@@ -89,6 +89,7 @@ export function UnlockModal({
                 <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#1d4ed8", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6 }}>💳 Pay by Card (Instant Access)</div>
                 <div style={{ fontSize: ".82rem", color: "#1e40af", marginBottom: 12, lineHeight: 1.5 }}>
                   Pay securely online with Stripe. Your account unlocks automatically after payment.
+                  <strong> Not available for Pakistani bank cards</strong> — if you&apos;re in Pakistan, use Bank / JazzCash / Easypaisa below instead.
                 </div>
                 <button
                   onClick={handleStripeCheckout}
