@@ -15,14 +15,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!SCHOLARSHIP_STATUSES.includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
-  const percentage = body.scholarshipPercentage === null || body.scholarshipPercentage === undefined
-    ? null
-    : Number(body.scholarshipPercentage);
-  if (percentage !== null && (Number.isNaN(percentage) || percentage < 0 || percentage > 100)) {
-    return NextResponse.json({ error: "Scholarship percentage must be between 0 and 100" }, { status: 400 });
-  }
 
-  const updated = await updateScholarshipStatus(id, status, percentage, body.adminNotes);
+  const updated = await updateScholarshipStatus(id, status, body.adminNotes);
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ application: updated });
 }

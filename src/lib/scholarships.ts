@@ -2,8 +2,9 @@ import { sql } from "@/lib/db";
 
 // "new" is the default every application starts in, before the founder acts
 // on it — not a manually-chosen outcome, but still a real state so it needs
-// to be a valid value. The scholarship_percentage field (100/75/50) already
-// carries how much was approved, so "approved" doesn't need to be split.
+// to be a valid value. "approved" always means the full 100% Opportunity
+// Scholarship — every access-granting and billing-exclusion check in the
+// app already keys off status alone, never a partial amount.
 export type ScholarshipStatus = "new" | "approved" | "waitlisted" | "not_selected";
 
 export const SCHOLARSHIP_STATUSES: ScholarshipStatus[] = ["new", "approved", "waitlisted", "not_selected"];
@@ -50,7 +51,6 @@ export interface ScholarshipApplication {
   agrees_assessments_support: boolean;
   parent_commitment_agreed: boolean;
   status: ScholarshipStatus;
-  scholarship_percentage: number | null;
   admin_notes: string | null;
   created_at: string;
   updated_at: string;
@@ -154,12 +154,12 @@ export async function listScholarshipApplications(): Promise<ScholarshipApplicat
 }
 
 export async function updateScholarshipStatus(
-  id: string, status: ScholarshipStatus, scholarshipPercentage: number | null, adminNotes?: string
+  id: string, status: ScholarshipStatus, adminNotes?: string
 ): Promise<ScholarshipApplication | null> {
   await ensureTable();
   const rows = await sql`
     UPDATE scholarship_applications
-    SET status = ${status}, scholarship_percentage = ${scholarshipPercentage},
+    SET status = ${status},
         admin_notes = COALESCE(${adminNotes ?? null}, admin_notes), updated_at = NOW()
     WHERE id = ${id}
     RETURNING *

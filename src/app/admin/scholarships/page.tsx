@@ -25,7 +25,6 @@ interface Application {
   agrees_assessments_support: boolean;
   parent_commitment_agreed: boolean;
   status: string;
-  scholarship_percentage: number | null;
   admin_notes: string | null;
   created_at: string;
 }
@@ -66,7 +65,6 @@ export default function AdminScholarships() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [programFilter, setProgramFilter] = useState<"all" | "sat" | "o-level">("all");
   const [draftStatus, setDraftStatus] = useState<Record<string, string>>({});
-  const [draftPct, setDraftPct] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [draftAccountName, setDraftAccountName] = useState<Record<string, string>>({});
   const [draftAccountEmail, setDraftAccountEmail] = useState<Record<string, string>>({});
@@ -81,13 +79,11 @@ export default function AdminScholarships() {
 
   async function save(id: string) {
     const status = draftStatus[id];
-    const pctRaw = draftPct[id];
-    const scholarshipPercentage = pctRaw?.trim() ? Number(pctRaw) : null;
     setSaving(id);
     const r = await fetch(`/api/admin/scholarships/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, scholarshipPercentage }),
+      body: JSON.stringify({ status }),
     });
     const d = await r.json();
     if (r.ok) {
@@ -204,7 +200,6 @@ export default function AdminScholarships() {
                           <td>
                             <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 800, background: meta.bg, color: meta.color }}>
                               {STATUS_LABELS[a.status]}
-                              {a.scholarship_percentage != null ? ` · ${a.scholarship_percentage}%` : ""}
                             </span>
                           </td>
                           <td>
@@ -265,29 +260,15 @@ export default function AdminScholarships() {
                                   <label>Status</label>
                                   <select
                                     value={draftStatus[a.id] ?? a.status}
-                                    onChange={e => {
-                                      const value = e.target.value;
-                                      setDraftStatus(d => ({ ...d, [a.id]: value }));
-                                      // Scholarships default to 100% — this founding
-                                      // cohort's public emphasis — so approving doesn't
-                                      // require typing a number every time. Still
-                                      // editable below for a future partial scholarship.
-                                      if (value === "approved" && a.scholarship_percentage == null) {
-                                        setDraftPct(d => ({ ...d, [a.id]: "100" }));
-                                      }
-                                    }}
+                                    onChange={e => setDraftStatus(d => ({ ...d, [a.id]: e.target.value }))}
                                   >
                                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
                                   </select>
-                                </div>
-                                <div className="field" style={{ width: 160 }}>
-                                  <label>Scholarship %</label>
-                                  <input
-                                    type="number" min={0} max={100}
-                                    value={draftPct[a.id] ?? (a.scholarship_percentage ?? "")}
-                                    onChange={e => setDraftPct(d => ({ ...d, [a.id]: e.target.value }))}
-                                    placeholder="e.g. 100"
-                                  />
+                                  {(draftStatus[a.id] ?? a.status) === "approved" && (
+                                    <p style={{ margin: "6px 0 0", color: "#15803d", fontSize: ".78rem", fontWeight: 700 }}>
+                                      ✓ Approved = full 100% Opportunity Scholarship
+                                    </p>
+                                  )}
                                 </div>
                                 <button
                                   onClick={() => save(a.id)}

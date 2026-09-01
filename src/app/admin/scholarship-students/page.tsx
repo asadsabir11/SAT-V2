@@ -9,7 +9,6 @@ interface Application {
   student_name: string;
   student_email: string | null;
   parent_email: string;
-  scholarship_percentage: number | null;
   updated_at: string;
 }
 
@@ -78,7 +77,6 @@ export default function AdminScholarshipStudents() {
                     <th>Student</th>
                     <th>Program</th>
                     <th>Account email</th>
-                    <th>Scholarship</th>
                     <th>Account created</th>
                     <th></th>
                   </tr>
@@ -89,7 +87,6 @@ export default function AdminScholarshipStudents() {
                       <td style={{ fontWeight: 700, color: "#071b33" }}>{s.student_name}</td>
                       <td style={{ fontSize: ".83rem" }}>{s.program === "o-level" ? "O Level" : "SAT"}</td>
                       <td style={{ fontSize: ".83rem" }}>{s.student_email || s.parent_email}</td>
-                      <td style={{ fontSize: ".83rem" }}>{s.scholarship_percentage != null ? `${s.scholarship_percentage}%` : "—"}</td>
                       <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(s.updated_at)}</td>
                       <td>
                         <button onClick={() => deleteStudent(s.id, s.student_name)}
