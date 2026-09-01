@@ -219,7 +219,7 @@ export default function AdminAccess() {
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan={8} style={{ background: "#f8fafc", padding: "18px 20px" }}>
+                          <td colSpan={8} style={{ background: "#f8fafc", padding: "18px 20px", whiteSpace: "normal" }}>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px 32px" }}>
                               <div>
                                 <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Payment method</div>

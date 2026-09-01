@@ -217,7 +217,7 @@ export default function AdminScholarships() {
                         </tr>
                         {isExpanded && (
                           <tr>
-                            <td colSpan={6} style={{ background: "#f8fafc", padding: "20px 22px" }}>
+                            <td colSpan={6} style={{ background: "#f8fafc", padding: "20px 22px", whiteSpace: "normal" }}>
                               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px 32px", marginBottom: 20 }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                                   <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>Student</div>
