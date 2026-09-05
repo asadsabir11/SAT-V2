@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { findByField } from "@/lib/storage";
-import { subjectsForStudyGroup } from "@/lib/punjab9thSessions";
+import { subjectEntriesForStudyGroup } from "@/lib/punjab9thSessions";
 
 export const metadata: Metadata = { title: "My Account", robots: { index: false, follow: false } };
 
@@ -25,7 +25,7 @@ export default async function Punjab9thPortal() {
   }
 
   const lead = await findByField<Punjab9thLead>("leads-punjab-9th.json", "studentEmail", session!.email);
-  const subjects = subjectsForStudyGroup(lead?.studyGroup ?? "Biology");
+  const subjects = subjectEntriesForStudyGroup(lead?.studyGroup ?? "Biology");
 
   return (
     <section className="section">
@@ -46,13 +46,13 @@ export default async function Punjab9thPortal() {
         <div className="grid grid-3">
           {subjects.map((subject) => (
             <Link
-              key={subject}
-              href={`/punjab-board-9th-class/portal/${encodeURIComponent(subject)}`}
+              key={subject.slug}
+              href={`/punjab-board-9th-class/portal/${subject.slug}`}
               className="card"
               style={{ display: "flex", flexDirection: "column", gap: 8, textDecoration: "none" }}
             >
               <div className="icon">📘</div>
-              <h3 style={{ margin: 0, color: "#071b33" }}>{subject}</h3>
+              <h3 style={{ margin: 0, color: "#071b33" }}>{subject.label}</h3>
               <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>View class →</span>
             </Link>
           ))}

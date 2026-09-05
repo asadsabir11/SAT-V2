@@ -27,6 +27,33 @@ export function subjectsForStudyGroup(group: string): string[] {
   return group === "Computer Science" ? CS_GROUP_SUBJECTS : BIOLOGY_GROUP_SUBJECTS;
 }
 
+// URL-safe slugs for the student-facing portal routes. The DB/admin layer
+// keeps using the plain display-name string as `subject` (unchanged —
+// existing sessions like "Urdu" were created that way and still match) —
+// this mapping only exists so a route like .../portal/[subject] never has
+// to put "Tarjuma-tul-Quran or Ethics" (with a literal space) in a URL.
+export interface Punjab9thSubjectEntry { slug: string; label: string; }
+const SUBJECT_SLUGS: Punjab9thSubjectEntry[] = [
+  { slug: "english", label: "English" },
+  { slug: "urdu", label: "Urdu" },
+  { slug: "maths", label: "Maths" },
+  { slug: "physics", label: "Physics" },
+  { slug: "chemistry", label: "Chemistry" },
+  { slug: "biology", label: "Biology" },
+  { slug: "computer-science", label: "Computer Science" },
+  { slug: "islamiat", label: "Islamiat" },
+  { slug: "tarjuma-tul-quran-or-ethics", label: "Tarjuma-tul-Quran or Ethics" },
+];
+
+export function subjectSlugToLabel(slug: string): string | undefined {
+  return SUBJECT_SLUGS.find((s) => s.slug === slug)?.label;
+}
+
+export function subjectEntriesForStudyGroup(group: string): Punjab9thSubjectEntry[] {
+  const labels = subjectsForStudyGroup(group);
+  return SUBJECT_SLUGS.filter((s) => labels.includes(s.label));
+}
+
 export interface Punjab9thSession {
   id: string;
   subject: string;

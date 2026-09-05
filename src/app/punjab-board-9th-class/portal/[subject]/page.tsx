@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { findByField } from "@/lib/storage";
-import { subjectsForStudyGroup, getActivePunjab9thSessionsForSubjectAndGroup } from "@/lib/punjab9thSessions";
+import { subjectsForStudyGroup, subjectSlugToLabel, getActivePunjab9thSessionsForSubjectAndGroup } from "@/lib/punjab9thSessions";
 
 interface Punjab9thLead { studyGroup: string; }
 
@@ -19,14 +19,16 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
     redirect("/login?role=student&program=punjab-9th&next=/punjab-board-9th-class/portal");
   }
 
-  const { subject } = await params;
+  const { subject: slug } = await params;
+  const subject = subjectSlugToLabel(slug);
   const lead = await findByField<Punjab9thLead>("leads-punjab-9th.json", "studentEmail", session!.email);
   const group = lead?.studyGroup ?? "Biology";
 
-  // Only allow subjects that are actually part of this student's group —
-  // guards against someone hand-editing the URL to a subject that isn't
-  // theirs (e.g. a Biology-group student trying /portal/Computer%20Science).
-  if (!subjectsForStudyGroup(group).includes(subject)) {
+  // Only allow subjects that resolve to a real slug AND are actually part
+  // of this student's group — guards against both a bad slug and someone
+  // hand-editing the URL to a subject that isn't theirs (e.g. a
+  // Biology-group student trying /portal/computer-science).
+  if (!subject || !subjectsForStudyGroup(group).includes(subject)) {
     notFound();
   }
 
