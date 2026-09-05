@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { getSession } from "@/lib/auth";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const session = await getSession();
+  const dashboardHref = session?.role === "student" && session.program === "punjab-9th"
+    ? "/punjab-board-9th-class/portal"
+    : "/dashboard";
+
   return (
     <section className="section" style={{ minHeight: "60vh", display: "flex", alignItems: "center" }}>
       <div className="container" style={{ textAlign: "center", maxWidth: 560 }}>
@@ -14,7 +20,7 @@ export default function NotFound() {
         </p>
         <div className="actions" style={{ justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/" className="btn btn-primary">Go to homepage</Link>
-          <Link href="/dashboard" className="btn btn-secondary">My dashboard</Link>
+          <Link href={dashboardHref} className="btn btn-secondary">My dashboard</Link>
           <Link href="/discussion" className="btn btn-secondary">Q&amp;A board</Link>
         </div>
       </div>

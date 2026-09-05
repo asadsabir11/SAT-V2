@@ -71,7 +71,10 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   }
 
   const first = user.name.split(" ")[0];
-  const href = (user.role === "founder" || user.role === "teacher") ? "/admin" : user.role === "parent" ? "/parent" : "/dashboard";
+  const href = (user.role === "founder" || user.role === "teacher") ? "/admin"
+    : user.role === "parent" ? "/parent"
+    : user.program === "punjab-9th" ? "/punjab-board-9th-class/portal"
+    : "/dashboard";
   return (
     <div style={{display:"inline-flex",alignItems:"center",gap:6}}>
       <Link href={href} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:999,background:"#eaf1ff",color:"#1551c7",fontWeight:800,fontSize:".82rem",border:"1.5px solid #d0e0ff",whiteSpace:"nowrap",textDecoration:"none"}}>
@@ -100,6 +103,8 @@ export function Header() {
   // doesn't need either marketing page at all — they're here for their
   // child's reports, not to browse cohorts — so only "For Parents" stays.
   const navItems = user?.role === "parent"
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
+    : user?.role === "student" && user.program === "punjab-9th"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
     : user?.role === "student" && (user.program === "o-level" || user.program === "sat")
     ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
@@ -196,7 +201,7 @@ export function Footer(){
                   <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
                     Welcome back — head to your dashboard to browse subjects or unlock a new one.
                   </p>
-                  <Link href="/dashboard" className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
+                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
                 </>
               ) : (
                 <>
