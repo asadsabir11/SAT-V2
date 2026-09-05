@@ -44,16 +44,18 @@ export async function POST(req: NextRequest) {
       city: String(body.city).trim(),
       punjabBoard: String(body.punjabBoard).trim(),
       schoolName: body.schoolName?.trim() || null,
+      // Registration is by group only (Biology or Computer Science) — the
+      // flat monthly fee covers every subject in that group, so there's no
+      // per-subject selection anywhere in this flow.
       studyGroup: String(body.studyGroup).trim(),
       teachingMedium: String(body.teachingMedium).trim(),
       preferredClassTime: String(body.preferredClassTime).trim(),
       deviceAvailable: body.deviceAvailable?.trim() || null,
-      subjectsNeedingHelp: Array.isArray(body.subjectsNeedingHelp) ? body.subjectsNeedingHelp.map(String) : [],
       howHeard: body.howHeard?.trim() || null,
       createdAt: new Date().toISOString(),
     };
 
-    await appendData("leads-punjab-9th", record);
+    await appendData("leads-punjab-9th.json", record);
 
     await Promise.all([
       createNotification({

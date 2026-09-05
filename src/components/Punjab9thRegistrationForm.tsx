@@ -2,7 +2,6 @@
 import { useState } from "react";
 
 const PUNJAB_BOARDS = ["Lahore", "Gujranwala", "Rawalpindi", "Faisalabad", "Multan", "Sargodha", "Sahiwal", "Bahawalpur", "D.G. Khan", "Not sure"];
-const SUBJECT_HELP_OPTIONS = ["Maths", "Physics", "Chemistry", "Biology", "Computer Science", "English", "Urdu", "Islamiat", "Tarjuma-tul-Quran", "Not sure yet"];
 
 const WHATSAPP_NUMBER = "923316663291";
 const CONFIRMATION_WHATSAPP_MESSAGE =
@@ -16,11 +15,6 @@ export function Punjab9thRegistrationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [parentConsent, setParentConsent] = useState(false);
-  const [subjectsNeedingHelp, setSubjectsNeedingHelp] = useState<string[]>([]);
-
-  function toggleSubject(s: string) {
-    setSubjectsNeedingHelp((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
-  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,7 +36,6 @@ export function Punjab9thRegistrationForm() {
       teachingMedium: fd.get("teachingMedium"),
       preferredClassTime: fd.get("preferredClassTime"),
       deviceAvailable: fd.get("deviceAvailable"),
-      subjectsNeedingHelp,
       howHeard: fd.get("howHeard"),
       parentConsent: true,
     };
@@ -147,18 +140,6 @@ export function Punjab9thRegistrationForm() {
             <option value="Google">Google</option>
             <option value="Other">Other</option>
           </select>
-        </div>
-      </div>
-
-      <div>
-        <label style={labelStyle}>Which subjects does your child need the most help in? (optional)</label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 16px", marginTop: 8 }}>
-          {SUBJECT_HELP_OPTIONS.map((s) => (
-            <label key={s} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: ".85rem", color: "#344054", cursor: "pointer" }}>
-              <input type="checkbox" checked={subjectsNeedingHelp.includes(s)} onChange={() => toggleSubject(s)} />
-              {s}
-            </label>
-          ))}
         </div>
       </div>
 
