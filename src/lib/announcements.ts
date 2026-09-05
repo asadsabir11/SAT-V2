@@ -31,7 +31,7 @@ async function ensureTable() {
 // No program = admin view, every announcement across both programs.
 // A program = student view, that program's posts plus any legacy/general
 // ones (program IS NULL).
-export async function getAnnouncements(program?: "sat" | "o-level"): Promise<Announcement[]> {
+export async function getAnnouncements(program?: "sat" | "o-level" | "punjab-9th"): Promise<Announcement[]> {
   await ensureTable();
   const rows = program
     ? await sql`SELECT * FROM announcements WHERE program = ${program} OR program IS NULL ORDER BY created_at DESC LIMIT 10`

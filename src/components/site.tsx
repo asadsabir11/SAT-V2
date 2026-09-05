@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["9th Class", "/punjab-board-9th-class"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
-type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" } | null;
+type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" } | null;
 
 // Clicking through opens the full notifications page (LinkedIn-style)
 // rather than a navbar dropdown — this component is just the bell + unread
@@ -101,7 +101,7 @@ export function Header() {
   // child's reports, not to browse cohorts — so only "For Parents" stays.
   const navItems = user?.role === "parent"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
-    : user?.role === "student" && user.program
+    : user?.role === "student" && (user.program === "o-level" || user.program === "sat")
     ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
     : PUBLIC_NAV;
   return (

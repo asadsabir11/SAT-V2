@@ -73,7 +73,7 @@ export async function createNotification(input: {
 // in JS (it already has the student's unlocked-subjects set from
 // getOLevelAccessMap) rather than here, to avoid dynamic array params
 // against the `sql` tagged-template wrapper.
-export async function listNotificationsForStudent(studentUserId: string, program: "sat" | "o-level", limit = 30): Promise<Notification[]> {
+export async function listNotificationsForStudent(studentUserId: string, program: "sat" | "o-level" | "punjab-9th", limit = 30): Promise<Notification[]> {
   await ensureTable();
   const rows = await sql`
     SELECT * FROM notifications

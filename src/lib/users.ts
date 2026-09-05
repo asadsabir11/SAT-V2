@@ -48,7 +48,7 @@ export async function createUser(
   password: string,
   role: "student" | "founder" | "parent" | "teacher",
   name: string,
-  program: "sat" | "o-level" = "sat"
+  program: "sat" | "o-level" | "punjab-9th" = "sat"
 ): Promise<string> {
   await ensureUsersTable();
   const id = crypto.randomUUID();
@@ -80,7 +80,7 @@ export async function findUserByEmail(email: string) {
 // account already exists, used by both registration endpoints instead of
 // the global findUserByEmail() so registering for the other program isn't
 // blocked.
-export async function findUserByEmailAndProgram(email: string, program: "sat" | "o-level") {
+export async function findUserByEmailAndProgram(email: string, program: "sat" | "o-level" | "punjab-9th") {
   await ensureUsersTable();
   const rows = await sql`
     SELECT * FROM users WHERE email = ${email.toLowerCase().trim()} AND program = ${program} LIMIT 1

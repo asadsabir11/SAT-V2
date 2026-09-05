@@ -5,6 +5,7 @@ import Link from "next/link";
 interface Punjab9thLead {
   id: string;
   studentName: string;
+  studentEmail?: string;
   parentName: string;
   parentWhatsapp: string;
   city: string;
@@ -128,6 +129,10 @@ export default function AdminPunjab9thLeads() {
                           <tr>
                             <td colSpan={8} style={{ background: "#f8fafc", padding: "16px 20px", whiteSpace: "normal" }}>
                               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px 28px" }}>
+                                <div>
+                                  <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Student email (account login)</div>
+                                  <div style={{ fontWeight: 700, color: "#071b33" }}>{l.studentEmail || "—"}</div>
+                                </div>
                                 <div>
                                   <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Punjab Board</div>
                                   <div style={{ fontWeight: 700, color: "#071b33" }}>{l.punjabBoard}</div>

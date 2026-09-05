@@ -1,18 +1,14 @@
 "use client";
 import { useState } from "react";
+import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 
 const PUNJAB_BOARDS = ["Lahore", "Gujranwala", "Rawalpindi", "Faisalabad", "Multan", "Sargodha", "Sahiwal", "Bahawalpur", "D.G. Khan", "Not sure"];
-
-const WHATSAPP_NUMBER = "923316663291";
-const CONFIRMATION_WHATSAPP_MESSAGE =
-  "Assalam-o-Alaikum! Aap ki 9th Class registration receive ho gayi hai. Hamari admissions team batch timings aur first-week joining details share karegi. Agar aap ka koi sawal hai to isi WhatsApp par message kar dein.";
 
 const inputStyle: React.CSSProperties = { width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #d0d7e3", fontSize: ".92rem" };
 const labelStyle: React.CSSProperties = { display: "block", fontWeight: 700, fontSize: ".85rem", color: "#071b33", marginBottom: 6 };
 
 export function Punjab9thRegistrationForm() {
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [parentConsent, setParentConsent] = useState(false);
 
@@ -25,8 +21,28 @@ export function Punjab9thRegistrationForm() {
     }
 
     const fd = new FormData(e.currentTarget);
+    const studentEmail = String(fd.get("studentEmail") ?? "").trim();
+    const password = String(fd.get("password") ?? "");
+    const confirmPassword = String(fd.get("confirmPassword") ?? "");
+
+    if (!isValidEmail(studentEmail)) {
+      setError("Enter a valid student email address.");
+      return;
+    }
+    const pwError = passwordStrengthError(password);
+    if (pwError) {
+      setError(`Password: ${pwError}`);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     const body = {
       studentName: fd.get("studentName"),
+      studentEmail,
+      password,
       parentName: fd.get("parentName"),
       parentWhatsapp: fd.get("parentWhatsapp"),
       city: fd.get("city"),
@@ -53,35 +69,20 @@ export function Punjab9thRegistrationForm() {
         setSubmitting(false);
         return;
       }
-      setSubmitted(true);
+      // Full page navigation so the Header picks up the new session cookie —
+      // the account now exists and they're already signed in.
+      window.location.href = "/punjab-board-9th-class/portal";
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setSubmitting(false);
     }
-  }
-
-  if (submitted) {
-    const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(CONFIRMATION_WHATSAPP_MESSAGE)}`;
-    return (
-      <div className="card" style={{ textAlign: "center", padding: "48px 32px", background: "linear-gradient(135deg,#eaf4ff,#f0fdf4)" }}>
-        <div style={{ fontSize: "2.5rem", marginBottom: 14 }}>🎓</div>
-        <h2 style={{ margin: "0 0 10px", color: "#071b33" }}>Registration received!</h2>
-        <p style={{ color: "#344054", lineHeight: 1.7, maxWidth: 480, margin: "0 auto 20px" }}>
-          Thank you for registering for The Digital Tutor&apos;s Punjab Board 9th Class program. Our admissions team
-          will contact the parent on WhatsApp with the available batch timings and joining instructions.
-        </p>
-        <a href={waLink} target="_blank" rel="noreferrer" className="btn btn-teal" style={{ display: "inline-flex", padding: "12px 24px" }}>
-          Message Us Now for a Faster Response →
-        </a>
-      </div>
-    );
   }
 
   return (
     <form onSubmit={onSubmit} className="card" style={{ display: "grid", gap: 20 }}>
       <div className="form-grid">
         <div className="field"><label style={labelStyle}>Student&apos;s full name *</label><input name="studentName" required style={inputStyle} /></div>
+        <div className="field"><label style={labelStyle}>Student&apos;s email *</label><input type="email" name="studentEmail" required autoComplete="email" style={inputStyle} /></div>
         <div className="field"><label style={labelStyle}>Parent/guardian&apos;s name *</label><input name="parentName" required style={inputStyle} /></div>
         <div className="field"><label style={labelStyle}>Parent&apos;s WhatsApp number *</label><input type="tel" name="parentWhatsapp" required placeholder="03xx xxxxxxx" style={inputStyle} /></div>
         <div className="field"><label style={labelStyle}>City *</label><input name="city" required style={inputStyle} /></div>
@@ -140,6 +141,20 @@ export function Punjab9thRegistrationForm() {
             <option value="Google">Google</option>
             <option value="Other">Other</option>
           </select>
+        </div>
+      </div>
+
+      <div>
+        <p style={{ margin: "0 0 12px", fontWeight: 800, color: "#071b33", fontSize: ".95rem" }}>Create a password for the student account</p>
+        <div className="form-grid">
+          <div className="field">
+            <label style={labelStyle}>Password *</label>
+            <input type="password" name="password" required autoComplete="new-password" placeholder="Min 8 chars, include a number" style={inputStyle} />
+          </div>
+          <div className="field">
+            <label style={labelStyle}>Confirm password *</label>
+            <input type="password" name="confirmPassword" required autoComplete="new-password" placeholder="Repeat your password" style={inputStyle} />
+          </div>
         </div>
       </div>
 

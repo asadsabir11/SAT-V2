@@ -5,6 +5,7 @@ import { readData } from "@/lib/storage";
 interface Punjab9thLead {
   id: string;
   studentName: string;
+  studentEmail?: string;
   parentName: string;
   parentWhatsapp: string;
   city: string;
