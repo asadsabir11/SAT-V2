@@ -36,6 +36,18 @@ const PROGRAMS = [
     icon: "📘",
     points: ["Register free, pay to unlock", "Live founder-led classes", "Weekly office hours", "Past-paper practice"],
   },
+  {
+    key: "punjab-9th",
+    name: "9th Class (Punjab Board)",
+    tagline: "For students preparing for Punjab Board exams",
+    description: "Live online classes for Biology and Computer Science groups, taught by experienced teachers following the latest Punjab Board syllabus.",
+    href: "/punjab-board-9th-class",
+    accent: "#ea580c",
+    grad: "linear-gradient(135deg,#ea580c,#f59e0b)",
+    glow: "rgba(234,88,12,.35)",
+    icon: "📗",
+    points: ["Attend your first week before paying", "Live classes and teacher support", "Tests and progress tracking", "PKR 2,500/month for all subjects"],
+  },
 ] as const;
 
 export default function AcademyPage() {
@@ -47,7 +59,7 @@ export default function AcademyPage() {
 
       <section className="section">
         <div className="container">
-          <div className="grid grid-2" style={{ maxWidth: 800, margin: "0 auto" }}>
+          <div className="grid grid-3" style={{ maxWidth: 1080, margin: "0 auto" }}>
             {PROGRAMS.map((p) => (
               <Link
                 key={p.key}

@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: BASE, priority: 1.0 },
     { url: `${BASE}/o-level`, priority: 0.9 },
     { url: `${BASE}/founder-cohort`, priority: 0.9 },
+    { url: `${BASE}/punjab-board-9th-class`, priority: 0.85 },
     { url: `${BASE}/academy`, priority: 0.8 },
     { url: `${BASE}/register`, priority: 0.9 },
     { url: `${BASE}/login`, priority: 0.7 },
