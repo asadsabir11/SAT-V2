@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["O Level", "/o-level"], ["SAT Prep", "/founder-cohort"], ["9th Class", "/punjab-board-9th-class"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
+const PUBLIC_NAV = [["O Level", "/o-level"], ["9th Class", "/punjab-board-9th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
 type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" } | null;
 
