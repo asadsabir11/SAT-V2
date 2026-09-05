@@ -17,6 +17,16 @@ export type Punjab9thStudyGroup = "Biology" | "Computer Science" | "Both";
 
 export const PUNJAB_9TH_SUBJECTS = ["English", "Urdu", "Maths", "Physics", "Chemistry", "Biology", "Computer Science", "Islamiat", "Tarjuma-tul-Quran or Ethics"] as const;
 
+// Which subjects a student actually studies, based on their registered
+// group — used to render permanent subject cards on the portal (always
+// shown, whether or not a class has been scheduled for that subject yet).
+const BIOLOGY_GROUP_SUBJECTS = ["English", "Urdu", "Maths", "Physics", "Chemistry", "Biology", "Islamiat", "Tarjuma-tul-Quran or Ethics"];
+const CS_GROUP_SUBJECTS = ["English", "Urdu", "Maths", "Physics", "Chemistry", "Computer Science", "Islamiat", "Tarjuma-tul-Quran or Ethics"];
+
+export function subjectsForStudyGroup(group: string): string[] {
+  return group === "Computer Science" ? CS_GROUP_SUBJECTS : BIOLOGY_GROUP_SUBJECTS;
+}
+
 export interface Punjab9thSession {
   id: string;
   subject: string;
@@ -56,6 +66,19 @@ export async function getActivePunjab9thSessionsForGroup(group: string): Promise
     SELECT id, subject, study_group, title, meeting_link, scheduled_at, is_active, created_by, created_at
     FROM live_sessions
     WHERE program = 'punjab-9th' AND is_active = true AND (study_group = ${group} OR study_group = 'Both')
+    ORDER BY scheduled_at ASC
+  `;
+  return rows as Punjab9thSession[];
+}
+
+// Powers the dedicated per-subject portal page — a student clicks their
+// "Urdu" card and lands on a page scoped to just that subject.
+export async function getActivePunjab9thSessionsForSubjectAndGroup(subject: string, group: string): Promise<Punjab9thSession[]> {
+  await ensureColumn();
+  const rows = await sql`
+    SELECT id, subject, study_group, title, meeting_link, scheduled_at, is_active, created_by, created_at
+    FROM live_sessions
+    WHERE program = 'punjab-9th' AND is_active = true AND subject = ${subject} AND (study_group = ${group} OR study_group = 'Both')
     ORDER BY scheduled_at ASC
   `;
   return rows as Punjab9thSession[];
