@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CTAButton, FAQAccordion } from "@/components/site";
 import { Punjab9thRegistrationForm } from "@/components/Punjab9thRegistrationForm";
+import { getSession } from "@/lib/auth";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
 const WHATSAPP_HERO_LINK = "https://wa.me/923316663291?text=Assalam-oAlaikum%2C%20mujhe%209th%20Class%20online%20program%20ki%20details%20chahiye.";
@@ -69,7 +70,10 @@ const FAQ_ITEMS: [string, string][] = [
   ["How will parents receive updates?", "Parent communication and important progress updates will be sent through the registered WhatsApp number."],
 ];
 
-export default function Punjab9thClassPage() {
+export default async function Punjab9thClassPage() {
+  const session = await getSession();
+  const isSignedInAsPunjab9th = session?.role === "student" && session.program === "punjab-9th";
+
   return (
     <>
       {/* 1 — Hero */}
@@ -92,7 +96,11 @@ export default function Punjab9thClassPage() {
             ))}
           </div>
           <div className="actions">
-            <CTAButton href="#apply" variant="accent">Register for the First Week</CTAButton>
+            {isSignedInAsPunjab9th ? (
+              <CTAButton href="/punjab-board-9th-class/portal" variant="accent">Go to My Portal</CTAButton>
+            ) : (
+              <CTAButton href="#apply" variant="accent">Register for the First Week</CTAButton>
+            )}
             <a href={WHATSAPP_HERO_LINK} target="_blank" rel="noreferrer" className="btn btn-ghost">WhatsApp Us</a>
           </div>
           <p style={{ marginTop: 20, color: "rgba(255,255,255,.6)", fontSize: ".85rem" }}>
@@ -246,7 +254,11 @@ export default function Punjab9thClassPage() {
           </p>
           <p style={{ color: "#5eead4", fontWeight: 800, marginBottom: 20 }}>PKR 2,500 per month for all subjects</p>
           <div className="actions" style={{ justifyContent: "center" }}>
-            <CTAButton href="#apply" variant="accent">Register Now</CTAButton>
+            {isSignedInAsPunjab9th ? (
+              <CTAButton href="/punjab-board-9th-class/portal" variant="accent">Go to My Portal</CTAButton>
+            ) : (
+              <CTAButton href="#apply" variant="accent">Register Now</CTAButton>
+            )}
             <a href={WHATSAPP_HERO_LINK} target="_blank" rel="noreferrer" className="btn btn-ghost">Ask a Question on WhatsApp</a>
           </div>
           <p style={{ marginTop: 16, color: "rgba(255,255,255,.6)", fontSize: ".85rem" }}>WhatsApp: +92 331 666 3291</p>
@@ -265,16 +277,29 @@ export default function Punjab9thClassPage() {
       {/* Registration form */}
       <section className="section soft" id="apply" style={{ scrollMarginTop: 90 }}>
         <div className="container" style={{ maxWidth: 720 }}>
-          <div className="eyebrow" style={{ justifyContent: "center" }}>Register</div>
-          <h2 className="title" style={{ textAlign: "center" }}>Register for the 9th Class First Week</h2>
-          <p className="lead" style={{ textAlign: "center", margin: "0 auto 28px" }}>
-            Complete the form below. Our admissions team will contact the parent on WhatsApp with class timings
-            and joining instructions.
-          </p>
-          <Punjab9thRegistrationForm />
-          <p style={{ marginTop: 24, textAlign: "center", color: "var(--muted)", fontSize: ".85rem" }}>
-            Prefer WhatsApp? <a href={WHATSAPP_HERO_LINK} target="_blank" rel="noreferrer" style={{ color: "var(--blue)", fontWeight: 700 }}>Message us directly →</a>
-          </p>
+          {isSignedInAsPunjab9th ? (
+            <div className="card" style={{ maxWidth: 560, margin: "0 auto", textAlign: "center", padding: 40, background: "linear-gradient(135deg,#fff7ed,#eaf4ff)" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>✅</div>
+              <p style={{ fontWeight: 800, color: "#9a3412", marginBottom: 8, fontSize: "1.05rem" }}>You&apos;re already registered</p>
+              <p style={{ color: "#7c4a1e", lineHeight: 1.65, margin: "0 auto 20px" }}>
+                Head to your portal to see your class schedule and join links.
+              </p>
+              <CTAButton href="/punjab-board-9th-class/portal" variant="primary">Go to my portal →</CTAButton>
+            </div>
+          ) : (
+            <>
+              <div className="eyebrow" style={{ justifyContent: "center" }}>Register</div>
+              <h2 className="title" style={{ textAlign: "center" }}>Register for the 9th Class First Week</h2>
+              <p className="lead" style={{ textAlign: "center", margin: "0 auto 28px" }}>
+                Complete the form below. Our admissions team will contact the parent on WhatsApp with class timings
+                and joining instructions.
+              </p>
+              <Punjab9thRegistrationForm />
+              <p style={{ marginTop: 24, textAlign: "center", color: "var(--muted)", fontSize: ".85rem" }}>
+                Prefer WhatsApp? <a href={WHATSAPP_HERO_LINK} target="_blank" rel="noreferrer" style={{ color: "var(--blue)", fontWeight: 700 }}>Message us directly →</a>
+              </p>
+            </>
+          )}
         </div>
       </section>
     </>
