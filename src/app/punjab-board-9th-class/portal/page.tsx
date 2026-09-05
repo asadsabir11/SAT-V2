@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { findByField } from "@/lib/storage";
-import { getActivePunjab9thSessionsForGroup, type Punjab9thSession } from "@/lib/punjab9thSessions";
+import { getActivePunjab9thSessionsForGroup } from "@/lib/punjab9thSessions";
+import { Punjab9thClassSchedule } from "@/components/Punjab9thClassSchedule";
 
 export const metadata: Metadata = { title: "My Account", robots: { index: false, follow: false } };
 
@@ -42,31 +43,7 @@ export default async function Punjab9thPortal() {
         </div>
 
         <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "0 0 14px" }}>Your class schedule</h2>
-        {sessions.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93" }}>
-            <p style={{ fontWeight: 700 }}>No classes scheduled yet</p>
-            <p style={{ fontSize: ".88rem" }}>Class timings will appear here once your batch schedule is set — we&apos;ll also message your parent on WhatsApp.</p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {sessions.map((s: Punjab9thSession) => (
-              <div key={s.id} className="card" style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                <div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 900, color: "#071b33" }}>{s.title}</span>
-                    <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#eff6ff", color: "#155eef" }}>{s.subject}</span>
-                  </div>
-                  <div style={{ fontSize: ".85rem", color: "#6b7c93" }}>
-                    {new Date(s.scheduled_at).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                </div>
-                <a href={s.meeting_link} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: "9px 20px", fontSize: ".88rem", flexShrink: 0 }}>
-                  Join Zoom →
-                </a>
-              </div>
-            ))}
-          </div>
-        )}
+        <Punjab9thClassSchedule sessions={sessions} />
       </div>
     </section>
   );
