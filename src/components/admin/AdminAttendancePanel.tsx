@@ -11,7 +11,7 @@ const STATUS_OPTS = [
   { value: "absent",  label: "Absent",  bg: "#fef2f2", color: "#dc2626", border: "#fca5a5" },
 ] as const;
 
-export function AdminAttendancePanel({ program, title, description }: { program: "sat" | "o-level"; title: string; description: string }) {
+export function AdminAttendancePanel({ program, title, description }: { program: "sat" | "o-level" | "punjab-9th"; title: string; description: string }) {
   const [sessions, setSessions]   = useState<Session[]>([]);
   const [sessionId, setSessionId] = useState("");
   const [rows, setRows]           = useState<AttRow[]>([]);

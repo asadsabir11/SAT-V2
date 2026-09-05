@@ -127,6 +127,9 @@ export default function Admin() {
             <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
               📅 Manage sessions →
             </Link>
+            <Link href="/admin/punjab-9th-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+              🎥 9th Online Classes →
+            </Link>
             <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
               💬 Q&A board →
             </Link>
@@ -163,6 +166,9 @@ export default function Admin() {
             </Link>
             <Link href="/admin/o-level-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
               ✅ O Level attendance →
+            </Link>
+            <Link href="/admin/punjab-9th-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+              ✅ 9th Grade attendance →
             </Link>
             <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
               📚 Homework →
