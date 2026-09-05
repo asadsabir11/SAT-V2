@@ -50,6 +50,7 @@ export default function Home() {
             <div className="actions">
               <CTAButton href="/register">Register for SAT →</CTAButton>
               <CTAButton href="/o-level#apply" secondary>Register for O Level →</CTAButton>
+              <CTAButton href="/punjab-board-9th-class#apply" secondary>Register for 9th Grade →</CTAButton>
             </div>
             <div className="trust-strip">
               <span className="trust-item">Free SAT diagnostic — included after sign-up</span>
@@ -68,7 +69,7 @@ export default function Home() {
             <div className="stat"><strong>Weekly</strong><span>Live teaching + homework rhythm</span></div>
             <div className="stat"><strong>Always on</strong><span>AI explanations and study coaching</span></div>
             <div className="stat"><strong>Parent-ready</strong><span>Clear weekly progress visibility</span></div>
-            <div className="stat"><strong>Two programs</strong><span>SAT® prep and Cambridge O Level</span></div>
+            <div className="stat"><strong>Three programs</strong><span>SAT®, Cambridge O Level &amp; 9th Class</span></div>
           </div>
         </div>
       </section>
@@ -78,9 +79,9 @@ export default function Home() {
         <div className="container">
           <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
             <div className="eyebrow" style={{ justifyContent: "center" }}>Choose your program</div>
-            <h2 className="title">One academy, two ways to get ahead</h2>
+            <h2 className="title">One academy, three ways to get ahead</h2>
           </div>
-          <div className="grid grid-2" style={{ marginTop: 32 }}>
+          <div className="grid grid-3" style={{ marginTop: 32 }}>
             <article className="card" style={{ display: "flex", flexDirection: "column" }}>
               <h3 style={{ marginTop: 0 }}>SAT® Preparation</h3>
               <p style={{ flex: 1 }}>Affordable SAT® prep for ambitious global students — weekly live classes, AI tutor, and mock tests.</p>
@@ -102,6 +103,17 @@ export default function Home() {
                 <li>Parent reporting</li>
               </ul>
               <Link href="/o-level" className="btn btn-primary">Explore O Level</Link>
+            </article>
+            <article className="card" style={{ display: "flex", flexDirection: "column" }}>
+              <h3 style={{ marginTop: 0 }}>9th Class (Punjab Board)</h3>
+              <p style={{ flex: 1 }}>Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus — PKR 2,500/month for all subjects.</p>
+              <ul className="check-list" style={{ margin: "14px 0 20px" }}>
+                <li>Attend your first week before paying</li>
+                <li>Live classes and teacher support</li>
+                <li>Regular tests and progress tracking</li>
+                <li>Parent progress updates</li>
+              </ul>
+              <Link href="/punjab-board-9th-class" className="btn btn-primary">Explore 9th Class</Link>
             </article>
           </div>
         </div>
