@@ -124,6 +124,11 @@ export default function Admin() {
                 🔑 Access requests →
               </Link>
             )}
+            {isFounder && (
+              <Link href="/admin/punjab-9th-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                🔑 9th Class access →
+              </Link>
+            )}
             <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
               📅 Manage sessions →
             </Link>
