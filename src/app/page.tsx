@@ -401,27 +401,6 @@ export default function Home() {
           <FAQAccordion items={faqs} />
         </div>
       </section>
-
-      {/* 12 — Final CTA */}
-      <section style={{ padding: "100px 0", background: "linear-gradient(160deg,#061729 0%,#071b33 45%,#0b2440 100%)" }}>
-        <div className="container" style={{ textAlign: "center" }}>
-          <div className="eyebrow" style={{ color: "#5eead4", justifyContent: "center" }}>Ready to start?</div>
-          <h2 className="title" style={{ color: "#fff", maxWidth: 680, margin: "12px auto 16px" }}>
-            Take the free diagnostic. Join the cohort. Change the trajectory.
-          </h2>
-          <p style={{ color: "rgba(255,255,255,.6)", maxWidth: 520, margin: "0 auto 36px", lineHeight: 1.75, fontSize: "1.05rem" }}>
-            The cohort is intentionally small. Seats are limited. If this is the right
-            moment, register now — the diagnostic takes 10 minutes.
-          </p>
-          <div className="actions" style={{ justifyContent: "center", gap: 14 }}>
-            <CTAButton href="/register">Create free account →</CTAButton>
-            <Link href="/register?plan=Core" className="btn btn-ghost">Reserve your cohort seat</Link>
-          </div>
-          <p style={{ color: "rgba(255,255,255,.3)", fontSize: ".8rem", marginTop: 28, lineHeight: 1.6 }}>
-            SAT® is a trademark registered by the College Board · Not affiliated with or endorsed by College Board
-          </p>
-        </div>
-      </section>
     </>
   );
 }
