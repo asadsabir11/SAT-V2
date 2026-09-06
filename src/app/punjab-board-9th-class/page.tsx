@@ -109,11 +109,11 @@ export default async function Punjab9thClassPage() {
                 Founding cohort limited to the first 300 students.
               </p>
             </div>
-            <div className="hero-panel" style={{ padding: 14 }}>
+            <div className="hero-panel" style={{ padding: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
-                src="/9th-class-video-call.png"
-                alt="9th Class students on a live online class"
-                style={{ width: "100%", borderRadius: 18, display: "block", objectFit: "cover", maxHeight: 420 }}
+                src="/9th-class-promo-banner.png"
+                alt="Punjab Board 9th Class — special launch fee PKR 2,500 per month"
+                style={{ width: "100%", maxWidth: 380, borderRadius: 18, display: "block", objectFit: "contain" }}
               />
             </div>
           </div>
@@ -255,11 +255,6 @@ export default async function Punjab9thClassPage() {
       {/* 8 — Pricing */}
       <section className="section soft">
         <div className="container" style={{ maxWidth: 560 }}>
-          <img
-            src="/9th-class-promo-banner.png"
-            alt="Punjab Board 9th Class — special launch fee PKR 2,500 per month"
-            style={{ width: "100%", maxWidth: 340, display: "block", margin: "0 auto 28px", borderRadius: 18, boxShadow: "0 16px 40px rgba(7,27,51,.18)" }}
-          />
           <div className="eyebrow" style={{ justifyContent: "center" }}>Founding Student Launch Offer</div>
           <h2 className="title" style={{ textAlign: "center" }}>Punjab Board 9th Class — All Subjects</h2>
           <article className="card" style={{ marginTop: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", border: "2px solid var(--blue)" }}>
