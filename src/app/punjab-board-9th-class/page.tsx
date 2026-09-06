@@ -153,11 +153,7 @@ export default async function Punjab9thClassPage() {
         <div className="container">
           <div className="eyebrow" style={{ justifyContent: "center" }}>Real students, real classes</div>
           <h2 className="title" style={{ textAlign: "center" }}>Learning from home, guided every step</h2>
-          <div className="grid grid-2" style={{ marginTop: 32 }}>
-            <figure style={{ margin: 0 }}>
-              <img src="/9th-class-mother-daughter.png" alt="A parent reviewing progress with her daughter" style={{ width: "100%", borderRadius: 16, display: "block", objectFit: "cover", maxHeight: 320 }} />
-              <figcaption style={{ marginTop: 10, color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>Parents can follow their child&apos;s progress every step of the way</figcaption>
-            </figure>
+          <div className="grid grid-3" style={{ marginTop: 32 }}>
             <figure style={{ margin: 0 }}>
               <img src="/9th-class-video-call-2.png" alt="Two students in a live online class with their teacher" style={{ width: "100%", borderRadius: 16, display: "block", objectFit: "cover", maxHeight: 320 }} />
               <figcaption style={{ marginTop: 10, color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>Live classes with real teachers, not just recorded videos</figcaption>
