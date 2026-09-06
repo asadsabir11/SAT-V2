@@ -108,7 +108,7 @@ export function Header() {
     : user?.role === "student" && user.program === "punjab-9th"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "amna-shamima"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort" && href !== "/punjab-board-9th-class")
+    ? ([["Amna Shamima Program", "/amna-shamima"]] as const)
     : user?.role === "student" && (user.program === "o-level" || user.program === "sat")
     ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
     : PUBLIC_NAV;
