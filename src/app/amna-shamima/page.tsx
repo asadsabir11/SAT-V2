@@ -58,12 +58,14 @@ export default async function AmnaShamimaPage() {
                 )}
               </div>
             </div>
-            <div className="hero-panel" style={{ padding: 14 }}>
-              <img
-                src="/amna-shamim-classroom2.png"
-                alt="Amna Shamima Foundation students in class"
-                style={{ width: "100%", borderRadius: 18, display: "block", objectFit: "cover", maxHeight: 420 }}
-              />
+            <div className="hero-panel" style={{ padding: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ background: "#fff", borderRadius: 18, padding: 28, width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src="/amna-shamima-logo.png"
+                  alt="Amna Shamima Foundation"
+                  style={{ width: "100%", maxWidth: 240, display: "block", objectFit: "contain" }}
+                />
+              </div>
             </div>
           </div>
         </div>
