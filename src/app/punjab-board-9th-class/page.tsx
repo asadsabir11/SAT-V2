@@ -109,11 +109,11 @@ export default async function Punjab9thClassPage() {
                 Founding cohort limited to the first 300 students.
               </p>
             </div>
-            <div className="hero-panel" style={{ padding: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="hero-panel" style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
                 src="/9th-class-promo-banner.png"
                 alt="Punjab Board 9th Class — special launch fee PKR 2,500 per month"
-                style={{ width: "100%", maxWidth: 380, borderRadius: 18, display: "block", objectFit: "contain" }}
+                style={{ width: "100%", maxWidth: 520, borderRadius: 18, display: "block", objectFit: "contain" }}
               />
             </div>
           </div>
