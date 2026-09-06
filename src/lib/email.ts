@@ -984,3 +984,45 @@ export async function sendPunjab9thAccessGranted(opts: { email: string; name: st
     `,
   });
 }
+
+export async function sendAmnaShamimaLeadAdminAlert(lead: { studentName: string; studentEmail: string; whatsapp: string; city: string | null }) {
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
+    to: ADMIN_EMAILS,
+    subject: `New Amna Shamima Foundation AI course registration: ${lead.studentName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">New AI course registration 🤖</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:120px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${lead.studentName}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#155eef;">${lead.studentEmail}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">WhatsApp</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.whatsapp}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">City</td><td style="padding:10px 0;color:#071b33;">${lead.city ?? "—"}</td></tr>
+        </table>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/admin/amna-shamima-leads" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View lead →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendAmnaShamimaRegistrationWelcome(student: { name: string; email: string }) {
+  await sendEmail({
+    to: student.email,
+    subject: "Welcome to the AI Course — Amna Shamima Foundation",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 6px;font-size:1.4rem;">Welcome, ${student.name}! 🎉</h2>
+        <p style="color:#6b7c93;margin:0 0 24px;font-size:.95rem;line-height:1.6;">
+          You've registered for the AI course for Amna Shamima Foundation students. Your account is ready — sign in
+          any time to watch lectures and join the live online class.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${APP_URL}/amna-shamima/portal" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my portal →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}

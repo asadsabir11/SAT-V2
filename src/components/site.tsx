@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["O Level", "/o-level"], ["9th Class", "/punjab-board-9th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
-type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" } | null;
+type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" | "amna-shamima" } | null;
 
 // Clicking through opens the full notifications page (LinkedIn-style)
 // rather than a navbar dropdown — this component is just the bell + unread
@@ -74,6 +74,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   const href = (user.role === "founder" || user.role === "teacher") ? "/admin"
     : user.role === "parent" ? "/parent"
     : user.program === "punjab-9th" ? "/punjab-board-9th-class/portal"
+    : user.program === "amna-shamima" ? "/amna-shamima/portal"
     : "/dashboard";
   return (
     <div style={{display:"inline-flex",alignItems:"center",gap:6}}>
@@ -106,6 +107,8 @@ export function Header() {
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "punjab-9th"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
+    : user?.role === "student" && user.program === "amna-shamima"
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort" && href !== "/punjab-board-9th-class")
     : user?.role === "student" && (user.program === "o-level" || user.program === "sat")
     ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
     : PUBLIC_NAV;
@@ -201,7 +204,7 @@ export function Footer(){
                   <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
                     Welcome back — head to your dashboard to browse subjects or unlock a new one.
                   </p>
-                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
+                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : user?.program === "amna-shamima" ? "/amna-shamima/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
                 </>
               ) : (
                 <>

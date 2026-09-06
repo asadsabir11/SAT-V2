@@ -5,6 +5,8 @@ export default async function NotFound() {
   const session = await getSession();
   const dashboardHref = session?.role === "student" && session.program === "punjab-9th"
     ? "/punjab-board-9th-class/portal"
+    : session?.role === "student" && session.program === "amna-shamima"
+    ? "/amna-shamima/portal"
     : "/dashboard";
 
   return (

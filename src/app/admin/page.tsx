@@ -36,6 +36,7 @@ export default function Admin() {
   const [isFounder, setIsFounder] = useState(false);
   const [scholarshipStudentCount, setScholarshipStudentCount] = useState<number | null>(null);
   const [punjab9thLeadCount, setPunjab9thLeadCount] = useState<number | null>(null);
+  const [amnaShamimaLeadCount, setAmnaShamimaLeadCount] = useState<number | null>(null);
 
   async function clearTestData() {
     const typed = window.prompt(
@@ -64,6 +65,10 @@ export default function Admin() {
     fetch("/api/admin/punjab-9th-leads")
       .then((r) => r.json())
       .then((d) => setPunjab9thLeadCount((d.leads ?? []).length))
+      .catch(() => {});
+    fetch("/api/admin/amna-shamima-leads")
+      .then((r) => r.json())
+      .then((d) => setAmnaShamimaLeadCount((d.leads ?? []).length))
       .catch(() => {});
   }, []);
 
@@ -137,6 +142,12 @@ export default function Admin() {
             </Link>
             <Link href="/admin/punjab-9th-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
               📝 9th Class quizzes →
+            </Link>
+            <Link href="/admin/amna-shamima-lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+              🤖 Amna Shamima lectures →
+            </Link>
+            <Link href="/admin/amna-shamima-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
+              💻 Amna Shamima online class →
             </Link>
             <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
               💬 Q&A board →
@@ -216,6 +227,7 @@ export default function Admin() {
                   <BigNavCard href="/admin/o-level-leads" icon="🎓" title="O Level Registered Students" count={m?.oLevelLeads ?? "—"} accent="#4338ca" />
                   <BigNavCard href="/admin/scholarship-students" icon="🎓" title="Scholarship Students" count={scholarshipStudentCount ?? "—"} accent="#b45309" />
                   <BigNavCard href="/admin/punjab-9th-leads" icon="📗" title="Punjab 9th Class Leads" count={punjab9thLeadCount ?? "—"} accent="#ea580c" />
+                  <BigNavCard href="/admin/amna-shamima-leads" icon="🤖" title="Amna Shamima AI Course Leads" count={amnaShamimaLeadCount ?? "—"} accent="#7c3aed" />
                 </div>
               </div>
             </>

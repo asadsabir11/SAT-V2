@@ -119,6 +119,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Amna Shamima Foundation — exclusive program banner */}
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <div className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", padding: "26px 32px", background: "linear-gradient(135deg,#f5f3ff,#eaf4ff)", borderColor: "#ddd6fe" }}>
+            <div>
+              <div className="eyebrow" style={{ color: "#7c3aed" }}>🤝 Partnership Program</div>
+              <h3 style={{ margin: "4px 0 6px", color: "#071b33" }}>AI course for Amna Shamima Foundation students only</h3>
+              <p style={{ margin: 0, color: "#6b7c93", maxWidth: 560 }}>
+                A dedicated AI training program built exclusively for Amna Shamima Foundation students.
+              </p>
+            </div>
+            <Link href="/amna-shamima" className="btn btn-primary" style={{ flexShrink: 0 }}>Visit →</Link>
+          </div>
+        </div>
+      </section>
+
       {/* Stat strip */}
       <div style={{ background: "#fff", borderBottom: "1px solid var(--line)", padding: "0" }}>
         <div className="container">

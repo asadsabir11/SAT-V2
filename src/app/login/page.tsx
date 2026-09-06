@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type Role = "student" | "founder" | "parent" | "teacher";
-type Program = "sat" | "o-level" | "punjab-9th";
+type Program = "sat" | "o-level" | "punjab-9th" | "amna-shamima";
 const ROLE_LABELS: Record<Role, string> = { student: "Student", parent: "Parent", founder: "Founder", teacher: "Teacher" };
 
 function LoginForm() {
@@ -23,7 +23,7 @@ function LoginForm() {
     const r = params.get("role") as Role;
     if (r === "student" || r === "founder" || r === "parent" || r === "teacher") setRole(r);
     const p = params.get("program") as Program;
-    if (p === "sat" || p === "o-level" || p === "punjab-9th") setProgram(p);
+    if (p === "sat" || p === "o-level" || p === "punjab-9th" || p === "amna-shamima") setProgram(p);
   }, [params]);
 
   async function handleSubmit(e: { preventDefault(): void }) {
@@ -45,6 +45,7 @@ function LoginForm() {
       const defaultLanding = (data.role === "founder" || data.role === "teacher") ? "/admin"
         : data.role === "parent" ? "/parent"
         : role === "student" && program === "punjab-9th" ? "/punjab-board-9th-class/portal"
+        : role === "student" && program === "amna-shamima" ? "/amna-shamima/portal"
         : "/dashboard";
       // Only honor ?next= if it was set for the role that actually just
       // signed in. Middleware stamps next= together with a role= hint when
@@ -85,7 +86,7 @@ function LoginForm() {
               key={r}
               type="button"
               aria-pressed={role === r}
-              onClick={() => { setRole(r); setError(""); if (r !== "student" && program === "punjab-9th") setProgram("sat"); }}
+              onClick={() => { setRole(r); setError(""); if (r !== "student" && (program === "punjab-9th" || program === "amna-shamima")) setProgram("sat"); }}
               style={{
                 flex: 1, padding: "10px 8px", borderRadius: 9, border: "none", cursor: "pointer",
                 fontWeight: 700, fontSize: ".84rem", transition: ".15s",
@@ -106,7 +107,7 @@ function LoginForm() {
             </label>
             <div style={{ display: "flex", gap: 8, background: "#f1f5f9", borderRadius: 10, padding: 4 }}>
               {(role === "student"
-                ? ([["sat", "SAT Prep"], ["o-level", "O Level"], ["punjab-9th", "9th Class"]] as const)
+                ? ([["sat", "SAT Prep"], ["o-level", "O Level"], ["punjab-9th", "9th Class"], ["amna-shamima", "AI Course"]] as const)
                 : ([["sat", "SAT Prep"], ["o-level", "O Level"]] as const)
               ).map(([p, label]) => (
                 <button
