@@ -45,6 +45,7 @@ export function Punjab9thRegistrationForm() {
       password,
       parentName: fd.get("parentName"),
       parentWhatsapp: fd.get("parentWhatsapp"),
+      parentEmail: fd.get("parentEmail"),
       city: fd.get("city"),
       punjabBoard: fd.get("punjabBoard"),
       schoolName: fd.get("schoolName"),
@@ -85,6 +86,7 @@ export function Punjab9thRegistrationForm() {
         <div className="field"><label style={labelStyle}>Student&apos;s email *</label><input type="email" name="studentEmail" required autoComplete="email" style={inputStyle} /></div>
         <div className="field"><label style={labelStyle}>Parent/guardian&apos;s name *</label><input name="parentName" required style={inputStyle} /></div>
         <div className="field"><label style={labelStyle}>Parent&apos;s WhatsApp number *</label><input type="tel" name="parentWhatsapp" required placeholder="03xx xxxxxxx" style={inputStyle} /></div>
+        <div className="field"><label style={labelStyle}>Parent/guardian&apos;s email (optional)</label><input type="email" name="parentEmail" autoComplete="email" style={inputStyle} /></div>
         <div className="field"><label style={labelStyle}>City *</label><input name="city" required style={inputStyle} /></div>
         <div className="field">
           <label style={labelStyle}>Punjab Board *</label>

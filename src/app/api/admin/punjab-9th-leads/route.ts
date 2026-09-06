@@ -8,6 +8,7 @@ interface Punjab9thLead {
   studentEmail?: string;
   parentName: string;
   parentWhatsapp: string;
+  parentEmail?: string | null;
   city: string;
   punjabBoard: string;
   schoolName: string | null;

@@ -852,7 +852,7 @@ export async function sendChallanVerified(opts: { email: string; name: string; a
 // module) — this email plus the in-app notification are, for now, the only
 // way the admissions team finds out a new lead came in.
 export async function sendPunjab9thLeadAdminAlert(lead: {
-  studentName: string; parentName: string; parentWhatsapp: string; city: string;
+  studentName: string; parentName: string; parentWhatsapp: string; parentEmail?: string | null; city: string;
   punjabBoard: string; studyGroup: string; teachingMedium: string; preferredClassTime: string;
 }) {
   if (ADMIN_EMAILS.length === 0) return;
@@ -864,7 +864,7 @@ export async function sendPunjab9thLeadAdminAlert(lead: {
         <h2 style="color:#071b33;margin:0 0 8px;">New 9th Class registration 🎓</h2>
         <table style="width:100%;border-collapse:collapse;">
           <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:150px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${lead.studentName}</td></tr>
-          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Parent</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.parentName} · ${lead.parentWhatsapp}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Parent</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.parentName} · ${lead.parentWhatsapp}${lead.parentEmail ? ` · ${lead.parentEmail}` : ""}</td></tr>
           <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">City / Board</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.city} · ${lead.punjabBoard}</td></tr>
           <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Group</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.studyGroup}</td></tr>
           <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Medium / Time</td><td style="padding:10px 0;color:#071b33;">${lead.teachingMedium} · ${lead.preferredClassTime}</td></tr>

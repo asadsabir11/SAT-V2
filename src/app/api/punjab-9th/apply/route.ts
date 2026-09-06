@@ -45,6 +45,10 @@ export async function POST(req: NextRequest) {
     if (!isValidEmail(studentEmail)) {
       return NextResponse.json({ error: "Enter a valid student email address" }, { status: 400 });
     }
+    const parentEmail = body.parentEmail?.trim() ? String(body.parentEmail).trim().toLowerCase() : null;
+    if (parentEmail && !isValidEmail(parentEmail)) {
+      return NextResponse.json({ error: "Enter a valid parent/guardian email address" }, { status: 400 });
+    }
     const pwError = passwordStrengthError(String(body.password));
     if (pwError) {
       return NextResponse.json({ error: `Password: ${pwError}` }, { status: 400 });
@@ -66,6 +70,7 @@ export async function POST(req: NextRequest) {
       studentEmail,
       parentName: String(body.parentName).trim(),
       parentWhatsapp: String(body.parentWhatsapp).trim(),
+      parentEmail,
       city: String(body.city).trim(),
       punjabBoard: String(body.punjabBoard).trim(),
       schoolName: body.schoolName?.trim() || null,
