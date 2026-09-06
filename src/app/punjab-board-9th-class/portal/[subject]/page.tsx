@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { findByField } from "@/lib/storage";
 import { subjectsForStudyGroup, subjectSlugToLabel, getActivePunjab9thSessionsForSubjectAndGroup } from "@/lib/punjab9thSessions";
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
+import { getPublishedPunjab9thQuizzesBySubject } from "@/lib/punjab9thQuiz";
 
 interface Punjab9thLead { studyGroup: string; }
 
@@ -36,6 +37,7 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
   const accessLevel = await getPunjab9thAccessLevel(session!.email);
   const unlocked = accessLevel === "unlocked";
   const sessions = unlocked ? await getActivePunjab9thSessionsForSubjectAndGroup(subject, group) : [];
+  const quizzes = unlocked ? await getPublishedPunjab9thQuizzesBySubject(subject) : [];
 
   return (
     <section className="section">
@@ -76,6 +78,29 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
               </div>
             ))}
           </div>
+        )}
+
+        {unlocked && (
+          <>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "32px 0 14px" }}>Quizzes</h2>
+            {quizzes.length === 0 ? (
+              <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93" }}>
+                <p style={{ fontWeight: 700 }}>No quizzes yet</p>
+                <p style={{ fontSize: ".88rem" }}>Check back soon — quizzes are added regularly.</p>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+                {quizzes.map((q) => (
+                  <Link key={q.id} href={`/punjab-board-9th-class/portal/quiz/${q.id}`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div className="eyebrow">📝 {q.question_count} question{q.question_count === 1 ? "" : "s"}</div>
+                    <h3 style={{ margin: 0, color: "#071b33" }}>{q.title}</h3>
+                    {q.description && <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{q.description}</p>}
+                    <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>Start quiz →</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

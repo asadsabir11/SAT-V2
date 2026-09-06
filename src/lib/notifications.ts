@@ -16,7 +16,7 @@ export interface Notification {
   // null program = shown to students in both programs (or, for admin
   // notifications, just informational metadata — admin sees everything
   // regardless of program).
-  program: "sat" | "o-level" | null;
+  program: "sat" | "o-level" | "punjab-9th" | null;
   // O-Level-only subject scoping; null = whole program (or SAT, where there's
   // no per-subject access model). Not used for admin notifications.
   subject: string | null;
@@ -53,7 +53,7 @@ export async function createNotification(input: {
   title: string;
   body?: string | null;
   link?: string | null;
-  program?: "sat" | "o-level" | null;
+  program?: "sat" | "o-level" | "punjab-9th" | null;
   subject?: string | null;
   studentUserId?: string | null;
   audience?: NotificationAudience;

@@ -135,6 +135,9 @@ export default function Admin() {
             <Link href="/admin/punjab-9th-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
               🎥 9th Online Classes →
             </Link>
+            <Link href="/admin/punjab-9th-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+              📝 9th Class quizzes →
+            </Link>
             <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
               💬 Q&A board →
             </Link>
