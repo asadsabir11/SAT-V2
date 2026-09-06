@@ -92,119 +92,233 @@ export default function Admin() {
       </PageHero>
       <section className="section">
         <div className="container">
-          <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+          <div style={{ display: "grid", gap: 20, marginBottom: 32 }}>
+            {/* O Level */}
+            <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #4338ca" }}>
+              <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>📘 O Level</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Link href="/admin/o-level-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fef3c7", color: "#b45309" }}>
+                  📘 O Level quizzes →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/o-level-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
+                    🔑 O Level access →
+                  </Link>
+                )}
+                <Link href="/admin/past-papers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
+                  📄 O Level past papers →
+                </Link>
+                <Link href="/admin/workbooks" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📘 O Level workbooks →
+                </Link>
+                <Link href="/admin/o-level-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
+                  ✅ O Level attendance →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/o-level-parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
+                    👨‍👩‍👧 O Level parent accounts →
+                  </Link>
+                )}
+                <Link href="/admin/o-level-reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
+                  📊 O Level parent reports →
+                </Link>
+                {/* Shared with SAT — one page, program toggle inside */}
+                <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  🎬 Manage lectures →
+                </Link>
+                <Link href="/admin/question-bank" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+                  📚 Question bank →
+                </Link>
+                <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
+                  📅 Manage sessions →
+                </Link>
+                {/* General tools, relevant here too */}
+                <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
+                  📢 Announcements →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/scholarships" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                    🎓 Scholarship applications →
+                  </Link>
+                )}
+                {isFounder && (
+                  <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
+                <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📚 Homework →
+                </Link>
+                <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📈 Analytics →
+                </Link>
+                <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
+                  💬 Q&A board →
+                </Link>
+                {isFounder && (
+                  <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+                    🗑 Clear ALL students (every program)
+                  </button>
+                )}
+              </div>
+            </article>
+
+            {/* SAT */}
+            <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #155eef" }}>
+              <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>🎓 SAT</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {isFounder && (
+                  <Link href="/admin/quiz" className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
+                    Manage diagnostic quizzes →
+                  </Link>
+                )}
+                <Link href="/admin/quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #1d4ed8", background: "#eff6ff", color: "#1d4ed8" }}>
+                  📝 SAT quizzes →
+                </Link>
+                <Link href="/admin/materials" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0ea5e9", background: "#f0f9ff", color: "#0369a1" }}>
+                  📚 Study materials →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
+                    🔑 Access requests →
+                  </Link>
+                )}
+                <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
+                  ✅ SAT attendance →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
+                    👨‍👩‍👧 SAT parent accounts →
+                  </Link>
+                )}
+                <Link href="/admin/reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+                  📊 SAT parent reports →
+                </Link>
+                {/* Shared with O Level — one page, program toggle inside */}
+                <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  🎬 Manage lectures →
+                </Link>
+                <Link href="/admin/question-bank" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
+                  📚 Question bank →
+                </Link>
+                <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
+                  📅 Manage sessions →
+                </Link>
+                {/* General tools, relevant here too */}
+                <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
+                  📢 Announcements →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/scholarships" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                    🎓 Scholarship applications →
+                  </Link>
+                )}
+                {isFounder && (
+                  <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
+                <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📚 Homework →
+                </Link>
+                <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📈 Analytics →
+                </Link>
+                <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
+                  💬 Q&A board →
+                </Link>
+                {isFounder && (
+                  <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+                    🗑 Clear ALL students (every program)
+                  </button>
+                )}
+              </div>
+            </article>
+
+            {/* 9th Grade */}
+            <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #ea580c" }}>
+              <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>📗 9th Grade</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {isFounder && (
+                  <Link href="/admin/punjab-9th-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                    🔑 9th Class access →
+                  </Link>
+                )}
+                <Link href="/admin/punjab-9th-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                  🎥 9th Online Classes →
+                </Link>
+                <Link href="/admin/punjab-9th-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                  📝 9th Class quizzes →
+                </Link>
+                <Link href="/admin/punjab-9th-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                  ✅ 9th Grade attendance →
+                </Link>
+                {/* General tools, relevant here too */}
+                {isFounder && (
+                  <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
+                <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📚 Homework →
+                </Link>
+                <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📈 Analytics →
+                </Link>
+                <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
+                  💬 Q&A board →
+                </Link>
+                {isFounder && (
+                  <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+                    🗑 Clear ALL students (every program)
+                  </button>
+                )}
+              </div>
+            </article>
+
+            {/* Amna Shamima */}
+            <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #7c3aed" }}>
+              <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>🤖 Amna Shamima</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Link href="/admin/amna-shamima-lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  🤖 Amna Shamima lectures →
+                </Link>
+                <Link href="/admin/amna-shamima-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
+                  💻 Amna Shamima online class →
+                </Link>
+                {/* General tools, relevant here too */}
+                {isFounder && (
+                  <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
+                <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📚 Homework →
+                </Link>
+                <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📈 Analytics →
+                </Link>
+                <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
+                  💬 Q&A board →
+                </Link>
+                {isFounder && (
+                  <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+                    🗑 Clear ALL students (every program)
+                  </button>
+                )}
+              </div>
+            </article>
+
+            {/* Fees */}
             {isFounder && (
-              <Link href="/admin/quiz" className="btn btn-primary" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem" }}>
-                Manage diagnostic quizzes →
-              </Link>
-            )}
-            <Link href="/admin/quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #1d4ed8", background: "#eff6ff", color: "#1d4ed8" }}>
-              📝 SAT quizzes →
-            </Link>
-            <Link href="/admin/materials" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0ea5e9", background: "#f0f9ff", color: "#0369a1" }}>
-              📚 Study materials →
-            </Link>
-            <Link href="/admin/question-bank" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
-              📚 Question bank →
-            </Link>
-            <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
-              🎬 Manage lectures →
-            </Link>
-            <Link href="/admin/o-level-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fef3c7", color: "#b45309" }}>
-              📘 O Level quizzes →
-            </Link>
-            {isFounder && (
-              <Link href="/admin/o-level-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
-                🔑 O Level access →
-              </Link>
-            )}
-            <Link href="/admin/past-papers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
-              📄 O Level past papers →
-            </Link>
-            <Link href="/admin/workbooks" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
-              📘 O Level workbooks →
-            </Link>
-            {isFounder && (
-              <Link href="/admin/access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #22c55e", background: "#f0fdf4", color: "#15803d" }}>
-                🔑 Access requests →
-              </Link>
-            )}
-            {isFounder && (
-              <Link href="/admin/punjab-9th-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
-                🔑 9th Class access →
-              </Link>
-            )}
-            <Link href="/admin/sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #065f46", background: "#d1fae5", color: "#065f46" }}>
-              📅 Manage sessions →
-            </Link>
-            <Link href="/admin/punjab-9th-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
-              🎥 9th Online Classes →
-            </Link>
-            <Link href="/admin/punjab-9th-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
-              📝 9th Class quizzes →
-            </Link>
-            <Link href="/admin/amna-shamima-lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
-              🤖 Amna Shamima lectures →
-            </Link>
-            <Link href="/admin/amna-shamima-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
-              💻 Amna Shamima online class →
-            </Link>
-            <Link href="/discussion" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#ede9fe", color: "#7c3aed" }}>
-              💬 Q&A board →
-            </Link>
-            <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
-              📢 Announcements →
-            </Link>
-            {isFounder && (
-              <Link href="/admin/parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
-                👨‍👩‍👧 SAT parent accounts →
-              </Link>
-            )}
-            {isFounder && (
-              <Link href="/admin/o-level-parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
-                👨‍👩‍👧 O Level parent accounts →
-              </Link>
-            )}
-            {isFounder && (
-              <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
-                👨‍🏫 Teacher accounts →
-              </Link>
-            )}
-            {isFounder && (
-              <Link href="/admin/scholarships" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
-                🎓 Scholarship applications →
-              </Link>
-            )}
-            {isFounder && (
-              <Link href="/admin/fees" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
-                💰 Fees →
-              </Link>
-            )}
-            <Link href="/admin/attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #15803d", background: "#f0fdf4", color: "#15803d" }}>
-              ✅ SAT attendance →
-            </Link>
-            <Link href="/admin/o-level-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
-              ✅ O Level attendance →
-            </Link>
-            <Link href="/admin/punjab-9th-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
-              ✅ 9th Grade attendance →
-            </Link>
-            <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
-              📚 Homework →
-            </Link>
-            <Link href="/admin/reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #155eef", background: "#eff6ff", color: "#155eef" }}>
-              📊 SAT parent reports →
-            </Link>
-            <Link href="/admin/o-level-reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #4338ca", background: "#eef2ff", color: "#4338ca" }}>
-              📊 O Level parent reports →
-            </Link>
-            <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
-              📈 Analytics →
-            </Link>
-            {isFounder && (
-              <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
-                🗑 Clear ALL students (SAT + O-Level + Scholarships)
-              </button>
+              <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #059669" }}>
+                <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>💰 Fees</h3>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <Link href="/admin/fees" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
+                    💰 Fees →
+                  </Link>
+                </div>
+              </article>
             )}
           </div>
 
