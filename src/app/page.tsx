@@ -364,7 +364,6 @@ export default function Home() {
             ))}
           </div>
           <div className="actions" style={{ marginTop: 28 }}>
-            <CTAButton href="/parent-webinar">Register for free parent webinar</CTAButton>
             <Link href="/sample-report" className="btn btn-secondary">See a sample parent report →</Link>
           </div>
         </div>
