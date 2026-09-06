@@ -79,33 +79,44 @@ export default async function Punjab9thClassPage() {
       {/* 1 — Hero */}
       <section className="section band">
         <div className="container">
-          <div className="eyebrow" style={{ color: "#5eead4" }}>Phase 1 — Admissions Open</div>
-          <h1 className="display" style={{ color: "#fff", maxWidth: 780 }}>
-            Punjab Board 9th Class — All Subjects Online
-          </h1>
-          <p className="lead" style={{ color: "rgba(255,255,255,.78)" }}>
-            Live online classes for Biology and Computer Science groups, taught by experienced teachers following
-            the latest Punjab Board syllabus.
-          </p>
-          <p style={{ color: "#5eead4", fontWeight: 800, fontSize: "1.05rem" }}>
-            Special Launch Fee: PKR 2,500 per month for all subjects
-          </p>
-          <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {SUPPORTING_POINTS.map((p) => (
-              <span key={p} className="badge teal">✓ {p}</span>
-            ))}
+          <div className="hero-layout">
+            <div>
+              <div className="eyebrow" style={{ color: "#5eead4" }}>Phase 1 — Admissions Open</div>
+              <h1 className="display" style={{ color: "#fff", maxWidth: 780 }}>
+                Punjab Board 9th Class — All Subjects Online
+              </h1>
+              <p className="lead" style={{ color: "rgba(255,255,255,.78)" }}>
+                Live online classes for Biology and Computer Science groups, taught by experienced teachers following
+                the latest Punjab Board syllabus.
+              </p>
+              <p style={{ color: "#5eead4", fontWeight: 800, fontSize: "1.05rem" }}>
+                Special Launch Fee: PKR 2,500 per month for all subjects
+              </p>
+              <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 10 }}>
+                {SUPPORTING_POINTS.map((p) => (
+                  <span key={p} className="badge teal">✓ {p}</span>
+                ))}
+              </div>
+              <div className="actions">
+                {isSignedInAsPunjab9th ? (
+                  <CTAButton href="/punjab-board-9th-class/portal" variant="accent">Go to My Portal</CTAButton>
+                ) : (
+                  <CTAButton href="#apply" variant="accent">Register for the First Week</CTAButton>
+                )}
+                <a href={WHATSAPP_HERO_LINK} target="_blank" rel="noreferrer" className="btn btn-ghost">WhatsApp Us</a>
+              </div>
+              <p style={{ marginTop: 20, color: "rgba(255,255,255,.6)", fontSize: ".85rem" }}>
+                Founding cohort limited to the first 300 students.
+              </p>
+            </div>
+            <div className="hero-panel" style={{ padding: 14 }}>
+              <img
+                src="/9th-class-video-call.png"
+                alt="9th Class students on a live online class"
+                style={{ width: "100%", borderRadius: 18, display: "block", objectFit: "cover", maxHeight: 420 }}
+              />
+            </div>
           </div>
-          <div className="actions">
-            {isSignedInAsPunjab9th ? (
-              <CTAButton href="/punjab-board-9th-class/portal" variant="accent">Go to My Portal</CTAButton>
-            ) : (
-              <CTAButton href="#apply" variant="accent">Register for the First Week</CTAButton>
-            )}
-            <a href={WHATSAPP_HERO_LINK} target="_blank" rel="noreferrer" className="btn btn-ghost">WhatsApp Us</a>
-          </div>
-          <p style={{ marginTop: 20, color: "rgba(255,255,255,.6)", fontSize: ".85rem" }}>
-            Founding cohort limited to the first 300 students.
-          </p>
         </div>
       </section>
 
@@ -134,6 +145,32 @@ export default async function Punjab9thClassPage() {
             The Digital Tutor brings the complete academy experience online. Students attend scheduled live
             classes, ask questions, complete assignments and prepare for school and board examinations from home.
           </p>
+        </div>
+      </section>
+
+      {/* 3b — Students learning from home */}
+      <section className="section soft">
+        <div className="container">
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Real students, real classes</div>
+          <h2 className="title" style={{ textAlign: "center" }}>Learning from home, guided every step</h2>
+          <div className="grid grid-2" style={{ marginTop: 32 }}>
+            <figure style={{ margin: 0 }}>
+              <img src="/9th-class-mother-daughter.png" alt="A parent reviewing progress with her daughter" style={{ width: "100%", borderRadius: 16, display: "block", objectFit: "cover", maxHeight: 320 }} />
+              <figcaption style={{ marginTop: 10, color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>Parents can follow their child&apos;s progress every step of the way</figcaption>
+            </figure>
+            <figure style={{ margin: 0 }}>
+              <img src="/9th-class-video-call-2.png" alt="Two students in a live online class with their teacher" style={{ width: "100%", borderRadius: 16, display: "block", objectFit: "cover", maxHeight: 320 }} />
+              <figcaption style={{ marginTop: 10, color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>Live classes with real teachers, not just recorded videos</figcaption>
+            </figure>
+            <figure style={{ margin: 0 }}>
+              <img src="/9th-class-solo-study.png" alt="A student studying independently at home" style={{ width: "100%", borderRadius: 16, display: "block", objectFit: "cover", maxHeight: 320 }} />
+              <figcaption style={{ marginTop: 10, color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>Structured notes and recordings make independent revision easy</figcaption>
+            </figure>
+            <figure style={{ margin: 0 }}>
+              <img src="/9th-class-video-call.png" alt="Students taking notes during a live online class" style={{ width: "100%", borderRadius: 16, display: "block", objectFit: "cover", maxHeight: 320 }} />
+              <figcaption style={{ marginTop: 10, color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>Students stay engaged and take notes throughout every class</figcaption>
+            </figure>
+          </div>
         </div>
       </section>
 
@@ -222,6 +259,11 @@ export default async function Punjab9thClassPage() {
       {/* 8 — Pricing */}
       <section className="section soft">
         <div className="container" style={{ maxWidth: 560 }}>
+          <img
+            src="/9th-class-promo-banner.png"
+            alt="Punjab Board 9th Class — special launch fee PKR 2,500 per month"
+            style={{ width: "100%", maxWidth: 340, display: "block", margin: "0 auto 28px", borderRadius: 18, boxShadow: "0 16px 40px rgba(7,27,51,.18)" }}
+          />
           <div className="eyebrow" style={{ justifyContent: "center" }}>Founding Student Launch Offer</div>
           <h2 className="title" style={{ textAlign: "center" }}>Punjab Board 9th Class — All Subjects</h2>
           <article className="card" style={{ marginTop: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", border: "2px solid var(--blue)" }}>
