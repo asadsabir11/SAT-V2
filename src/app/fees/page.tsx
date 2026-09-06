@@ -5,7 +5,7 @@ import { PageHero } from "@/components/site";
 
 interface Challan {
   id: string;
-  program: "sat" | "o-level";
+  program: "sat" | "o-level" | "punjab-9th";
   subject: string;
   period: string;
   amount_due: string;
@@ -13,7 +13,6 @@ interface Challan {
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
-  "": "Full SAT Access",
   mathematics: "Mathematics",
   "english-language": "English Language",
   "computer-science": "Computer Science",
@@ -21,6 +20,11 @@ const SUBJECT_LABELS: Record<string, string> = {
   "pakistan-studies": "Pakistan Studies",
   physics: "Physics",
 };
+
+function subjectLabel(program: Challan["program"], subject: string): string {
+  if (subject) return SUBJECT_LABELS[subject] ?? subject;
+  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+}
 
 const STATUS_META: Record<Challan["status"], { label: string; bg: string; color: string }> = {
   unpaid:    { label: "Unpaid",    bg: "#fee2e2", color: "#991b1b" },
@@ -37,7 +41,7 @@ type Tab = "challans" | "submit";
 
 export default function FeesPage() {
   const [tab, setTab] = useState<Tab>("challans");
-  const [me, setMe] = useState<{ name: string; email: string } | null>(null);
+  const [me, setMe] = useState<{ name: string; email: string; program?: string } | null>(null);
   const [challans, setChallans] = useState<Challan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +61,7 @@ export default function FeesPage() {
       fetch("/api/auth/me").then(r => r.json()),
       fetch("/api/fees/challans").then(r => r.json()),
     ]).then(([authData, feeData]) => {
-      setMe(authData.user ? { name: authData.user.name, email: authData.user.email } : null);
+      setMe(authData.user ? { name: authData.user.name, email: authData.user.email, program: authData.user.program } : null);
       setChallans(feeData.challans ?? []);
     }).finally(() => setLoading(false));
   }
@@ -140,7 +144,12 @@ export default function FeesPage() {
 
   return (
     <>
-      <PageHero eyebrow="Fee portal" title="Fees" backHref="/dashboard" backLabel="Dashboard">
+      <PageHero
+        eyebrow="Fee portal"
+        title="Fees"
+        backHref={me?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : "/dashboard"}
+        backLabel={me?.program === "punjab-9th" ? "My Portal" : "Dashboard"}
+      >
         View your monthly fee challans and submit payment proof for verification.
       </PageHero>
       <section className="section">
@@ -180,7 +189,7 @@ export default function FeesPage() {
                         return (
                           <tr key={c.id}>
                             <td style={{ fontWeight: 700, color: "#071b33" }}>{fmtPeriod(c.period)}</td>
-                            <td style={{ fontSize: ".85rem" }}>{SUBJECT_LABELS[c.subject] ?? c.subject}</td>
+                            <td style={{ fontSize: ".85rem" }}>{subjectLabel(c.program, c.subject)}</td>
                             <td style={{ fontSize: ".85rem", fontWeight: 700 }}>PKR {Number(c.amount_due).toLocaleString()}</td>
                             <td>
                               <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 800, background: meta.bg, color: meta.color }}>
@@ -231,7 +240,7 @@ export default function FeesPage() {
                   {unpaidChallans.map(c => (
                     <label key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", border: "1.5px solid #e8eef6", borderRadius: 10, cursor: "pointer", background: selected.has(c.id) ? "#eff6ff" : "#fff" }}>
                       <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} style={{ width: 18, height: 18 }} />
-                      <span style={{ fontWeight: 700, color: "#071b33" }}>{fmtPeriod(c.period)} — {SUBJECT_LABELS[c.subject] ?? c.subject}</span>
+                      <span style={{ fontWeight: 700, color: "#071b33" }}>{fmtPeriod(c.period)} — {subjectLabel(c.program, c.subject)}</span>
                       <span style={{ marginLeft: "auto", color: "#6b7c93", fontWeight: 700 }}>PKR {Number(c.amount_due).toLocaleString()}</span>
                     </label>
                   ))}

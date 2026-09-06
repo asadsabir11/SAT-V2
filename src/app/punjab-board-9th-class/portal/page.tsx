@@ -80,6 +80,21 @@ export default async function Punjab9thPortal() {
           </div>
         )}
 
+        <Link
+          href="/fees"
+          className="module-card fade-up"
+          style={{ "--module-accent": "#0e7490", "--module-accent-grad": "linear-gradient(135deg,#0e7490,#06b6d4)", "--module-glow": "rgba(14,116,144,.35)", display: "block", marginBottom: 24 } as CSSProperties}
+        >
+          <article className="card" style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 16, padding: "18px 22px" }}>
+            <div className="module-icon" style={{ flexShrink: 0 }}>💰</div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, color: "#071b33" }}>Fees</h3>
+              <p style={{ margin: "2px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>View your fee challans and submit payment proof</p>
+            </div>
+            <span className="module-arrow" style={{ fontWeight: 700, fontSize: ".85rem", color: "#0e7490", flexShrink: 0 }}>Open →</span>
+          </article>
+        </Link>
+
         <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "0 0 14px" }}>Your subjects</h2>
         <div className="grid grid-3">
           {subjects.map((subject) => {

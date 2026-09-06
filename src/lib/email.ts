@@ -827,7 +827,8 @@ export async function sendChallanGenerated(opts: { email: string; name: string; 
   });
 }
 
-export async function sendChallanVerified(opts: { email: string; name: string; amountPaid: number; subjects: string }) {
+export async function sendChallanVerified(opts: { email: string; name: string; amountPaid: number; subjects: string; program?: "sat" | "o-level" | "punjab-9th" }) {
+  const dashboardHref = opts.program === "punjab-9th" ? `${APP_URL}/punjab-board-9th-class/portal` : `${APP_URL}/dashboard`;
   await sendEmail({
     to: opts.email,
     subject: "Payment verified — you're all set!",
@@ -839,7 +840,7 @@ export async function sendChallanVerified(opts: { email: string; name: string; a
           and your access has been renewed.
         </p>
         <div style="margin-bottom:20px;">
-          <a href="${APP_URL}/dashboard" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
+          <a href="${dashboardHref}" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my dashboard →</a>
         </div>
         <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
       </div>

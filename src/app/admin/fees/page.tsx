@@ -6,7 +6,7 @@ interface Challan {
   id: string;
   student_email: string;
   student_name: string | null;
-  program: "sat" | "o-level";
+  program: "sat" | "o-level" | "punjab-9th";
   subject: string;
   period: string;
   amount_due: string;
@@ -27,7 +27,6 @@ interface Submission {
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
-  "": "Full SAT Access",
   mathematics: "Mathematics",
   "english-language": "English Language",
   "computer-science": "Computer Science",
@@ -35,6 +34,11 @@ const SUBJECT_LABELS: Record<string, string> = {
   "pakistan-studies": "Pakistan Studies",
   physics: "Physics",
 };
+
+function subjectLabel(program: Challan["program"], subject: string): string {
+  if (subject) return SUBJECT_LABELS[subject] ?? subject;
+  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+}
 
 const STATUS_META: Record<Challan["status"], { label: string; bg: string; color: string }> = {
   unpaid:    { label: "Unpaid",       bg: "#fee2e2", color: "#991b1b" },
@@ -205,7 +209,7 @@ export default function AdminFeesPage() {
                   .map(id => challans.find(c => c.id === id))
                   .filter((c): c is Challan => !!c);
                 const label = covers.length > 0
-                  ? covers.map(c => `${fmtPeriod(c.period)} — ${SUBJECT_LABELS[c.subject] ?? c.subject}`).join(", ")
+                  ? covers.map(c => `${fmtPeriod(c.period)} — ${subjectLabel(c.program, c.subject)}`).join(", ")
                   : "—";
                 const isExpanded = expandedId === s.id;
                 return (
@@ -316,8 +320,8 @@ export default function AdminFeesPage() {
                         return (
                           <tr key={c.id}>
                             <td style={{ fontWeight: 700, color: "#071b33" }}>{c.student_name || "—"}<br /><span style={{ fontWeight: 400, color: "#6b7c93", fontSize: ".78rem" }}>{c.student_email}</span></td>
-                            <td style={{ fontSize: ".83rem" }}>{c.program === "o-level" ? "O Level" : "SAT"}</td>
-                            <td style={{ fontSize: ".83rem" }}>{SUBJECT_LABELS[c.subject] ?? c.subject}</td>
+                            <td style={{ fontSize: ".83rem" }}>{c.program === "o-level" ? "O Level" : c.program === "punjab-9th" ? "9th Class" : "SAT"}</td>
+                            <td style={{ fontSize: ".83rem" }}>{subjectLabel(c.program, c.subject)}</td>
                             <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtPeriod(c.period)}</td>
                             <td style={{ fontSize: ".83rem", fontWeight: 700 }}>PKR {Number(c.amount_due).toLocaleString()}</td>
                             <td>

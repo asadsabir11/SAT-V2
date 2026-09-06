@@ -2,6 +2,7 @@ import { sql } from "@/lib/db";
 import { marginalPriceForNextSubject } from "@/lib/academy/data";
 import { listStudentsWithAccess } from "@/lib/users";
 import { listOLevelAccessRequests } from "@/lib/olevelAccess";
+import { listPunjab9thStudentsWithAccess } from "@/lib/punjab9thAccess";
 import { findApprovedScholarshipForStudent } from "@/lib/scholarships";
 import { createNotification } from "@/lib/notifications";
 import { sendChallanGenerated } from "@/lib/email";
@@ -10,6 +11,8 @@ import { sendChallanGenerated } from "@/lib/email";
 // here rather than imported, since that page's constant isn't exported and
 // this is the only other place that needs to know the flat monthly fee.
 const SAT_MONTHLY_FEE = 5300;
+// Must match the punjab-9th unlock page's AMOUNT_DUE, same reasoning.
+const PUNJAB9TH_MONTHLY_FEE = 2500;
 
 export type ChallanStatus = "unpaid" | "submitted" | "paid";
 export type SubmissionStatus = "pending" | "verified" | "rejected";
@@ -19,7 +22,7 @@ export interface Challan {
   student_user_id: string;
   student_email: string;
   student_name: string | null;
-  program: "sat" | "o-level";
+  program: "sat" | "o-level" | "punjab-9th";
   // Empty string (not NULL) for SAT rows — Postgres UNIQUE constraints treat
   // every NULL as distinct from every other NULL, which would let duplicate
   // SAT challans slip through for the same student/period.
@@ -124,6 +127,23 @@ export async function generateMonthlyChallans(period: string): Promise<{ created
     await sql`
       INSERT INTO challans (id, student_user_id, student_email, student_name, program, subject, period, amount_due)
       VALUES (${crypto.randomUUID()}, ${s.id}, ${s.email}, ${s.name}, 'sat', '', ${period}, ${SAT_MONTHLY_FEE})
+    `;
+    created++;
+    notifiedStudents.set(s.id, { email: s.email, name: s.name });
+  }
+
+  // punjab-9th has no scholarship program yet, so unlike the SAT/O-Level
+  // loops there's no findApprovedScholarshipForStudent check here.
+  const punjab9thStudents = await listPunjab9thStudentsWithAccess();
+  for (const s of punjab9thStudents) {
+    if (s.access_level !== "unlocked") continue;
+    const exists = await sql`
+      SELECT id FROM challans WHERE student_user_id = ${s.id} AND program = 'punjab-9th' AND subject = '' AND period = ${period} LIMIT 1
+    `;
+    if (exists.length > 0) { skipped++; continue; }
+    await sql`
+      INSERT INTO challans (id, student_user_id, student_email, student_name, program, subject, period, amount_due)
+      VALUES (${crypto.randomUUID()}, ${s.id}, ${s.email}, ${s.name}, 'punjab-9th', '', ${period}, ${PUNJAB9TH_MONTHLY_FEE})
     `;
     created++;
     notifiedStudents.set(s.id, { email: s.email, name: s.name });

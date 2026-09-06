@@ -5,7 +5,6 @@ import { sendChallanSubmissionAck, sendChallanSubmissionAdminAlert } from "@/lib
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 const SUBJECT_LABELS: Record<string, string> = {
-  "": "Full SAT Access",
   mathematics: "Mathematics",
   "english-language": "English Language",
   "computer-science": "Computer Science",
@@ -13,6 +12,11 @@ const SUBJECT_LABELS: Record<string, string> = {
   "pakistan-studies": "Pakistan Studies",
   physics: "Physics",
 };
+
+function subjectLabel(program: string, subject: string): string {
+  if (subject) return SUBJECT_LABELS[subject] ?? subject;
+  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+}
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -47,7 +51,7 @@ export async function POST(req: NextRequest) {
     if (challan.status === "paid") {
       return NextResponse.json({ error: "One of the selected challans is already paid" }, { status: 409 });
     }
-    subjects.push(SUBJECT_LABELS[challan.subject] ?? challan.subject);
+    subjects.push(subjectLabel(challan.program, challan.subject));
   }
 
   const subjectsLabel = subjects.join(", ");
