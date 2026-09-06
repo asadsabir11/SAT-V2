@@ -122,15 +122,29 @@ export default function Home() {
       {/* Amna Shamima Foundation — exclusive program banner */}
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
-          <div className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", padding: "26px 32px", background: "linear-gradient(135deg,#f5f3ff,#eaf4ff)", borderColor: "#ddd6fe" }}>
-            <div>
-              <div className="eyebrow" style={{ color: "#7c3aed" }}>🤝 Partnership Program</div>
-              <h3 style={{ margin: "4px 0 6px", color: "#071b33" }}>AI course for Amna Shamima Foundation students only</h3>
-              <p style={{ margin: 0, color: "#6b7c93", maxWidth: 560 }}>
-                A dedicated AI training program built exclusively for Amna Shamima Foundation students.
-              </p>
+          <div
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap",
+              padding: "34px 40px", borderRadius: 22,
+              background: "linear-gradient(135deg,#4c1d95,#5b21b6 45%,#1e3a8a)",
+              boxShadow: "0 16px 40px rgba(76,29,149,.35)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap" }}>
+              <div style={{ width: 110, height: 110, borderRadius: 18, background: "#fff", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: "0 6px 18px rgba(0,0,0,.2)", padding: 6 }}>
+                <img src="/amna-shamima-logo.png" alt="Amna Shamima Foundation" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              </div>
+              <div>
+                <div className="eyebrow" style={{ color: "#c4b5fd" }}>🤝 Partnership Program</div>
+                <h3 style={{ margin: "4px 0 8px", color: "#fff", fontSize: "1.35rem", fontWeight: 900, letterSpacing: "-.02em" }}>
+                  AI Course for Amna Shamima Foundation Students Only
+                </h3>
+                <p style={{ margin: 0, color: "rgba(255,255,255,.8)", maxWidth: 560 }}>
+                  A dedicated AI training program built exclusively for Amna Shamima Foundation students.
+                </p>
+              </div>
             </div>
-            <Link href="/amna-shamima" className="btn btn-primary" style={{ flexShrink: 0 }}>Visit →</Link>
+            <Link href="/amna-shamima" className="btn" style={{ flexShrink: 0, background: "#fff", color: "#4c1d95", fontWeight: 800, padding: "14px 30px", fontSize: "1rem" }}>Visit →</Link>
           </div>
         </div>
       </section>
