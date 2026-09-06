@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { appendData } from "@/lib/storage";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { createNotification } from "@/lib/notifications";
-import { sendPunjab9thLeadAdminAlert } from "@/lib/email";
+import { sendPunjab9thLeadAdminAlert, sendPunjab9thRegistrationWelcome } from "@/lib/email";
 import { createUser, findUserByEmailAndProgram } from "@/lib/users";
 import { createToken, AUTH_COOKIE } from "@/lib/auth";
 import { isValidEmail, passwordStrengthError } from "@/lib/validators";
@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
         link: "/admin",
       }).catch(console.error),
       sendPunjab9thLeadAdminAlert(record).catch(console.error),
+      sendPunjab9thRegistrationWelcome({ name: studentName, email: studentEmail }).catch(console.error),
     ]);
 
     const token = await createToken({ id: userId, email: studentEmail, role: "student", name: studentName, program: "punjab-9th" });

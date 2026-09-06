@@ -874,6 +874,60 @@ export async function sendPunjab9thLeadAdminAlert(lead: {
   });
 }
 
+export async function sendPunjab9thRegistrationWelcome(student: { name: string; email: string }) {
+  await sendEmail({
+    to: student.email,
+    subject: "Welcome to The Digital Tutor — you're in!",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 6px;font-size:1.4rem;">Welcome, ${student.name}! 🎉</h2>
+        <p style="color:#6b7c93;margin:0 0 24px;font-size:.95rem;line-height:1.6;">
+          You've registered for The Digital Tutor's Punjab Board 9th Class program. Here's how it works:
+        </p>
+        <div style="background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:16px;border:1.5px solid #e8eef6;">
+          <p style="margin:0 0 14px;font-weight:800;color:#071b33;font-size:.95rem;">Your next steps</p>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">1</span>
+                <strong style="color:#071b33;">Receive your class details</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Our admissions team will contact your parent on WhatsApp with batch timings and joining instructions</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">2</span>
+                <strong style="color:#071b33;">Attend your first week</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Experience the classes before paying anything</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">3</span>
+                <strong style="color:#071b33;">Unlock full access</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 0 32px;color:#6b7c93;font-size:.85rem;">PKR 2,500/month covers every subject in your group — submit payment from your portal once you're ready to continue</td>
+            </tr>
+          </table>
+        </div>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/punjab-board-9th-class/portal" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my portal →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;line-height:1.6;">
+          Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
+          The Digital Tutor · academy.thedigitaltutor.net
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPunjab9thPaymentSubmittedAck(opts: { email: string; name: string }) {
   await sendEmail({
     to: opts.email,
