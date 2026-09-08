@@ -346,6 +346,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 7c — Weekly class schedule */}
+      <section className="section soft">
+        <div className="container">
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Live class rhythm</div>
+          <h2 className="title" style={{ textAlign: "center" }}>Weekly Class Schedule</h2>
+          <p className="lead" style={{ textAlign: "center", margin: "0 auto 32px", maxWidth: 640 }}>
+            Every program runs on a fixed weekly rhythm — the same structure that keeps students consistent instead
+            of relying on self-study alone.
+          </p>
+          <div className="card" style={{ padding: 0, overflow: "hidden", maxWidth: 900, margin: "0 auto" }}>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>5:00–6:00 PM</th>
+                    <th>6:15–7:15 PM</th>
+                    <th>7:30–8:30 PM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Monday", "Grade 9 English", "O Level English", "SAT"],
+                    ["Tuesday", "Grade 9 Mathematics", "O Level Mathematics", "—"],
+                    ["Wednesday", "Grade 9 Computer Science", "O Level Computer Science", "—"],
+                    ["Thursday", "Grade 9 English", "O Level English", "SAT"],
+                    ["Friday", "Grade 9 Mathematics", "O Level Mathematics", "—"],
+                    ["Saturday", "Grade 9 Computer Science", "O Level Computer Science", "—"],
+                    ["Sunday", "No classes", "Recording backup/makeup", "Weekly planning"],
+                  ].map(([day, slot1, slot2, slot3]) => (
+                    <tr key={day}>
+                      <td style={{ fontWeight: 800, color: "#071b33" }}>{day}</td>
+                      <td style={{ color: slot1 === "—" || slot1 === "No classes" ? "#a0aec0" : "#344054" }}>{slot1}</td>
+                      <td style={{ color: slot2 === "—" ? "#a0aec0" : "#344054" }}>{slot2}</td>
+                      <td style={{ color: slot3 === "—" ? "#a0aec0" : "#344054" }}>{slot3}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p style={{ textAlign: "center", color: "var(--muted)", fontSize: ".85rem", marginTop: 16 }}>
+            Times shown in Pakistan Standard Time (PKT). Exact batch timing is confirmed after registration.
+          </p>
+        </div>
+      </section>
+
       {/* 8 — Parent trust */}
       <section className="section">
         <div className="container">
