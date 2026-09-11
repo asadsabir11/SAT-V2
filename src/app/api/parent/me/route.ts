@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { getStudentForParent, getReportForStudent, listReportsForStudent, getHomeworkForStudent, getAttendanceForStudent } from "@/lib/parent-system";
 import { getAssessmentHistory } from "@/lib/analytics";
 import { getSubjectPerformanceForStudent, getRecentAttemptsForStudent } from "@/lib/olevel-quiz";
+import { getPunjab9thSubjectPerformanceForStudent, getPunjab9thRecentAttemptsForStudent } from "@/lib/punjab9thQuiz";
 import { getSubject } from "@/lib/academy/data";
 
 export async function GET() {
@@ -19,6 +20,7 @@ export async function GET() {
   const studentId = (student as { id: string; email: string; program: string }).id;
   const studentEmail = (student as { id: string; email: string; program: string }).email;
   const isOLevel = (student as { program: string }).program === "o-level";
+  const isPunjab9th = (student as { program: string }).program === "punjab-9th";
 
   if (isOLevel) {
     const [latestReport, reports, attendance, subjectsRaw, recentAttempts] = await Promise.all([
@@ -29,6 +31,20 @@ export async function GET() {
       getRecentAttemptsForStudent(studentEmail),
     ]);
     const subjects = subjectsRaw.map((s) => ({ ...s, subjectLabel: getSubject(s.subject)?.name ?? s.subject }));
+    return NextResponse.json({ student, latestReport, reports, homework: [], attendance, subjects, recentAttempts });
+  }
+
+  if (isPunjab9th) {
+    const [latestReport, reports, attendance, subjectsRaw, recentAttempts] = await Promise.all([
+      getReportForStudent(studentId),
+      listReportsForStudent(studentId),
+      getAttendanceForStudent(studentId),
+      getPunjab9thSubjectPerformanceForStudent(studentEmail),
+      getPunjab9thRecentAttemptsForStudent(studentEmail),
+    ]);
+    // Subject is already a plain human-readable string for this program —
+    // no slug-to-name lookup needed like O-Level's academy.ts registry.
+    const subjects = subjectsRaw.map((s) => ({ ...s, subjectLabel: s.subject }));
     return NextResponse.json({ student, latestReport, reports, homework: [], attendance, subjects, recentAttempts });
   }
 

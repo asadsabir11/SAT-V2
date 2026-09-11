@@ -10,7 +10,8 @@ export async function GET() {
   const student = await getStudentForParent(session.id);
   if (!student) return NextResponse.json({ error: "No student linked" }, { status: 404 });
 
-  if ((student as { program: string }).program === "o-level") return NextResponse.json({ skills: [] });
+  const program = (student as { program: string }).program;
+  if (program === "o-level" || program === "punjab-9th") return NextResponse.json({ skills: [] });
 
   const skills = await getSkillAccuracy(student.id as string);
   return NextResponse.json({ skills });

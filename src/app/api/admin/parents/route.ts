@@ -8,7 +8,7 @@ import { sendParentAccountWelcome } from "@/lib/email";
 import { findAllByFieldCI } from "@/lib/storage";
 import { sql } from "@/lib/db";
 
-const LEADS_COLLECTION: Record<string, string> = { sat: "leads-student.json", "o-level": "leads-o-level.json" };
+const LEADS_COLLECTION: Record<string, string> = { sat: "leads-student.json", "o-level": "leads-o-level.json", "punjab-9th": "leads-punjab-9th.json" };
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const [allLinks, allStudents, unlinkedParents] = await Promise.all([
     listParentLinks(),
     sql`SELECT id, name, email, program FROM users WHERE role = 'student' ORDER BY name`,
-    program === "sat" || program === "o-level" ? listUnlinkedParents(program) : Promise.resolve([]),
+    program === "sat" || program === "o-level" || program === "punjab-9th" ? listUnlinkedParents(program) : Promise.resolve([]),
   ]);
 
   const links = program ? allLinks.filter((l) => l.student_program === program) : allLinks;
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   }
 
   const studentRows = await sql`SELECT name, email, program FROM users WHERE id = ${studentId} AND role = 'student'`;
-  const student = studentRows[0] as { name: string; email: string; program: "sat" | "o-level" } | undefined;
+  const student = studentRows[0] as { name: string; email: string; program: "sat" | "o-level" | "punjab-9th" } | undefined;
   if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
 
   // Find or create the parent user — scoped to the STUDENT's program, same

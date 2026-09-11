@@ -6,7 +6,9 @@ interface Link_ { id: string; parent_id: string; parent_name: string; parent_ema
 interface Student { id: string; name: string; email: string; parentName?: string; parentEmail?: string; }
 interface UnlinkedParent { id: string; name: string; email: string; created_at: string; }
 
-export function AdminParentsPanel({ program, title, description }: { program: "sat" | "o-level"; title: string; description: string }) {
+const OTHER_PROGRAM_LABEL: Record<string, string> = { sat: "O Level", "o-level": "SAT", "punjab-9th": "SAT or O Level" };
+
+export function AdminParentsPanel({ program, title, description }: { program: "sat" | "o-level" | "punjab-9th"; title: string; description: string }) {
   const [links, setLinks]       = useState<Link_[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [unlinkedParents, setUnlinkedParents] = useState<UnlinkedParent[]>([]);
@@ -196,8 +198,8 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
           </div>
         </div>
         <p style={{ color: "#6b7c93", fontSize: ".78rem", margin: "0 0 14px" }}>
-          A parent with a child in both programs can be linked here separately from the {program === "sat" ? "O Level" : "SAT"}
-          {" "}module using the same email — each gets its own login scoped to that child.
+          A parent with a child in more than one program can be linked here separately from the {OTHER_PROGRAM_LABEL[program]}
+          {" "}module(s) using the same email — each gets its own login scoped to that child.
         </p>
         {error   && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".85rem", marginBottom: 10 }}>⚠ {error}</p>}
         {success && <p style={{ color: "#15803d", fontWeight: 600, fontSize: ".85rem", marginBottom: 10 }}>✓ {success}</p>}
@@ -272,8 +274,8 @@ export function AdminParentsPanel({ program, title, description }: { program: "s
       <div className="card" style={{ marginTop: 40, background: "#fef2f2", border: "1.5px solid #fecaca" }}>
         <h3 style={{ margin: "0 0 4px", color: "#991b1b", fontSize: ".95rem" }}>⚠ Danger zone</h3>
         <p style={{ color: "#7f1d1d", fontSize: ".82rem", margin: "0 0 14px" }}>
-          Permanently deletes every parent account and every parent-student link, across both SAT and O-Level. Does
-          not touch students, teachers, or founder accounts. This cannot be undone.
+          Permanently deletes every parent account and every parent-student link, across every program (SAT, O-Level
+          and 9th Grade). Does not touch students, teachers, or founder accounts. This cannot be undone.
         </p>
         <button
           onClick={deleteAllParents}

@@ -253,6 +253,14 @@ export default function Admin() {
                 <Link href="/admin/punjab-9th-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
                   ✅ 9th Grade attendance →
                 </Link>
+                {isFounder && (
+                  <Link href="/admin/punjab-9th-parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                    👨‍👩‍👧 9th Class parent accounts →
+                  </Link>
+                )}
+                <Link href="/admin/punjab-9th-reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
+                  📊 9th Class parent reports →
+                </Link>
                 {/* General tools, relevant here too */}
                 {isFounder && (
                   <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>

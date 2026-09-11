@@ -99,7 +99,10 @@ export default function ParentPortal() {
     }).finally(() => setLoading(false));
   }, [retryKey]);
 
-  const isOLevel = student?.program === "o-level";
+  // O-Level and punjab-9th share the same "subjects-based" report shape
+  // (per-subject quiz performance, no single mock score) — SAT is the odd
+  // one out with its diagnostic/mock score model.
+  const usesSubjectsView = student?.program === "o-level" || student?.program === "punjab-9th";
 
   if (loading) return (
     <section className="section"><div className="container">
@@ -145,7 +148,7 @@ export default function ParentPortal() {
             )}
           </div>
 
-          {!isOLevel && m?.score?.latestMock && (
+          {!usesSubjectsView && m?.score?.latestMock && (
             <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(255,255,255,.07)", borderRadius: 12, border: "1px solid rgba(255,255,255,.1)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
                 <div>
@@ -176,7 +179,7 @@ export default function ParentPortal() {
         </div>
 
         {/* Current week stats */}
-        {m && !isOLevel && (
+        {m && !usesSubjectsView && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 24 }}>
             {[
               {
@@ -216,7 +219,7 @@ export default function ParentPortal() {
         )}
 
         {/* Current week stats — O-Level */}
-        {m && isOLevel && (
+        {m && usesSubjectsView && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14, marginBottom: 24 }}>
             <div style={{ background: m.attendance.status === "present" ? "#f0fdf4" : "#fff7ed", border: `1.5px solid ${m.attendance.status === "present" ? "#86efac" : "#fdba74"}`, borderRadius: 16, padding: "18px 20px" }}>
               <div style={{ fontSize: "1.4rem", marginBottom: 8 }}>{m.attendance.status === "present" ? "✅" : m.attendance.status === "late" ? "🕐" : m.attendance.status === "not recorded" ? "—" : "❌"}</div>
@@ -285,7 +288,7 @@ export default function ParentPortal() {
         )}
 
         {/* O-Level subject performance */}
-        {isOLevel && oLevelSubjects.length > 0 && (
+        {usesSubjectsView && oLevelSubjects.length > 0 && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📊 Subject performance</div>
             {oLevelSubjects.map(s => {
@@ -305,12 +308,12 @@ export default function ParentPortal() {
                 </div>
               );
             })}
-            <p style={{ margin: "8px 0 0", fontSize: ".72rem", color: "#9ca3af" }}>Based on unlocked O-Level quiz attempts. Updates after each quiz.</p>
+            <p style={{ margin: "8px 0 0", fontSize: ".72rem", color: "#9ca3af" }}>Based on unlocked quiz attempts. Updates after each quiz.</p>
           </div>
         )}
 
         {/* Recent quiz attempts — O-Level */}
-        {isOLevel && oLevelAttempts.length > 0 && (
+        {usesSubjectsView && oLevelAttempts.length > 0 && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📝 Recent quiz attempts</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -325,7 +328,7 @@ export default function ParentPortal() {
         )}
 
         {/* Score trend */}
-        {!isOLevel && scoreHistory.length > 1 && (
+        {!usesSubjectsView && scoreHistory.length > 1 && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📈 Score trend</div>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 120, padding: "0 4px" }}>
@@ -353,7 +356,7 @@ export default function ParentPortal() {
                     <div style={{ fontSize: ".75rem", color: "#6b7c93" }}>{fmt(r.period_start)} – {fmt(r.period_end)}</div>
                   </div>
                   <div style={{ fontSize: ".78rem", color: "#6b7c93", marginTop: 4 }}>
-                    {r.metrics_json?.program === "o-level" ? (
+                    {r.metrics_json?.program === "o-level" || r.metrics_json?.program === "punjab-9th" ? (
                       <>Attendance: {r.metrics_json?.attendance?.status ?? "—"}{(r.metrics_json?.subjects?.length ?? 0) > 0 ? ` · ${r.metrics_json.subjects!.filter(s => s.attempts > 0).length}/${r.metrics_json.subjects!.length} subjects attempted` : ""}</>
                     ) : (
                       <>Attendance: {r.metrics_json?.attendance?.status ?? "—"} · Homework: {r.metrics_json?.homework?.done ?? 0}/{r.metrics_json?.homework?.assigned ?? 0}
@@ -368,7 +371,7 @@ export default function ParentPortal() {
         )}
 
         {/* Skill accuracy bars */}
-        {!isOLevel && skills.some(s => s.total > 0) && (
+        {!usesSubjectsView && skills.some(s => s.total > 0) && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: ".72rem", fontWeight: 800, color: "#6b7c93", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>📊 Skill breakdown</div>
             {(["Math", "RW"] as const).map(section => {
@@ -440,11 +443,13 @@ export default function ParentPortal() {
           </div>
         )}
 
-        <div style={{ padding: "14px 18px", borderRadius: 12, background: "#fffbeb", border: "1px solid #fde68a", fontSize: ".75rem", color: "#92400e" }}>
-          {isOLevel
-            ? "Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment."
-            : "SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service with no affiliation or score guarantee."}
-        </div>
+        {student?.program !== "punjab-9th" && (
+          <div style={{ padding: "14px 18px", borderRadius: 12, background: "#fffbeb", border: "1px solid #fde68a", fontSize: ".75rem", color: "#92400e" }}>
+            {student?.program === "o-level"
+              ? "Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment."
+              : "SAT® is a registered trademark of College Board. The Digital Tutor is an independent preparation service with no affiliation or score guarantee."}
+          </div>
+        )}
       </div>
     </section>
   );

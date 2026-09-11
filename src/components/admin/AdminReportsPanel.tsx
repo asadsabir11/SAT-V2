@@ -13,7 +13,7 @@ const STATUS_META: Record<string, { label: string; bg: string; color: string }> 
 
 function fmtDate(d: string | null) { return d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—"; }
 
-export function AdminReportsPanel({ program, title, description }: { program: "sat" | "o-level"; title: string; description: string }) {
+export function AdminReportsPanel({ program, title, description }: { program: "sat" | "o-level" | "punjab-9th"; title: string; description: string }) {
   const [reports, setReports]   = useState<Report[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading]   = useState(true);

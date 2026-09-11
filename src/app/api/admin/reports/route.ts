@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import {
-  buildReportMetrics, buildOLevelReportMetrics, saveReport, updateReportStatus,
+  buildReportMetrics, buildOLevelReportMetrics, buildPunjab9thReportMetrics, saveReport, updateReportStatus,
   listAllReports, getReportById, updateReportFields
 } from "@/lib/parent-system";
-import { sendParentReport, sendOLevelParentReport } from "@/lib/email";
+import { sendParentReport, sendOLevelParentReport, sendPunjab9thParentReport } from "@/lib/email";
 import { findByField } from "@/lib/storage";
-import { generateReportNarrative, generateOLevelReportNarrative, getAITutorUsage } from "@/lib/analytics";
+import { generateReportNarrative, generateOLevelReportNarrative, generatePunjab9thReportNarrative, getAITutorUsage } from "@/lib/analytics";
 import { sql, type Row } from "@/lib/db";
 
 // Shared by the single "send" action and bulk send — looks up the parent
@@ -27,12 +27,15 @@ async function sendReportToParent(report: Row): Promise<{ emailResult: { ok: boo
 
   let whatsappNumber = "";
   const studentEmail = (studentRows[0] as { email: string } | undefined)?.email;
+  const reportProgram = (report.metrics_json as { program?: string }).program;
   if (studentEmail) {
-    const lead = await findByField<{ whatsapp?: string }>("leads-student", "studentEmail", studentEmail);
-    whatsappNumber = (lead?.whatsapp ?? "").replace(/\D/g, "");
+    const leadCollection = reportProgram === "punjab-9th" ? "leads-punjab-9th.json" : "leads-student";
+    const lead = await findByField<{ whatsapp?: string; parentWhatsapp?: string }>(leadCollection, "studentEmail", studentEmail);
+    whatsappNumber = (lead?.whatsapp ?? lead?.parentWhatsapp ?? "").replace(/\D/g, "");
   }
 
-  const isOLevel = (report.metrics_json as { program?: string }).program === "o-level";
+  const isOLevel = reportProgram === "o-level";
+  const isPunjab9th = reportProgram === "punjab-9th";
 
   let emailResult: { ok: boolean; error?: string } = { ok: false, error: "No parent email linked" };
   let waLink = "";
@@ -40,7 +43,7 @@ async function sendReportToParent(report: Row): Promise<{ emailResult: { ok: boo
   if (parentLinks.length > 0) {
     const pl = parentLinks[0] as { parent_email: string; parent_name: string };
 
-    if (isOLevel) {
+    if (isOLevel || isPunjab9th) {
       const metrics = report.metrics_json as {
         student: string; week: number;
         attendance: { status: string };
@@ -49,7 +52,8 @@ async function sendReportToParent(report: Row): Promise<{ emailResult: { ok: boo
         focusAreas: string[];
       };
 
-      emailResult = await sendOLevelParentReport({
+      const sendFn = isPunjab9th ? sendPunjab9thParentReport : sendOLevelParentReport;
+      emailResult = await sendFn({
         parentEmail:      pl.parent_email,
         parentName:       pl.parent_name,
         studentName:      metrics.student,
@@ -174,6 +178,8 @@ export async function POST(req: NextRequest) {
 
     const metrics = student.program === "o-level"
       ? await buildOLevelReportMetrics(studentId, student.email, Number(weekNo), periodStart, periodEnd)
+      : student.program === "punjab-9th"
+      ? await buildPunjab9thReportMetrics(studentId, student.email, Number(weekNo), periodStart, periodEnd)
       : await buildReportMetrics(studentId, Number(weekNo), periodStart, periodEnd);
     const id = await saveReport(studentId, Number(weekNo), periodStart, periodEnd, metrics, "", "");
     return NextResponse.json({ ok: true, id, metrics });
@@ -185,7 +191,8 @@ export async function POST(req: NextRequest) {
     const report = await getReportById(id);
     if (!report) return NextResponse.json({ error: "Report not found" }, { status: 404 });
 
-    if ((report.metrics_json as { program?: string }).program === "o-level") {
+    const narrativeReportProgram = (report.metrics_json as { program?: string }).program;
+    if (narrativeReportProgram === "o-level" || narrativeReportProgram === "punjab-9th") {
       const m = report.metrics_json as {
         student: string; week: number;
         attendance: { status: string };
@@ -194,7 +201,8 @@ export async function POST(req: NextRequest) {
         focusAreas: string[];
       };
 
-      const narrative = await generateOLevelReportNarrative({
+      const generateFn = narrativeReportProgram === "punjab-9th" ? generatePunjab9thReportNarrative : generateOLevelReportNarrative;
+      const narrative = await generateFn({
         studentName:      m.student,
         weekNo:           m.week,
         attendanceStatus: m.attendance?.status ?? "not recorded",
@@ -286,6 +294,8 @@ export async function POST(req: NextRequest) {
 
         const metrics = student.program === "o-level"
           ? await buildOLevelReportMetrics(studentId, student.email, Number(weekNo), periodStart, periodEnd)
+          : student.program === "punjab-9th"
+          ? await buildPunjab9thReportMetrics(studentId, student.email, Number(weekNo), periodStart, periodEnd)
           : await buildReportMetrics(studentId, Number(weekNo), periodStart, periodEnd);
         const id = await saveReport(studentId, Number(weekNo), periodStart, periodEnd, metrics, "", "");
 
@@ -293,9 +303,10 @@ export async function POST(req: NextRequest) {
         let narrative: string | undefined;
         if (useAINarrative) {
           try {
-            if (student.program === "o-level") {
-              const m = metrics as import("@/lib/parent-system").OLevelReportMetrics;
-              narrative = await generateOLevelReportNarrative({
+            if (student.program === "o-level" || student.program === "punjab-9th") {
+              const m = metrics as import("@/lib/parent-system").OLevelReportMetrics | import("@/lib/parent-system").Punjab9thReportMetrics;
+              const generateFn = student.program === "punjab-9th" ? generatePunjab9thReportNarrative : generateOLevelReportNarrative;
+              narrative = await generateFn({
                 studentName: m.student, weekNo: m.week,
                 attendanceStatus: m.attendance?.status ?? "not recorded",
                 subjects: m.subjects ?? [], strengths: m.strengths ?? [], focusAreas: m.focusAreas ?? [],

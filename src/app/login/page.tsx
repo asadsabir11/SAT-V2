@@ -108,7 +108,7 @@ function LoginForm() {
             <div style={{ display: "flex", gap: 8, background: "#f1f5f9", borderRadius: 10, padding: 4 }}>
               {(role === "student"
                 ? ([["sat", "SAT Prep"], ["o-level", "O Level"], ["punjab-9th", "9th Class"], ["amna-shamima", "AI Course"]] as const)
-                : ([["sat", "SAT Prep"], ["o-level", "O Level"]] as const)
+                : ([["sat", "SAT Prep"], ["o-level", "O Level"], ["punjab-9th", "9th Class"]] as const)
               ).map(([p, label]) => (
                 <button
                   key={p}
@@ -129,8 +129,8 @@ function LoginForm() {
             </div>
             <p style={{ margin: "6px 0 0", fontSize: ".76rem", color: "#a0aec0" }}>
               {role === "parent"
-                ? "Have a child in both programs? Pick which child's account to view."
-                : "Registered for both? Pick the one you want to sign into."}
+                ? "Have a child in more than one program? Pick which child's account to view."
+                : "Registered for more than one? Pick the one you want to sign into."}
             </p>
           </div>
         )}

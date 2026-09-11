@@ -3,6 +3,10 @@ import { getAITutorUsage, getStrengthsAndFocus } from "@/lib/analytics";
 import { getSubjectPerformanceForStudent } from "@/lib/olevel-quiz";
 import { getOLevelAccessMap } from "@/lib/olevelAccess";
 import { getSubject } from "@/lib/academy/data";
+import { getPunjab9thSubjectPerformanceForStudent } from "@/lib/punjab9thQuiz";
+import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
+import { subjectsForStudyGroup } from "@/lib/punjab9thSessions";
+import { findByField } from "@/lib/storage";
 
 
 let ready = false;
@@ -114,7 +118,7 @@ export async function listParentLinks() {
 // in listParentLinks() since that only reads parent_student_links, so a
 // parent created without finishing the link step (or one whose link got
 // removed) would otherwise disappear from the admin view entirely.
-export async function listUnlinkedParents(program: "sat" | "o-level") {
+export async function listUnlinkedParents(program: "sat" | "o-level" | "punjab-9th") {
   await ensureParentTables();
   const rows = await sql`
     SELECT u.id, u.name, u.email, u.created_at
@@ -401,9 +405,79 @@ export async function buildOLevelReportMetrics(
   };
 }
 
+// ─── Punjab 9th Class report metrics (same shape as OLevelReportMetrics —
+// both programs assess via per-subject quizzes rather than a single mock
+// score — but sourced from punjab9thQuiz.ts and the flat access flag
+// instead of per-subject O-Level unlocks) ──────────────────────────────────
+
+export interface Punjab9thReportMetrics {
+  student:    string;
+  week:       number;
+  program:    "punjab-9th";
+  attendance: { status: string; sessionTitle?: string };
+  subjects:   OLevelSubjectReportRow[];
+  strengths:  string[];
+  focusAreas: string[];
+}
+
+export async function buildPunjab9thReportMetrics(
+  studentId: string, studentEmail: string, weekNo: number, periodStart: string, periodEnd: string
+): Promise<Punjab9thReportMetrics> {
+  await ensureParentTables();
+
+  const [studentRows, attendanceRows, accessLevel, subjectPerf, lead] = await Promise.all([
+    sql`SELECT name FROM users WHERE id = ${studentId}`,
+    sql`
+      SELECT sa.status, ls.title
+      FROM session_attendance sa
+      JOIN live_sessions ls ON ls.id = sa.session_id
+      WHERE sa.student_id = ${studentId}
+        AND ls.scheduled_at >= ${periodStart}
+        AND ls.scheduled_at <= ${periodEnd}
+      ORDER BY ls.scheduled_at DESC LIMIT 1
+    `,
+    getPunjab9thAccessLevel(studentEmail),
+    getPunjab9thSubjectPerformanceForStudent(studentEmail),
+    findByField<{ studyGroup: string }>("leads-punjab-9th.json", "studentEmail", studentEmail),
+  ]);
+
+  const perfBySubject = new Map(subjectPerf.map((s) => [s.subject, s]));
+  // Flat access (not per-subject like O-Level) — once unlocked, every
+  // subject in the student's registered group is shown, whether or not
+  // they've attempted a quiz in it yet.
+  const groupSubjects = accessLevel === "unlocked" ? subjectsForStudyGroup(lead?.studyGroup ?? "Biology") : [];
+
+  const subjects: OLevelSubjectReportRow[] = groupSubjects.map((subject) => {
+    const perf = perfBySubject.get(subject);
+    return {
+      subject,
+      subjectLabel: subject,
+      attempts: perf?.attempts ?? 0,
+      avgPercent: perf?.avgPercent ?? null,
+    };
+  });
+
+  const strengths = subjectPerf
+    .filter((s) => s.avgPercent !== null && s.avgPercent >= 70)
+    .map((s) => s.subject);
+  const focusAreas = subjectPerf.flatMap((s) => s.weakTopics).slice(0, 3);
+
+  return {
+    student: (studentRows[0] as { name: string } | undefined)?.name ?? "Student",
+    week: weekNo,
+    program: "punjab-9th",
+    attendance: attendanceRows[0]
+      ? { status: (attendanceRows[0] as { status: string }).status, sessionTitle: (attendanceRows[0] as { title: string }).title }
+      : { status: "not recorded" },
+    subjects,
+    strengths,
+    focusAreas,
+  };
+}
+
 export async function saveReport(
   studentId: string, weekNo: number, periodStart: string, periodEnd: string,
-  metrics: ReportMetrics | OLevelReportMetrics, coachNote: string, parentAction: string
+  metrics: ReportMetrics | OLevelReportMetrics | Punjab9thReportMetrics, coachNote: string, parentAction: string
 ) {
   await ensureParentTables();
   const id = crypto.randomUUID();

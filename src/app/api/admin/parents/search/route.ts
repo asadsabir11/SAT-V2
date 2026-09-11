@@ -15,11 +15,11 @@ export async function GET(req: NextRequest) {
   const params = new URL(req.url).searchParams;
   const parentEmail = params.get("parentEmail")?.trim();
   const program = params.get("program");
-  if (!parentEmail || (program !== "sat" && program !== "o-level")) {
+  if (!parentEmail || (program !== "sat" && program !== "o-level" && program !== "punjab-9th")) {
     return NextResponse.json({ error: "parentEmail and a valid program are required" }, { status: 400 });
   }
 
-  const collection = program === "sat" ? "leads-student.json" : "leads-o-level.json";
+  const collection = program === "sat" ? "leads-student.json" : program === "o-level" ? "leads-o-level.json" : "leads-punjab-9th.json";
   const leads = await findAllByFieldCI<{ studentEmail?: string; parentName?: string }>(collection, "parentEmail", parentEmail);
 
   const seen = new Set<string>();
