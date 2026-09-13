@@ -209,7 +209,7 @@ export default function Home() {
       </div>
 
       {/* We're hiring — careers callout */}
-      <section className="section" style={{ paddingTop: 0, paddingBottom: 40 }}>
+      <section className="section" style={{ paddingTop: 56, paddingBottom: 0 }}>
         <div className="container">
           <div
             style={{
