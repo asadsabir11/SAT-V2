@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/scholarship`, priority: 0.7 },
     { url: `${BASE}/sample-report`, priority: 0.6 },
     { url: `${BASE}/contact`, priority: 0.6 },
+    { url: `${BASE}/careers`, priority: 0.5 },
     { url: `${BASE}/materials`, priority: 0.6 },
     { url: `${BASE}/guides`, priority: 0.7 },
     { url: `${BASE}/privacy`, priority: 0.4 },

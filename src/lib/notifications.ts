@@ -2,7 +2,7 @@ import { sql } from "@/lib/db";
 
 export type NotificationType =
   | "challan" | "lecture" | "quiz" | "announcement" // student-facing
-  | "registration" | "access_request" | "scholarship"; // admin-facing
+  | "registration" | "access_request" | "scholarship" | "teacher_application"; // admin-facing
 
 export type NotificationAudience = "student" | "admin";
 

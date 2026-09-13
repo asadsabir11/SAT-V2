@@ -1084,3 +1084,25 @@ export async function sendAmnaShamimaRegistrationWelcome(student: { name: string
     `,
   });
 }
+
+export async function sendTeacherApplicationAdminAlert(app: { name: string; email: string; phone: string; resumeUrl: string }) {
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
+    to: ADMIN_EMAILS,
+    subject: `New teacher application: ${app.name}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">New teacher application 👨‍🏫</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:100px;">Name</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${app.name}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#155eef;">${app.email}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Phone</td><td style="padding:10px 0;font-weight:700;color:#071b33;">${app.phone}</td></tr>
+        </table>
+        <div style="margin-top:20px;display:flex;gap:10px;">
+          <a href="${app.resumeUrl}" style="display:inline-block;padding:12px 24px;background:#f1f5f9;color:#344054;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">View resume →</a>
+          <a href="${APP_URL}/admin/teacher-applications" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">Review applications →</a>
+        </div>
+      </div>
+    `,
+  });
+}

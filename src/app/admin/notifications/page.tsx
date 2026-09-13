@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
-type NotifType = "registration" | "access_request" | "scholarship";
+type NotifType = "registration" | "access_request" | "scholarship" | "teacher_application";
 
 interface NotificationItem {
   id: string;
@@ -18,12 +18,14 @@ const NOTIF_ICONS: Record<NotifType, string> = {
   registration: "🧑‍🎓",
   access_request: "🔑",
   scholarship: "🎓",
+  teacher_application: "👨‍🏫",
 };
 
 const NOTIF_COLORS: Record<NotifType, string> = {
   registration: "linear-gradient(135deg,#155eef,#18a999)",
   access_request: "linear-gradient(135deg,#059669,#10b981)",
   scholarship: "linear-gradient(135deg,#b45309,#f59e0b)",
+  teacher_application: "linear-gradient(135deg,#7c3aed,#a855f7)",
 };
 
 const TABS: [string, NotifType | "all"][] = [
@@ -31,6 +33,7 @@ const TABS: [string, NotifType | "all"][] = [
   ["Registrations", "registration"],
   ["Access requests", "access_request"],
   ["Scholarships", "scholarship"],
+  ["Teacher applications", "teacher_application"],
 ];
 
 function timeAgo(d: string) {
@@ -68,6 +71,7 @@ export default function AdminNotificationsPage() {
     registration: items.filter(n => n.type === "registration").length,
     access_request: items.filter(n => n.type === "access_request").length,
     scholarship: items.filter(n => n.type === "scholarship").length,
+    teacher_application: items.filter(n => n.type === "teacher_application").length,
   };
   const visible = tab === "all" ? items : items.filter(n => n.type === tab);
 
@@ -78,7 +82,7 @@ export default function AdminNotificationsPage() {
           <Link href="/admin" style={{ color: "#6b7c93", fontSize: ".82rem", textDecoration: "none" }}>← Admin</Link>
           <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "6px 0 4px", letterSpacing: "-.03em" }}>Notifications</h1>
           <p style={{ color: "#6b7c93", fontSize: ".88rem", margin: 0 }}>
-            New registrations, access requests, and scholarship applications — all in one place.
+            New registrations, access requests, scholarship applications, and teacher applications — all in one place.
           </p>
         </div>
 

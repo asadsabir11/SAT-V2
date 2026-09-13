@@ -146,6 +146,11 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
+                {isFounder && (
+                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    📄 Teacher applications →
+                  </Link>
+                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -218,6 +223,11 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
+                {isFounder && (
+                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    📄 Teacher applications →
+                  </Link>
+                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -267,6 +277,11 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
+                {isFounder && (
+                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    📄 Teacher applications →
+                  </Link>
+                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -298,6 +313,11 @@ export default function Admin() {
                 {isFounder && (
                   <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
                     👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
+                {isFounder && (
+                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    📄 Teacher applications →
                   </Link>
                 )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
