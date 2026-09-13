@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { appendData } from "@/lib/storage";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { createNotification } from "@/lib/notifications";
-import { sendTeacherApplicationAdminAlert } from "@/lib/email";
+import { sendTeacherApplicationAdminAlert, sendTeacherApplicationConfirmation } from "@/lib/email";
 import { isValidEmail } from "@/lib/validators";
 
 // Public "hire teachers" form — pure lead capture, no account created. The
 // admin reviews resumes at /admin/teacher-applications and reaches out to
-// candidates by phone directly, so there's no automated reply/status flow
-// here beyond the initial admin alert.
+// candidates by phone directly — the applicant only gets an automated
+// "we received it" confirmation, no further status updates beyond that.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         link: "/admin/teacher-applications",
       }).catch(console.error),
       sendTeacherApplicationAdminAlert({ name, email, phone, resumeUrl }).catch(console.error),
+      sendTeacherApplicationConfirmation({ name, email }).catch(console.error),
     ]);
 
     return NextResponse.json({ ok: true });

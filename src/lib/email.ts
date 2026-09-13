@@ -1106,3 +1106,23 @@ export async function sendTeacherApplicationAdminAlert(app: { name: string; emai
     `,
   });
 }
+
+export async function sendTeacherApplicationConfirmation(app: { name: string; email: string }) {
+  await sendEmail({
+    to: app.email,
+    subject: "Thank you for applying — The Digital Tutor",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">Thank you for applying, ${app.name}! 🎉</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 16px;">
+          We've received your application and resume for a teaching position at The Digital Tutor. Our team is
+          reviewing applications now — if your profile is a good fit, we will reach you soon by phone.
+        </p>
+        <p style="color:#6b7c93;font-size:.85rem;line-height:1.6;margin:0;">
+          No further action is needed on your end right now.
+        </p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
