@@ -146,11 +146,6 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
-                {isFounder && (
-                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
-                    📄 Teacher applications →
-                  </Link>
-                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -223,11 +218,6 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
-                {isFounder && (
-                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
-                    📄 Teacher applications →
-                  </Link>
-                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -277,11 +267,6 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
-                {isFounder && (
-                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
-                    📄 Teacher applications →
-                  </Link>
-                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -315,11 +300,6 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
-                {isFounder && (
-                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
-                    📄 Teacher applications →
-                  </Link>
-                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -344,6 +324,18 @@ export default function Admin() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <Link href="/admin/fees" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
                     💰 Fees →
+                  </Link>
+                </div>
+              </article>
+            )}
+
+            {/* Teacher Applications */}
+            {isFounder && (
+              <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #9333ea" }}>
+                <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>👨‍🏫 Teacher Applications</h3>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    📄 Teacher applications →
                   </Link>
                 </div>
               </article>
