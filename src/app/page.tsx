@@ -208,6 +208,34 @@ export default function Home() {
         </div>
       </div>
 
+      {/* We're hiring — careers callout */}
+      <section className="section" style={{ paddingTop: 0, paddingBottom: 40 }}>
+        <div className="container">
+          <div
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap",
+              padding: "30px 36px", borderRadius: 20,
+              background: "linear-gradient(135deg,#065f46,#0e7490 60%,#155eef)",
+              boxShadow: "0 16px 40px rgba(6,95,70,.25)",
+            }}
+          >
+            <div>
+              <div className="eyebrow" style={{ color: "#5eead4" }}>👨‍🏫 We&apos;re Hiring</div>
+              <h3 style={{ margin: "4px 0 8px", color: "#fff", fontSize: "1.3rem", fontWeight: 900, letterSpacing: "-.02em" }}>
+                Teach With The Digital Tutor
+              </h3>
+              <p style={{ margin: 0, color: "rgba(255,255,255,.82)", maxWidth: 560 }}>
+                We&apos;re looking for experienced teachers across SAT, Cambridge O Level, and Punjab Board 9th Class.
+                Submit your resume and our team will contact you directly.
+              </p>
+            </div>
+            <Link href="/careers" className="btn" style={{ flexShrink: 0, background: "#fff", color: "#065f46", fontWeight: 800, padding: "14px 30px", fontSize: "1rem" }}>
+              Apply Now →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 2 — Welcome video */}
       <section className="section" style={{ paddingTop: 60, paddingBottom: 60 }}>
         <div className="container" style={{ maxWidth: 860 }}>
