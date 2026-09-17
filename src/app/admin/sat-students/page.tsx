@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-interface Student { studentName: string; country: string; packageType: string; studentEmail: string; grade?: string; createdAt: string; }
+interface Student { studentName: string; country: string; packageType: string; studentEmail: string; whatsapp?: string; grade?: string; createdAt: string; }
 
 export default function AdminSatStudents() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -46,6 +46,7 @@ export default function AdminSatStudents() {
                     <th>Country</th>
                     <th>Package</th>
                     <th>Email</th>
+                    <th>WhatsApp</th>
                     <th>Grade</th>
                     <th>Registered</th>
                     <th></th>
@@ -58,6 +59,7 @@ export default function AdminSatStudents() {
                       <td>{s.country}</td>
                       <td>{s.packageType}</td>
                       <td>{s.studentEmail}</td>
+                      <td>{s.whatsapp ?? "—"}</td>
                       <td>{s.grade ?? "—"}</td>
                       <td>{new Date(s.createdAt).toLocaleDateString()}</td>
                       <td>
