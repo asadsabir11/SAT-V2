@@ -67,6 +67,10 @@ export default function AdminLectures() {
   const [editDesc, setEditDesc] = useState("");
   const [editCategory, setEditCategory] = useState<LectureCategory>("math");
   const [editProgram, setEditProgram] = useState<LectureProgram>("sat");
+  const [editThumbnail, setEditThumbnail] = useState<File | null>(null);
+  const [editThumbnailPreview, setEditThumbnailPreview] = useState("");
+  const [editThumbUploading, setEditThumbUploading] = useState(false);
+  const editThumbRef = useRef<HTMLInputElement>(null);
 
   // List filter
   const [filterProgram, setFilterProgram] = useState<"all" | LectureProgram>("all");
@@ -198,13 +202,32 @@ export default function AdminLectures() {
   }
 
   async function saveEdit(id: string) {
+    let thumbnailUrl: string | undefined;
+    if (editThumbnail) {
+      setEditThumbUploading(true);
+      try {
+        const blob = await upload(editThumbnail.name, editThumbnail, {
+          access: "public",
+          handleUploadUrl: "/api/lectures/upload",
+        });
+        thumbnailUrl = blob.url;
+      } catch (e) {
+        alert(`Cover image upload failed: ${e instanceof Error ? e.message : e}. Other changes were not saved — try again.`);
+        setEditThumbUploading(false);
+        return;
+      }
+      setEditThumbUploading(false);
+    }
+
     await fetch(`/api/lectures/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: editTitle, description: editDesc, category: editCategory }),
+      body: JSON.stringify({ title: editTitle, description: editDesc, category: editCategory, thumbnail_url: thumbnailUrl }),
     });
-    setLectures(ls => ls.map(l => l.id === id ? { ...l, title: editTitle, description: editDesc, category: editCategory } : l));
+    setLectures(ls => ls.map(l => l.id === id ? { ...l, title: editTitle, description: editDesc, category: editCategory, thumbnail_url: thumbnailUrl ?? l.thumbnail_url } : l));
     setEditingId(null);
+    setEditThumbnail(null);
+    setEditThumbnailPreview("");
   }
 
   const published = lectures.filter(l => l.is_published).length;
@@ -464,9 +487,33 @@ export default function AdminLectures() {
                         ))}
                       </div>
                     </div>
+                    <div className="field" style={{ marginBottom: 12 }}>
+                      <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#344054", display: "block", marginBottom: 6 }}>Cover image</label>
+                      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        <div style={{ width: 72, height: 48, borderRadius: 6, overflow: "hidden", flexShrink: 0, background: "linear-gradient(135deg,#0c1629,#1e3a5f)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {editThumbnailPreview
+                            ? <img src={editThumbnailPreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                            : <span style={{ fontSize: "1.2rem" }}>🎬</span>}
+                        </div>
+                        <button type="button" onClick={() => editThumbRef.current?.click()} style={{ padding: "7px 14px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".8rem", cursor: "pointer" }}>
+                          Change cover image
+                        </button>
+                        {editThumbnail && <span style={{ fontSize: ".78rem", color: "#6b7c93" }}>{editThumbnail.name}</span>}
+                        <input
+                          ref={editThumbRef} type="file" accept="image/*" style={{ display: "none" }}
+                          onChange={e => {
+                            const f = e.target.files?.[0] ?? null;
+                            setEditThumbnail(f);
+                            if (f) setEditThumbnailPreview(URL.createObjectURL(f));
+                          }}
+                        />
+                      </div>
+                    </div>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button className="btn btn-primary" onClick={() => saveEdit(lec.id)} disabled={!editTitle.trim()} style={{ padding: "8px 18px", fontSize: ".85rem" }}>Save</button>
-                      <button onClick={() => setEditingId(null)} style={{ padding: "8px 16px", borderRadius: 8, background: "#f1f5f9", border: "none", fontWeight: 700, cursor: "pointer", color: "#6b7c93", fontSize: ".85rem" }}>Cancel</button>
+                      <button className="btn btn-primary" onClick={() => saveEdit(lec.id)} disabled={!editTitle.trim() || editThumbUploading} style={{ padding: "8px 18px", fontSize: ".85rem" }}>
+                        {editThumbUploading ? "Uploading…" : "Save"}
+                      </button>
+                      <button onClick={() => { setEditingId(null); setEditThumbnail(null); setEditThumbnailPreview(""); }} style={{ padding: "8px 16px", borderRadius: 8, background: "#f1f5f9", border: "none", fontWeight: 700, cursor: "pointer", color: "#6b7c93", fontSize: ".85rem" }}>Cancel</button>
                     </div>
                   </div>
                 ) : (
@@ -517,7 +564,7 @@ export default function AdminLectures() {
                         Preview
                       </a>
                       <button
-                        onClick={() => { setEditingId(lec.id); setEditTitle(lec.title); setEditDesc(lec.description); setEditCategory(lec.category); setEditProgram(lec.program); }}
+                        onClick={() => { setEditingId(lec.id); setEditTitle(lec.title); setEditDesc(lec.description); setEditCategory(lec.category); setEditProgram(lec.program); setEditThumbnail(null); setEditThumbnailPreview(lec.thumbnail_url); }}
                         style={{ padding: "6px 12px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
                         Edit
                       </button>

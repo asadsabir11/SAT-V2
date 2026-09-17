@@ -73,7 +73,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: true });
   }
   if (body.title !== undefined) {
-    await updateLecture(id, body.title, body.description ?? "", body.category);
+    await updateLecture(id, body.title, body.description ?? "", body.category, body.thumbnail_url);
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ error: "Nothing to update" }, { status: 400 });

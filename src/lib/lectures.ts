@@ -88,13 +88,17 @@ export async function createLecture(title: string, description: string, videoUrl
   return id;
 }
 
-export async function updateLecture(id: string, title: string, description: string, category?: string) {
+export async function updateLecture(id: string, title: string, description: string, category?: string, thumbnailUrl?: string) {
   await ensureTable();
-  if (category) {
-    await sql`UPDATE lectures SET title=${title}, description=${description}, category=${category}, updated_at=NOW() WHERE id=${id}`;
-  } else {
-    await sql`UPDATE lectures SET title=${title}, description=${description}, updated_at=NOW() WHERE id=${id}`;
-  }
+  await sql`
+    UPDATE lectures SET
+      title = ${title},
+      description = ${description},
+      category = COALESCE(${category ?? null}, category),
+      thumbnail_url = COALESCE(${thumbnailUrl ?? null}, thumbnail_url),
+      updated_at = NOW()
+    WHERE id = ${id}
+  `;
 }
 
 export async function publishLecture(id: string) {
