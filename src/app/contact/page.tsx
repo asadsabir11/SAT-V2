@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@thedigitaltutor.net";
-const SAT_WHATSAPP_URL      = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL || "";
+const SAT_WHATSAPP_URL      = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL || "https://chat.whatsapp.com/DPnhbBha1z7KW6NfOggNdp";
 const OLEVEL_WHATSAPP_URL   = process.env.NEXT_PUBLIC_OLEVEL_WHATSAPP_COMMUNITY_URL || "";
 const PUNJAB9TH_WHATSAPP_URL = process.env.NEXT_PUBLIC_PUNJAB9TH_WHATSAPP_COMMUNITY_URL || "https://www.whatsapp.com/channel/0029Vb8CwzC9MF91yctcHH2J";
 
