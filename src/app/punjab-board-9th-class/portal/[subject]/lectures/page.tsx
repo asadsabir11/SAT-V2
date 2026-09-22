@@ -56,11 +56,21 @@ export default async function Punjab9thSubjectLecturesPage({ params }: { params:
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
             {lectures.map((lec, i) => (
-              <Link key={lec.id} href={`/lectures/${lec.id}`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6 }}>
-                <div className="eyebrow">🎬 Lecture {i + 1}</div>
-                <h3 style={{ margin: 0, color: "#071b33" }}>{lec.title}</h3>
-                {lec.description && <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{lec.description}</p>}
-                <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>Watch now →</span>
+              <Link key={lec.id} href={`/lectures/${lec.id}`} className="card" style={{ textDecoration: "none", padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                <div style={{ aspectRatio: "16/9", background: "linear-gradient(135deg,#0c1629 0%,#1e3a5f 60%)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+                  {lec.thumbnail_url && <img src={lec.thumbnail_url} alt={lec.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
+                  <div style={{ position: "relative", width: 44, height: 44, borderRadius: "50%", background: "rgba(0,0,0,.45)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(255,255,255,.35)" }}>
+                    <div style={{ width: 0, height: 0, borderTop: "8px solid transparent", borderBottom: "8px solid transparent", borderLeft: "14px solid rgba(255,255,255,.9)", marginLeft: 3 }} />
+                  </div>
+                  <div style={{ position: "absolute", top: 10, left: 12, padding: "3px 10px", borderRadius: 999, background: "rgba(0,0,0,.45)", color: "#fff", fontSize: ".7rem", fontWeight: 800, letterSpacing: ".06em" }}>
+                    LECTURE {i + 1}
+                  </div>
+                </div>
+                <div style={{ padding: "14px 16px 16px", display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                  <h3 style={{ margin: 0, color: "#071b33", fontSize: ".95rem" }}>{lec.title}</h3>
+                  {lec.description && <p style={{ margin: 0, color: "#6b7c93", fontSize: ".82rem" }}>{lec.description}</p>}
+                  <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>Watch now →</span>
+                </div>
               </Link>
             ))}
           </div>
