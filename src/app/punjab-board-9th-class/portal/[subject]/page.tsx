@@ -86,45 +86,20 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
         )}
 
         {unlocked && (
-          <>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "32px 0 14px" }}>Lectures</h2>
-            {lectures.length === 0 ? (
-              <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93" }}>
-                <p style={{ fontWeight: 700 }}>No lectures yet</p>
-                <p style={{ fontSize: ".88rem" }}>Check back soon — lectures are added regularly.</p>
-              </div>
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-                {lectures.map((lec, i) => (
-                  <Link key={lec.id} href={`/lectures/${lec.id}`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6 }}>
-                    <div className="eyebrow">🎬 Lecture {i + 1}</div>
-                    <h3 style={{ margin: 0, color: "#071b33" }}>{lec.title}</h3>
-                    {lec.description && <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{lec.description}</p>}
-                    <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>Watch now →</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "32px 0 14px" }}>Quizzes</h2>
-            {quizzes.length === 0 ? (
-              <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93" }}>
-                <p style={{ fontWeight: 700 }}>No quizzes yet</p>
-                <p style={{ fontSize: ".88rem" }}>Check back soon — quizzes are added regularly.</p>
-              </div>
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-                {quizzes.map((q) => (
-                  <Link key={q.id} href={`/punjab-board-9th-class/portal/quiz/${q.id}`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6 }}>
-                    <div className="eyebrow">📝 {q.question_count} question{q.question_count === 1 ? "" : "s"}</div>
-                    <h3 style={{ margin: 0, color: "#071b33" }}>{q.title}</h3>
-                    {q.description && <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{q.description}</p>}
-                    <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>Start quiz →</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14, marginTop: 32 }}>
+            <Link href={`/punjab-board-9th-class/portal/${slug}/lectures`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6, padding: "22px 24px" }}>
+              <div style={{ fontSize: "1.6rem" }}>🎬</div>
+              <h3 style={{ margin: "4px 0 0", color: "#071b33" }}>Lectures</h3>
+              <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{lectures.length} available</p>
+              <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>View lectures →</span>
+            </Link>
+            <Link href={`/punjab-board-9th-class/portal/${slug}/quizzes`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6, padding: "22px 24px" }}>
+              <div style={{ fontSize: "1.6rem" }}>📝</div>
+              <h3 style={{ margin: "4px 0 0", color: "#071b33" }}>Quizzes</h3>
+              <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{quizzes.length} available</p>
+              <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>View quizzes →</span>
+            </Link>
+          </div>
         )}
       </div>
     </section>
