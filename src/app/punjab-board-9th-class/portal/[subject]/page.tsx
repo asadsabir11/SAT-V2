@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
@@ -86,18 +87,36 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
         )}
 
         {unlocked && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14, marginTop: 32 }}>
-            <Link href={`/punjab-board-9th-class/portal/${slug}/lectures`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6, padding: "22px 24px" }}>
-              <div style={{ fontSize: "1.6rem" }}>🎬</div>
-              <h3 style={{ margin: "4px 0 0", color: "#071b33" }}>Lectures</h3>
-              <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{lectures.length} available</p>
-              <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>View lectures →</span>
+          <div className="grid grid-2" style={{ marginTop: 32 }}>
+            <Link
+              href={`/punjab-board-9th-class/portal/${slug}/lectures`}
+              className="module-card fade-up"
+              style={{ "--module-accent": "#7c3aed", "--module-accent-grad": "linear-gradient(135deg,#7c3aed,#a855f7)", "--module-glow": "rgba(124,58,237,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#a855f7)", opacity: 0.1 }} />
+                <div className="module-icon">🎬</div>
+                <h3 style={{ margin: "14px 0 0", color: "#071b33" }}>Lectures</h3>
+                <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{lectures.length} available</p>
+                <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#7c3aed" }}>
+                  View lectures →
+                </span>
+              </article>
             </Link>
-            <Link href={`/punjab-board-9th-class/portal/${slug}/quizzes`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6, padding: "22px 24px" }}>
-              <div style={{ fontSize: "1.6rem" }}>📝</div>
-              <h3 style={{ margin: "4px 0 0", color: "#071b33" }}>Quizzes</h3>
-              <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{quizzes.length} available</p>
-              <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>View quizzes →</span>
+            <Link
+              href={`/punjab-board-9th-class/portal/${slug}/quizzes`}
+              className="module-card fade-up"
+              style={{ "--module-accent": "#ea580c", "--module-accent-grad": "linear-gradient(135deg,#ea580c,#f59e0b)", "--module-glow": "rgba(234,88,12,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg,#ea580c,#f59e0b)", opacity: 0.1 }} />
+                <div className="module-icon">📝</div>
+                <h3 style={{ margin: "14px 0 0", color: "#071b33" }}>Quizzes</h3>
+                <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{quizzes.length} available</p>
+                <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#ea580c" }}>
+                  View quizzes →
+                </span>
+              </article>
             </Link>
           </div>
         )}
