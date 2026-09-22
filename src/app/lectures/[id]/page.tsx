@@ -2,8 +2,9 @@
 import { useEffect, useState, use, useRef, useCallback } from "react";
 import Link from "next/link";
 
-type LectureProgram = "sat" | "o-level";
-type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
+type LectureProgram = "sat" | "o-level" | "punjab-9th";
+type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics"
+  | "urdu" | "maths" | "chemistry" | "biology" | "islamiat" | "tarjuma-tul-quran-or-ethics";
 
 interface Lecture {
   id: string;
@@ -28,6 +29,12 @@ const CATEGORY_LABEL: Record<LectureCategory, string> = {
   islamiyat: "🕌 Islamiyat",
   "pakistan-studies": "🌍 Pakistan Studies",
   physics: "⚛️ Physics",
+  urdu: "🖋️ Urdu",
+  maths: "➗ Maths",
+  chemistry: "🧪 Chemistry",
+  biology: "🧬 Biology",
+  islamiat: "🕌 Islamiat",
+  "tarjuma-tul-quran-or-ethics": "📜 Tarjuma-tul-Quran / Ethics",
 };
 
 interface QuizQuestion {
@@ -332,7 +339,7 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
   const prevLec = currentIndex > 0 ? sameCat[currentIndex - 1] : null;
   const nextLec = currentIndex < sameCat.length - 1 ? sameCat[currentIndex + 1] : null;
 
-  const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : "/lectures";
+  const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : lecture.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : "/lectures";
 
   return (
     <section className="section" onContextMenu={e => e.preventDefault()}>

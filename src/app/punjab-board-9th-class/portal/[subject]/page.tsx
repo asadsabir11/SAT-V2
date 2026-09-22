@@ -6,6 +6,7 @@ import { findByField } from "@/lib/storage";
 import { subjectsForStudyGroup, subjectSlugToLabel, getActivePunjab9thSessionsForSubjectAndGroup } from "@/lib/punjab9thSessions";
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
 import { getPublishedPunjab9thQuizzesBySubject } from "@/lib/punjab9thQuiz";
+import { getPublishedLecturesByProgram } from "@/lib/lectures";
 
 interface Punjab9thLead { studyGroup: string; }
 
@@ -38,6 +39,10 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
   const unlocked = accessLevel === "unlocked";
   const sessions = unlocked ? await getActivePunjab9thSessionsForSubjectAndGroup(subject, group) : [];
   const quizzes = unlocked ? await getPublishedPunjab9thQuizzesBySubject(subject) : [];
+  // Lecture category values are the same slugs used in this page's URL
+  // (see SUBJECT_SLUGS in punjab9thSessions.ts), so filtering by `slug`
+  // here lines up directly with what the admin picks when uploading.
+  const lectures = unlocked ? (await getPublishedLecturesByProgram("punjab-9th")).filter((l) => l.category === slug) : [];
 
   return (
     <section className="section">
@@ -82,6 +87,25 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
 
         {unlocked && (
           <>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "32px 0 14px" }}>Lectures</h2>
+            {lectures.length === 0 ? (
+              <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93" }}>
+                <p style={{ fontWeight: 700 }}>No lectures yet</p>
+                <p style={{ fontSize: ".88rem" }}>Check back soon — lectures are added regularly.</p>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+                {lectures.map((lec, i) => (
+                  <Link key={lec.id} href={`/lectures/${lec.id}`} className="card" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div className="eyebrow">🎬 Lecture {i + 1}</div>
+                    <h3 style={{ margin: 0, color: "#071b33" }}>{lec.title}</h3>
+                    {lec.description && <p style={{ margin: 0, color: "#6b7c93", fontSize: ".85rem" }}>{lec.description}</p>}
+                    <span style={{ marginTop: "auto", fontWeight: 700, fontSize: ".85rem", color: "#155eef" }}>Watch now →</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "32px 0 14px" }}>Quizzes</h2>
             {quizzes.length === 0 ? (
               <div className="card" style={{ textAlign: "center", padding: 32, color: "#6b7c93" }}>

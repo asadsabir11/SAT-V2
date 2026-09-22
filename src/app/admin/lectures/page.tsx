@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
-type LectureProgram = "sat" | "o-level";
-type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
+type LectureProgram = "sat" | "o-level" | "punjab-9th";
+type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics"
+  | "urdu" | "maths" | "chemistry" | "biology" | "islamiat" | "tarjuma-tul-quran-or-ethics";
 
 interface Lecture {
   id: string;
@@ -38,10 +39,23 @@ const OLEVEL_CATEGORIES: CategoryMeta[] = [
   { value: "physics",           label: "Physics",           icon: "⚛️", color: "#c2410c", bg: "#fff7ed" },
 ];
 
-const ALL_CATEGORIES = [...SAT_CATEGORIES, ...OLEVEL_CATEGORIES];
+const PUNJAB9TH_CATEGORIES: CategoryMeta[] = [
+  { value: "english",                       label: "English",                       icon: "📖", color: "#155eef", bg: "#eff6ff" },
+  { value: "urdu",                          label: "Urdu",                          icon: "🖋️", color: "#7c3aed", bg: "#f5f3ff" },
+  { value: "maths",                         label: "Maths",                         icon: "➗", color: "#ea580c", bg: "#fff7ed" },
+  { value: "physics",                       label: "Physics",                       icon: "⚛️", color: "#0e7490", bg: "#ecfeff" },
+  { value: "chemistry",                     label: "Chemistry",                     icon: "🧪", color: "#059669", bg: "#dcfce7" },
+  { value: "biology",                       label: "Biology",                       icon: "🧬", color: "#dc2626", bg: "#fef2f2" },
+  { value: "computer-science",              label: "Computer Science",              icon: "💻", color: "#1d4ed8", bg: "#eff6ff" },
+  { value: "islamiat",                      label: "Islamiat",                      icon: "🕌", color: "#15803d", bg: "#dcfce7" },
+  { value: "tarjuma-tul-quran-or-ethics",   label: "Tarjuma-tul-Quran / Ethics",    icon: "📜", color: "#b45309", bg: "#fef3c7" },
+];
+
+const ALL_CATEGORIES = [...SAT_CATEGORIES, ...OLEVEL_CATEGORIES, ...PUNJAB9TH_CATEGORIES];
 const categoryMeta = (cat: LectureCategory): CategoryMeta =>
   ALL_CATEGORIES.find(c => c.value === cat) ?? SAT_CATEGORIES[1];
-const categoriesFor = (program: LectureProgram) => program === "o-level" ? OLEVEL_CATEGORIES : SAT_CATEGORIES;
+const categoriesFor = (program: LectureProgram) =>
+  program === "o-level" ? OLEVEL_CATEGORIES : program === "punjab-9th" ? PUNJAB9TH_CATEGORIES : SAT_CATEGORIES;
 
 export default function AdminLectures() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
@@ -266,7 +280,7 @@ export default function AdminLectures() {
           <div className="field" style={{ marginBottom: 16 }}>
             <label>Program *</label>
             <div style={{ display: "flex", gap: 10 }}>
-              {([["sat", "🎓 SAT"], ["o-level", "📘 O Level"]] as [LectureProgram, string][]).map(([val, label]) => (
+              {([["sat", "🎓 SAT"], ["o-level", "📘 O Level"], ["punjab-9th", "🏫 9th Class"]] as [LectureProgram, string][]).map(([val, label]) => (
                 <button
                   key={val}
                   type="button"
@@ -286,7 +300,7 @@ export default function AdminLectures() {
 
           {/* Category selector */}
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>{program === "o-level" ? "Subject *" : "Category *"}</label>
+            <label>{program === "o-level" || program === "punjab-9th" ? "Subject *" : "Category *"}</label>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {categoriesFor(program).map(({ value, label, icon, color, bg }) => (
                 <button
@@ -312,6 +326,11 @@ export default function AdminLectures() {
             {program === "o-level" && (
               <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
                 ℹ O Level materials are open to any logged-in student — no payment tier yet.
+              </p>
+            )}
+            {program === "punjab-9th" && (
+              <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
+                ℹ 9th Class access is a single flat unlock — one payment unlocks lectures for every subject.
               </p>
             )}
           </div>
@@ -424,7 +443,7 @@ export default function AdminLectures() {
         {/* Lecture list */}
         {!loading && lectures.length > 0 && (
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-            {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"]] as [typeof filterProgram, string][]).map(([val, label]) => (
+            {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"], ["punjab-9th", "🏫 9th Class"]] as [typeof filterProgram, string][]).map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setFilterProgram(val)}
@@ -530,8 +549,10 @@ export default function AdminLectures() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
                         <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".75rem" }}>#{i + 1}</span>
-                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: lec.program === "o-level" ? "#fef3c7" : "#f1f5f9", color: lec.program === "o-level" ? "#92400e" : "#475569" }}>
-                          {lec.program === "o-level" ? "📘 O Level" : "🎓 SAT"}
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700,
+                          background: lec.program === "o-level" ? "#fef3c7" : lec.program === "punjab-9th" ? "#dbeafe" : "#f1f5f9",
+                          color:      lec.program === "o-level" ? "#92400e" : lec.program === "punjab-9th" ? "#1e40af" : "#475569" }}>
+                          {lec.program === "o-level" ? "📘 O Level" : lec.program === "punjab-9th" ? "🏫 9th Class" : "🎓 SAT"}
                         </span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700,
                           background: categoryMeta(lec.category).bg,

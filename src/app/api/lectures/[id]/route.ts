@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { getLectureById, updateLecture, publishLecture, unpublishLecture, deleteLecture, setFreePreview, setIntroVideo, clearIntroVideo } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
 import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
+import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
 import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
@@ -23,6 +24,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
         const subjectAccess = await getOLevelSubjectAccess(session.email, lecture.category);
         if (subjectAccess !== "unlocked") {
           return NextResponse.json({ error: "Access denied. Unlock this subject to watch this lecture." }, { status: 403 });
+        }
+      }
+    } else if (lecture.program === "punjab-9th") {
+      if (!lecture.is_free_preview) {
+        const accessLevel = await getPunjab9thAccessLevel(session.email);
+        if (accessLevel !== "unlocked") {
+          return NextResponse.json({ error: "Access denied. Unlock full access to watch this lecture." }, { status: 403 });
         }
       }
     } else {

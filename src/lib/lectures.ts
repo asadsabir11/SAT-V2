@@ -1,13 +1,21 @@
 import { sql } from "@/lib/db";
 
 
-export type Program = "sat" | "o-level";
+export type Program = "sat" | "o-level" | "punjab-9th";
 export type SatLectureCategory = "introduction" | "math" | "english";
 export type OLevelLectureCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
-export type LectureCategory = SatLectureCategory | OLevelLectureCategory;
+// Mirrors the subject slugs in punjab9thSessions.ts's SUBJECT_SLUGS (kept as a
+// separate literal list rather than imported, the same way OLevelLectureCategory
+// doesn't import from academy/data.ts — this file stays self-contained).
+export type Punjab9thLectureCategory = "english" | "urdu" | "maths" | "physics" | "chemistry" | "biology" | "computer-science" | "islamiat" | "tarjuma-tul-quran-or-ethics";
+export type LectureCategory = SatLectureCategory | OLevelLectureCategory | Punjab9thLectureCategory;
 
 export const OLEVEL_LECTURE_CATEGORIES: OLevelLectureCategory[] = [
   "mathematics", "computer-science", "english-language", "islamiyat", "pakistan-studies", "physics",
+];
+
+export const PUNJAB9TH_LECTURE_CATEGORIES: Punjab9thLectureCategory[] = [
+  "english", "urdu", "maths", "physics", "chemistry", "biology", "computer-science", "islamiat", "tarjuma-tul-quran-or-ethics",
 ];
 
 export type Lecture = {
