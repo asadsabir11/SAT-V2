@@ -250,6 +250,10 @@ export default function Admin() {
                 <Link href="/admin/punjab-9th-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
                   📝 9th Class quizzes →
                 </Link>
+                {/* Shared with SAT/O Level — one page, program toggle inside */}
+                <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  🎬 Manage lectures →
+                </Link>
                 <Link href="/admin/punjab-9th-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #ea580c", background: "#fff7ed", color: "#c2410c" }}>
                   ✅ 9th Grade attendance →
                 </Link>
