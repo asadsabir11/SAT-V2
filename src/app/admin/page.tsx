@@ -298,7 +298,13 @@ export default function Admin() {
                 <Link href="/admin/amna-shamima-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #059669", background: "#ecfdf5", color: "#047857" }}>
                   💻 Amna Shamima online class →
                 </Link>
+                <Link href="/admin/amna-shamima-materials" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fffbeb", color: "#92400e" }}>
+                  📄 Amna Shamima materials →
+                </Link>
                 {/* General tools, relevant here too */}
+                <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
+                  📢 Announcements →
+                </Link>
                 {isFounder && (
                   <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
                     👨‍🏫 Teacher accounts →

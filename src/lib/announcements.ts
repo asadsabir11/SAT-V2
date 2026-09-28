@@ -9,7 +9,7 @@ export type Announcement = {
   created_at: string;
   // null = posted before program-scoping existed — shown to both programs
   // rather than silently hidden from whichever one didn't originally exist.
-  program: "sat" | "o-level" | null;
+  program: "sat" | "o-level" | "amna-shamima" | null;
 };
 
 let ready = false;
@@ -39,7 +39,7 @@ export async function getAnnouncements(program?: "sat" | "o-level" | "punjab-9th
   return rows as Announcement[];
 }
 
-export async function createAnnouncement(data: { title: string; body: string; created_by: string; program: "sat" | "o-level" }): Promise<string> {
+export async function createAnnouncement(data: { title: string; body: string; created_by: string; program: "sat" | "o-level" | "amna-shamima" }): Promise<string> {
   await ensureTable();
   const id = crypto.randomUUID();
   await sql`INSERT INTO announcements (id, title, body, created_by, program) VALUES (${id}, ${data.title}, ${data.body}, ${data.created_by}, ${data.program})`;
