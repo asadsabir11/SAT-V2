@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
   if (!title?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Title and body are required" }, { status: 400 });
   }
-  if (program !== "sat" && program !== "o-level" && program !== "amna-shamima") {
-    return NextResponse.json({ error: "A valid program (SAT, O Level, or Amna Shamima) is required" }, { status: 400 });
+  if (program !== "sat" && program !== "o-level" && program !== "amna-shamima" && program !== "punjab-9th") {
+    return NextResponse.json({ error: "A valid program (SAT, O Level, 9th Class, or Amna Shamima) is required" }, { status: 400 });
   }
   const id = await createAnnouncement({ title: title.trim(), body: body.trim(), created_by: session.email, program });
   await createNotification({

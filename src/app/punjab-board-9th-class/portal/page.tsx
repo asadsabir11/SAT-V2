@@ -6,11 +6,20 @@ import { getSession } from "@/lib/auth";
 import { findByField } from "@/lib/storage";
 import { subjectEntriesForStudyGroup } from "@/lib/punjab9thSessions";
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
+import { getAnnouncements } from "@/lib/announcements";
 import { PageHero } from "@/components/site";
 
 export const metadata: Metadata = { title: "My Account", robots: { index: false, follow: false } };
 
 const WHATSAPP_LINK = "https://wa.me/923316663291?text=Assalam-oAlaikum%2C%20mujhe%209th%20Class%20online%20program%20ki%20details%20chahiye.";
+
+function timeAgo(d: string) {
+  const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
 
 interface Punjab9thLead { studyGroup: string; }
 
@@ -44,6 +53,7 @@ export default async function Punjab9thPortal() {
   const subjects = subjectEntriesForStudyGroup(lead?.studyGroup ?? "Biology");
   const accessLevel = await getPunjab9thAccessLevel(session!.email);
   const unlocked = accessLevel === "unlocked";
+  const announcements = await getAnnouncements("punjab-9th");
 
   return (
     <>
@@ -60,6 +70,25 @@ export default async function Punjab9thPortal() {
       </PageHero>
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container" style={{ maxWidth: 780 }}>
+        {announcements.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            {announcements.map((a) => (
+              <div key={a.id} style={{
+                display: "flex", gap: 14, alignItems: "flex-start",
+                background: "#fffbeb", border: "1.5px solid #fde68a",
+                borderRadius: 12, padding: "14px 18px", marginBottom: 10,
+              }}>
+                <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>📢</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 800, color: "#92400e", margin: "0 0 3px", fontSize: ".92rem" }}>{a.title}</p>
+                  <p style={{ color: "#78350f", fontSize: ".85rem", margin: "0 0 4px", lineHeight: 1.5 }}>{a.body}</p>
+                  <span style={{ color: "#b45309", fontSize: ".72rem" }}>{timeAgo(a.created_at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {!unlocked && (
           <div className="card" style={{ marginBottom: 24, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14, background: accessLevel === "pending" ? "#fffbeb" : "#fff7ed", borderColor: accessLevel === "pending" ? "#fde68a" : "#fed7aa" }}>
             <div>
