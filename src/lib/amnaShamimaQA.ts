@@ -13,6 +13,7 @@ export type AmnaShamimaQAPost = {
   id: string;
   title: string;
   body: string;
+  attachment_url: string | null;
   author_email: string;
   author_name: string;
   is_answered: boolean;
@@ -24,6 +25,7 @@ export type AmnaShamimaQAReply = {
   id: string;
   post_id: string;
   body: string;
+  attachment_url: string | null;
   author_email: string;
   author_name: string;
   created_at: string;
@@ -43,6 +45,7 @@ async function ensureTables() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE amna_shamima_qa_posts ADD COLUMN IF NOT EXISTS attachment_url TEXT`;
   await sql`
     CREATE TABLE IF NOT EXISTS amna_shamima_qa_replies (
       id TEXT PRIMARY KEY,
@@ -53,6 +56,7 @@ async function ensureTables() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE amna_shamima_qa_replies ADD COLUMN IF NOT EXISTS attachment_url TEXT`;
   ready = true;
 }
 
@@ -86,22 +90,22 @@ export async function getQAReplies(postId: string): Promise<AmnaShamimaQAReply[]
   return rows as AmnaShamimaQAReply[];
 }
 
-export async function createQAPost(data: { title: string; body: string; author_email: string; author_name: string }): Promise<string> {
+export async function createQAPost(data: { title: string; body: string; attachment_url?: string | null; author_email: string; author_name: string }): Promise<string> {
   await ensureTables();
   const id = crypto.randomUUID();
   await sql`
-    INSERT INTO amna_shamima_qa_posts (id, title, body, author_email, author_name)
-    VALUES (${id}, ${data.title}, ${data.body}, ${data.author_email}, ${data.author_name})
+    INSERT INTO amna_shamima_qa_posts (id, title, body, attachment_url, author_email, author_name)
+    VALUES (${id}, ${data.title}, ${data.body}, ${data.attachment_url ?? null}, ${data.author_email}, ${data.author_name})
   `;
   return id;
 }
 
-export async function createQAReply(data: { post_id: string; body: string; author_email: string; author_name: string }): Promise<string> {
+export async function createQAReply(data: { post_id: string; body: string; attachment_url?: string | null; author_email: string; author_name: string }): Promise<string> {
   await ensureTables();
   const id = crypto.randomUUID();
   await sql`
-    INSERT INTO amna_shamima_qa_replies (id, post_id, body, author_email, author_name)
-    VALUES (${id}, ${data.post_id}, ${data.body}, ${data.author_email}, ${data.author_name})
+    INSERT INTO amna_shamima_qa_replies (id, post_id, body, attachment_url, author_email, author_name)
+    VALUES (${id}, ${data.post_id}, ${data.body}, ${data.attachment_url ?? null}, ${data.author_email}, ${data.author_name})
   `;
   await sql`UPDATE amna_shamima_qa_posts SET is_answered = true WHERE id = ${data.post_id}`;
   return id;

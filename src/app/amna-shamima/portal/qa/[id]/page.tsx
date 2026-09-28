@@ -44,9 +44,16 @@ export default async function AmnaShamimaQAThreadPage({ params }: { params: Prom
           </div>
           <h1 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#071b33", margin: "0 0 12px", lineHeight: 1.3 }}>{post.title}</h1>
           <p style={{ color: "#344054", lineHeight: 1.75, margin: "0 0 16px", whiteSpace: "pre-wrap" }}>{post.body}</p>
-          <span style={{ color: "#94a3b8", fontSize: ".78rem" }}>
-            Asked by <strong style={{ color: "#6b7c93" }}>{post.author_name}</strong> · {timeAgo(post.created_at)}
-          </span>
+          {post.attachment_url && (
+            <a href={post.attachment_url} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 16, padding: "6px 12px", borderRadius: 8, background: "#f1f5f9", color: "#344054", fontWeight: 700, fontSize: ".82rem", textDecoration: "none" }}>
+              📎 View attachment
+            </a>
+          )}
+          <div>
+            <span style={{ color: "#94a3b8", fontSize: ".78rem" }}>
+              Asked by <strong style={{ color: "#6b7c93" }}>{post.author_name}</strong> · {timeAgo(post.created_at)}
+            </span>
+          </div>
         </div>
 
         <div>
@@ -66,9 +73,16 @@ export default async function AmnaShamimaQAThreadPage({ params }: { params: Prom
                     <span style={{ padding: "2px 8px", borderRadius: 999, fontSize: ".7rem", fontWeight: 800, background: "#d97706", color: "#fff" }}>Teacher</span>
                   </div>
                   <p style={{ color: "#344054", lineHeight: 1.75, margin: "0 0 12px", whiteSpace: "pre-wrap" }}>{r.body}</p>
-                  <span style={{ color: "#94a3b8", fontSize: ".78rem" }}>
-                    <strong style={{ color: "#6b7c93" }}>{r.author_name}</strong> · {timeAgo(r.created_at)}
-                  </span>
+                  {r.attachment_url && (
+                    <a href={r.attachment_url} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, padding: "6px 12px", borderRadius: 8, background: "#f1f5f9", color: "#344054", fontWeight: 700, fontSize: ".82rem", textDecoration: "none" }}>
+                      📎 View attachment
+                    </a>
+                  )}
+                  <div>
+                    <span style={{ color: "#94a3b8", fontSize: ".78rem" }}>
+                      <strong style={{ color: "#6b7c93" }}>{r.author_name}</strong> · {timeAgo(r.created_at)}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

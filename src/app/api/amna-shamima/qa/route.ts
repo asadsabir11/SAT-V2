@@ -21,10 +21,10 @@ export async function POST(req: NextRequest) {
   if (!session || session.role !== "student" || session.program !== "amna-shamima") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { title, body } = await req.json();
+  const { title, body, attachment_url } = await req.json();
   if (!title?.trim() || !body?.trim()) {
     return NextResponse.json({ error: "Title and question are required" }, { status: 400 });
   }
-  const id = await createQAPost({ title: title.trim(), body: body.trim(), author_email: session.email, author_name: session.name });
+  const id = await createQAPost({ title: title.trim(), body: body.trim(), attachment_url: attachment_url?.trim() || null, author_email: session.email, author_name: session.name });
   return NextResponse.json({ id });
 }

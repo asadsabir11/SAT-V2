@@ -1,14 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 
 interface Post {
-  id: string; title: string; body: string;
+  id: string; title: string; body: string; attachment_url: string | null;
   author_name: string; author_email: string; is_answered: boolean;
   reply_count: number; created_at: string;
 }
 interface Reply {
-  id: string; body: string; author_name: string; created_at: string;
+  id: string; body: string; attachment_url: string | null; author_name: string; created_at: string;
 }
 
 function timeAgo(d: string) {
@@ -29,7 +30,10 @@ export default function AdminAmnaShamimaQA() {
   const [replies, setReplies] = useState<Reply[]>([]);
   const [loadingThread, setLoadingThread] = useState(false);
   const [replyBody, setReplyBody] = useState("");
+  const [replyAttachment, setReplyAttachment] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const replyAttachRef = useRef<HTMLInputElement>(null);
 
   function loadPosts() {
     return fetch("/api/amna-shamima/qa").then((r) => r.json()).then((d) => setPosts(d.posts ?? []));
@@ -42,6 +46,9 @@ export default function AdminAmnaShamimaQA() {
   async function openThread(id: string) {
     if (openId === id) { setOpenId(null); return; }
     setOpenId(id);
+    setReplyBody("");
+    setReplyAttachment(null);
+    setSubmitError("");
     setLoadingThread(true);
     const d = await fetch(`/api/amna-shamima/qa/${id}`).then((r) => r.json());
     setReplies(d.replies ?? []);
@@ -51,16 +58,31 @@ export default function AdminAmnaShamimaQA() {
   async function submitReply(postId: string) {
     if (!replyBody.trim()) return;
     setSubmitting(true);
-    const res = await fetch(`/api/amna-shamima/qa/${postId}/reply`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body: replyBody }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setReplies((r) => [...r, { id: data.id, body: replyBody, author_name: "You", created_at: new Date().toISOString() }]);
+    setSubmitError("");
+    try {
+      let attachmentUrl = "";
+      if (replyAttachment) {
+        const blob = await upload(replyAttachment.name, replyAttachment, {
+          access: "public",
+          handleUploadUrl: "/api/amna-shamima/materials/upload",
+        }).catch((e) => { throw new Error(`Attachment upload failed: ${e?.message ?? e}`); });
+        attachmentUrl = blob.url;
+      }
+      const res = await fetch(`/api/amna-shamima/qa/${postId}/reply`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body: replyBody, attachment_url: attachmentUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setSubmitError(data.error ?? "Failed to post."); setSubmitting(false); return; }
+      setReplies((r) => [...r, { id: data.id, body: replyBody, attachment_url: attachmentUrl || null, author_name: "You", created_at: new Date().toISOString() }]);
       setPosts((ps) => ps.map((p) => (p.id === postId ? { ...p, is_answered: true, reply_count: p.reply_count + 1 } : p)));
       setReplyBody("");
+      setReplyAttachment(null);
+      if (replyAttachRef.current) replyAttachRef.current.value = "";
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   }
 
   async function deleteReply(postId: string, replyId: string) {
@@ -131,6 +153,12 @@ export default function AdminAmnaShamimaQA() {
                     </div>
                     <p style={{ fontWeight: 800, color: "#071b33", margin: "0 0 4px", fontSize: ".95rem" }}>{p.title}</p>
                     <p style={{ color: "#6b7c93", fontSize: ".85rem", margin: "0 0 4px" }}>{p.body}</p>
+                    {p.attachment_url && (
+                      <a href={p.attachment_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: 4, margin: "0 0 4px", color: "#344054", fontWeight: 700, fontSize: ".78rem", textDecoration: "none" }}>
+                        📎 View attachment
+                      </a>
+                    )}
+                    <br />
                     <span style={{ color: "#a0aec0", fontSize: ".75rem" }}>{p.author_name} ({p.author_email}) · {timeAgo(p.created_at)}</span>
                   </div>
                   <button onClick={() => deletePost(p.id)} style={{ padding: "6px 12px", borderRadius: 8, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", flexShrink: 0 }}>
@@ -147,6 +175,11 @@ export default function AdminAmnaShamimaQA() {
                         {replies.map((r) => (
                           <div key={r.id} style={{ padding: "12px 14px", borderRadius: 8, background: "#f8fafc" }}>
                             <p style={{ color: "#344054", fontSize: ".88rem", margin: "0 0 8px", whiteSpace: "pre-wrap" }}>{r.body}</p>
+                            {r.attachment_url && (
+                              <a href={r.attachment_url} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 8, color: "#344054", fontWeight: 700, fontSize: ".78rem", textDecoration: "none" }}>
+                                📎 View attachment
+                              </a>
+                            )}
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span style={{ color: "#a0aec0", fontSize: ".72rem" }}>{r.author_name} · {timeAgo(r.created_at)}</span>
                               <button onClick={() => deleteReply(p.id, r.id)} style={{ padding: "3px 9px", borderRadius: 6, background: "#fee2e2", border: "none", color: "#991b1b", fontWeight: 700, fontSize: ".72rem", cursor: "pointer" }}>
@@ -164,6 +197,16 @@ export default function AdminAmnaShamimaQA() {
                       rows={3}
                       style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #d0d7e3", fontSize: ".88rem", fontFamily: "inherit", resize: "vertical", marginBottom: 10 }}
                     />
+                    <div
+                      onClick={() => replyAttachRef.current?.click()}
+                      style={{ border: `2px dashed ${replyAttachment ? "#10b981" : "#c8d5e3"}`, borderRadius: 8, padding: "10px 14px", cursor: "pointer", background: replyAttachment ? "#f0fdf4" : "#f8fafc", marginBottom: 10 }}
+                    >
+                      <span style={{ fontSize: ".82rem", fontWeight: 700, color: replyAttachment ? "#065f46" : "#6b7c93" }}>
+                        {replyAttachment ? `📎 ${replyAttachment.name} · Click to change` : "📎 Attach a file (optional)"}
+                      </span>
+                    </div>
+                    <input ref={replyAttachRef} type="file" accept="application/pdf,image/*" style={{ display: "none" }} onChange={(e) => setReplyAttachment(e.target.files?.[0] ?? null)} />
+                    {submitError && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".82rem", marginBottom: 10 }}>⚠ {submitError}</p>}
                     <button className="btn btn-primary" onClick={() => submitReply(p.id)} disabled={submitting || !replyBody.trim()} style={{ padding: "8px 18px", fontSize: ".85rem" }}>
                       {submitting ? "Posting…" : "Post answer"}
                     </button>
