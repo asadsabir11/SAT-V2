@@ -98,6 +98,26 @@ function resolveCategoryForProgram(program: LectureProgram, key: string): Lectur
   return key as LectureCategory;
 }
 
+const PROGRAM_LABEL: Record<LectureProgram, string> = { sat: "🎓 SAT", "o-level": "📘 O Level", "punjab-9th": "🏫 9th Class" };
+const ALL_PROGRAMS: LectureProgram[] = ["sat", "o-level", "punjab-9th"];
+
+function commonSubjectForCategory(program: LectureProgram, category: LectureCategory): CommonSubject | undefined {
+  return COMMON_SUBJECTS.find((cs) => cs.values[program] === category);
+}
+
+// For an already-uploaded lecture: which other programs its current subject
+// could also be added to (same video, no re-upload needed). Only subjects
+// with a common mapping offer anything, and a program that already holds an
+// identical video is left out to avoid an accidental duplicate.
+function eligibleExtraPrograms(program: LectureProgram, category: LectureCategory, videoUrl: string, allLectures: Lecture[]) {
+  const cs = commonSubjectForCategory(program, category);
+  if (!cs) return [] as { program: LectureProgram; label: string; targetCategory: LectureCategory }[];
+  return ALL_PROGRAMS
+    .filter((p) => p !== program && cs.values[p] !== undefined)
+    .filter((p) => !allLectures.some((other) => other.program === p && other.video_url === videoUrl))
+    .map((p) => ({ program: p, label: PROGRAM_LABEL[p], targetCategory: cs.values[p]! }));
+}
+
 export default function AdminLectures() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,6 +146,7 @@ export default function AdminLectures() {
   const [editThumbnailPreview, setEditThumbnailPreview] = useState("");
   const [editThumbUploading, setEditThumbUploading] = useState(false);
   const editThumbRef = useRef<HTMLInputElement>(null);
+  const [addToPrograms, setAddToPrograms] = useState<LectureProgram[]>([]);
 
   // List filter
   const [filterProgram, setFilterProgram] = useState<"all" | LectureProgram>("all");
@@ -276,7 +297,11 @@ export default function AdminLectures() {
     setLectures(ls => ls.filter(l => l.id !== id));
   }
 
-  async function saveEdit(id: string) {
+  function toggleAddToProgram(p: LectureProgram) {
+    setAddToPrograms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
+  }
+
+  async function saveEdit(lec: Lecture) {
     let thumbnailUrl: string | undefined;
     if (editThumbnail) {
       setEditThumbUploading(true);
@@ -294,15 +319,63 @@ export default function AdminLectures() {
       setEditThumbUploading(false);
     }
 
-    await fetch(`/api/lectures/${id}`, {
+    await fetch(`/api/lectures/${lec.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: editTitle, description: editDesc, category: editCategory, thumbnail_url: thumbnailUrl }),
     });
-    setLectures(ls => ls.map(l => l.id === id ? { ...l, title: editTitle, description: editDesc, category: editCategory, thumbnail_url: thumbnailUrl ?? l.thumbnail_url } : l));
+    setLectures(ls => ls.map(l => l.id === lec.id ? { ...l, title: editTitle, description: editDesc, category: editCategory, thumbnail_url: thumbnailUrl ?? l.thumbnail_url } : l));
+
+    // Create sibling rows in any newly-checked programs, reusing this same
+    // video — re-intersect with what's actually eligible right now in case
+    // editCategory changed after a program was checked.
+    const eligible = eligibleExtraPrograms(editProgram, editCategory, lec.video_url, lectures);
+    const toAdd = addToPrograms.filter((p) => eligible.some((e) => e.program === p));
+    const failed: string[] = [];
+    for (const p of toAdd) {
+      const targetCategory = eligible.find((e) => e.program === p)!.targetCategory;
+      try {
+        const res = await fetch("/api/lectures", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: editTitle,
+            description: editDesc,
+            video_url: lec.video_url,
+            thumbnail_url: thumbnailUrl ?? lec.thumbnail_url,
+            category: targetCategory,
+            program: p,
+          }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const d = await res.json();
+        const newLecture: Lecture = {
+          id: d.id,
+          title: editTitle,
+          description: editDesc,
+          video_url: lec.video_url,
+          thumbnail_url: thumbnailUrl ?? lec.thumbnail_url,
+          program: p,
+          category: targetCategory,
+          is_intro_video: false,
+          is_free_preview: false,
+          order_index: 0,
+          is_published: false,
+          created_at: new Date().toISOString(),
+        };
+        setLectures(ls => [...ls, newLecture]);
+      } catch {
+        failed.push(PROGRAM_LABEL[p]);
+      }
+    }
+    if (failed.length > 0) {
+      alert(`Saved, but adding this lecture to ${failed.join(", ")} failed. Try again from Edit if needed.`);
+    }
+
     setEditingId(null);
     setEditThumbnail(null);
     setEditThumbnailPreview("");
+    setAddToPrograms([]);
   }
 
   const published = lectures.filter(l => l.is_published).length;
@@ -600,11 +673,35 @@ export default function AdminLectures() {
                         />
                       </div>
                     </div>
+                    {eligibleExtraPrograms(editProgram, editCategory, lec.video_url, lectures).length > 0 && (
+                      <div className="field" style={{ marginBottom: 12 }}>
+                        <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#344054", display: "block", marginBottom: 6 }}>
+                          Also add to other programs (same video, no re-upload)
+                        </label>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          {eligibleExtraPrograms(editProgram, editCategory, lec.video_url, lectures).map(({ program: p, label }) => (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => toggleAddToProgram(p)}
+                              style={{
+                                padding: "7px 14px", borderRadius: 8, fontWeight: 700, fontSize: ".82rem", cursor: "pointer",
+                                border: addToPrograms.includes(p) ? "2px solid #155eef" : "2px solid #e8eef6",
+                                background: addToPrograms.includes(p) ? "#eff6ff" : "#f8fafc",
+                                color: addToPrograms.includes(p) ? "#155eef" : "#6b7c93",
+                              }}
+                            >
+                              {addToPrograms.includes(p) ? "✓ " : ""}{label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button className="btn btn-primary" onClick={() => saveEdit(lec.id)} disabled={!editTitle.trim() || editThumbUploading} style={{ padding: "8px 18px", fontSize: ".85rem" }}>
-                        {editThumbUploading ? "Uploading…" : "Save"}
+                      <button className="btn btn-primary" onClick={() => saveEdit(lec)} disabled={!editTitle.trim() || editThumbUploading} style={{ padding: "8px 18px", fontSize: ".85rem" }}>
+                        {editThumbUploading ? "Uploading…" : addToPrograms.length > 0 ? `Save + add to ${addToPrograms.length}` : "Save"}
                       </button>
-                      <button onClick={() => { setEditingId(null); setEditThumbnail(null); setEditThumbnailPreview(""); }} style={{ padding: "8px 16px", borderRadius: 8, background: "#f1f5f9", border: "none", fontWeight: 700, cursor: "pointer", color: "#6b7c93", fontSize: ".85rem" }}>Cancel</button>
+                      <button onClick={() => { setEditingId(null); setEditThumbnail(null); setEditThumbnailPreview(""); setAddToPrograms([]); }} style={{ padding: "8px 16px", borderRadius: 8, background: "#f1f5f9", border: "none", fontWeight: 700, cursor: "pointer", color: "#6b7c93", fontSize: ".85rem" }}>Cancel</button>
                     </div>
                   </div>
                 ) : (
@@ -657,7 +754,7 @@ export default function AdminLectures() {
                         Preview
                       </a>
                       <button
-                        onClick={() => { setEditingId(lec.id); setEditTitle(lec.title); setEditDesc(lec.description); setEditCategory(lec.category); setEditProgram(lec.program); setEditThumbnail(null); setEditThumbnailPreview(lec.thumbnail_url); }}
+                        onClick={() => { setEditingId(lec.id); setEditTitle(lec.title); setEditDesc(lec.description); setEditCategory(lec.category); setEditProgram(lec.program); setEditThumbnail(null); setEditThumbnailPreview(lec.thumbnail_url); setAddToPrograms([]); }}
                         style={{ padding: "6px 12px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
                         Edit
                       </button>
