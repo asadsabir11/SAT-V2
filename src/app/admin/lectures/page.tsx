@@ -57,6 +57,47 @@ const categoryMeta = (cat: LectureCategory): CategoryMeta =>
 const categoriesFor = (program: LectureProgram) =>
   program === "o-level" ? OLEVEL_CATEGORIES : program === "punjab-9th" ? PUNJAB9TH_CATEGORIES : SAT_CATEGORIES;
 
+// Subjects that are conceptually the same across programs but stored under a
+// different value per program's own category enum (e.g. SAT's "math" vs
+// O-Level's "mathematics" vs 9th's "maths"). When the admin selects more than
+// one program at upload time, only these appear as options — picking one
+// resolves to each selected program's own value when the lecture rows are
+// created (see resolveCategoryForProgram). Physics/Computer Science already
+// share an identical value between O-Level and 9th; kept in this same table
+// for a single lookup path.
+type CommonSubject = { label: string; icon: string; color: string; bg: string; values: Partial<Record<LectureProgram, LectureCategory>> };
+const COMMON_SUBJECTS: CommonSubject[] = [
+  { label: "Math",             icon: "📐", color: "#155eef", bg: "#eff6ff", values: { sat: "math", "o-level": "mathematics", "punjab-9th": "maths" } },
+  { label: "English",          icon: "📖", color: "#7c3aed", bg: "#f5f3ff", values: { sat: "english", "o-level": "english-language", "punjab-9th": "english" } },
+  { label: "Physics",          icon: "⚛️", color: "#c2410c", bg: "#fff7ed", values: { "o-level": "physics", "punjab-9th": "physics" } },
+  { label: "Computer Science", icon: "💻", color: "#1d4ed8", bg: "#eff6ff", values: { "o-level": "computer-science", "punjab-9th": "computer-science" } },
+  { label: "Islamiyat",        icon: "🕌", color: "#15803d", bg: "#dcfce7", values: { "o-level": "islamiyat", "punjab-9th": "islamiat" } },
+];
+
+type CategoryOption = { key: string; label: string; icon: string; color: string; bg: string };
+
+// A single program → its own full category list, exactly as before. Two or
+// more programs → only the subjects common to ALL of them, keyed "common:<label>"
+// so resolveCategoryForProgram can tell the two cases apart.
+function categoryOptionsFor(programs: LectureProgram[]): CategoryOption[] {
+  if (programs.length <= 1) {
+    const prog = programs[0] ?? "sat";
+    return categoriesFor(prog).map(({ value, label, icon, color, bg }) => ({ key: value, label, icon, color, bg }));
+  }
+  return COMMON_SUBJECTS
+    .filter((cs) => programs.every((p) => cs.values[p] !== undefined))
+    .map((cs) => ({ key: `common:${cs.label}`, label: cs.label, icon: cs.icon, color: cs.color, bg: cs.bg }));
+}
+
+function resolveCategoryForProgram(program: LectureProgram, key: string): LectureCategory {
+  if (key.startsWith("common:")) {
+    const label = key.slice("common:".length);
+    const value = COMMON_SUBJECTS.find((cs) => cs.label === label)?.values[program];
+    return value ?? categoriesFor(program)[0].value;
+  }
+  return key as LectureCategory;
+}
+
 export default function AdminLectures() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,8 +105,8 @@ export default function AdminLectures() {
   // Upload form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [program, setProgram] = useState<LectureProgram>("sat");
-  const [category, setCategory] = useState<LectureCategory>("math");
+  const [programs, setPrograms] = useState<LectureProgram[]>(["sat"]);
+  const [categoryKey, setCategoryKey] = useState<string>("math");
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
@@ -99,13 +140,26 @@ export default function AdminLectures() {
     loadLectures().finally(() => setLoading(false));
   }, []);
 
-  function switchProgram(p: LectureProgram) {
-    setProgram(p);
-    setCategory(categoriesFor(p)[0].value);
+  // Toggles a program in/out of the multi-select, always keeping at least
+  // one selected. Only resets the category choice when the set of available
+  // subjects actually changes — toggling off the last remaining program is a
+  // no-op and must not silently reset whatever the admin already picked.
+  function toggleProgram(p: LectureProgram) {
+    setPrograms(prev => {
+      if (prev.includes(p)) {
+        if (prev.length === 1) return prev;
+        const next = prev.filter(x => x !== p);
+        setCategoryKey(categoryOptionsFor(next)[0]?.key ?? "");
+        return next;
+      }
+      const next = [...prev, p];
+      setCategoryKey(categoryOptionsFor(next)[0]?.key ?? "");
+      return next;
+    });
   }
 
   async function handleUpload() {
-    if (!title.trim() || !file) return;
+    if (!title.trim() || !file || programs.length === 0) return;
     setUploading(true);
     setUploadError("");
     setUploadProgress(0);
@@ -122,43 +176,50 @@ export default function AdminLectures() {
         thumbnailUrl = thumbBlob.url;
       }
 
-      // 2. Upload video
+      // 2. Upload video — once, regardless of how many programs are selected
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/lectures/upload",
         onUploadProgress: ({ percentage }) => setUploadProgress(Math.round(percentage)),
       }).catch(e => { throw new Error(`Video upload failed: ${e?.message ?? e}`); });
 
-      // 3. Save lecture metadata
-      const res = await fetch("/api/lectures", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, video_url: blob.url, thumbnail_url: thumbnailUrl, category, program }),
-      });
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(`Save failed (${res.status}): ${errBody.error ?? "unknown error"}`);
+      // 3. Save one lecture row per selected program, all pointing at the
+      // same video/thumbnail. Each row is independent afterward (its own
+      // publish/free-preview/intro state) — publishing appends to the local
+      // list as each save succeeds, so a partial failure still shows
+      // whichever programs' rows were actually created.
+      for (const prog of programs) {
+        const cat = resolveCategoryForProgram(prog, categoryKey);
+        const res = await fetch("/api/lectures", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description, video_url: blob.url, thumbnail_url: thumbnailUrl, category: cat, program: prog }),
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(`Save failed for ${prog} (${res.status}): ${errBody.error ?? "unknown error"}`);
+        }
+        const d = await res.json();
+        const newLecture: Lecture = {
+          id: d.id,
+          title,
+          description,
+          video_url: blob.url,
+          thumbnail_url: thumbnailUrl,
+          program: prog,
+          category: cat,
+          is_intro_video: false,
+          is_free_preview: false,
+          order_index: 0,
+          is_published: false,
+          created_at: new Date().toISOString(),
+        };
+        setLectures(ls => [...ls, newLecture]);
       }
-      const d = await res.json();
 
-      const newLecture: Lecture = {
-        id: d.id,
-        title,
-        description,
-        video_url: blob.url,
-        thumbnail_url: thumbnailUrl,
-        program,
-        category,
-        is_intro_video: false,
-        is_free_preview: false,
-        order_index: lectures.length + 1,
-        is_published: false,
-        created_at: new Date().toISOString(),
-      };
-      setLectures(ls => [...ls, newLecture]);
       setTitle("");
       setDescription("");
-      setCategory(categoriesFor(program)[0].value);
+      setCategoryKey(categoryOptionsFor(programs)[0]?.key ?? "");
       setFile(null);
       setThumbnail(null);
       setThumbnailPreview("");
@@ -276,7 +337,8 @@ export default function AdminLectures() {
             </div>
           </div>
 
-          {/* Program selector */}
+          {/* Program selector — multi-select: pick more than one to publish
+              the same video to every program it's relevant to in one go. */}
           <div className="field" style={{ marginBottom: 16 }}>
             <label>Program *</label>
             <div style={{ display: "flex", gap: 10 }}>
@@ -284,51 +346,61 @@ export default function AdminLectures() {
                 <button
                   key={val}
                   type="button"
-                  onClick={() => switchProgram(val)}
+                  onClick={() => toggleProgram(val)}
                   style={{
                     flex: 1, padding: "10px 16px", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", cursor: "pointer", transition: ".15s",
-                    border: program === val ? "2px solid #155eef" : "2px solid #e8eef6",
-                    background: program === val ? "#eff6ff" : "#f8fafc",
-                    color: program === val ? "#155eef" : "#6b7c93",
+                    border: programs.includes(val) ? "2px solid #155eef" : "2px solid #e8eef6",
+                    background: programs.includes(val) ? "#eff6ff" : "#f8fafc",
+                    color: programs.includes(val) ? "#155eef" : "#6b7c93",
                   }}
                 >
-                  {label}
+                  {programs.includes(val) ? "✓ " : ""}{label}
                 </button>
               ))}
             </div>
+            {programs.length > 1 && (
+              <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
+                ℹ This video will be uploaded once and saved as a separate lecture under each selected program — only subjects common to all of them are offered below.
+              </p>
+            )}
           </div>
 
-          {/* Category selector */}
+          {/* Category / subject selector */}
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>{program === "o-level" || program === "punjab-9th" ? "Subject *" : "Category *"}</label>
+            <label>{programs.length === 1 && programs[0] === "sat" ? "Category *" : "Subject *"}</label>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {categoriesFor(program).map(({ value, label, icon, color, bg }) => (
+              {categoryOptionsFor(programs).map(({ key, label, icon, color, bg }) => (
                 <button
-                  key={value}
+                  key={key}
                   type="button"
-                  onClick={() => setCategory(value)}
+                  onClick={() => setCategoryKey(key)}
                   style={{
                     flex: 1, minWidth: 130, padding: "10px 16px", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", cursor: "pointer", transition: ".15s",
-                    border: category === value ? `2px solid ${color}` : "2px solid #e8eef6",
-                    background: category === value ? bg : "#f8fafc",
-                    color: category === value ? color : "#6b7c93",
+                    border: categoryKey === key ? `2px solid ${color}` : "2px solid #e8eef6",
+                    background: categoryKey === key ? bg : "#f8fafc",
+                    color: categoryKey === key ? color : "#6b7c93",
                   }}
                 >
                   {icon} {label}
                 </button>
               ))}
             </div>
-            {program === "sat" && category === "introduction" && (
+            {categoryOptionsFor(programs).length === 0 && (
+              <p style={{ color: "#dc2626", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
+                ⚠ These selected programs have no subject in common — pick a different combination.
+              </p>
+            )}
+            {programs.includes("sat") && categoryKey === "introduction" && (
               <p style={{ color: "#15803d", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
                 ✓ Introduction videos are free for all students — no lock, no payment required.
               </p>
             )}
-            {program === "o-level" && (
+            {programs.includes("o-level") && (
               <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
                 ℹ O Level materials are open to any logged-in student — no payment tier yet.
               </p>
             )}
-            {program === "punjab-9th" && (
+            {programs.includes("punjab-9th") && (
               <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
                 ℹ 9th Class access is a single flat unlock — one payment unlocks lectures for every subject.
               </p>
@@ -433,10 +505,10 @@ export default function AdminLectures() {
           <button
             className="btn btn-primary"
             onClick={handleUpload}
-            disabled={uploading || !title.trim() || !file}
+            disabled={uploading || !title.trim() || !file || categoryOptionsFor(programs).length === 0}
             style={{ minWidth: 180 }}
           >
-            {uploading ? `Uploading ${uploadProgress}%…` : "Upload lecture"}
+            {uploading ? `Uploading ${uploadProgress}%…` : programs.length > 1 ? `Upload to ${programs.length} programs` : "Upload lecture"}
           </button>
         </div>
 
