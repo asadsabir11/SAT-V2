@@ -19,6 +19,16 @@ function fmtDue(d: string | null) {
   return new Date(d).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
 }
 
+// due_at from the API is a UTC ISO string — a <input type="datetime-local">
+// needs the equivalent LOCAL wall-clock time, or the edit form shows the
+// UTC reading shifted by the browser's timezone offset instead of the
+// actual scheduled time.
+function toLocalInputValue(iso: string): string {
+  const d = new Date(iso);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
 export default function AdminAmnaShamimaAssignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -231,7 +241,7 @@ export default function AdminAmnaShamimaAssignments() {
                       <Link href={`/admin/amna-shamima-assignments/${a.id}`} style={{ padding: "6px 12px", borderRadius: 8, background: "#f0fdf4", border: "none", color: "#15803d", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", textDecoration: "none" }}>
                         Submissions
                       </Link>
-                      <button onClick={() => { setEditingId(a.id); setEditTitle(a.title); setEditDesc(a.description); setEditDueAt(a.due_at ? a.due_at.slice(0, 16) : ""); setEditMaxMarks(a.max_marks ? String(a.max_marks) : ""); }} style={{ padding: "6px 12px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
+                      <button onClick={() => { setEditingId(a.id); setEditTitle(a.title); setEditDesc(a.description); setEditDueAt(a.due_at ? toLocalInputValue(a.due_at) : ""); setEditMaxMarks(a.max_marks ? String(a.max_marks) : ""); }} style={{ padding: "6px 12px", borderRadius: 8, background: "#eff6ff", border: "none", color: "#155eef", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
                         Edit
                       </button>
                       <button onClick={() => togglePublish(a)} style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", background: a.is_published ? "#fef3c7" : "#d1fae5", color: a.is_published ? "#92400e" : "#065f46" }}>
