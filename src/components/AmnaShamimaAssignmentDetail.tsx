@@ -38,6 +38,7 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
 
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [unsubmitting, setUnsubmitting] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -76,6 +77,22 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
     }
   }
 
+  async function handleUnsubmit() {
+    if (!confirm("Unsubmit this assignment? You'll need to turn it in again.")) return;
+    setUnsubmitting(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/amna-shamima/assignments/${id}/submit`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Couldn't unsubmit.");
+      setSubmission(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setUnsubmitting(false);
+    }
+  }
+
   if (loading) return <section className="section"><div className="container" style={{ maxWidth: 700 }}><div className="card" style={{ padding: 40, textAlign: "center", color: "#6b7c93" }}>Loading…</div></div></section>;
   if (notFound || !assignment) return <section className="section"><div className="container" style={{ maxWidth: 700 }}><div className="card" style={{ padding: 40, textAlign: "center", color: "#6b7c93" }}>Assignment not found.</div></div></section>;
 
@@ -101,19 +118,17 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
               <h1 style={{ fontSize: "1.35rem", fontWeight: 900, color: "#071b33", margin: "2px 0 8px", lineHeight: 1.3 }}>{assignment.title}</h1>
               {assignment.description && <p style={{ color: "#344054", lineHeight: 1.75, margin: "0 0 14px", whiteSpace: "pre-wrap" }}>{assignment.description}</p>}
 
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: assignment.attachment_url ? 14 : 0 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 999, fontSize: ".78rem", fontWeight: 700, background: "#f1f5f9", color: "#475569" }}>
-                  🗓️ {fmtDue(assignment.due_at)}
-                </span>
+              <div style={{ display: "grid", gridTemplateColumns: assignment.max_marks ? "1fr 1fr" : "1fr", gap: 10, marginBottom: assignment.attachment_url ? 14 : 0 }}>
+                <div style={{ padding: "12px 14px", borderRadius: 12, background: countdown ? countdown.bg : "#f1f5f9", border: `1.5px solid ${countdown ? countdown.color : "#e2e8f0"}22` }}>
+                  <p style={{ margin: "0 0 3px", fontSize: ".7rem", fontWeight: 800, color: countdown ? countdown.color : "#64748b", textTransform: "uppercase", letterSpacing: ".05em" }}>🗓️ Deadline</p>
+                  <p style={{ margin: 0, fontSize: "1rem", fontWeight: 900, color: "#071b33", lineHeight: 1.3 }}>{fmtDue(assignment.due_at)}</p>
+                  {countdown && <p style={{ margin: "3px 0 0", fontSize: ".82rem", fontWeight: 800, color: countdown.color }}>{countdown.text}</p>}
+                </div>
                 {assignment.max_marks && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 999, fontSize: ".78rem", fontWeight: 700, background: "#eff6ff", color: "#155eef" }}>
-                    ⭐ {assignment.max_marks} marks
-                  </span>
-                )}
-                {countdown && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 999, fontSize: ".78rem", fontWeight: 700, background: countdown.bg, color: countdown.color }}>
-                    ⏰ {countdown.text}
-                  </span>
+                  <div style={{ padding: "12px 14px", borderRadius: 12, background: "#eff6ff", border: "1.5px solid #bfdbfe" }}>
+                    <p style={{ margin: "0 0 3px", fontSize: ".7rem", fontWeight: 800, color: "#155eef", textTransform: "uppercase", letterSpacing: ".05em" }}>⭐ Marks</p>
+                    <p style={{ margin: 0, fontSize: "1.6rem", fontWeight: 900, color: "#071b33", lineHeight: 1.1 }}>{assignment.max_marks}</p>
+                  </div>
                 )}
               </div>
 
@@ -153,22 +168,30 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
 
           {submission && (
             <div style={{
-              display: "flex", alignItems: "center", gap: 12, marginBottom: 18, padding: "14px 16px", borderRadius: 12,
+              marginBottom: graded ? 0 : 18, padding: "14px 16px", borderRadius: 12,
               background: submission.is_late ? "#fef2f2" : "#f0fdf4", border: `1.5px solid ${submission.is_late ? "#fecaca" : "#86efac"}`,
             }}>
-              <div style={{ width: 38, height: 38, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", background: submission.is_late ? "#fee2e2" : "#dcfce7" }}>
-                {submission.is_late ? "⚠️" : "✅"}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 38, height: 38, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", background: submission.is_late ? "#fee2e2" : "#dcfce7" }}>
+                  {submission.is_late ? "⚠️" : "✅"}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: 0, fontWeight: 800, fontSize: ".92rem", color: submission.is_late ? "#991b1b" : "#065f46" }}>
+                    {submission.is_late ? "Turned in late" : "Turned in"}
+                  </p>
+                  <a href={submission.file_url} target="_blank" rel="noreferrer" style={{ fontSize: ".82rem", color: "#155eef", fontWeight: 700, textDecoration: "none" }}>View your file →</a>
+                </div>
+                {!graded && (
+                  <button onClick={handleUnsubmit} disabled={unsubmitting} style={{ flexShrink: 0, padding: "7px 14px", borderRadius: 8, background: "#fff", border: "1.5px solid #d0d7e3", color: "#6b7c93", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
+                    {unsubmitting ? "…" : "Unsubmit"}
+                  </button>
+                )}
               </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontWeight: 800, fontSize: ".92rem", color: submission.is_late ? "#991b1b" : "#065f46" }}>
-                  {submission.is_late ? "Turned in late" : "Turned in"}
-                </p>
-                <a href={submission.file_url} target="_blank" rel="noreferrer" style={{ fontSize: ".82rem", color: "#155eef", fontWeight: 700, textDecoration: "none" }}>View your file →</a>
-              </div>
+              {!graded && error && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".82rem", margin: "10px 0 0" }}>⚠ {error}</p>}
             </div>
           )}
 
-          {!graded && (
+          {!submission && !graded && (
             <>
               <div
                 onClick={() => fileRef.current?.click()}
@@ -188,7 +211,7 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
                 ) : (
                   <>
                     <div style={{ fontSize: "1.8rem", marginBottom: 8 }}>📁</div>
-                    <p style={{ fontWeight: 700, color: "#344054", margin: 0, fontSize: ".92rem" }}>{submission ? "Choose a new file to resubmit" : "Click to choose a file"}</p>
+                    <p style={{ fontWeight: 700, color: "#344054", margin: 0, fontSize: ".92rem" }}>Click to choose a file</p>
                     <p style={{ color: "#6b7c93", fontSize: ".78rem", margin: "4px 0 0" }}>PDF, Word doc, JPG or PNG</p>
                   </>
                 )}
@@ -202,7 +225,7 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
               )}
               {error && <p style={{ color: "#dc2626", fontWeight: 600, fontSize: ".85rem", marginBottom: 14 }}>⚠ {error}</p>}
               <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !file} style={{ width: "100%", padding: "13px" }}>
-                {submitting ? "Submitting…" : submission ? "Resubmit" : "Turn in"}
+                {submitting ? "Submitting…" : "Turn in"}
               </button>
             </>
           )}

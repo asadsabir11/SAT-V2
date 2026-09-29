@@ -183,3 +183,15 @@ export async function gradeSubmission(id: string, marks: number, feedback: strin
     WHERE id = ${id}
   `;
 }
+
+// Google Classroom's "Unsubmit" — reverts a turned-in assignment back to
+// "not turned in" so the student can attach a different file and turn it in
+// again. Only meaningful before grading; callers should block it afterward
+// (the API route does).
+export async function unsubmitAssignment(assignmentId: string, studentEmail: string): Promise<void> {
+  await ensureTables();
+  await sql`
+    DELETE FROM amna_shamima_assignment_submissions
+    WHERE assignment_id = ${assignmentId} AND student_email = ${studentEmail.toLowerCase().trim()}
+  `;
+}
