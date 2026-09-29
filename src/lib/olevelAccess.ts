@@ -133,7 +133,7 @@ export async function listOLevelAccessRequests(): Promise<OLevelAccessRow[]> {
     SELECT a.id, a.email, u.name, a.subject, a.status, a.payment_requested_at, a.approved_at, a.approved_by, a.notes, a.created_at,
            a.payment_method, a.amount_paid, a.transaction_reference, a.payment_date, a.payer_account_name, a.payment_screenshot_url
     FROM olevel_subject_access a
-    LEFT JOIN users u ON u.email = a.email
+    LEFT JOIN users u ON u.email = a.email AND u.program = 'o-level'
     ORDER BY
       CASE a.status WHEN 'pending' THEN 0 WHEN 'unlocked' THEN 1 ELSE 2 END,
       a.created_at DESC
@@ -147,7 +147,7 @@ export async function getOLevelAccessById(id: string): Promise<OLevelAccessRow |
     SELECT a.id, a.email, u.name, a.subject, a.status, a.payment_requested_at, a.approved_at, a.approved_by, a.notes, a.created_at,
            a.payment_method, a.amount_paid, a.transaction_reference, a.payment_date, a.payer_account_name, a.payment_screenshot_url
     FROM olevel_subject_access a
-    LEFT JOIN users u ON u.email = a.email
+    LEFT JOIN users u ON u.email = a.email AND u.program = 'o-level'
     WHERE a.id = ${id}
     LIMIT 1
   `;
