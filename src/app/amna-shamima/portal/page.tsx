@@ -55,7 +55,7 @@ export default async function AmnaShamimaPortal() {
             </div>
           )}
 
-          <div className="grid grid-4">
+          <div className="grid grid-3">
             <Link
               href="/amna-shamima/portal/lectures"
               className="module-card fade-up"
@@ -102,6 +102,18 @@ export default async function AmnaShamimaPortal() {
                 <h3>Ask a Question</h3>
                 <p>Post a question and get an answer from your teacher.</p>
                 <span className="module-arrow" style={{ color: "#dc2626", fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
+              </article>
+            </Link>
+            <Link
+              href="/amna-shamima/portal/assignments"
+              className="module-card fade-up"
+              style={{ "--module-accent": "#0e7490", "--module-accent-grad": "linear-gradient(135deg,#0e7490,#06b6d4)", "--module-glow": "rgba(14,116,144,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%" }}>
+                <div className="module-icon">📋</div>
+                <h3>Assignments</h3>
+                <p>Submit your work and see your grades.</p>
+                <span className="module-arrow" style={{ color: "#0e7490", fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
               </article>
             </Link>
           </div>

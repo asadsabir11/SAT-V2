@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { PageHero } from "@/components/site";
 
-type NotifType = "challan" | "lecture" | "quiz" | "announcement";
+type NotifType = "challan" | "lecture" | "quiz" | "announcement" | "assignment";
 
 interface NotificationItem {
   id: string;
@@ -20,6 +20,7 @@ const NOTIF_ICONS: Record<NotifType, string> = {
   lecture: "🎬",
   quiz: "📝",
   announcement: "📢",
+  assignment: "📋",
 };
 
 const NOTIF_COLORS: Record<NotifType, string> = {
@@ -27,6 +28,7 @@ const NOTIF_COLORS: Record<NotifType, string> = {
   lecture: "linear-gradient(135deg,#155eef,#18a999)",
   quiz: "linear-gradient(135deg,#7c3aed,#a855f7)",
   announcement: "linear-gradient(135deg,#f59e0b,#ea580c)",
+  assignment: "linear-gradient(135deg,#dc2626,#f87171)",
 };
 
 const TABS: [string, NotifType | "all"][] = [
@@ -35,6 +37,7 @@ const TABS: [string, NotifType | "all"][] = [
   ["Lectures", "lecture"],
   ["Quizzes", "quiz"],
   ["Announcements", "announcement"],
+  ["Assignments", "assignment"],
 ];
 
 function timeAgo(d: string) {
@@ -73,6 +76,7 @@ export default function NotificationsPage() {
     lecture: items.filter(n => n.type === "lecture").length,
     quiz: items.filter(n => n.type === "quiz").length,
     announcement: items.filter(n => n.type === "announcement").length,
+    assignment: items.filter(n => n.type === "assignment").length,
   };
   const visible = tab === "all" ? items : items.filter(n => n.type === tab);
 
