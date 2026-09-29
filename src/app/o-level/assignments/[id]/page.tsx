@@ -26,11 +26,13 @@ function fmtDue(d: string | null) {
 function dueCountdown(dueAt: string | null): { text: string; color: string; bg: string } | null {
   if (!dueAt) return null;
   const diffMs = new Date(dueAt).getTime() - Date.now();
-  const hours = Math.abs(diffMs) / 3600000;
   if (diffMs < 0) {
-    const days = Math.floor(hours / 24);
+    const days = Math.floor(Math.abs(diffMs) / 86400000);
     return { text: days >= 1 ? `Overdue by ${days}d` : "Overdue", color: "#991b1b", bg: "#fee2e2" };
   }
+  const minutes = diffMs / 60000;
+  if (minutes < 60) return { text: `Due in ${Math.max(1, Math.round(minutes))}m`, color: "#991b1b", bg: "#fee2e2" };
+  const hours = diffMs / 3600000;
   if (hours < 24) return { text: `Due in ${Math.ceil(hours)}h`, color: "#92400e", bg: "#fef3c7" };
   const days = Math.ceil(hours / 24);
   return { text: `Due in ${days}d`, color: "#155eef", bg: "#eff6ff" };
