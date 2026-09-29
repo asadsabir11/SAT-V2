@@ -143,10 +143,14 @@ export default function OLevelAssignmentDetail({ params }: { params: Promise<{ i
               </div>
 
               {assignment.attachment_url && (
-                <a href={assignment.attachment_url} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 16px", borderRadius: 10, background: "#f1f5f9", color: "#344054", fontWeight: 700, fontSize: ".85rem", textDecoration: "none", transition: "background .15s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#e2e8f0")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#f1f5f9")}>
-                  📎 View assignment file
+                <a href={assignment.attachment_url} target="_blank" rel="noreferrer" style={{
+                  display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 20px", borderRadius: 10,
+                  background: "linear-gradient(135deg,#dc2626,#f87171)", color: "#fff", fontWeight: 800, fontSize: ".88rem",
+                  textDecoration: "none", boxShadow: "0 4px 14px rgba(220,38,38,.35)", transition: "transform .15s, box-shadow .15s",
+                }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(220,38,38,.5)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 14px rgba(220,38,38,.35)"; }}>
+                  📎 View Assignment File
                 </a>
               )}
             </div>
