@@ -8,6 +8,7 @@ import { subjectsForStudyGroup, subjectSlugToLabel, getActivePunjab9thSessionsFo
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
 import { getPublishedPunjab9thQuizzesBySubject } from "@/lib/punjab9thQuiz";
 import { getPublishedLecturesByProgram } from "@/lib/lectures";
+import { getPublishedAssignments } from "@/lib/punjab9thAssignments";
 
 interface Punjab9thLead { studyGroup: string; }
 
@@ -44,6 +45,7 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
   // (see SUBJECT_SLUGS in punjab9thSessions.ts), so filtering by `slug`
   // here lines up directly with what the admin picks when uploading.
   const lectures = unlocked ? (await getPublishedLecturesByProgram("punjab-9th")).filter((l) => l.category === slug) : [];
+  const assignments = unlocked ? (await getPublishedAssignments()).filter((a) => a.category === slug) : [];
 
   return (
     <section className="section">
@@ -87,7 +89,7 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
         )}
 
         {unlocked && (
-          <div className="grid grid-2" style={{ marginTop: 32 }}>
+          <div className="grid grid-3" style={{ marginTop: 32 }}>
             <Link
               href={`/punjab-board-9th-class/portal/${slug}/lectures`}
               className="module-card fade-up"
@@ -115,6 +117,21 @@ export default async function Punjab9thSubjectPage({ params }: { params: Promise
                 <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{quizzes.length} available</p>
                 <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#ea580c" }}>
                   View quizzes →
+                </span>
+              </article>
+            </Link>
+            <Link
+              href={`/punjab-board-9th-class/portal/${slug}/assignments`}
+              className="module-card fade-up"
+              style={{ "--module-accent": "#0e7490", "--module-accent-grad": "linear-gradient(135deg,#0e7490,#06b6d4)", "--module-glow": "rgba(14,116,144,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg,#0e7490,#06b6d4)", opacity: 0.1 }} />
+                <div className="module-icon">📋</div>
+                <h3 style={{ margin: "14px 0 0", color: "#071b33" }}>Assignments</h3>
+                <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{assignments.length} available</p>
+                <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#0e7490" }}>
+                  View assignments →
                 </span>
               </article>
             </Link>

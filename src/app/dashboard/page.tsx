@@ -314,6 +314,9 @@ export default function Dashboard() {
             <Link href="/fees" style={{ padding: "10px 20px", background: "#ecfeff", color: "#0e7490", border: "1.5px solid #a5f3fc", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
               💰 Fees →
             </Link>
+            <Link href="/assignments" style={{ padding: "10px 20px", background: "#fef2f2", color: "#991b1b", border: "1.5px solid #fecaca", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
+              📋 Assignments →
+            </Link>
           </div>
 
           <div className="grid grid-2" style={{ marginTop: 20 }}>
