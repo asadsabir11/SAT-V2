@@ -33,6 +33,7 @@ const OLEVEL_MODULES = [
   { href: "/o-level/sessions", icon: "📅", title: "Live Sessions", description: "Join live classes and open office hours.", accent: "#059669", grad: "linear-gradient(135deg,#059669,#10b981)", glow: "rgba(5,150,105,.35)" },
   { href: "/o-level/past-papers", icon: "📄", title: "Past Papers", description: "Practice with past-paper style questions.", accent: "#ea580c", grad: "linear-gradient(135deg,#ea580c,#f59e0b)", glow: "rgba(234,88,12,.35)" },
   { href: "/fees", icon: "💰", title: "Fees", description: "View your fee challans and submit payment proof.", accent: "#0e7490", grad: "linear-gradient(135deg,#0e7490,#06b6d4)", glow: "rgba(14,116,144,.35)" },
+  { href: "/o-level/assignments", icon: "📋", title: "Assignments", description: "Submit your work per subject and see your grades.", accent: "#dc2626", grad: "linear-gradient(135deg,#dc2626,#f87171)", glow: "rgba(220,38,38,.35)" },
 ];
 
 interface Announcement {
