@@ -13,7 +13,7 @@ interface Submission {
 }
 
 function fmtWhen(d: string) {
-  return new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
 }
 
 export default function AdminAssignmentSubmissions({ params }: { params: Promise<{ id: string }> }) {

@@ -14,7 +14,7 @@ interface Assignment {
 
 function fmtDue(d: string | null) {
   if (!d) return "No due date";
-  return new Date(d).toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(d).toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
 }
 
 function dueCountdown(dueAt: string | null): { text: string; color: string; bg: string } | null {

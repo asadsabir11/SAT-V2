@@ -13,7 +13,7 @@ interface Assignment {
 
 function fmtDue(d: string | null) {
   if (!d) return "No due date";
-  return new Date(d).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(d).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
 }
 
 function statusFor(a: Assignment): { label: string; icon: string; bg: string; color: string } {
