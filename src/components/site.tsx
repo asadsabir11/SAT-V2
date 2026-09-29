@@ -109,8 +109,13 @@ export function Header() {
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "amna-shamima"
     ? ([["Amna Shamima Program", "/amna-shamima"]] as const)
-    : user?.role === "student" && (user.program === "o-level" || user.program === "sat")
-    ? PUBLIC_NAV.filter(([, href]) => user.program === "o-level" ? href !== "/founder-cohort" : href !== "/o-level")
+    // O-Level's own "O Level" link was redundant (they're already there) —
+    // matches the Amna Shamima/9th-Class pattern of not re-showing your own
+    // program, leaving just the one other-program link worth exploring.
+    : user?.role === "student" && user.program === "o-level"
+    ? ([["9th Class", "/punjab-board-9th-class"]] as const)
+    : user?.role === "student" && user.program === "sat"
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level")
     : PUBLIC_NAV;
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
