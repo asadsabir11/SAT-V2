@@ -319,6 +319,9 @@ export default function Admin() {
                 <Link href="/admin/amna-shamima-assignments" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
                   📋 Amna Shamima assignments →
                 </Link>
+                <Link href="/admin/amna-shamima-recordings" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #1d4ed8", background: "#eff6ff", color: "#1d4ed8" }}>
+                  🎥 Amna Shamima recordings →
+                </Link>
                 {/* General tools, relevant here too */}
                 <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
                   📢 Announcements →

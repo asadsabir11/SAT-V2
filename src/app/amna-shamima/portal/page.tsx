@@ -116,6 +116,18 @@ export default async function AmnaShamimaPortal() {
                 <span className="module-arrow" style={{ color: "#0e7490", fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
               </article>
             </Link>
+            <Link
+              href="/amna-shamima/portal/recordings"
+              className="module-card fade-up"
+              style={{ "--module-accent": "#1d4ed8", "--module-accent-grad": "linear-gradient(135deg,#1d4ed8,#38bdf8)", "--module-glow": "rgba(29,78,216,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%" }}>
+                <div className="module-icon">🎥</div>
+                <h3>Recordings</h3>
+                <p>Missed a class? Watch the recording here.</p>
+                <span className="module-arrow" style={{ color: "#1d4ed8", fontWeight: 700, fontSize: ".85rem" }}>Open →</span>
+              </article>
+            </Link>
           </div>
         </div>
       </section>
