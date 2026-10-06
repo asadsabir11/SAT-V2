@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CTAButton, FAQAccordion, FeatureCard, PricingCard, VideoBox } from "@/components/site";
+import { EnrollmentBadge } from "@/components/EnrollmentBadge";
 import Link from "next/link";
 
 // Title/description are inherited from the root layout — this only pins the
@@ -84,6 +85,7 @@ export default function Home() {
           <div className="grid grid-3" style={{ marginTop: 32 }}>
             <article className="card" style={{ display: "flex", flexDirection: "column" }}>
               <h3 style={{ marginTop: 0 }}>SAT® Preparation</h3>
+              <EnrollmentBadge program="sat" />
               <p style={{ flex: 1 }}>Affordable SAT® prep for ambitious global students — weekly live classes, AI tutor, and mock tests.</p>
               <ul className="check-list" style={{ margin: "14px 0 20px" }}>
                 <li>Weekly live classes</li>
@@ -95,6 +97,7 @@ export default function Home() {
             </article>
             <article className="card" style={{ display: "flex", flexDirection: "column" }}>
               <h3 style={{ marginTop: 0 }}>Cambridge O Level / IGCSE</h3>
+              <EnrollmentBadge program="o-level" />
               <p style={{ flex: 1 }}>Live O Level tuition where students are never left stuck — open office hours and past-paper mastery.</p>
               <ul className="check-list" style={{ margin: "14px 0 20px" }}>
                 <li>Live classes</li>
@@ -106,6 +109,7 @@ export default function Home() {
             </article>
             <article className="card" style={{ display: "flex", flexDirection: "column" }}>
               <h3 style={{ marginTop: 0 }}>9th Class (Punjab Board)</h3>
+              <EnrollmentBadge program="punjab-9th" />
               <p style={{ flex: 1 }}>Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus — PKR 2,500/month for all subjects.</p>
               <ul className="check-list" style={{ margin: "14px 0 20px" }}>
                 <li>Attend your first week before paying</li>

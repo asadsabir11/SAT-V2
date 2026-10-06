@@ -395,6 +395,12 @@ export default function Admin() {
                   <BigNavCard href="/admin/amna-shamima-leads" icon="🤖" title="Amna Shamima AI Course Leads" count={amnaShamimaLeadCount ?? "—"} accent="#7c3aed" />
                 </div>
               </div>
+
+              <div style={{ marginTop: 20 }}>
+                <Link href="/admin/enrollment-status" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fef2f2", color: "#991b1b" }}>
+                  🔴 Enrollment status (Fully Booked badges) →
+                </Link>
+              </div>
             </>
           )}
         </div>
