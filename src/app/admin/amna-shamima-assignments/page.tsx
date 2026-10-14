@@ -171,14 +171,14 @@ export default function AdminAmnaShamimaAssignments() {
           </div>
 
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Attachment (optional — PDF, DOC/DOCX, JPG, PNG)</label>
+            <label>Attachment (optional — PDF, DOC/DOCX, JPG, PNG, or MP4 — up to 1 GB)</label>
             <div
               onClick={() => fileRef.current?.click()}
               style={{ border: `2px dashed ${file ? "#10b981" : "#c8d5e3"}`, borderRadius: 10, padding: "16px 20px", textAlign: "center", cursor: "pointer", background: file ? "#f0fdf4" : "#f8fafc" }}
             >
               {file ? <p style={{ fontWeight: 700, color: "#065f46", margin: 0, fontSize: ".88rem" }}>📎 {file.name} · Click to change</p> : <p style={{ color: "#6b7c93", margin: 0, fontSize: ".88rem" }}>📎 Click to attach a file (optional)</p>}
             </div>
-            <input ref={fileRef} type="file" accept="application/pdf,.doc,.docx,image/*" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <input ref={fileRef} type="file" accept="application/pdf,.doc,.docx,image/*,video/mp4" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           </div>
 
           {uploading && (

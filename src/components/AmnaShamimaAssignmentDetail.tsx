@@ -218,11 +218,11 @@ export default function AmnaShamimaAssignmentDetail({ id }: { id: string }) {
                   <>
                     <div style={{ fontSize: "1.8rem", marginBottom: 8 }}>📁</div>
                     <p style={{ fontWeight: 700, color: "#344054", margin: 0, fontSize: ".92rem" }}>Click to choose a file</p>
-                    <p style={{ color: "#6b7c93", fontSize: ".78rem", margin: "4px 0 0" }}>PDF, Word doc, JPG or PNG</p>
+                    <p style={{ color: "#6b7c93", fontSize: ".78rem", margin: "4px 0 0" }}>PDF, Word doc, JPG, PNG, or MP4 video — up to 1 GB</p>
                   </>
                 )}
               </div>
-              <input ref={fileRef} type="file" accept="application/pdf,.doc,.docx,image/*" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              <input ref={fileRef} type="file" accept="application/pdf,.doc,.docx,image/*,video/mp4" style={{ display: "none" }} onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               {isPastDue && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "#fffbeb", marginBottom: 14 }}>
                   <span>⏳</span>

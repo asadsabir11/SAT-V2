@@ -27,8 +27,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           "application/msword",
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "image/jpeg", "image/png", "image/webp", "image/gif",
+          "video/mp4",
         ],
-        maximumSizeInBytes: 50 * 1024 * 1024, // 50 MB
+        // Raised from 50MB once video submissions (e.g. the video-editing
+        // cohort's assignments) started needing this endpoint — matches the
+        // existing lecture-video upload cap.
+        maximumSizeInBytes: 1024 * 1024 * 1024, // 1 GB
         addRandomSuffix: true,
       }),
       onUploadCompleted: async () => {},
