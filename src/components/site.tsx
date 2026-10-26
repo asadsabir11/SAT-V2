@@ -4,9 +4,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["O Level", "/o-level"], ["9th Class", "/punjab-board-9th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
+const PUBLIC_NAV = [["O Level", "/o-level"], ["A Level", "/a-level"], ["9th Class", "/punjab-board-9th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
-type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" | "amna-shamima" } | null;
+type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" | "amna-shamima" | "a-level" } | null;
 
 // Clicking through opens the full notifications page (LinkedIn-style)
 // rather than a navbar dropdown — this component is just the bell + unread
@@ -75,6 +75,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     : user.role === "parent" ? "/parent"
     : user.program === "punjab-9th" ? "/punjab-board-9th-class/portal"
     : user.program === "amna-shamima" ? "/amna-shamima/portal"
+    : user.program === "a-level" ? "/a-level/portal"
     : "/dashboard";
   return (
     <div style={{display:"inline-flex",alignItems:"center",gap:6}}>
@@ -104,15 +105,17 @@ export function Header() {
   // doesn't need either marketing page at all — they're here for their
   // child's reports, not to browse cohorts — so only "For Parents" stays.
   const navItems = user?.role === "parent"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "punjab-9th"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/founder-cohort")
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "amna-shamima"
     ? ([["Amna Shamima Program", "/amna-shamima"]] as const)
     : user?.role === "student" && user.program === "o-level"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/punjab-board-9th-class" && href !== "/founder-cohort")
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/punjab-board-9th-class" && href !== "/a-level" && href !== "/founder-cohort")
+    : user?.role === "student" && user.program === "a-level"
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/punjab-board-9th-class" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "sat"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level")
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level")
     : PUBLIC_NAV;
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
@@ -206,7 +209,7 @@ export function Footer(){
                   <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
                     Welcome back — head to your dashboard to browse subjects or unlock a new one.
                   </p>
-                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : user?.program === "amna-shamima" ? "/amna-shamima/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
+                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : user?.program === "amna-shamima" ? "/amna-shamima/portal" : user?.program === "a-level" ? "/a-level/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
                 </>
               ) : (
                 <>

@@ -1,7 +1,7 @@
 import { sql } from "@/lib/db";
 
 
-export type Program = "sat" | "o-level" | "punjab-9th";
+export type Program = "sat" | "o-level" | "punjab-9th" | "a-level";
 export type SatLectureCategory = "introduction" | "math" | "english";
 export type OLevelLectureCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 // Mirrors the subject slugs in punjab9thSessions.ts's SUBJECT_SLUGS (kept as a

@@ -2,7 +2,7 @@
 import { useEffect, useState, use, useRef, useCallback } from "react";
 import Link from "next/link";
 
-type LectureProgram = "sat" | "o-level" | "punjab-9th";
+type LectureProgram = "sat" | "o-level" | "punjab-9th" | "a-level";
 type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics"
   | "urdu" | "maths" | "chemistry" | "biology" | "islamiat" | "tarjuma-tul-quran-or-ethics";
 
@@ -339,7 +339,7 @@ export default function WatchLecture({ params }: { params: Promise<{ id: string 
   const prevLec = currentIndex > 0 ? sameCat[currentIndex - 1] : null;
   const nextLec = currentIndex < sameCat.length - 1 ? sameCat[currentIndex + 1] : null;
 
-  const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : lecture.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : "/lectures";
+  const libraryHref = lecture.program === "o-level" ? "/o-level/lectures" : lecture.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : lecture.program === "a-level" ? "/a-level/portal/lectures" : "/lectures";
 
   return (
     <section className="section" onContextMenu={e => e.preventDefault()}>

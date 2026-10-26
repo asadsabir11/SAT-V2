@@ -6,7 +6,7 @@ const attempts = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 10;
 
-const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "amna-shamima": "AI Course" };
+const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "amna-shamima": "AI Course", "a-level": "A Level" };
 const programLabel = (p: string) => PROGRAM_LABELS[p] ?? "SAT";
 
 function getRateLimit(ip: string): { blocked: boolean } {

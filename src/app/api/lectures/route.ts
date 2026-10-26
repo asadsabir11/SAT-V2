@@ -4,6 +4,7 @@ import { getAllLectures, getPublishedLectures, createLecture, OLEVEL_LECTURE_CAT
 import { getStudentAccessLevel } from "@/lib/users";
 import { getOLevelAccessMap } from "@/lib/olevelAccess";
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
+import { getALevelAccessLevel } from "@/lib/aLevelAccess";
 
 export async function GET() {
   const session = await getSession();
@@ -15,25 +16,29 @@ export async function GET() {
   }
 
   // Student: return all published lectures marked with is_locked
-  const [lectures, accessLevel, oLevelAccess, punjab9thAccessLevel] = await Promise.all([
+  const [lectures, accessLevel, oLevelAccess, punjab9thAccessLevel, aLevelAccessLevel] = await Promise.all([
     getPublishedLectures(),
     getStudentAccessLevel(session.email),
     getOLevelAccessMap(session.email),
     getPunjab9thAccessLevel(session.email),
+    getALevelAccessLevel(session.email),
   ]);
 
   const isUnlocked = accessLevel === "unlocked";
   const punjab9thUnlocked = punjab9thAccessLevel === "unlocked";
+  const aLevelUnlocked = aLevelAccessLevel === "unlocked";
   const lecturesWithLock = lectures.map(({ video_url: _v, ...l }) => ({
     ...l,
     is_locked: l.program === "o-level"
       ? !l.is_free_preview && oLevelAccess[l.category] !== "unlocked"
       : l.program === "punjab-9th"
       ? !l.is_free_preview && !punjab9thUnlocked
+      : l.program === "a-level"
+      ? !l.is_free_preview && !aLevelUnlocked
       : l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
   }));
 
-  return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel, o_level_access: oLevelAccess, punjab9th_access: punjab9thAccessLevel });
+  return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel, o_level_access: oLevelAccess, punjab9th_access: punjab9thAccessLevel, a_level_access: aLevelAccessLevel });
 }
 
 export async function POST(req: NextRequest) {
@@ -45,11 +50,13 @@ export async function POST(req: NextRequest) {
   if (!title || !video_url) {
     return NextResponse.json({ error: "title and video_url are required" }, { status: 400 });
   }
-  const prog: Program = program === "o-level" ? "o-level" : program === "punjab-9th" ? "punjab-9th" : "sat";
+  const prog: Program = program === "o-level" ? "o-level" : program === "punjab-9th" ? "punjab-9th" : program === "a-level" ? "a-level" : "sat";
   const cat: LectureCategory = prog === "o-level"
     ? (OLEVEL_LECTURE_CATEGORIES.includes(category) ? category : "mathematics")
     : prog === "punjab-9th"
     ? (PUNJAB9TH_LECTURE_CATEGORIES.includes(category) ? category : "english")
+    : prog === "a-level"
+    ? "computer-science"
     : (category === "english" ? "english" : category === "introduction" ? "introduction" : "math");
   const id = await createLecture(title, description ?? "", video_url, session.email, thumbnail_url ?? "", cat, prog);
   return NextResponse.json({ id });

@@ -37,6 +37,7 @@ export default function Admin() {
   const [scholarshipStudentCount, setScholarshipStudentCount] = useState<number | null>(null);
   const [punjab9thLeadCount, setPunjab9thLeadCount] = useState<number | null>(null);
   const [amnaShamimaLeadCount, setAmnaShamimaLeadCount] = useState<number | null>(null);
+  const [aLevelLeadCount, setALevelLeadCount] = useState<number | null>(null);
 
   async function clearTestData() {
     const typed = window.prompt(
@@ -69,6 +70,10 @@ export default function Admin() {
     fetch("/api/admin/amna-shamima-leads")
       .then((r) => r.json())
       .then((d) => setAmnaShamimaLeadCount((d.leads ?? []).length))
+      .catch(() => {});
+    fetch("/api/admin/a-level-leads")
+      .then((r) => r.json())
+      .then((d) => setALevelLeadCount((d.leads ?? []).length))
       .catch(() => {});
   }, []);
 
@@ -348,6 +353,51 @@ export default function Admin() {
               </div>
             </article>
 
+            {/* A Level */}
+            <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #be123c" }}>
+              <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>🎯 A Level</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {isFounder && (
+                  <Link href="/admin/a-level-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #be123c", background: "#fff1f2", color: "#be123c" }}>
+                    🔑 A Level access →
+                  </Link>
+                )}
+                <Link href="/admin/a-level-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #be123c", background: "#fff1f2", color: "#be123c" }}>
+                  🎥 A Level live sessions →
+                </Link>
+                <Link href="/admin/a-level-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #be123c", background: "#fff1f2", color: "#be123c" }}>
+                  📝 A Level quizzes →
+                </Link>
+                <Link href="/admin/a-level-past-papers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #be123c", background: "#fff1f2", color: "#be123c" }}>
+                  📄 A Level past papers →
+                </Link>
+                <Link href="/admin/a-level-assignments" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #be123c", background: "#fff1f2", color: "#be123c" }}>
+                  📋 A Level assignments →
+                </Link>
+                {/* Shared with SAT/O Level/9th — one page, program toggle inside */}
+                <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  🎬 Manage lectures →
+                </Link>
+                {/* General tools, relevant here too */}
+                <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
+                  📢 Announcements →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
+                <Link href="/admin/analytics" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  📈 Analytics →
+                </Link>
+                {isFounder && (
+                  <button onClick={clearTestData} style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fee2e2", color: "#991b1b", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>
+                    🗑 Clear ALL students (every program)
+                  </button>
+                )}
+              </div>
+            </article>
+
             {/* Fees */}
             {isFounder && (
               <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #059669" }}>
@@ -393,6 +443,7 @@ export default function Admin() {
                   <BigNavCard href="/admin/scholarship-students" icon="🎓" title="Scholarship Students" count={scholarshipStudentCount ?? "—"} accent="#b45309" />
                   <BigNavCard href="/admin/punjab-9th-leads" icon="📗" title="Punjab 9th Class Leads" count={punjab9thLeadCount ?? "—"} accent="#ea580c" />
                   <BigNavCard href="/admin/amna-shamima-leads" icon="🤖" title="Amna Shamima AI Course Leads" count={amnaShamimaLeadCount ?? "—"} accent="#7c3aed" />
+                  <BigNavCard href="/admin/a-level-leads" icon="🎯" title="A Level Leads" count={aLevelLeadCount ?? "—"} accent="#be123c" />
                 </div>
               </div>
 
