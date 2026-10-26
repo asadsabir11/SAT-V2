@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
-const AMOUNT_DUE = 3000;
+const AMOUNT_DUE = 10000;
 // Same shared bank account as O-Level/SAT/9th — one account, not a separate one per program.
 const BANK_NAME = process.env.NEXT_PUBLIC_OLEVEL_BANK_NAME ?? "";
 const BANK_ACCOUNT_TITLE = process.env.NEXT_PUBLIC_OLEVEL_BANK_ACCOUNT_TITLE ?? "";

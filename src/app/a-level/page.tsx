@@ -8,11 +8,11 @@ const WHATSAPP_HERO_LINK = "https://wa.me/923316663291?text=Assalam-oAlaikum%2C%
 
 export const metadata: Metadata = {
   title: "A Level Computer Science — Live Online Classes",
-  description: "Live online A Level Computer Science classes taught by experienced teachers, following the latest Cambridge/Edexcel syllabus. Special launch fee available.",
+  description: "Live online A Level Computer Science classes taught by experienced teachers, following the latest Cambridge/Edexcel syllabus. Special launch fee: PKR 10,000/month.",
   alternates: { canonical: `${BASE_URL}/a-level` },
   openGraph: {
     title: "A Level Computer Science — Live Online Classes",
-    description: "Live online A Level Computer Science classes following the latest Cambridge/Edexcel syllabus.",
+    description: "Live online A Level Computer Science classes following the latest Cambridge/Edexcel syllabus. Special launch fee: PKR 10,000/month.",
     url: `${BASE_URL}/a-level`,
     type: "website",
     images: ["/opengraph-image"],
@@ -21,13 +21,15 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: ["/opengraph-image"],
     title: "A Level Computer Science — Live Online Classes",
-    description: "Live online A Level Computer Science classes following the latest Cambridge/Edexcel syllabus.",
+    description: "Live online A Level Computer Science classes following the latest Cambridge/Edexcel syllabus. Special launch fee: PKR 10,000/month.",
   },
 };
 
 const SUPPORTING_POINTS = ["Attend your first week before paying", "Live classes and teacher support", "Quizzes, assignments and past papers", "Focused entirely on Computer Science"];
 
 const TRUST_POINTS = ["A Level Computer Science", "Live online teaching", "Cambridge/Edexcel-aligned", "Regular tests", "Parent progress updates"];
+
+const PRICING_INCLUDES = ["Live A Level Computer Science classes", "Notes and assignments", "Topic quizzes and past papers", "Class recordings", "Academic support", "Parent progress updates"];
 
 const WHAT_STUDENTS_RECEIVE = [
   { icon: "🎓", title: "Live teaching", description: "Students attend scheduled classes with teachers and can ask questions during the lesson." },
@@ -72,6 +74,9 @@ export default async function ALevelPage() {
               <p className="lead" style={{ color: "rgba(255,255,255,.78)" }}>
                 Live online A Level Computer Science classes, taught by experienced teachers following the latest
                 exam-board syllabus.
+              </p>
+              <p style={{ color: "#fda4af", fontWeight: 800, fontSize: "1.05rem" }}>
+                Special Launch Fee: PKR 10,000 per month
               </p>
               <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 10 }}>
                 {SUPPORTING_POINTS.map((p) => (
@@ -158,6 +163,30 @@ export default async function ALevelPage() {
         </div>
       </section>
 
+      {/* 5.5 — Pricing */}
+      <section className="section soft">
+        <div className="container" style={{ maxWidth: 560 }}>
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Founding Student Launch Offer</div>
+          <h2 className="title" style={{ textAlign: "center" }}>A Level Computer Science</h2>
+          <article className="card" style={{ marginTop: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", border: "2px solid #be123c" }}>
+            <div className="price">PKR 10,000<span style={{ fontSize: "1rem", fontWeight: 700 }}>/mo</span></div>
+            <ul style={{ textAlign: "left", margin: "18px 0 24px", display: "grid", gap: 8 }}>
+              {PRICING_INCLUDES.map((i) => (
+                <li key={i} style={{ color: "#4a6070", fontSize: ".92rem" }}>✓ {i}</li>
+              ))}
+            </ul>
+            <p style={{ color: "var(--muted)", fontSize: ".82rem", marginBottom: 20 }}>
+              Launch price available to the first founding batch of students.
+            </p>
+            <CTAButton href="#apply" variant="primary">Claim the Launch Fee</CTAButton>
+          </article>
+          <p style={{ marginTop: 20, textAlign: "center", color: "var(--muted)", fontSize: ".8rem", lineHeight: 1.6 }}>
+            Registration is free. Students may attend the first week of their assigned batch before the first
+            monthly payment becomes due. Any future fee revision will not affect an already-paid month.
+          </p>
+        </div>
+      </section>
+
       {/* 6 — Closing CTA */}
       <section className="section band">
         <div className="container" style={{ textAlign: "center" }}>
@@ -165,6 +194,7 @@ export default async function ALevelPage() {
           <p className="lead" style={{ color: "rgba(255,255,255,.78)", margin: "0 auto 8px" }}>
             Join live classes from home with structured teaching, regular practice and academic accountability.
           </p>
+          <p style={{ color: "#fda4af", fontWeight: 800, marginBottom: 20 }}>PKR 10,000 per month</p>
           <div className="actions" style={{ justifyContent: "center" }}>
             {isSignedInAsALevel ? (
               <CTAButton href="/a-level/portal" variant="accent">Go to My Portal</CTAButton>
