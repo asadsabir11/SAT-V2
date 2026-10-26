@@ -971,7 +971,7 @@ export async function sendPunjab9thRegistrationWelcome(student: { name: string; 
               </td>
             </tr>
             <tr>
-              <td style="padding:2px 0 0 32px;color:#6b7c93;font-size:.85rem;">PKR 2,500/month covers every subject in your group — submit payment from your portal once you're ready to continue</td>
+              <td style="padding:2px 0 0 32px;color:#6b7c93;font-size:.85rem;">PKR 10,000/month covers every subject in your group — submit payment from your portal once you're ready to continue</td>
             </tr>
           </table>
         </div>

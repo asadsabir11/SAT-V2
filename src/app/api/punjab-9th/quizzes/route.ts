@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Flat access, not per-subject — the whole account is unlocked or not,
-  // matching the flat PKR 2,500/mo pricing (see punjab9thAccess.ts).
+  // matching the flat PKR 10,000/mo pricing (see punjab9thAccess.ts).
   const access = await getPunjab9thAccessLevel(session.email);
   if (access !== "unlocked") {
     return NextResponse.json({ quizzes: [], access });

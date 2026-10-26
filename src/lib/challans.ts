@@ -12,7 +12,7 @@ import { sendChallanGenerated } from "@/lib/email";
 // this is the only other place that needs to know the flat monthly fee.
 const SAT_MONTHLY_FEE = 5300;
 // Must match the punjab-9th unlock page's AMOUNT_DUE, same reasoning.
-const PUNJAB9TH_MONTHLY_FEE = 2500;
+const PUNJAB9TH_MONTHLY_FEE = 10000;
 
 export type ChallanStatus = "unpaid" | "submitted" | "paid";
 export type SubmissionStatus = "pending" | "verified" | "rejected";

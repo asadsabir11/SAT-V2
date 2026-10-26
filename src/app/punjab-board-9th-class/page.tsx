@@ -8,11 +8,11 @@ const WHATSAPP_HERO_LINK = "https://wa.me/923316663291?text=Assalam-oAlaikum%2C%
 
 export const metadata: Metadata = {
   title: "Punjab Board 9th Class — All Subjects Online",
-  description: "Live online classes for Biology and Computer Science groups, taught by experienced teachers following the latest Punjab Board syllabus. Special launch fee: PKR 2,500/month for all subjects.",
+  description: "Live online classes for Biology and Computer Science groups, taught by experienced teachers following the latest Punjab Board syllabus. Special launch fee: PKR 10,000/month for all subjects.",
   alternates: { canonical: `${BASE_URL}/punjab-board-9th-class` },
   openGraph: {
     title: "Punjab Board 9th Class — All Subjects Online",
-    description: "Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus. Special launch fee: PKR 2,500/month for all subjects.",
+    description: "Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus. Special launch fee: PKR 10,000/month for all subjects.",
     url: `${BASE_URL}/punjab-board-9th-class`,
     type: "website",
     images: ["/opengraph-image"],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: ["/opengraph-image"],
     title: "Punjab Board 9th Class — All Subjects Online",
-    description: "Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus. Special launch fee: PKR 2,500/month for all subjects.",
+    description: "Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus. Special launch fee: PKR 10,000/month for all subjects.",
   },
 };
 
@@ -32,7 +32,7 @@ const SUPPORTING_POINTS = [
   "Biology and Computer Science groups available",
 ];
 
-const TRUST_POINTS = ["All major subjects", "Live online teaching", "Punjab Board preparation", "Regular tests", "Parent progress updates", "PKR 2,500/month"];
+const TRUST_POINTS = ["All major subjects", "Live online teaching", "Punjab Board preparation", "Regular tests", "Parent progress updates", "PKR 10,000/month"];
 
 const BIOLOGY_SUBJECTS = ["English", "Urdu", "Maths", "Physics", "Chemistry", "Biology", "Islamiat", "Tarjuma-tul-Quran or Ethics, where applicable"];
 const CS_SUBJECTS = ["English", "Urdu", "Maths", "Physics", "Chemistry", "Computer Science", "Islamiat", "Tarjuma-tul-Quran or Ethics, where applicable"];
@@ -52,7 +52,7 @@ const HOW_IT_WORKS = [
   { title: "Complete the registration form", description: "Select the Biology or Computer Science group." },
   { title: "Receive your class details", description: "Our admissions team will contact the parent on WhatsApp." },
   { title: "Attend the first week", description: "Experience the classes before paying the monthly fee." },
-  { title: "Continue for PKR 2,500 per month", description: "The fee covers the complete 9th Class subject package — not one individual subject." },
+  { title: "Continue for PKR 10,000 per month", description: "The fee covers the complete 9th Class subject package — not one individual subject." },
 ];
 
 const PARENT_MONITOR_POINTS = ["Class attendance", "Assignment completion", "Chapter-test performance", "Subjects requiring additional attention", "Overall consistency and participation"];
@@ -60,7 +60,7 @@ const PARENT_MONITOR_POINTS = ["Class attendance", "Assignment completion", "Cha
 const PRICING_INCLUDES = ["Biology or Computer Science group", "Live classes for all included subjects", "Notes and assignments", "Regular tests", "Class recordings", "Academic support", "Parent progress updates"];
 
 const FAQ_ITEMS: [string, string][] = [
-  ["Is PKR 2,500 the fee for one subject?", "No. The launch fee covers the complete 9th Class package for the selected Biology or Computer Science group."],
+  ["Is PKR 10,000 the fee for one subject?", "No. The launch fee covers the complete 9th Class package for the selected Biology or Computer Science group."],
   ["Are these live or recorded classes?", "The main lessons are taught live. Recordings are also provided for revision and missed lessons."],
   ["Can my child try the classes before paying?", "Yes. Registered students may attend their first week before paying. Payment is required to continue after the trial period."],
   ["Which Punjab Boards do you cover?", "The program follows the common Punjab curriculum and examination requirements. Students can register from Lahore, Gujranwala, Rawalpindi, Faisalabad, Multan, Sargodha, Sahiwal, Bahawalpur and D.G. Khan boards."],
@@ -90,7 +90,7 @@ export default async function Punjab9thClassPage() {
                 the latest Punjab Board syllabus.
               </p>
               <p style={{ color: "#5eead4", fontWeight: 800, fontSize: "1.05rem" }}>
-                Special Launch Fee: PKR 2,500 per month for all subjects
+                Special Launch Fee: PKR 10,000 per month for all subjects
               </p>
               <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 10 }}>
                 {SUPPORTING_POINTS.map((p) => (
@@ -112,7 +112,7 @@ export default async function Punjab9thClassPage() {
             <div className="hero-panel" style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
                 src="/9th-class-promo-banner.png"
-                alt="Punjab Board 9th Class — special launch fee PKR 2,500 per month"
+                alt="Punjab Board 9th Class — special launch fee"
                 style={{ width: "100%", maxWidth: 520, borderRadius: 18, display: "block", objectFit: "contain" }}
               />
             </div>
@@ -258,7 +258,7 @@ export default async function Punjab9thClassPage() {
           <div className="eyebrow" style={{ justifyContent: "center" }}>Founding Student Launch Offer</div>
           <h2 className="title" style={{ textAlign: "center" }}>Punjab Board 9th Class — All Subjects</h2>
           <article className="card" style={{ marginTop: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", border: "2px solid var(--blue)" }}>
-            <div className="price">PKR 2,500<span style={{ fontSize: "1rem", fontWeight: 700 }}>/mo</span></div>
+            <div className="price">PKR 10,000<span style={{ fontSize: "1rem", fontWeight: 700 }}>/mo</span></div>
             <ul style={{ textAlign: "left", margin: "18px 0 24px", display: "grid", gap: 8 }}>
               {PRICING_INCLUDES.map((i) => (
                 <li key={i} style={{ color: "#4a6070", fontSize: ".92rem" }}>✓ {i}</li>
@@ -285,7 +285,7 @@ export default async function Punjab9thClassPage() {
             Join live Punjab Board classes from home with structured teaching, regular practice and academic
             accountability.
           </p>
-          <p style={{ color: "#5eead4", fontWeight: 800, marginBottom: 20 }}>PKR 2,500 per month for all subjects</p>
+          <p style={{ color: "#5eead4", fontWeight: 800, marginBottom: 20 }}>PKR 10,000 per month for all subjects</p>
           <div className="actions" style={{ justifyContent: "center" }}>
             {isSignedInAsPunjab9th ? (
               <CTAButton href="/punjab-board-9th-class/portal" variant="accent">Go to My Portal</CTAButton>

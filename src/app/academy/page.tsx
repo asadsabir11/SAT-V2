@@ -46,7 +46,7 @@ const PROGRAMS = [
     grad: "linear-gradient(135deg,#ea580c,#f59e0b)",
     glow: "rgba(234,88,12,.35)",
     icon: "📗",
-    points: ["Attend your first week before paying", "Live classes and teacher support", "Tests and progress tracking", "PKR 2,500/month for all subjects"],
+    points: ["Attend your first week before paying", "Live classes and teacher support", "Tests and progress tracking", "PKR 10,000/month for all subjects"],
   },
 ] as const;
 

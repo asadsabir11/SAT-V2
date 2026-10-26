@@ -110,7 +110,7 @@ export default function Home() {
             <article className="card" style={{ display: "flex", flexDirection: "column" }}>
               <h3 style={{ marginTop: 0 }}>9th Class (Punjab Board)</h3>
               <EnrollmentBadge program="punjab-9th" />
-              <p style={{ flex: 1 }}>Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus — PKR 2,500/month for all subjects.</p>
+              <p style={{ flex: 1 }}>Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus — PKR 10,000/month for all subjects.</p>
               <ul className="check-list" style={{ margin: "14px 0 20px" }}>
                 <li>Attend your first week before paying</li>
                 <li>Live classes and teacher support</li>
