@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 const PUBLIC_NAV = [["O Level", "/o-level"], ["A Level", "/a-level"], ["9th Class", "/punjab-board-9th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
@@ -53,14 +53,39 @@ function NotificationBell({ isAdmin }: { isAdmin: boolean }) {
 // filtering, which renders as a plain Link instead, same as before). Native
 // <details>/<summary> rather than a useState+ref click-outside setup, same
 // lightweight pattern already used for FAQAccordion elsewhere in this file.
+// The panel is positioned via fixed coordinates computed on open (rather
+// than plain CSS position:absolute) because the nav row has overflowX:auto
+// for small screens — per the CSS spec that forces overflow-y to clip too,
+// which silently cut off an absolutely-positioned panel. Fixed positioning
+// escapes that ancestor's clipping entirely.
 function CambridgeNavDropdown() {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    const el = detailsRef.current;
+    if (!el) return;
+    const onToggle = () => {
+      if (el.open) {
+        const rect = el.getBoundingClientRect();
+        setCoords({ top: rect.bottom + 6, left: rect.left });
+      } else {
+        setCoords(null);
+      }
+    };
+    el.addEventListener("toggle", onToggle);
+    return () => el.removeEventListener("toggle", onToggle);
+  }, []);
+
   return (
-    <details className="nav-dropdown">
+    <details ref={detailsRef} className="nav-dropdown">
       <summary>Cambridge</summary>
-      <div className="nav-dropdown-panel">
-        <Link href="/o-level">O Level</Link>
-        <Link href="/a-level">A Level</Link>
-      </div>
+      {coords && (
+        <div className="nav-dropdown-panel" style={{ position: "fixed", top: coords.top, left: coords.left }}>
+          <Link href="/o-level" onClick={() => detailsRef.current?.removeAttribute("open")}>O Level</Link>
+          <Link href="/a-level" onClick={() => detailsRef.current?.removeAttribute("open")}>A Level</Link>
+        </div>
+      )}
     </details>
   );
 }
