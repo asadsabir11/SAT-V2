@@ -47,6 +47,24 @@ function NotificationBell({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
+// Groups O Level and A Level under one nav item — they're only ever both
+// present together in navItems for the logged-out/generic case (a signed-in
+// O-Level or A-Level student only ever has their own single link left after
+// filtering, which renders as a plain Link instead, same as before). Native
+// <details>/<summary> rather than a useState+ref click-outside setup, same
+// lightweight pattern already used for FAQAccordion elsewhere in this file.
+function CambridgeNavDropdown() {
+  return (
+    <details className="nav-dropdown">
+      <summary>Cambridge</summary>
+      <div className="nav-dropdown-panel">
+        <Link href="/o-level">O Level</Link>
+        <Link href="/a-level">A Level</Link>
+      </div>
+    </details>
+  );
+}
+
 function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   const [user, setUser] = useState<AuthUser>(null);
   useEffect(() => {
@@ -117,6 +135,7 @@ export function Header() {
     : user?.role === "student" && user.program === "sat"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level")
     : PUBLIC_NAV;
+  const showCambridgeDropdown = navItems.some(([, href]) => href === "/o-level") && navItems.some(([, href]) => href === "/a-level");
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
@@ -124,9 +143,11 @@ export function Header() {
           <span style={{color:"#155eef"}}>The Digital</span> Tutor
         </Link>
         <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
-          {navItems.map(([label, href]) => (
-            <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>
-          ))}
+          {navItems.map(([label, href]) => {
+            if (showCambridgeDropdown && href === "/o-level") return <CambridgeNavDropdown key="cambridge" />;
+            if (showCambridgeDropdown && href === "/a-level") return null;
+            return <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>;
+          })}
           {user?.role === "student" && <NotificationBell isAdmin={false} />}
           {(user?.role === "founder" || user?.role === "teacher") && <NotificationBell isAdmin />}
           <AuthBadge onUser={setUser} />
