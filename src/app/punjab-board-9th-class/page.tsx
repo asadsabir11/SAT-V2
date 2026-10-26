@@ -111,7 +111,7 @@ export default async function Punjab9thClassPage() {
             </div>
             <div className="hero-panel" style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
-                src="/9th-class-promo-banner.png"
+                src="/9th-class-video-call-2.png"
                 alt="Punjab Board 9th Class — special launch fee"
                 style={{ width: "100%", maxWidth: 520, borderRadius: 18, display: "block", objectFit: "contain" }}
               />
