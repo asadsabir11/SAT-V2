@@ -47,10 +47,8 @@ function NotificationBell({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
-// Groups O Level and A Level under one nav item — they're only ever both
-// present together in navItems for the logged-out/generic case (a signed-in
-// O-Level or A-Level student only ever has their own single link left after
-// filtering, which renders as a plain Link instead, same as before). Native
+// Groups a set of related nav links under one dropdown item — used for
+// "Cambridge" (O Level, A Level) and "Punjab Board" (9th Class). Native
 // <details>/<summary> rather than a useState+ref click-outside setup, same
 // lightweight pattern already used for FAQAccordion elsewhere in this file.
 // The panel is positioned via fixed coordinates computed on open (rather
@@ -58,7 +56,7 @@ function NotificationBell({ isAdmin }: { isAdmin: boolean }) {
 // for small screens — per the CSS spec that forces overflow-y to clip too,
 // which silently cut off an absolutely-positioned panel. Fixed positioning
 // escapes that ancestor's clipping entirely.
-function CambridgeNavDropdown() {
+function NavDropdown({ label, items }: { label: string; items: readonly (readonly [string, string])[] }) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
 
@@ -79,11 +77,12 @@ function CambridgeNavDropdown() {
 
   return (
     <details ref={detailsRef} className="nav-dropdown">
-      <summary>Cambridge</summary>
+      <summary>{label}</summary>
       {coords && (
         <div className="nav-dropdown-panel" style={{ position: "fixed", top: coords.top, left: coords.left }}>
-          <Link href="/o-level" onClick={() => detailsRef.current?.removeAttribute("open")}>O Level</Link>
-          <Link href="/a-level" onClick={() => detailsRef.current?.removeAttribute("open")}>A Level</Link>
+          {items.map(([itemLabel, href]) => (
+            <Link key={href} href={href} onClick={() => detailsRef.current?.removeAttribute("open")}>{itemLabel}</Link>
+          ))}
         </div>
       )}
     </details>
@@ -161,6 +160,7 @@ export function Header() {
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level")
     : PUBLIC_NAV;
   const showCambridgeDropdown = navItems.some(([, href]) => href === "/o-level") && navItems.some(([, href]) => href === "/a-level");
+  const showPunjabBoardDropdown = navItems.some(([, href]) => href === "/punjab-board-9th-class");
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
@@ -169,8 +169,9 @@ export function Header() {
         </Link>
         <nav style={{display:"flex",gap:6,alignItems:"center",fontSize:".88rem",fontWeight:700,overflowX:"auto"}}>
           {navItems.map(([label, href]) => {
-            if (showCambridgeDropdown && href === "/o-level") return <CambridgeNavDropdown key="cambridge" />;
+            if (showCambridgeDropdown && href === "/o-level") return <NavDropdown key="cambridge" label="Cambridge" items={[["O Level", "/o-level"], ["A Level", "/a-level"]]} />;
             if (showCambridgeDropdown && href === "/a-level") return null;
+            if (showPunjabBoardDropdown && href === "/punjab-board-9th-class") return <NavDropdown key="punjab-board" label="Punjab Board" items={[["9th Class", "/punjab-board-9th-class"]]} />;
             return <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>;
           })}
           {user?.role === "student" && <NotificationBell isAdmin={false} />}
