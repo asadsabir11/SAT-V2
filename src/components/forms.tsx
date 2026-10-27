@@ -533,8 +533,15 @@ export function OLevelRegistrationForm() {
         return;
       }
       trackLead({ subject: "o-level-registration" });
-      // Full page reload so the Header re-fetches the session cookie
-      window.location.href = "/dashboard";
+      // Full page reload so the Header re-fetches the session cookie.
+      // A visitor who arrived here from the book-redemption flow
+      // (/redeem?code=... -> /o-level?next=redeem#apply) needs to land back
+      // on /redeem to actually use their code, not on the dashboard like
+      // every other registration — reading the query string directly here
+      // (rather than a useSearchParams hook) avoids needing a Suspense
+      // boundary around this form just for this one conditional redirect.
+      const fromBookRedeem = new URLSearchParams(window.location.search).get("next") === "redeem";
+      window.location.href = fromBookRedeem ? "/redeem" : "/dashboard";
     } catch {
       setErrorMessage("Something went wrong. Please try again.");
       setStatus("error");
