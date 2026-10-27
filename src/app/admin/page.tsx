@@ -130,11 +130,6 @@ export default function Admin() {
                 <Link href="/admin/o-level-assignments" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #dc2626", background: "#fef2f2", color: "#991b1b" }}>
                   📋 O Level assignments →
                 </Link>
-                {isFounder && (
-                  <Link href="/admin/book-codes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
-                    📖 Book redemption codes →
-                  </Link>
-                )}
                 {/* Shared with SAT — one page, program toggle inside */}
                 <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   🎬 Manage lectures →
@@ -422,6 +417,20 @@ export default function Admin() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <Link href="/admin/teacher-applications" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
                     📄 Teacher applications →
+                  </Link>
+                </div>
+              </article>
+            )}
+
+            {/* Book Redemption — covers O Level, 9th Class and A Level printed
+                notes, so it gets its own card rather than sitting inside any
+                one program's section. */}
+            {isFounder && (
+              <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #0e7490" }}>
+                <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>📖 Book Redemption</h3>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <Link href="/admin/book-codes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
+                    📖 Book redemption codes →
                   </Link>
                 </div>
               </article>
