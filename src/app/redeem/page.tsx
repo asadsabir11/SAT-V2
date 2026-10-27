@@ -87,10 +87,14 @@ function RedeemForm() {
           <Link href={`/login?role=student&next=/redeem${code ? `?code=${encodeURIComponent(code)}` : ""}`} className="btn btn-primary">Log in</Link>
           {/* .btn-ghost is white-on-transparent, meant for dark "band"
               sections — invisible on this card's white background, so
-              these use an explicit light-background style instead. */}
-          <Link href="/o-level?next=redeem#apply" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for O Level</Link>
-          <Link href="/punjab-board-9th-class#apply" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for 9th Class</Link>
-          <Link href="/a-level#apply" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for A Level</Link>
+              these use an explicit light-background style instead. A
+              dedicated minimal form (name/email/password only), not each
+              program's full marketing-site registration form — a
+              book-redemption student already proved purchase via their
+              code, they're not a lead that needs the admissions funnel. */}
+          <Link href="/redeem/register?program=o-level" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for O Level</Link>
+          <Link href="/redeem/register?program=punjab-9th" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for 9th Class</Link>
+          <Link href="/redeem/register?program=a-level" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for A Level</Link>
         </div>
       </div>
     );
