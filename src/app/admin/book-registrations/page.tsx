@@ -21,10 +21,25 @@ export default function AdminBookRegistrations() {
   const [rows, setRows] = useState<RegistrationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "redeemed" | "pending">("all");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  function load() {
+    setLoading(true);
     fetch("/api/admin/book-registrations").then((r) => r.json()).then((d) => setRows(d.registrations ?? [])).finally(() => setLoading(false));
-  }, []);
+  }
+  useEffect(load, []);
+
+  async function handleDelete(row: RegistrationRow) {
+    if (!confirm(`Delete ${row.name} (${row.email})? This removes their account, login, and any ${PROGRAM_LABELS[row.program] ?? row.program} subject access. This cannot be undone.`)) return;
+    setDeletingId(row.id);
+    try {
+      const res = await fetch(`/api/admin/book-registrations/${row.id}`, { method: "DELETE" });
+      if (res.ok) load();
+      else alert("Failed to delete. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const filtered = rows.filter((r) => filter === "all" || (filter === "redeemed" ? r.redeemed : !r.redeemed));
   const redeemedCount = rows.filter((r) => r.redeemed).length;
@@ -59,6 +74,7 @@ export default function AdminBookRegistrations() {
                   <th>Program</th>
                   <th>Registered</th>
                   <th>Code Status</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -72,6 +88,11 @@ export default function AdminBookRegistrations() {
                       <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: ".78rem", fontWeight: 700, background: r.redeemed ? "#f0fdf4" : "#fef3c7", color: r.redeemed ? "#15803d" : "#92400e" }}>
                         {r.redeemed ? "Redeemed ✓" : "Not redeemed yet"}
                       </span>
+                    </td>
+                    <td>
+                      <button onClick={() => handleDelete(r)} disabled={deletingId === r.id} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "#fee2e2", color: "#991b1b", fontWeight: 700, fontSize: ".82rem", cursor: "pointer" }}>
+                        {deletingId === r.id ? "Deleting…" : "Delete"}
+                      </button>
                     </td>
                   </tr>
                 ))}
