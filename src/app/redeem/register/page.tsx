@@ -92,7 +92,7 @@ export default function BookRegisterPage() {
     <section className="section">
       <div className="container" style={{ maxWidth: 560 }}>
         <div className="eyebrow" style={{ justifyContent: "center" }}>Printed Notes</div>
-        <h1 className="title" style={{ textAlign: "center", marginBottom: 28 }}>Quick Registration</h1>
+        <h1 className="title" style={{ textAlign: "center", marginBottom: 28 }}>Registration</h1>
         <Suspense fallback={<p style={{ textAlign: "center", color: "var(--muted)" }}>Loading…</p>}>
           <RegisterForm />
         </Suspense>
