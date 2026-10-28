@@ -34,6 +34,7 @@ const OLEVEL_MODULES = [
   { href: "/o-level/past-papers", icon: "📄", title: "Past Papers", description: "Practice with past-paper style questions.", accent: "#ea580c", grad: "linear-gradient(135deg,#ea580c,#f59e0b)", glow: "rgba(234,88,12,.35)" },
   { href: "/fees", icon: "💰", title: "Fees", description: "View your fee challans and submit payment proof.", accent: "#0e7490", grad: "linear-gradient(135deg,#0e7490,#06b6d4)", glow: "rgba(14,116,144,.35)" },
   { href: "/o-level/assignments", icon: "📋", title: "Assignments", description: "Submit your work per subject and see your grades.", accent: "#dc2626", grad: "linear-gradient(135deg,#dc2626,#f87171)", glow: "rgba(220,38,38,.35)" },
+  { href: "/chat", icon: "🤖", title: "AI Tutor", description: "Chat for instant help and explanations.", accent: "#9333ea", grad: "linear-gradient(135deg,#9333ea,#c084fc)", glow: "rgba(147,51,234,.35)" },
 ];
 
 interface Announcement {
@@ -305,7 +306,7 @@ export default function Dashboard() {
             <Link href="/quizzes" style={{ padding: "10px 20px", background: "#155eef", color: "#fff", borderRadius: 10, fontWeight: 800, fontSize: ".88rem", textDecoration: "none" }}>
               📝 Quizzes →
             </Link>
-            <Link href="/ai-tutor" style={{ padding: "10px 20px", background: "#f5f3ff", color: "#6d28d9", border: "1.5px solid #ddd6fe", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
+            <Link href="/chat" style={{ padding: "10px 20px", background: "#f5f3ff", color: "#6d28d9", border: "1.5px solid #ddd6fe", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
               🤖 AI Tutor →
             </Link>
             <Link href="/sessions" style={{ padding: "10px 20px", background: "#ecfdf5", color: "#065f46", border: "1.5px solid #a7f3d0", borderRadius: 10, fontWeight: 700, fontSize: ".88rem", textDecoration: "none" }}>
@@ -338,7 +339,7 @@ export default function Dashboard() {
               </p>
               <div className="actions">
                 {diagScore ? (
-                  <CTAButton href="/ai-tutor">Open AI tutor</CTAButton>
+                  <CTAButton href="/chat">Open AI tutor</CTAButton>
                 ) : (
                   <CTAButton href="/diagnostic">Take the diagnostic</CTAButton>
                 )}

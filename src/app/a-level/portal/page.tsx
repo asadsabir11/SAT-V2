@@ -119,6 +119,21 @@ export default async function ALevelPortal() {
             </article>
           </Link>
 
+          <Link
+            href="/chat"
+            className="module-card fade-up"
+            style={{ "--module-accent": "#9333ea", "--module-accent-grad": "linear-gradient(135deg,#9333ea,#c084fc)", "--module-glow": "rgba(147,51,234,.35)", display: "block", marginBottom: 24 } as CSSProperties}
+          >
+            <article className="card" style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 16, padding: "18px 22px" }}>
+              <div className="module-icon" style={{ flexShrink: 0 }}>🤖</div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, color: "#071b33" }}>AI Tutor</h3>
+                <p style={{ margin: "2px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>Chat for instant help and explanations</p>
+              </div>
+              <span className="module-arrow" style={{ fontWeight: 700, fontSize: ".85rem", color: "#9333ea", flexShrink: 0 }}>Open →</span>
+            </article>
+          </Link>
+
           <div className="grid grid-3">
             {MODULES.map((m) => (
               <Link

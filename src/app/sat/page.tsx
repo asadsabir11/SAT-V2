@@ -15,7 +15,7 @@ const MODULES = [
   { href: "/sessions", icon: "📅", title: "Sessions", description: "Join live classes, tutoring sessions, and Q&A calls." },
   { href: "/lectures", icon: "🎬", title: "Lectures", description: "Watch class recordings on demand, anytime." },
   { href: "/diagnostic", icon: "📝", title: "Diagnostic", description: "Take your baseline test and see your starting score." },
-  { href: "/ai-tutor", icon: "🤖", title: "AI Tutor", description: "Get instant help and personalized practice." },
+  { href: "/chat", icon: "🤖", title: "AI Tutor", description: "Get instant help and personalized practice." },
 ];
 
 export default function SatHubPage() {
