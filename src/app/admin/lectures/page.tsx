@@ -5,7 +5,7 @@ import { upload } from "@vercel/blob/client";
 
 type LectureProgram = "sat" | "o-level" | "punjab-9th" | "a-level";
 type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics"
-  | "urdu" | "maths" | "chemistry" | "biology" | "islamiat" | "tarjuma-tul-quran-or-ethics";
+  | "urdu" | "maths" | "chemistry" | "biology" | "islamiat" | "tarjuma-tul-quran-or-ethics" | "computer-science-vol1" | "computer-science-vol2";
 
 interface Lecture {
   id: string;
@@ -52,7 +52,8 @@ const PUNJAB9TH_CATEGORIES: CategoryMeta[] = [
 ];
 
 const ALEVEL_CATEGORIES: CategoryMeta[] = [
-  { value: "computer-science",  label: "Computer Science",  icon: "💻", color: "#be123c", bg: "#fff1f2" },
+  { value: "computer-science-vol1",  label: "Computer Science (CS 9618 Vol 1)",  icon: "💻", color: "#be123c", bg: "#fff1f2" },
+  { value: "computer-science-vol2",  label: "Computer Science (CS 9618 Vol 2)",  icon: "🖥️", color: "#9f1239", bg: "#ffe4e6" },
 ];
 
 const ALL_CATEGORIES = [...SAT_CATEGORIES, ...OLEVEL_CATEGORIES, ...PUNJAB9TH_CATEGORIES, ...ALEVEL_CATEGORIES];
@@ -74,7 +75,12 @@ const COMMON_SUBJECTS: CommonSubject[] = [
   { label: "Math",             icon: "📐", color: "#155eef", bg: "#eff6ff", values: { sat: "math", "o-level": "mathematics", "punjab-9th": "maths" } },
   { label: "English",          icon: "📖", color: "#7c3aed", bg: "#f5f3ff", values: { sat: "english", "o-level": "english-language", "punjab-9th": "english" } },
   { label: "Physics",          icon: "⚛️", color: "#c2410c", bg: "#fff7ed", values: { "o-level": "physics", "punjab-9th": "physics" } },
-  { label: "Computer Science", icon: "💻", color: "#1d4ed8", bg: "#eff6ff", values: { "o-level": "computer-science", "punjab-9th": "computer-science", "a-level": "computer-science" } },
+  // "a-level" deliberately left out here — A-Level Computer Science split
+  // into two volumes (CS 9618 Vol 1 / Vol 2), so there's no longer a single
+  // value that unambiguously matches O-Level/9th's "computer-science" for
+  // the shared multi-program publish flow. A-Level lectures now go through
+  // the normal single-program upload with its own subject choice instead.
+  { label: "Computer Science", icon: "💻", color: "#1d4ed8", bg: "#eff6ff", values: { "o-level": "computer-science", "punjab-9th": "computer-science" } },
   { label: "Islamiyat",        icon: "🕌", color: "#15803d", bg: "#dcfce7", values: { "o-level": "islamiyat", "punjab-9th": "islamiat" } },
 ];
 

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getAllALevelQuizzes, getPublishedALevelQuizzes, createALevelQuiz } from "@/lib/aLevelQuiz";
-import { getALevelAccessLevel } from "@/lib/aLevelAccess";
+import { getAllALevelQuizzes, getPublishedALevelQuizzesBySubject, createALevelQuiz } from "@/lib/aLevelQuiz";
+import { getALevelSubjectAccess } from "@/lib/aLevelAccess";
+import { ALEVEL_LECTURE_CATEGORIES, type ALevelLectureCategory } from "@/lib/lectures";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -16,12 +17,16 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Flat access, not per-subject — matches A-Level's single flat fee.
-  const access = await getALevelAccessLevel(session.email);
+  const subjectParam = req.nextUrl.searchParams.get("subject");
+  if (!subjectParam || !ALEVEL_LECTURE_CATEGORIES.includes(subjectParam as ALevelLectureCategory)) {
+    return NextResponse.json({ error: "subject is required" }, { status: 400 });
+  }
+  const subject = subjectParam as ALevelLectureCategory;
+  const access = await getALevelSubjectAccess(session.email, subject);
   if (access !== "unlocked") {
     return NextResponse.json({ quizzes: [], access });
   }
-  const quizzes = await getPublishedALevelQuizzes();
+  const quizzes = await getPublishedALevelQuizzesBySubject(subject);
   return NextResponse.json({ quizzes, access });
 }
 
@@ -30,10 +35,10 @@ export async function POST(req: NextRequest) {
   if (!session || session.role !== "founder" && session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { title, description } = await req.json();
-  if (!title) {
-    return NextResponse.json({ error: "title is required" }, { status: 400 });
+  const { subject, title, description } = await req.json();
+  if (!title || !subject || !ALEVEL_LECTURE_CATEGORIES.includes(subject)) {
+    return NextResponse.json({ error: "subject and title are required" }, { status: 400 });
   }
-  const id = await createALevelQuiz(title, description ?? "", session.email);
+  const id = await createALevelQuiz(subject, title, description ?? "", session.email);
   return NextResponse.json({ id });
 }

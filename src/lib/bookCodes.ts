@@ -204,7 +204,16 @@ export async function redeemBookCode(rawCode: string, email: string, name: strin
   } else if (row.program === "punjab-9th") {
     await grantPunjab9thAccess(normalizedEmail, approvedBy, notes);
   } else if (row.program === "a-level") {
-    await grantALevelAccess(normalizedEmail, approvedBy, notes);
+    if (row.subject) {
+      await grantALevelAccess(normalizedEmail, row.subject, approvedBy, notes);
+    } else {
+      // A-Level became subject-scoped (CS 9618 Vol 1 / Vol 2) after this
+      // feature launched — a code generated before that split has no
+      // subject recorded. Grant both volumes rather than leaving a
+      // redeemed code granting nothing.
+      await grantALevelAccess(normalizedEmail, "computer-science-vol1", approvedBy, notes);
+      await grantALevelAccess(normalizedEmail, "computer-science-vol2", approvedBy, notes);
+    }
   }
 
   return { ok: true, program: row.program, subject: row.subject };

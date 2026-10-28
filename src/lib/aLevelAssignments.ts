@@ -1,16 +1,17 @@
 import { sql } from "@/lib/db";
+import type { ALevelLectureCategory } from "@/lib/lectures";
 
-// Same Google Classroom shape as satAssignments.ts/amnaShamimaAssignments.ts
-// (late submissions flagged not blocking, one submission per student
-// replacing the last, Unsubmit before grading). A-Level access is flat
-// (one getALevelAccessLevel gate) — no category field at all, since
-// A-Level has exactly one subject (Computer Science).
+// Same Google Classroom shape as oLevelAssignments.ts (late submissions
+// flagged not blocking, one submission per student replacing the last,
+// Unsubmit before grading), category-scoped since A-Level access is now
+// per-subject (CS 9618 Vol 1 / Vol 2), not flat.
 
 export interface ALevelAssignment {
   id: string;
   title: string;
   description: string;
   attachment_url: string;
+  category: ALevelLectureCategory;
   due_at: string | null;
   max_marks: number | null;
   is_published: boolean;
@@ -42,6 +43,7 @@ async function ensureTables() {
       title TEXT NOT NULL,
       description TEXT DEFAULT '',
       attachment_url TEXT DEFAULT '',
+      category TEXT NOT NULL DEFAULT 'computer-science-vol1',
       due_at TIMESTAMPTZ,
       max_marks INTEGER,
       is_published BOOLEAN DEFAULT false,
@@ -66,6 +68,8 @@ async function ensureTables() {
       UNIQUE(assignment_id, student_email)
     )
   `;
+  // Table may already exist from before the Vol 1/Vol 2 split.
+  await sql`ALTER TABLE a_level_assignments ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'computer-science-vol1'`;
   ready = true;
 }
 
@@ -88,23 +92,23 @@ export async function getALevelAssignmentById(id: string): Promise<ALevelAssignm
 }
 
 export async function createALevelAssignment(data: {
-  title: string; description: string; attachment_url: string;
+  title: string; description: string; attachment_url: string; category: ALevelLectureCategory;
   due_at: string | null; max_marks: number | null; created_by: string;
 }): Promise<string> {
   await ensureTables();
   const id = crypto.randomUUID();
   await sql`
-    INSERT INTO a_level_assignments (id, title, description, attachment_url, due_at, max_marks, created_by)
-    VALUES (${id}, ${data.title}, ${data.description}, ${data.attachment_url}, ${data.due_at}, ${data.max_marks}, ${data.created_by})
+    INSERT INTO a_level_assignments (id, title, description, attachment_url, category, due_at, max_marks, created_by)
+    VALUES (${id}, ${data.title}, ${data.description}, ${data.attachment_url}, ${data.category}, ${data.due_at}, ${data.max_marks}, ${data.created_by})
   `;
   return id;
 }
 
-export async function updateALevelAssignment(id: string, data: { title: string; description: string; due_at: string | null; max_marks: number | null }): Promise<void> {
+export async function updateALevelAssignment(id: string, data: { title: string; description: string; category: ALevelLectureCategory; due_at: string | null; max_marks: number | null }): Promise<void> {
   await ensureTables();
   await sql`
     UPDATE a_level_assignments
-    SET title = ${data.title}, description = ${data.description}, due_at = ${data.due_at}, max_marks = ${data.max_marks}, updated_at = NOW()
+    SET title = ${data.title}, description = ${data.description}, category = ${data.category}, due_at = ${data.due_at}, max_marks = ${data.max_marks}, updated_at = NOW()
     WHERE id = ${id}
   `;
 }

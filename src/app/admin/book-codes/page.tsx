@@ -19,6 +19,10 @@ interface BookCodeRow {
 
 const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "a-level": "A Level" };
 const OLEVEL_SUBJECTS = getOLevelSubjects().map((s) => ({ slug: s.slug, name: s.name }));
+const ALEVEL_SUBJECTS = [
+  { slug: "computer-science-vol1", name: "Computer Science (CS 9618 Vol 1)" },
+  { slug: "computer-science-vol2", name: "Computer Science (CS 9618 Vol 2)" },
+];
 
 function fmtDate(d: string | null) {
   if (!d) return "—";
@@ -32,6 +36,7 @@ export default function AdminBookCodes() {
 
   const [program, setProgram] = useState<"o-level" | "punjab-9th" | "a-level">("o-level");
   const [subject, setSubject] = useState(OLEVEL_SUBJECTS[0]?.slug ?? "computer-science");
+  const [aLevelSubject, setALevelSubject] = useState(ALEVEL_SUBJECTS[0].slug);
   const [count, setCount] = useState(100);
   const [batchLabel, setBatchLabel] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -54,7 +59,7 @@ export default function AdminBookCodes() {
       const res = await fetch("/api/admin/book-codes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ program, subject: program === "o-level" ? subject : null, count, batchLabel: batchLabel.trim() }),
+        body: JSON.stringify({ program, subject: program === "o-level" ? subject : program === "a-level" ? aLevelSubject : null, count, batchLabel: batchLabel.trim() }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed to generate codes."); return; }
@@ -108,6 +113,14 @@ export default function AdminBookCodes() {
                 <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", marginBottom: 6 }}>Subject</label>
                 <select value={subject} onChange={(e) => setSubject(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #cbd7e5" }}>
                   {OLEVEL_SUBJECTS.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                </select>
+              </div>
+            )}
+            {program === "a-level" && (
+              <div>
+                <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", marginBottom: 6 }}>Subject</label>
+                <select value={aLevelSubject} onChange={(e) => setALevelSubject(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #cbd7e5" }}>
+                  {ALEVEL_SUBJECTS.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
                 </select>
               </div>
             )}

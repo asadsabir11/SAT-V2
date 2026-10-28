@@ -3,8 +3,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PageHero } from "@/components/site";
 
+type Subject = "computer-science-vol1" | "computer-science-vol2";
+const SUBJECT_LABELS: Record<Subject, string> = {
+  "computer-science-vol1": "CS 9618 Vol 1",
+  "computer-science-vol2": "CS 9618 Vol 2",
+};
+
 interface QuizSummary {
   id: string;
+  subject: Subject;
   title: string;
   description: string;
   is_published: boolean;
@@ -15,6 +22,7 @@ interface QuizSummary {
 export default function ALevelQuizManager() {
   const [quizzes, setQuizzes] = useState<QuizSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subject, setSubject] = useState<Subject>("computer-science-vol1");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [creating, setCreating] = useState(false);
@@ -36,7 +44,7 @@ export default function ALevelQuizManager() {
     const r = await fetch("/api/a-level/quizzes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: title.trim(), description: description.trim() }),
+      body: JSON.stringify({ subject, title: title.trim(), description: description.trim() }),
     });
     const d = await r.json();
     setCreating(false);
@@ -61,7 +69,7 @@ export default function ALevelQuizManager() {
   return (
     <>
       <PageHero eyebrow="A Level Quiz Management" title="Create & manage A Level Computer Science quizzes">
-        Access is flat, not per-subject — any student with full access unlocked can take any published quiz.
+        Each quiz belongs to a subject (CS 9618 Vol 1 or Vol 2) — students only see quizzes for subjects they&apos;ve unlocked.
       </PageHero>
 
       <section className="section">
@@ -77,6 +85,13 @@ export default function ALevelQuizManager() {
             <div className="card" style={{ marginBottom: 24, background: "#f8fafc", border: "1.5px solid #dce5ef" }}>
               <h3 style={{ margin: "0 0 16px", color: "#071b33" }}>New quiz</h3>
               <div className="form-grid">
+                <div className="field">
+                  <label>Subject *</label>
+                  <select value={subject} onChange={(e) => setSubject(e.target.value as Subject)}>
+                    <option value="computer-science-vol1">{SUBJECT_LABELS["computer-science-vol1"]}</option>
+                    <option value="computer-science-vol2">{SUBJECT_LABELS["computer-science-vol2"]}</option>
+                  </select>
+                </div>
                 <div className="field">
                   <label>Quiz title *</label>
                   <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Topic 1 — Data Representation" />
@@ -105,6 +120,7 @@ export default function ALevelQuizManager() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
                       <span style={{ fontWeight: 800, fontSize: "1rem", color: "#071b33" }}>{q.title}</span>
+                      <span style={{ background: "#f1f5f9", color: "#475569", fontSize: ".72rem", fontWeight: 700, padding: "2px 10px", borderRadius: 999 }}>{SUBJECT_LABELS[q.subject] ?? q.subject}</span>
                       {q.is_published && (
                         <span style={{ background: "#d1fae5", color: "#065f46", fontSize: ".72rem", fontWeight: 800, padding: "2px 10px", borderRadius: 999, border: "1px solid #a7f3d0" }}>
                           PUBLISHED

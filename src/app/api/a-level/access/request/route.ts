@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getALevelAccessLevel, requestALevelAccess } from "@/lib/aLevelAccess";
+import { getALevelSubjectAccess, requestALevelAccess } from "@/lib/aLevelAccess";
+import { ALEVEL_LECTURE_CATEGORIES } from "@/lib/lectures";
 import { sendALevelPaymentSubmittedAck, sendALevelPaymentSubmittedAdminAlert } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 
@@ -10,18 +11,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const current = await getALevelAccessLevel(session.email);
+  const body = await req.json().catch(() => ({}));
+  const { subject, paymentMethod, amountPaid, transactionReference, paymentDate, payerAccountName, paymentScreenshotUrl } = body;
+  if (!subject || !ALEVEL_LECTURE_CATEGORIES.includes(subject)) {
+    return NextResponse.json({ error: "A valid subject is required" }, { status: 400 });
+  }
+
+  const current = await getALevelSubjectAccess(session.email, subject);
   if (current === "unlocked") {
     return NextResponse.json({ ok: true, access_level: "unlocked" });
   }
 
-  const body = await req.json().catch(() => ({}));
-  const { paymentMethod, amountPaid, transactionReference, paymentDate, payerAccountName, paymentScreenshotUrl } = body;
   if (!paymentMethod || !amountPaid || !transactionReference?.trim() || !paymentDate || !payerAccountName?.trim()) {
     return NextResponse.json({ error: "Please fill in all required payment fields" }, { status: 400 });
   }
 
-  await requestALevelAccess(session.email, {
+  await requestALevelAccess(session.email, subject, {
     paymentMethod,
     amountPaid: Number(amountPaid),
     transactionReference: transactionReference.trim(),
@@ -37,7 +42,7 @@ export async function POST(req: Request) {
       type: "access_request",
       audience: "admin",
       title: `A Level access request: ${session.name}`,
-      body: `PKR ${Number(amountPaid).toLocaleString()} · ${paymentMethod}`,
+      body: `PKR ${Number(amountPaid).toLocaleString()} · ${paymentMethod} · ${subject}`,
       link: "/admin/a-level-access",
     }).catch(console.error),
   ]);

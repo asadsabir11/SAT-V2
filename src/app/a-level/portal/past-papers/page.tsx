@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PageHero } from "@/components/site";
 
+type Subject = "computer-science-vol1" | "computer-science-vol2";
+const SUBJECT_LABELS: Record<Subject, string> = {
+  "computer-science-vol1": "CS 9618 Vol 1",
+  "computer-science-vol2": "CS 9618 Vol 2",
+};
+const SUBJECTS: Subject[] = ["computer-science-vol1", "computer-science-vol2"];
+
 interface Paper {
   id: string;
   title: string;
@@ -21,16 +28,18 @@ const TYPE_META: Record<Paper["paper_type"], { label: string; icon: string }> = 
 };
 
 export default function ALevelPastPapersPage() {
+  const [subject, setSubject] = useState<Subject>("computer-science-vol1");
   const [papers, setPapers] = useState<Paper[]>([]);
   const [access, setAccess] = useState<"free" | "pending" | "unlocked">("free");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/a-level/past-papers")
+    setLoading(true);
+    fetch(`/api/a-level/past-papers?subject=${subject}`)
       .then((r) => r.json())
       .then((d) => { setPapers(d.papers ?? []); setAccess(d.access ?? "free"); })
       .finally(() => setLoading(false));
-  }, []);
+  }, [subject]);
 
   const locked = !loading && access !== "unlocked";
 
@@ -42,18 +51,26 @@ export default function ALevelPastPapersPage() {
 
       <section className="section">
         <div className="container" style={{ maxWidth: 780 }}>
+          <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+            {SUBJECTS.map((s) => (
+              <button key={s} onClick={() => setSubject(s)} className="btn" style={{ border: subject === s ? "2px solid #be123c" : "1.5px solid #cbd7e5", background: subject === s ? "#fff1f2" : "#fff", color: subject === s ? "#be123c" : "#344054" }}>
+                {SUBJECT_LABELS[s]}
+              </button>
+            ))}
+          </div>
+
           {loading ? (
             <div className="card" style={{ maxWidth: 400 }}><p>Loading past papers…</p></div>
           ) : locked ? (
             <div className="card" style={{ textAlign: "center", padding: 56 }}>
               <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>🔒</div>
               <p style={{ fontWeight: 700, color: "#071b33", marginBottom: 6 }}>
-                {access === "pending" ? "Payment under review" : "Full access required"}
+                {access === "pending" ? "Payment under review" : "Unlock this subject"}
               </p>
               <p style={{ color: "#6b7c93", fontSize: ".88rem", marginBottom: 16 }}>
-                {access === "pending" ? "We're verifying your payment — past papers will appear here once unlocked." : "Unlock full access to view past papers."}
+                {access === "pending" ? "We're verifying your payment — past papers will appear here once unlocked." : `Unlock ${SUBJECT_LABELS[subject]} to view past papers.`}
               </p>
-              {access !== "pending" && <Link href="/a-level/portal/unlock" className="btn btn-primary" style={{ background: "#be123c", borderColor: "#be123c" }}>Unlock Full Access →</Link>}
+              {access !== "pending" && <Link href={`/a-level/portal/unlock?subject=${subject}`} className="btn btn-primary" style={{ background: "#be123c", borderColor: "#be123c" }}>Unlock This Subject →</Link>}
             </div>
           ) : papers.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: 40, color: "#6b7c93" }}>

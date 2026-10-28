@@ -1,8 +1,9 @@
 import { sql } from "@/lib/db";
+import type { ALevelLectureCategory } from "@/lib/lectures";
 
-// Mirrors punjab9thQuiz.ts/olevel-quiz.ts, but with no `subject` field at
-// all — A-Level has exactly one subject (Computer Science), so a subject
-// column would be redundant everywhere. Own tables, isolated from both.
+// Mirrors punjab9thQuiz.ts/olevel-quiz.ts — subject-scoped, since A-Level
+// now has two subjects (CS 9618 Vol 1 / Vol 2). Own tables, isolated from
+// both O-Level's and Punjab-9th's.
 
 export type ALevelQuizQuestion = {
   id: string;
@@ -16,6 +17,7 @@ export type ALevelQuizQuestion = {
 
 export type ALevelQuiz = {
   id: string;
+  subject: ALevelLectureCategory;
   title: string;
   description: string;
   is_published: boolean;
@@ -43,6 +45,7 @@ async function ensureTables() {
   await sql`
     CREATE TABLE IF NOT EXISTS a_level_quizzes (
       id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL DEFAULT 'computer-science-vol1',
       title TEXT NOT NULL,
       description TEXT DEFAULT '',
       is_published BOOLEAN DEFAULT false,
@@ -66,25 +69,29 @@ async function ensureTables() {
       completed_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // Table may already exist from before the Vol 1/Vol 2 split — CREATE
+  // TABLE IF NOT EXISTS above is then a no-op, so the subject column needs
+  // its own migration (same reasoning as olevelAccess.ts's note on this).
+  await sql`ALTER TABLE a_level_quizzes ADD COLUMN IF NOT EXISTS subject TEXT NOT NULL DEFAULT 'computer-science-vol1'`;
   tablesReady = true;
 }
 
 export async function getAllALevelQuizzes(): Promise<(Omit<ALevelQuiz, "questions"> & { question_count: number })[]> {
   await ensureTables();
   const rows = await sql`
-    SELECT id, title, description, is_published, time_limit_minutes, created_by, created_at, updated_at,
+    SELECT id, subject, title, description, is_published, time_limit_minutes, created_by, created_at, updated_at,
            jsonb_array_length(questions) AS question_count
     FROM a_level_quizzes ORDER BY created_at DESC
   `;
   return rows as (Omit<ALevelQuiz, "questions"> & { question_count: number })[];
 }
 
-export async function getPublishedALevelQuizzes(): Promise<(Omit<ALevelQuiz, "questions"> & { question_count: number })[]> {
+export async function getPublishedALevelQuizzesBySubject(subject: ALevelLectureCategory): Promise<(Omit<ALevelQuiz, "questions"> & { question_count: number })[]> {
   await ensureTables();
   const rows = await sql`
-    SELECT id, title, description, is_published, time_limit_minutes, created_by, created_at, updated_at,
+    SELECT id, subject, title, description, is_published, time_limit_minutes, created_by, created_at, updated_at,
            jsonb_array_length(questions) AS question_count
-    FROM a_level_quizzes WHERE is_published = true ORDER BY created_at DESC
+    FROM a_level_quizzes WHERE is_published = true AND subject = ${subject} ORDER BY created_at DESC
   `;
   return rows as (Omit<ALevelQuiz, "questions"> & { question_count: number })[];
 }
@@ -96,12 +103,12 @@ export async function getALevelQuizById(id: string): Promise<ALevelQuiz | null> 
   return { ...rows[0], questions: rows[0].questions ?? [] } as ALevelQuiz;
 }
 
-export async function createALevelQuiz(title: string, description: string, createdBy: string): Promise<string> {
+export async function createALevelQuiz(subject: ALevelLectureCategory, title: string, description: string, createdBy: string): Promise<string> {
   await ensureTables();
   const id = crypto.randomUUID();
   await sql`
-    INSERT INTO a_level_quizzes (id, title, description, created_by)
-    VALUES (${id}, ${title}, ${description}, ${createdBy})
+    INSERT INTO a_level_quizzes (id, subject, title, description, created_by)
+    VALUES (${id}, ${subject}, ${title}, ${description}, ${createdBy})
   `;
   return id;
 }

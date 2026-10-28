@@ -3,20 +3,26 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { PageHero } from "@/components/site";
 
+type Category = "computer-science-vol1" | "computer-science-vol2";
+const SUBJECT_LABELS: Record<Category, string> = {
+  "computer-science-vol1": "Computer Science (CS 9618 Vol 1)",
+  "computer-science-vol2": "Computer Science (CS 9618 Vol 2)",
+};
+
 interface Lecture {
   id: string;
   title: string;
   description: string;
   thumbnail_url: string;
   program: "a-level";
-  category: "computer-science";
+  category: Category;
   order_index: number;
   created_at: string;
   is_locked?: boolean;
   is_free_preview?: boolean;
 }
 
-function LectureCard({ lec, index, onLockedClick }: { lec: Lecture; index: number; onLockedClick: () => void }) {
+function LectureCard({ lec, index, onLockedClick }: { lec: Lecture; index: number; onLockedClick: (category: Category) => void }) {
   const card = (
     <div
       className="card"
@@ -57,7 +63,7 @@ function LectureCard({ lec, index, onLockedClick }: { lec: Lecture; index: numbe
   );
 
   if (lec.is_locked) {
-    return <div onClick={onLockedClick} style={{ textDecoration: "none" }}>{card}</div>;
+    return <div onClick={() => onLockedClick(lec.category)} style={{ textDecoration: "none" }}>{card}</div>;
   }
   return <Link href={`/lectures/${lec.id}`} style={{ textDecoration: "none" }}>{card}</Link>;
 }
@@ -94,11 +100,20 @@ export default function ALevelLecturesPage() {
               <p style={{ color: "#6b7c93" }}>Check back soon — lessons are added regularly.</p>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-              {lectures.map((lec, i) => (
-                <LectureCard key={lec.id} lec={lec} index={i} onLockedClick={() => { window.location.href = "/a-level/portal/unlock"; }} />
-              ))}
-            </div>
+            (["computer-science-vol1", "computer-science-vol2"] as Category[]).map((cat) => {
+              const group = lectures.filter((l) => l.category === cat);
+              if (group.length === 0) return null;
+              return (
+                <div key={cat} style={{ marginBottom: 32 }}>
+                  <h2 style={{ color: "#071b33", fontSize: "1.1rem", marginBottom: 14 }}>{SUBJECT_LABELS[cat]}</h2>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+                    {group.map((lec, i) => (
+                      <LectureCard key={lec.id} lec={lec} index={i} onLockedClick={(category) => { window.location.href = `/a-level/portal/unlock?subject=${category}`; }} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
       </section>

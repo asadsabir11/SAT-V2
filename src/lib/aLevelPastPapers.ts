@@ -1,13 +1,14 @@
 import { sql } from "@/lib/db";
+import type { ALevelLectureCategory } from "@/lib/lectures";
 
-// Mirrors past-papers.ts, without a `subject` field — A-Level has exactly
-// one subject (Computer Science), so a subject column would be redundant.
-// Own table, isolated from O-Level's past_papers.
+// Mirrors past-papers.ts — subject-scoped, since A-Level now has two
+// subjects (CS 9618 Vol 1 / Vol 2). Own table, isolated from O-Level's.
 
 export type ALevelPaperType = "question_paper" | "mark_scheme" | "examiner_report" | "other";
 
 export type ALevelPastPaper = {
   id: string;
+  subject: ALevelLectureCategory;
   title: string;
   description: string;
   session: string;
@@ -27,6 +28,7 @@ async function ensureTable() {
   await sql`
     CREATE TABLE IF NOT EXISTS a_level_past_papers (
       id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL DEFAULT 'computer-science-vol1',
       title TEXT NOT NULL,
       description TEXT DEFAULT '',
       session TEXT DEFAULT '',
@@ -40,6 +42,8 @@ async function ensureTable() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  // Table may already exist from before the Vol 1/Vol 2 split.
+  await sql`ALTER TABLE a_level_past_papers ADD COLUMN IF NOT EXISTS subject TEXT NOT NULL DEFAULT 'computer-science-vol1'`;
   ready = true;
 }
 
@@ -49,9 +53,12 @@ export async function getAllALevelPapers(): Promise<ALevelPastPaper[]> {
   return rows as ALevelPastPaper[];
 }
 
-export async function getPublishedALevelPapers(): Promise<ALevelPastPaper[]> {
+export async function getPublishedALevelPapersBySubject(subject: ALevelLectureCategory): Promise<ALevelPastPaper[]> {
   await ensureTable();
-  const rows = await sql`SELECT * FROM a_level_past_papers WHERE is_published = true ORDER BY order_index ASC, created_at DESC`;
+  const rows = await sql`
+    SELECT * FROM a_level_past_papers WHERE is_published = true AND subject = ${subject}
+    ORDER BY order_index ASC, created_at DESC
+  `;
   return rows as ALevelPastPaper[];
 }
 
@@ -62,6 +69,7 @@ export async function getALevelPaperById(id: string): Promise<ALevelPastPaper | 
 }
 
 export async function createALevelPaper(data: {
+  subject: ALevelLectureCategory;
   title: string;
   description: string;
   session: string;
@@ -75,8 +83,8 @@ export async function createALevelPaper(data: {
   const maxRow = await sql`SELECT COALESCE(MAX(order_index), 0) AS m FROM a_level_past_papers`;
   const nextOrder = (maxRow[0].m as number) + 1;
   await sql`
-    INSERT INTO a_level_past_papers (id, title, description, session, paper_type, file_url, file_name, order_index, created_by)
-    VALUES (${id}, ${data.title}, ${data.description}, ${data.session}, ${data.paper_type}, ${data.file_url}, ${data.file_name}, ${nextOrder}, ${data.created_by})
+    INSERT INTO a_level_past_papers (id, subject, title, description, session, paper_type, file_url, file_name, order_index, created_by)
+    VALUES (${id}, ${data.subject}, ${data.title}, ${data.description}, ${data.session}, ${data.paper_type}, ${data.file_url}, ${data.file_name}, ${nextOrder}, ${data.created_by})
   `;
   return id;
 }

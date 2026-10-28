@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
   if (!VALID_PROGRAMS.includes(program)) {
     return NextResponse.json({ error: "Invalid program" }, { status: 400 });
   }
-  if (program === "o-level" && !subject) {
-    return NextResponse.json({ error: "Subject is required for O Level codes" }, { status: 400 });
+  if ((program === "o-level" || program === "a-level") && !subject) {
+    return NextResponse.json({ error: "Subject is required for this program" }, { status: 400 });
   }
   if (!Number.isInteger(count) || count < 1 || count > 2000) {
     return NextResponse.json({ error: "Count must be between 1 and 2000" }, { status: 400 });

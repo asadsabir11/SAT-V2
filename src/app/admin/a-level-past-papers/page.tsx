@@ -4,9 +4,15 @@ import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
 type PaperType = "question_paper" | "mark_scheme" | "examiner_report" | "other";
+type Subject = "computer-science-vol1" | "computer-science-vol2";
+const SUBJECT_LABELS: Record<Subject, string> = {
+  "computer-science-vol1": "CS 9618 Vol 1",
+  "computer-science-vol2": "CS 9618 Vol 2",
+};
 
 interface Paper {
   id: string;
+  subject: Subject;
   title: string;
   description: string;
   session: string;
@@ -28,6 +34,7 @@ export default function AdminALevelPastPapers() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [subject, setSubject] = useState<Subject>("computer-science-vol1");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [examSession, setExamSession] = useState("");
@@ -62,7 +69,7 @@ export default function AdminALevelPastPapers() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title, description, session: examSession, paper_type: paperType,
+          subject, title, description, session: examSession, paper_type: paperType,
           file_url: blob.url, file_name: file.name,
         }),
       });
@@ -108,9 +115,18 @@ export default function AdminALevelPastPapers() {
           <h3 style={{ margin: "0 0 18px", color: "#071b33", fontSize: "1rem" }}>Upload past paper</h3>
           <div className="form-grid" style={{ marginBottom: 14 }}>
             <div className="field">
+              <label>Subject *</label>
+              <select value={subject} onChange={(e) => setSubject(e.target.value as Subject)}>
+                <option value="computer-science-vol1">{SUBJECT_LABELS["computer-science-vol1"]}</option>
+                <option value="computer-science-vol2">{SUBJECT_LABELS["computer-science-vol2"]}</option>
+              </select>
+            </div>
+            <div className="field">
               <label>Title *</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. May/June 2024 Paper 1" />
             </div>
+          </div>
+          <div className="form-grid" style={{ marginBottom: 14 }}>
             <div className="field">
               <label>Description</label>
               <input value={description} onChange={(e) => setDescription(e.target.value)} />
@@ -171,6 +187,9 @@ export default function AdminALevelPastPapers() {
               <div key={p.id} className="card" style={{ padding: "16px 20px", display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
+                    <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#f1f5f9", color: "#475569" }}>
+                      {SUBJECT_LABELS[p.subject] ?? p.subject}
+                    </span>
                     <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#fff1f2", color: "#be123c" }}>
                       {TYPE_META[p.paper_type].icon} {TYPE_META[p.paper_type].label}
                     </span>

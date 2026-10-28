@@ -31,6 +31,7 @@ export default function TakeALevelQuiz({ params }: { params: Promise<{ id: strin
   const [notFound, setNotFound] = useState(false);
   const [unauthorized, setUnauthorized] = useState(false);
   const [locked, setLocked] = useState<"free" | "pending" | null>(null);
+  const [lockedSubject, setLockedSubject] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [results, setResults] = useState<QuizResult[]>([]);
@@ -46,7 +47,7 @@ export default function TakeALevelQuiz({ params }: { params: Promise<{ id: strin
       .then(async ({ status, data }) => {
         const d = await data;
         if (status === 401) { setUnauthorized(true); return; }
-        if (status === 403 && d.access) { setLocked(d.access); return; }
+        if (status === 403 && d.access) { setLocked(d.access); setLockedSubject(d.subject ?? ""); return; }
         if (status !== 200 || d.error) { setNotFound(true); return; }
         setQuiz(d.quiz);
         setBestScore(d.best_score ?? null);
@@ -112,7 +113,7 @@ export default function TakeALevelQuiz({ params }: { params: Promise<{ id: strin
           {locked === "pending" ? "We received your payment — it's being verified." : "Unlock full access to take this quiz."}
         </p>
         {locked !== "pending" && (
-          <Link href="/a-level/portal/unlock" className="btn btn-primary" style={{ marginBottom: 12, background: "#be123c", borderColor: "#be123c" }}>Unlock Full Access</Link>
+          <Link href={`/a-level/portal/unlock${lockedSubject ? `?subject=${lockedSubject}` : ""}`} className="btn btn-primary" style={{ marginBottom: 12, background: "#be123c", borderColor: "#be123c" }}>Unlock This Subject</Link>
         )}
         <br />
         <Link href="/a-level/portal" style={{ color: "#be123c", fontWeight: 700, fontSize: ".88rem" }}>← Portal</Link>

@@ -35,6 +35,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         body: due ? `Due ${due}` : null,
         link: `/a-level/portal/assignments/${id}`,
         program: "a-level",
+        subject: assignment.category,
       }).catch(console.error);
     }
     return NextResponse.json({ ok: true });
@@ -44,9 +45,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: true });
   }
   if (typeof body.title === "string") {
+    const existing = await getALevelAssignmentById(id);
     await updateALevelAssignment(id, {
       title: body.title,
       description: body.description ?? "",
+      category: body.category ?? existing?.category ?? "computer-science-vol1",
       due_at: body.due_at || null,
       max_marks: typeof body.max_marks === "number" && body.max_marks > 0 ? body.max_marks : null,
     });

@@ -3,8 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
+type Subject = "computer-science-vol1" | "computer-science-vol2";
+const SUBJECT_LABELS: Record<Subject, string> = {
+  "computer-science-vol1": "CS 9618 Vol 1",
+  "computer-science-vol2": "CS 9618 Vol 2",
+};
+
 interface Assignment {
   id: string;
+  category: Subject;
   title: string;
   description: string;
   attachment_url: string;
@@ -29,6 +36,7 @@ export default function AdminALevelAssignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [subject, setSubject] = useState<Subject>("computer-science-vol1");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueAt, setDueAt] = useState("");
@@ -40,6 +48,7 @@ export default function AdminALevelAssignments() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSubject, setEditSubject] = useState<Subject>("computer-science-vol1");
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [editDueAt, setEditDueAt] = useState("");
@@ -72,7 +81,7 @@ export default function AdminALevelAssignments() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title, description, attachment_url: attachmentUrl,
+          subject, title, description, attachment_url: attachmentUrl,
           due_at: dueAt ? new Date(dueAt).toISOString() : null,
           max_marks: maxMarks ? Number(maxMarks) : null,
         }),
@@ -111,13 +120,13 @@ export default function AdminALevelAssignments() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        title: editTitle, description: editDesc,
+        title: editTitle, description: editDesc, category: editSubject,
         due_at: editDueAt ? new Date(editDueAt).toISOString() : null,
         max_marks: editMaxMarks ? Number(editMaxMarks) : null,
       }),
     });
     setAssignments((as) => as.map((x) => (x.id === id
-      ? { ...x, title: editTitle, description: editDesc, due_at: editDueAt ? new Date(editDueAt).toISOString() : null, max_marks: editMaxMarks ? Number(editMaxMarks) : null }
+      ? { ...x, title: editTitle, description: editDesc, category: editSubject, due_at: editDueAt ? new Date(editDueAt).toISOString() : null, max_marks: editMaxMarks ? Number(editMaxMarks) : null }
       : x)));
     setEditingId(null);
   }
@@ -142,9 +151,18 @@ export default function AdminALevelAssignments() {
 
           <div className="form-grid" style={{ marginBottom: 14 }}>
             <div className="field">
+              <label>Subject *</label>
+              <select value={subject} onChange={(e) => setSubject(e.target.value as Subject)}>
+                <option value="computer-science-vol1">{SUBJECT_LABELS["computer-science-vol1"]}</option>
+                <option value="computer-science-vol2">{SUBJECT_LABELS["computer-science-vol2"]}</option>
+              </select>
+            </div>
+            <div className="field">
               <label>Title *</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Week 3 — Sorting algorithms practice set" />
             </div>
+          </div>
+          <div className="form-grid" style={{ marginBottom: 14 }}>
             <div className="field">
               <label>Instructions</label>
               <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What students need to do…" />
@@ -204,7 +222,16 @@ export default function AdminALevelAssignments() {
                 {editingId === a.id ? (
                   <div>
                     <div className="form-grid" style={{ marginBottom: 12 }}>
+                      <div className="field">
+                        <label>Subject *</label>
+                        <select value={editSubject} onChange={(e) => setEditSubject(e.target.value as Subject)}>
+                          <option value="computer-science-vol1">{SUBJECT_LABELS["computer-science-vol1"]}</option>
+                          <option value="computer-science-vol2">{SUBJECT_LABELS["computer-science-vol2"]}</option>
+                        </select>
+                      </div>
                       <div className="field"><label>Title *</label><input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} /></div>
+                    </div>
+                    <div className="form-grid" style={{ marginBottom: 12 }}>
                       <div className="field"><label>Instructions</label><input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} /></div>
                     </div>
                     <div className="form-grid" style={{ marginBottom: 12 }}>
@@ -220,6 +247,9 @@ export default function AdminALevelAssignments() {
                   <div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: 200 }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
+                        <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: "#f1f5f9", color: "#475569" }}>
+                          {SUBJECT_LABELS[a.category] ?? a.category}
+                        </span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700, background: a.is_published ? "#d1fae5" : "#f3f4f6", color: a.is_published ? "#065f46" : "#6b7c93" }}>
                           {a.is_published ? "● Published" : "○ Draft"}
                         </span>
@@ -233,7 +263,7 @@ export default function AdminALevelAssignments() {
                       <Link href={`/admin/a-level-assignments/${a.id}`} style={{ padding: "6px 12px", borderRadius: 8, background: "#f0fdf4", border: "none", color: "#15803d", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", textDecoration: "none" }}>
                         Submissions
                       </Link>
-                      <button onClick={() => { setEditingId(a.id); setEditTitle(a.title); setEditDesc(a.description); setEditDueAt(a.due_at ? toLocalInputValue(a.due_at) : ""); setEditMaxMarks(a.max_marks ? String(a.max_marks) : ""); }} style={{ padding: "6px 12px", borderRadius: 8, background: "#fff1f2", border: "none", color: "#be123c", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
+                      <button onClick={() => { setEditingId(a.id); setEditSubject(a.category); setEditTitle(a.title); setEditDesc(a.description); setEditDueAt(a.due_at ? toLocalInputValue(a.due_at) : ""); setEditMaxMarks(a.max_marks ? String(a.max_marks) : ""); }} style={{ padding: "6px 12px", borderRadius: 8, background: "#fff1f2", border: "none", color: "#be123c", fontWeight: 700, fontSize: ".78rem", cursor: "pointer" }}>
                         Edit
                       </button>
                       <button onClick={() => togglePublish(a)} style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontWeight: 700, fontSize: ".78rem", cursor: "pointer", background: a.is_published ? "#fef3c7" : "#d1fae5", color: a.is_published ? "#92400e" : "#065f46" }}>

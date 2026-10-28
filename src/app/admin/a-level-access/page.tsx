@@ -2,10 +2,17 @@
 import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 
+type Subject = "computer-science-vol1" | "computer-science-vol2";
+const SUBJECT_LABELS: Record<Subject, string> = {
+  "computer-science-vol1": "CS 9618 Vol 1",
+  "computer-science-vol2": "CS 9618 Vol 2",
+};
+
 interface Student {
   id: string;
   email: string;
-  name: string;
+  name: string | null;
+  subject: Subject;
   created_at: string;
   access_level: "free" | "pending" | "unlocked";
   payment_requested_at: string | null;
@@ -52,32 +59,34 @@ export default function AdminALevelAccess() {
   useEffect(() => {
     fetch("/api/admin/a-level-access")
       .then(r => r.json())
-      .then(d => setStudents(d.students ?? []))
+      .then(d => setStudents((d.requests ?? []).map((r: Record<string, unknown>) => ({ ...r, access_level: r.status }))))
       .finally(() => setLoading(false));
   }, []);
 
-  async function grant(email: string) {
-    setBusy(email);
+  async function grant(email: string, subject: Subject) {
+    const key = `${email}:${subject}`;
+    setBusy(key);
     await fetch("/api/admin/a-level-access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "grant", email, notes: noteInput.trim() || undefined }),
+      body: JSON.stringify({ action: "grant", email, subject, notes: noteInput.trim() || undefined }),
     });
-    setStudents(ss => ss.map(s => s.email === email ? { ...s, access_level: "unlocked", approved_at: new Date().toISOString(), notes: noteInput.trim() || s.notes } : s));
+    setStudents(ss => ss.map(s => s.email === email && s.subject === subject ? { ...s, access_level: "unlocked", approved_at: new Date().toISOString(), notes: noteInput.trim() || s.notes } : s));
     setGrantingId(null);
     setNoteInput("");
     setBusy(null);
   }
 
-  async function revoke(email: string) {
-    if (!confirm(`Revoke access for ${email}? They will lose full access.`)) return;
-    setBusy(email);
+  async function revoke(email: string, subject: Subject) {
+    if (!confirm(`Revoke ${SUBJECT_LABELS[subject]} access for ${email}?`)) return;
+    const key = `${email}:${subject}`;
+    setBusy(key);
     await fetch("/api/admin/a-level-access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "revoke", email }),
+      body: JSON.stringify({ action: "revoke", email, subject }),
     });
-    setStudents(ss => ss.map(s => s.email === email ? { ...s, access_level: "free", approved_at: null, approved_by: null } : s));
+    setStudents(ss => ss.map(s => s.email === email && s.subject === subject ? { ...s, access_level: "free", approved_at: null, approved_by: null } : s));
     setBusy(null);
   }
 
@@ -143,6 +152,7 @@ export default function AdminALevelAccess() {
                   <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Subject</th>
                     <th>Signed up</th>
                     <th>Status</th>
                     <th>Payment sent</th>
@@ -156,11 +166,13 @@ export default function AdminALevelAccess() {
                     const meta = STATUS_META[s.access_level];
                     const isGranting = grantingId === s.id;
                     const isExpanded = expandedId === s.id;
+                    const busyKey = `${s.email}:${s.subject}`;
                     return (
                       <Fragment key={s.id}>
                       <tr>
                         <td style={{ fontWeight: 700, color: "#071b33" }}>{s.name || "—"}</td>
                         <td style={{ fontSize: ".83rem" }}>{s.email}</td>
+                        <td style={{ fontSize: ".78rem", fontWeight: 700, color: "#475569" }}>{SUBJECT_LABELS[s.subject] ?? s.subject}</td>
                         <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtDate(s.created_at)}</td>
                         <td>
                           <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 800, background: meta.bg, color: meta.color }}>
@@ -187,10 +199,10 @@ export default function AdminALevelAccess() {
                                   style={{ width: 130, padding: "4px 8px", borderRadius: 6, border: "1.5px solid #e8eef6", fontSize: ".78rem" }}
                                 />
                                 <button
-                                  onClick={() => grant(s.email)}
-                                  disabled={busy === s.email}
+                                  onClick={() => grant(s.email, s.subject)}
+                                  disabled={busy === busyKey}
                                   style={{ padding: "4px 12px", borderRadius: 7, background: "#22c55e", color: "#fff", border: "none", fontWeight: 800, fontSize: ".75rem", cursor: "pointer" }}>
-                                  {busy === s.email ? "…" : "Confirm"}
+                                  {busy === busyKey ? "…" : "Confirm"}
                                 </button>
                                 <button onClick={() => { setGrantingId(null); setNoteInput(""); }} style={{ padding: "4px 10px", borderRadius: 7, background: "#f1f5f9", border: "none", fontWeight: 700, fontSize: ".75rem", cursor: "pointer", color: "#6b7c93" }}>
                                   Cancel
@@ -205,17 +217,17 @@ export default function AdminALevelAccess() {
                             )
                           ) : (
                             <button
-                              onClick={() => revoke(s.email)}
-                              disabled={busy === s.email}
+                              onClick={() => revoke(s.email, s.subject)}
+                              disabled={busy === busyKey}
                               style={{ padding: "5px 14px", borderRadius: 7, background: "#fee2e2", color: "#991b1b", border: "none", fontWeight: 800, fontSize: ".78rem", cursor: "pointer" }}>
-                              {busy === s.email ? "…" : "Revoke"}
+                              {busy === busyKey ? "…" : "Revoke"}
                             </button>
                           )}
                         </td>
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan={8} style={{ background: "#f8fafc", padding: "18px 20px", whiteSpace: "normal" }}>
+                          <td colSpan={9} style={{ background: "#f8fafc", padding: "18px 20px", whiteSpace: "normal" }}>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px 32px" }}>
                               <div>
                                 <div style={{ fontSize: ".72rem", fontWeight: 700, color: "#6b7c93", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Payment method</div>

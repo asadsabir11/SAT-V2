@@ -3,7 +3,8 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { getALevelAccessLevel } from "@/lib/aLevelAccess";
+import { getALevelAccessMap } from "@/lib/aLevelAccess";
+import { ALEVEL_SUBJECT_LABELS, type ALevelLectureCategory } from "@/lib/lectures";
 import { getAnnouncements } from "@/lib/announcements";
 import { PageHero } from "@/components/site";
 
@@ -33,8 +34,13 @@ export default async function ALevelPortal() {
     redirect("/login?role=student&program=a-level&next=/a-level/portal");
   }
 
-  const accessLevel = await getALevelAccessLevel(session!.email);
-  const unlocked = accessLevel === "unlocked";
+  const accessMap = await getALevelAccessMap(session!.email);
+  const subjects = Object.keys(ALEVEL_SUBJECT_LABELS) as ALevelLectureCategory[];
+  const unlockedSubjects = subjects.filter((s) => accessMap[s] === "unlocked");
+  const pendingSubjects = subjects.filter((s) => accessMap[s] === "pending");
+  // Module cards unlock as soon as ANY subject is unlocked — each module
+  // page itself filters/locks content per subject, same as O-Level's.
+  const unlocked = unlockedSubjects.length > 0;
   const announcements = await getAnnouncements("a-level");
 
   return (
@@ -71,25 +77,32 @@ export default async function ALevelPortal() {
             </div>
           )}
 
-          {!unlocked && (
-            <div className="card" style={{ marginBottom: 24, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14, background: accessLevel === "pending" ? "#fffbeb" : "#fff1f2", borderColor: accessLevel === "pending" ? "#fde68a" : "#fecdd3" }}>
-              <div>
-                <p style={{ margin: 0, fontWeight: 800, color: accessLevel === "pending" ? "#92400e" : "#9f1239" }}>
-                  {accessLevel === "pending" ? "⏳ Payment under review" : "🔒 Full access required"}
-                </p>
-                <p style={{ margin: "4px 0 0", color: accessLevel === "pending" ? "#78350f" : "#9d174d", fontSize: ".85rem" }}>
-                  {accessLevel === "pending"
-                    ? "We're verifying your payment. This usually takes a business day."
-                    : "Unlock to see lessons, quizzes, past papers and class links."}
-                </p>
-              </div>
-              {accessLevel !== "pending" && (
-                <Link href="/a-level/portal/unlock" className="btn btn-primary" style={{ padding: "10px 22px", flexShrink: 0, background: "#be123c", borderColor: "#be123c" }}>
-                  Unlock Full Access →
-                </Link>
-              )}
+          <div className="card" style={{ marginBottom: 24, padding: "20px 24px" }}>
+            <p style={{ margin: "0 0 12px", fontWeight: 800, color: "#071b33" }}>Your subjects</p>
+            <div style={{ display: "grid", gap: 10 }}>
+              {subjects.map((s) => {
+                const status = accessMap[s] ?? "free";
+                return (
+                  <div key={s} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, padding: "12px 16px", borderRadius: 10, background: status === "unlocked" ? "#f0fdf4" : status === "pending" ? "#fffbeb" : "#fff1f2" }}>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 700, color: "#071b33", fontSize: ".92rem" }}>{ALEVEL_SUBJECT_LABELS[s]}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: ".8rem", color: status === "unlocked" ? "#15803d" : status === "pending" ? "#92400e" : "#9f1239" }}>
+                        {status === "unlocked" ? "✅ Unlocked" : status === "pending" ? "⏳ Payment under review" : "🔒 Locked"}
+                      </p>
+                    </div>
+                    {status === "free" && (
+                      <Link href={`/a-level/portal/unlock?subject=${s}`} className="btn btn-primary" style={{ padding: "8px 18px", fontSize: ".85rem", background: "#be123c", borderColor: "#be123c" }}>
+                        Unlock →
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
+            {pendingSubjects.length === 0 && unlockedSubjects.length === 0 && (
+              <p style={{ margin: "12px 0 0", color: "#9d174d", fontSize: ".82rem" }}>Unlock a subject to see lessons, quizzes, past papers and class links.</p>
+            )}
+          </div>
 
           <Link
             href="/fees"

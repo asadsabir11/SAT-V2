@@ -8,7 +8,10 @@ export type OLevelLectureCategory = "mathematics" | "computer-science" | "englis
 // separate literal list rather than imported, the same way OLevelLectureCategory
 // doesn't import from academy/data.ts — this file stays self-contained).
 export type Punjab9thLectureCategory = "english" | "urdu" | "maths" | "physics" | "chemistry" | "biology" | "computer-science" | "islamiat" | "tarjuma-tul-quran-or-ethics";
-export type LectureCategory = SatLectureCategory | OLevelLectureCategory | Punjab9thLectureCategory;
+// Cambridge CS 9618's AS/A2 split — A-Level used to be single-subject
+// (plain "computer-science"), but now has two volumes with separate access.
+export type ALevelLectureCategory = "computer-science-vol1" | "computer-science-vol2";
+export type LectureCategory = SatLectureCategory | OLevelLectureCategory | Punjab9thLectureCategory | ALevelLectureCategory;
 
 export const OLEVEL_LECTURE_CATEGORIES: OLevelLectureCategory[] = [
   "mathematics", "computer-science", "english-language", "islamiyat", "pakistan-studies", "physics",
@@ -17,6 +20,13 @@ export const OLEVEL_LECTURE_CATEGORIES: OLevelLectureCategory[] = [
 export const PUNJAB9TH_LECTURE_CATEGORIES: Punjab9thLectureCategory[] = [
   "english", "urdu", "maths", "physics", "chemistry", "biology", "computer-science", "islamiat", "tarjuma-tul-quran-or-ethics",
 ];
+
+export const ALEVEL_LECTURE_CATEGORIES: ALevelLectureCategory[] = ["computer-science-vol1", "computer-science-vol2"];
+
+export const ALEVEL_SUBJECT_LABELS: Record<ALevelLectureCategory, string> = {
+  "computer-science-vol1": "Computer Science (CS 9618 Vol 1)",
+  "computer-science-vol2": "Computer Science (CS 9618 Vol 2)",
+};
 
 export type Lecture = {
   id: string;

@@ -9,7 +9,7 @@ import {
   deleteALevelQuiz,
   getALevelBestAttempt,
 } from "@/lib/aLevelQuiz";
-import { getALevelAccessLevel } from "@/lib/aLevelAccess";
+import { getALevelSubjectAccess } from "@/lib/aLevelAccess";
 import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
@@ -30,9 +30,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const access = await getALevelAccessLevel(session.email);
+  const access = await getALevelSubjectAccess(session.email, quiz.subject);
   if (access !== "unlocked") {
-    return NextResponse.json({ error: "Access denied. Unlock full access to take this quiz.", access }, { status: 403 });
+    return NextResponse.json({ error: "Access denied. Unlock this subject to take this quiz.", access, subject: quiz.subject }, { status: 403 });
   }
 
   const bestScore = await getALevelBestAttempt(id, session.email);
@@ -55,8 +55,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       await createNotification({
         type: "quiz",
         title: `New quiz: ${quiz.title}`,
-        link: "/a-level/portal",
+        link: `/a-level/portal/quizzes?subject=${quiz.subject}`,
         program: "a-level",
+        subject: quiz.subject,
       }).catch(console.error);
     }
     return NextResponse.json({ ok: true });
