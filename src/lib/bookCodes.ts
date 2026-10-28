@@ -188,12 +188,16 @@ export async function redeemBookCode(rawCode: string, email: string, name: strin
   const row = claimed[0] as { id: string; program: BookCodeProgram; subject: string | null };
 
   if (row.program !== studentProgram) {
-    // Shouldn't happen in practice (the redeem page only lets a student
-    // submit against their own program), but guard anyway rather than
-    // silently granting access for a program they're not even registered
-    // in. The code stays marked used either way — it was already claimed
-    // above, so it can't be retried against the right program by someone
-    // else; support can re-issue a replacement if this was a genuine mixup.
+    // A mismatched program is a recoverable mistake (e.g. registered under
+    // the wrong program by accident), not a security concern — roll back
+    // the claim instead of permanently burning a code nobody actually
+    // redeemed. Scoped to the email that just claimed it, so this can't
+    // undo a genuine redemption from an unrelated race.
+    await sql`
+      UPDATE book_redemption_codes
+      SET status = 'unused', redeemed_by_email = NULL, redeemed_by_name = NULL, redeemed_at = NULL
+      WHERE id = ${row.id} AND status = 'used' AND redeemed_by_email = ${normalizedEmail}
+    `;
     return { ok: false, error: "wrong_program" };
   }
 
