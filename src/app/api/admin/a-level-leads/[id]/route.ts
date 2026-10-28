@@ -29,6 +29,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
       await deleteParentsForStudent(row.id);
     }
     await sql`DELETE FROM users WHERE email = ${email} AND role = 'student' AND program = 'a-level'`;
+    // Per-subject access lives in its own table (added after this route was
+    // first written, when A-Level was still flat) — without this, a
+    // re-registration under the same email inherited whatever Vol 1/Vol 2
+    // access the deleted account still had, bypassing the book-redemption
+    // flow entirely.
+    await sql`DELETE FROM a_level_subject_access WHERE email = ${email}`;
   }
 
   await deleteByField("leads-a-level.json", "id", id);
