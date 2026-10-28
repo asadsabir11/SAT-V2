@@ -103,6 +103,63 @@ export async function listBookCodes(program?: BookCodeProgram): Promise<BookCode
   return rows as BookCodeRecord[];
 }
 
+let registrationsTableReady = false;
+async function ensureRegistrationsTable() {
+  if (registrationsTableReady) return;
+  await sql`
+    CREATE TABLE IF NOT EXISTS book_redemption_registrations (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      name TEXT NOT NULL,
+      program TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  registrationsTableReady = true;
+}
+
+// Separate from the normal per-program leads tables on purpose — a
+// book-redemption student isn't a marketing lead needing admissions
+// follow-up (see the registration form's own comment), so it doesn't
+// belong in /admin/o-level-leads etc. This just gives admins their own
+// view of who signed up through this specific flow.
+export async function recordBookRegistration(email: string, name: string, program: BookCodeProgram): Promise<void> {
+  await ensureRegistrationsTable();
+  await sql`
+    INSERT INTO book_redemption_registrations (id, email, name, program)
+    VALUES (${crypto.randomUUID()}, ${email.toLowerCase().trim()}, ${name}, ${program})
+  `;
+}
+
+export interface BookRegistrationRow {
+  id: string;
+  email: string;
+  name: string;
+  program: BookCodeProgram;
+  created_at: string;
+  redeemed: boolean;
+}
+
+export async function listBookRegistrations(program?: BookCodeProgram): Promise<BookRegistrationRow[]> {
+  await ensureRegistrationsTable();
+  await ensureTable();
+  const rows = program
+    ? await sql`
+        SELECT r.id, r.email, r.name, r.program, r.created_at,
+               EXISTS(SELECT 1 FROM book_redemption_codes c WHERE c.redeemed_by_email = r.email AND c.program = r.program AND c.status = 'used') AS redeemed
+        FROM book_redemption_registrations r
+        WHERE r.program = ${program}
+        ORDER BY r.created_at DESC
+      `
+    : await sql`
+        SELECT r.id, r.email, r.name, r.program, r.created_at,
+               EXISTS(SELECT 1 FROM book_redemption_codes c WHERE c.redeemed_by_email = r.email AND c.program = r.program AND c.status = 'used') AS redeemed
+        FROM book_redemption_registrations r
+        ORDER BY r.created_at DESC
+      `;
+  return rows as BookRegistrationRow[];
+}
+
 export type RedeemBookCodeResult =
   | { ok: true; program: BookCodeProgram; subject: string | null }
   | { ok: false; error: "not_found" | "already_used" | "wrong_program" };

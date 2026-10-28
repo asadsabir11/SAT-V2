@@ -432,6 +432,9 @@ export default function Admin() {
                   <Link href="/admin/book-codes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
                     📖 Book redemption codes →
                   </Link>
+                  <Link href="/admin/book-registrations" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #0e7490", background: "#ecfeff", color: "#0e7490" }}>
+                    🧑‍🎓 Book redemption students →
+                  </Link>
                 </div>
               </article>
             )}

@@ -4,8 +4,9 @@ import { createToken, AUTH_COOKIE } from "@/lib/auth";
 import { isValidEmail, passwordStrengthError } from "@/lib/validators";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { createNotification } from "@/lib/notifications";
+import { recordBookRegistration, type BookCodeProgram } from "@/lib/bookCodes";
 
-type BookProgram = "o-level" | "punjab-9th" | "a-level";
+type BookProgram = BookCodeProgram;
 const VALID_PROGRAMS: BookProgram[] = ["o-level", "punjab-9th", "a-level"];
 const PROGRAM_LABELS: Record<BookProgram, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "a-level": "A Level" };
 
@@ -55,13 +56,14 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = await createUser(email, String(body.password), "student", name, program);
+    await recordBookRegistration(email, name, program as BookCodeProgram);
 
     createNotification({
       type: "registration",
       audience: "admin",
       title: `New ${PROGRAM_LABELS[program as BookProgram]} book-code student: ${name}`,
       body: `Registered via printed-book redemption (${email})`,
-      link: "/admin/book-codes",
+      link: "/admin/book-registrations",
     }).catch(console.error);
 
     const token = await createToken({ id: userId, email, role: "student", name, program: program as BookProgram });
