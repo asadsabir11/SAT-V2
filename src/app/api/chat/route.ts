@@ -15,6 +15,23 @@ function placeholderReply(): string {
   return "The chatbot isn't connected yet — once it's configured, I'll answer using your course notes. In the meantime, try asking your teacher or check the lecture materials.";
 }
 
+// Client input is untrusted: keep only well-shaped {role, content} pairs,
+// cap history length/size so a malicious or buggy client can't blow up the
+// payload we forward to n8n.
+function sanitizeHistory(raw: unknown): ChatMessage[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (m): m is ChatMessage =>
+        !!m &&
+        typeof m === "object" &&
+        (m.role === "user" || m.role === "assistant") &&
+        typeof m.content === "string"
+    )
+    .slice(-6)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 1200) }));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
@@ -22,28 +39,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const allowed = await checkRateLimit(`chat:${clientIp(request)}`, 30, 60);
-    if (!allowed) {
+    const ipAllowed = await checkRateLimit(`chat:${clientIp(request)}`, 30, 60);
+    if (!ipAllowed) {
+      return NextResponse.json({ error: "Too many messages. Please slow down and try again shortly." }, { status: 429 });
+    }
+    const studentAllowed = await checkRateLimit(`chat:student:${session.id}`, 10, 1);
+    if (!studentAllowed) {
       return NextResponse.json({ error: "Too many messages. Please slow down and try again shortly." }, { status: 429 });
     }
 
-    const { messages, sessionId } = await request.json();
-    if (!messages?.length) {
+    const body = await request.json();
+    const message = typeof body?.message === "string" ? body.message.trim().slice(0, 2000) : "";
+    if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
-
-    const lastUserMsg = [...messages].reverse().find((m: ChatMessage) => m.role === "user")?.content ?? "";
+    const history = sanitizeHistory(body?.history);
+    const sessionId = typeof body?.sessionId === "string" ? body.sessionId : undefined;
 
     let response = placeholderReply();
-    const webhookUrl = process.env.N8N_CHATBOT_WEBHOOK_URL;
+    const webhookUrl = process.env.N8N_CHAT_URL;
     if (webhookUrl) {
       try {
+        // program/email/name come from the authenticated session, never from
+        // the request body — the client can't impersonate another program
+        // or student by sending a different value.
         const data = await sendToN8n(webhookUrl, {
           program: session.program ?? "sat",
           email: session.email,
           name: session.name,
-          message: lastUserMsg,
-          history: messages as ChatMessage[],
+          message,
+          history,
         }) as { response?: string };
         if (data?.response) response = data.response;
       } catch (n8nErr) {
@@ -60,10 +85,11 @@ export async function POST(request: NextRequest) {
         const userRows = await sql`SELECT id FROM users WHERE email = ${session.email} LIMIT 1`;
         const studentId = (userRows[0] as { id: string } | undefined)?.id;
         if (studentId) {
+          const messageCount = history.length + 1;
           await sql`
             INSERT INTO ai_tutor_sessions (id, student_id, started_at, message_count)
-            VALUES (${sessionId}, ${studentId}, NOW(), ${messages.length})
-            ON CONFLICT (id) DO UPDATE SET message_count = ${messages.length}, ended_at = NOW()
+            VALUES (${sessionId}, ${studentId}, NOW(), ${messageCount})
+            ON CONFLICT (id) DO UPDATE SET message_count = ${messageCount}, ended_at = NOW()
           `;
         }
       } catch (trackErr) {

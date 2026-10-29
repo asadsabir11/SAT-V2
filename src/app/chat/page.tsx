@@ -24,7 +24,7 @@ export default function ChatPage() {
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, sessionId: sessionId.current }),
+        body: JSON.stringify({ message: text, history: messages, sessionId: sessionId.current }),
       });
       const data = await r.json();
       setMessages((m) => [...m, { role: "assistant", content: data.response }]);
@@ -59,8 +59,9 @@ export default function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question…"
                 aria-label="Chat message"
+                disabled={loading}
               />
-              <button className="btn btn-primary">Send</button>
+              <button className="btn btn-primary" disabled={loading}>Send</button>
             </form>
 
             <div className="actions" style={{ justifyContent: "flex-end" }}>

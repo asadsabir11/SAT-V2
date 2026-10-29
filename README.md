@@ -37,7 +37,7 @@ Pricing CTAs use the Stripe payment-link pattern: if `NEXT_PUBLIC_STRIPE_FOUNDER
 
 ## Environment variables
 
-See `.env.example` for the full annotated list: database (`POSTGRES_URL`), auth (`JWT_SECRET`, `ADMIN_SECRET`), AI (`OPENAI_API_KEY`), email (`RESEND_API_KEY`, `ADMIN_EMAIL`), storage (`BLOB_READ_WRITE_TOKEN`), payments, community links (`NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL`, `NEXT_PUBLIC_TELEGRAM_COMMUNITY_URL`), contact addresses, weekly-report cron (`CRON_SECRET`, `COHORT_START_DATE`), and optional analytics IDs.
+See `.env.example` for the full annotated list: database (`POSTGRES_URL`), auth (`JWT_SECRET`, `ADMIN_SECRET`), AI (`OPENAI_API_KEY`), chatbot (`N8N_CHAT_URL`, `N8N_WEBHOOK_SECRET`), email (`RESEND_API_KEY`, `ADMIN_EMAIL`), storage (`BLOB_READ_WRITE_TOKEN`), payments, community links (`NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL`, `NEXT_PUBLIC_TELEGRAM_COMMUNITY_URL`), contact addresses, weekly-report cron (`CRON_SECRET`, `COHORT_START_DATE`), and optional analytics IDs. All of these must also be set in Vercel's project settings (Settings → Environment Variables) for production — `.env.local` only covers local dev.
 
 ## Legal
 
