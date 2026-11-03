@@ -37,7 +37,7 @@ export default function AdminBookCodes() {
   const [program, setProgram] = useState<"o-level" | "punjab-9th" | "a-level">("o-level");
   const [subject, setSubject] = useState(OLEVEL_SUBJECTS[0]?.slug ?? "computer-science");
   const [aLevelSubject, setALevelSubject] = useState(ALEVEL_SUBJECTS[0].slug);
-  const [count, setCount] = useState(100);
+  const [count, setCount] = useState("100");
   const [batchLabel, setBatchLabel] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedCodes, setGeneratedCodes] = useState<string[] | null>(null);
@@ -52,6 +52,11 @@ export default function AdminBookCodes() {
   async function handleGenerate(e: { preventDefault(): void }) {
     e.preventDefault();
     if (!batchLabel.trim()) { setError("Batch label is required (e.g. \"Print Run 1 — Oct 2026\")."); return; }
+    const parsedCount = Number(count);
+    if (!Number.isInteger(parsedCount) || parsedCount < 1 || parsedCount > 2000) {
+      setError("How many codes must be a whole number between 1 and 2000.");
+      return;
+    }
     setError("");
     setGenerating(true);
     setGeneratedCodes(null);
@@ -59,7 +64,7 @@ export default function AdminBookCodes() {
       const res = await fetch("/api/admin/book-codes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ program, subject: program === "o-level" ? subject : program === "a-level" ? aLevelSubject : null, count, batchLabel: batchLabel.trim() }),
+        body: JSON.stringify({ program, subject: program === "o-level" ? subject : program === "a-level" ? aLevelSubject : null, count: parsedCount, batchLabel: batchLabel.trim() }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Failed to generate codes."); return; }
@@ -126,7 +131,7 @@ export default function AdminBookCodes() {
             )}
             <div>
               <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", marginBottom: 6 }}>How many codes</label>
-              <input type="number" min={1} max={2000} value={count} onChange={(e) => setCount(Number(e.target.value))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #cbd7e5" }} />
+              <input type="number" min={1} max={2000} value={count} onChange={(e) => setCount(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #cbd7e5" }} />
             </div>
             <div>
               <label style={{ display: "block", fontWeight: 700, fontSize: ".85rem", marginBottom: 6 }}>Batch label</label>
