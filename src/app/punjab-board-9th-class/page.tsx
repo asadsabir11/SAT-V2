@@ -148,6 +148,20 @@ export default async function Punjab9thClassPage() {
         </div>
       </section>
 
+      {/* 3a — Weekly schedule */}
+      <section className="section">
+        <div className="container" style={{ maxWidth: 780, textAlign: "center" }}>
+          <div className="eyebrow" style={{ justifyContent: "center" }}>Weekly timetable</div>
+          <h2 className="title">Weekly Class Schedule</h2>
+          <p className="lead" style={{ margin: "0 auto 24px" }}>All times are Pakistan Standard Time (PKT).</p>
+          <img
+            src="/punjab-schedule.png"
+            alt="Punjab Board 9th and 10th Class weekly schedule, all times PKT: Monday Mathematics, Tuesday General Science, Wednesday Urdu, Thursday Test and Review, Friday English"
+            style={{ width: "100%", maxWidth: 640, borderRadius: 16, display: "block", margin: "0 auto" }}
+          />
+        </div>
+      </section>
+
       {/* 3b — Students learning from home */}
       <section className="section soft">
         <div className="container">
@@ -229,20 +243,6 @@ export default async function Punjab9thClassPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* 6b — Weekly schedule */}
-      <section className="section">
-        <div className="container" style={{ maxWidth: 780, textAlign: "center" }}>
-          <div className="eyebrow" style={{ justifyContent: "center" }}>Weekly timetable</div>
-          <h2 className="title">This week&apos;s class schedule</h2>
-          <p className="lead" style={{ margin: "0 auto 24px" }}>All times are Pakistan Standard Time (PKT).</p>
-          <img
-            src="/punjab-schedule.png"
-            alt="Punjab Board 9th and 10th Class weekly schedule, all times PKT: Monday Mathematics, Tuesday General Science, Wednesday Urdu, Thursday Test and Review, Friday English"
-            style={{ width: "100%", maxWidth: 640, borderRadius: 16, display: "block", margin: "0 auto" }}
-          />
         </div>
       </section>
 
