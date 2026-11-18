@@ -36,8 +36,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     } else if (program === "a-level") {
       await sql`DELETE FROM a_level_subject_access WHERE email = ${email}`;
     }
-    // punjab-9th has no separate access table — access_level lives directly
-    // on the users row, already removed above.
+    // punjab-9th/punjab-10th have no separate access table — access_level
+    // lives directly on the users row, already removed above.
   }
 
   await sql`DELETE FROM book_redemption_registrations WHERE id = ${id}`;

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 
-type LectureProgram = "sat" | "o-level" | "punjab-9th" | "a-level";
+type LectureProgram = "sat" | "o-level" | "punjab-9th" | "punjab-10th" | "a-level";
 type LectureCategory = "introduction" | "math" | "english" | "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics"
   | "urdu" | "maths" | "chemistry" | "biology" | "islamiat" | "tarjuma-tul-quran-or-ethics" | "computer-science-vol1" | "computer-science-vol2";
 
@@ -60,7 +60,7 @@ const ALL_CATEGORIES = [...SAT_CATEGORIES, ...OLEVEL_CATEGORIES, ...PUNJAB9TH_CA
 const categoryMeta = (cat: LectureCategory): CategoryMeta =>
   ALL_CATEGORIES.find(c => c.value === cat) ?? SAT_CATEGORIES[1];
 const categoriesFor = (program: LectureProgram) =>
-  program === "o-level" ? OLEVEL_CATEGORIES : program === "punjab-9th" ? PUNJAB9TH_CATEGORIES : program === "a-level" ? ALEVEL_CATEGORIES : SAT_CATEGORIES;
+  program === "o-level" ? OLEVEL_CATEGORIES : (program === "punjab-9th" || program === "punjab-10th") ? PUNJAB9TH_CATEGORIES : program === "a-level" ? ALEVEL_CATEGORIES : SAT_CATEGORIES;
 
 // Subjects that are conceptually the same across programs but stored under a
 // different value per program's own category enum (e.g. SAT's "math" vs
@@ -72,16 +72,16 @@ const categoriesFor = (program: LectureProgram) =>
 // for a single lookup path.
 type CommonSubject = { label: string; icon: string; color: string; bg: string; values: Partial<Record<LectureProgram, LectureCategory>> };
 const COMMON_SUBJECTS: CommonSubject[] = [
-  { label: "Math",             icon: "📐", color: "#155eef", bg: "#eff6ff", values: { sat: "math", "o-level": "mathematics", "punjab-9th": "maths" } },
-  { label: "English",          icon: "📖", color: "#7c3aed", bg: "#f5f3ff", values: { sat: "english", "o-level": "english-language", "punjab-9th": "english" } },
-  { label: "Physics",          icon: "⚛️", color: "#c2410c", bg: "#fff7ed", values: { "o-level": "physics", "punjab-9th": "physics" } },
+  { label: "Math",             icon: "📐", color: "#155eef", bg: "#eff6ff", values: { sat: "math", "o-level": "mathematics", "punjab-9th": "maths", "punjab-10th": "maths" } },
+  { label: "English",          icon: "📖", color: "#7c3aed", bg: "#f5f3ff", values: { sat: "english", "o-level": "english-language", "punjab-9th": "english", "punjab-10th": "english" } },
+  { label: "Physics",          icon: "⚛️", color: "#c2410c", bg: "#fff7ed", values: { "o-level": "physics", "punjab-9th": "physics", "punjab-10th": "physics" } },
   // "a-level" deliberately left out here — A-Level Computer Science split
   // into two volumes (CS 9618 Vol 1 / Vol 2), so there's no longer a single
-  // value that unambiguously matches O-Level/9th's "computer-science" for
-  // the shared multi-program publish flow. A-Level lectures now go through
-  // the normal single-program upload with its own subject choice instead.
-  { label: "Computer Science", icon: "💻", color: "#1d4ed8", bg: "#eff6ff", values: { "o-level": "computer-science", "punjab-9th": "computer-science" } },
-  { label: "Islamiyat",        icon: "🕌", color: "#15803d", bg: "#dcfce7", values: { "o-level": "islamiyat", "punjab-9th": "islamiat" } },
+  // value that unambiguously matches O-Level/9th/10th's "computer-science"
+  // for the shared multi-program publish flow. A-Level lectures now go
+  // through the normal single-program upload with its own subject choice.
+  { label: "Computer Science", icon: "💻", color: "#1d4ed8", bg: "#eff6ff", values: { "o-level": "computer-science", "punjab-9th": "computer-science", "punjab-10th": "computer-science" } },
+  { label: "Islamiyat",        icon: "🕌", color: "#15803d", bg: "#dcfce7", values: { "o-level": "islamiyat", "punjab-9th": "islamiat", "punjab-10th": "islamiat" } },
 ];
 
 type CategoryOption = { key: string; label: string; icon: string; color: string; bg: string };
@@ -108,8 +108,8 @@ function resolveCategoryForProgram(program: LectureProgram, key: string): Lectur
   return key as LectureCategory;
 }
 
-const PROGRAM_LABEL: Record<LectureProgram, string> = { sat: "🎓 SAT", "o-level": "📘 O Level", "punjab-9th": "🏫 9th Class", "a-level": "🎯 A Level" };
-const ALL_PROGRAMS: LectureProgram[] = ["sat", "o-level", "punjab-9th", "a-level"];
+const PROGRAM_LABEL: Record<LectureProgram, string> = { sat: "🎓 SAT", "o-level": "📘 O Level", "punjab-9th": "🏫 9th Class", "punjab-10th": "🏫 10th Class", "a-level": "🎯 A Level" };
+const ALL_PROGRAMS: LectureProgram[] = ["sat", "o-level", "punjab-9th", "punjab-10th", "a-level"];
 
 function commonSubjectForCategory(program: LectureProgram, category: LectureCategory): CommonSubject | undefined {
   return COMMON_SUBJECTS.find((cs) => cs.values[program] === category);
@@ -425,7 +425,7 @@ export default function AdminLectures() {
           <div className="field" style={{ marginBottom: 16 }}>
             <label>Program *</label>
             <div style={{ display: "flex", gap: 10 }}>
-              {([["sat", "🎓 SAT"], ["o-level", "📘 O Level"], ["punjab-9th", "🏫 9th Class"], ["a-level", "🎯 A Level"]] as [LectureProgram, string][]).map(([val, label]) => (
+              {([["sat", "🎓 SAT"], ["o-level", "📘 O Level"], ["punjab-9th", "🏫 9th Class"], ["punjab-10th", "🏫 10th Class"], ["a-level", "🎯 A Level"]] as [LectureProgram, string][]).map(([val, label]) => (
                 <button
                   key={val}
                   type="button"
@@ -486,6 +486,11 @@ export default function AdminLectures() {
             {programs.includes("punjab-9th") && (
               <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
                 ℹ 9th Class access is a single flat unlock — one payment unlocks lectures for every subject.
+              </p>
+            )}
+            {programs.includes("punjab-10th") && (
+              <p style={{ color: "#155eef", fontSize: ".78rem", fontWeight: 600, margin: "8px 0 0" }}>
+                ℹ 10th Class access is a single flat unlock — one payment unlocks lectures for every subject.
               </p>
             )}
           </div>
@@ -598,7 +603,7 @@ export default function AdminLectures() {
         {/* Lecture list */}
         {!loading && lectures.length > 0 && (
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-            {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"], ["punjab-9th", "🏫 9th Class"], ["a-level", "🎯 A Level"]] as [typeof filterProgram, string][]).map(([val, label]) => (
+            {([["all", "All"], ["sat", "🎓 SAT"], ["o-level", "📘 O Level"], ["punjab-9th", "🏫 9th Class"], ["punjab-10th", "🏫 10th Class"], ["a-level", "🎯 A Level"]] as [typeof filterProgram, string][]).map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setFilterProgram(val)}
@@ -729,9 +734,9 @@ export default function AdminLectures() {
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
                         <span style={{ fontWeight: 800, color: "#6b7c93", fontSize: ".75rem" }}>#{i + 1}</span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700,
-                          background: lec.program === "o-level" ? "#fef3c7" : lec.program === "punjab-9th" ? "#dbeafe" : lec.program === "a-level" ? "#fff1f2" : "#f1f5f9",
-                          color:      lec.program === "o-level" ? "#92400e" : lec.program === "punjab-9th" ? "#1e40af" : lec.program === "a-level" ? "#be123c" : "#475569" }}>
-                          {lec.program === "o-level" ? "📘 O Level" : lec.program === "punjab-9th" ? "🏫 9th Class" : lec.program === "a-level" ? "🎯 A Level" : "🎓 SAT"}
+                          background: lec.program === "o-level" ? "#fef3c7" : lec.program === "punjab-9th" ? "#dbeafe" : lec.program === "punjab-10th" ? "#ddd6fe" : lec.program === "a-level" ? "#fff1f2" : "#f1f5f9",
+                          color:      lec.program === "o-level" ? "#92400e" : lec.program === "punjab-9th" ? "#1e40af" : lec.program === "punjab-10th" ? "#5b21b6" : lec.program === "a-level" ? "#be123c" : "#475569" }}>
+                          {lec.program === "o-level" ? "📘 O Level" : lec.program === "punjab-9th" ? "🏫 9th Class" : lec.program === "punjab-10th" ? "🏫 10th Class" : lec.program === "a-level" ? "🎯 A Level" : "🎓 SAT"}
                         </span>
                         <span style={{ padding: "2px 10px", borderRadius: 999, fontSize: ".72rem", fontWeight: 700,
                           background: categoryMeta(lec.category).bg,

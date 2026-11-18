@@ -4,6 +4,7 @@ import { getSubmissionById, verifySubmission, rejectSubmission, getChallanById }
 import { grantAccess } from "@/lib/users";
 import { grantOLevelAccess } from "@/lib/olevelAccess";
 import { grantPunjab9thAccess } from "@/lib/punjab9thAccess";
+import { grantPunjab10thAccess } from "@/lib/punjab10thAccess";
 import { sendChallanVerified } from "@/lib/email";
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -17,7 +18,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 
 function subjectLabel(program: string, subject: string): string {
   if (subject) return SUBJECT_LABELS[subject] ?? subject;
-  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+  return program === "punjab-9th" ? "9th Class — All Subjects" : program === "punjab-10th" ? "10th Class — All Subjects" : "Full SAT Access";
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const challanIds = existing.challan_ids.split(",").filter(Boolean);
   const subjects: string[] = [];
-  let program: "sat" | "o-level" | "punjab-9th" | undefined;
+  let program: "sat" | "o-level" | "punjab-9th" | "punjab-10th" | undefined;
   for (const challanId of challanIds) {
     const challan = await getChallanById(challanId);
     if (!challan) continue;
@@ -57,6 +58,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       await grantAccess(challan.student_email, session.email, `Challan ${challan.period} verified via fee portal`);
     } else if (challan.program === "punjab-9th") {
       await grantPunjab9thAccess(challan.student_email, session.email, `Challan ${challan.period} verified via fee portal`);
+    } else if (challan.program === "punjab-10th") {
+      await grantPunjab10thAccess(challan.student_email, session.email, `Challan ${challan.period} verified via fee portal`);
     } else {
       await grantOLevelAccess(challan.student_email, challan.subject, session.email, `Challan ${challan.period} verified via fee portal`);
     }

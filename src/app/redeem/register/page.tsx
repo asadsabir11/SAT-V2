@@ -3,7 +3,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "a-level": "A Level" };
+const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "punjab-10th": "10th Class", "a-level": "A Level" };
 
 function RegisterForm() {
   const params = useSearchParams();

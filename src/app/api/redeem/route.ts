@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth";
 import { redeemBookCode, type BookCodeProgram } from "@/lib/bookCodes";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
-const REDEEMABLE_PROGRAMS: BookCodeProgram[] = ["o-level", "punjab-9th", "a-level"];
+const REDEEMABLE_PROGRAMS: BookCodeProgram[] = ["o-level", "punjab-9th", "punjab-10th", "a-level"];
 
 // Public book-code redemption — requires a signed-in student (the code
 // grants access to that student's own account), but any logged-in role

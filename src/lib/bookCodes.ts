@@ -1,6 +1,7 @@
 import { sql } from "@/lib/db";
 import { grantOLevelAccess } from "@/lib/olevelAccess";
 import { grantPunjab9thAccess } from "@/lib/punjab9thAccess";
+import { grantPunjab10thAccess } from "@/lib/punjab10thAccess";
 import { grantALevelAccess } from "@/lib/aLevelAccess";
 
 // Redemption codes printed inside physical copies of the academy's notes.
@@ -11,7 +12,7 @@ import { grantALevelAccess } from "@/lib/aLevelAccess";
 // uses) to actually unlock access. Nothing about the existing access tables
 // or the lecture/quiz/assignment access checks needs to change — a
 // book-redeemed account looks identical to a payment-unlocked one.
-export type BookCodeProgram = "o-level" | "punjab-9th" | "a-level";
+export type BookCodeProgram = "o-level" | "punjab-9th" | "punjab-10th" | "a-level";
 
 let tableReady = false;
 async function ensureTable() {
@@ -207,6 +208,8 @@ export async function redeemBookCode(rawCode: string, email: string, name: strin
     await grantOLevelAccess(normalizedEmail, row.subject, approvedBy, notes);
   } else if (row.program === "punjab-9th") {
     await grantPunjab9thAccess(normalizedEmail, approvedBy, notes);
+  } else if (row.program === "punjab-10th") {
+    await grantPunjab10thAccess(normalizedEmail, approvedBy, notes);
   } else if (row.program === "a-level") {
     if (row.subject) {
       await grantALevelAccess(normalizedEmail, row.subject, approvedBy, notes);

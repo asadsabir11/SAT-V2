@@ -36,6 +36,7 @@ export default function Admin() {
   const [isFounder, setIsFounder] = useState(false);
   const [scholarshipStudentCount, setScholarshipStudentCount] = useState<number | null>(null);
   const [punjab9thLeadCount, setPunjab9thLeadCount] = useState<number | null>(null);
+  const [punjab10thLeadCount, setPunjab10thLeadCount] = useState<number | null>(null);
   const [amnaShamimaLeadCount, setAmnaShamimaLeadCount] = useState<number | null>(null);
   const [aLevelLeadCount, setALevelLeadCount] = useState<number | null>(null);
 
@@ -66,6 +67,10 @@ export default function Admin() {
     fetch("/api/admin/punjab-9th-leads")
       .then((r) => r.json())
       .then((d) => setPunjab9thLeadCount((d.leads ?? []).length))
+      .catch(() => {});
+    fetch("/api/admin/punjab-10th-leads")
+      .then((r) => r.json())
+      .then((d) => setPunjab10thLeadCount((d.leads ?? []).length))
       .catch(() => {});
     fetch("/api/admin/amna-shamima-leads")
       .then((r) => r.json())
@@ -288,6 +293,51 @@ export default function Admin() {
                     👨‍🏫 Teacher accounts →
                   </Link>
                 )}
+              </div>
+            </article>
+
+            {/* 10th Grade — mirrors 9th Grade exactly */}
+            <article className="card" style={{ padding: "22px 24px", borderTop: "4px solid #b45309" }}>
+              <h3 style={{ margin: "0 0 14px", color: "#071b33", fontSize: "1.05rem" }}>📙 10th Grade</h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {isFounder && (
+                  <Link href="/admin/punjab-10th-access" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                    🔑 10th Class access →
+                  </Link>
+                )}
+                <Link href="/admin/punjab-10th-sessions" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                  🎥 10th Online Classes →
+                </Link>
+                <Link href="/admin/punjab-10th-quizzes" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                  📝 10th Class quizzes →
+                </Link>
+                <Link href="/admin/punjab-10th-assignments" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                  📋 10th Class assignments →
+                </Link>
+                {/* Shared with SAT/O Level — one page, program toggle inside */}
+                <Link href="/admin/lectures" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
+                  🎬 Manage lectures →
+                </Link>
+                <Link href="/admin/punjab-10th-attendance" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                  ✅ 10th Grade attendance →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/punjab-10th-parents" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                    👨‍👩‍👧 10th Class parent accounts →
+                  </Link>
+                )}
+                <Link href="/admin/punjab-10th-reports" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #b45309", background: "#fffbeb", color: "#92400e" }}>
+                  📊 10th Class parent reports →
+                </Link>
+                {/* General tools, relevant here too */}
+                <Link href="/admin/announcements" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #d97706", background: "#fef3c7", color: "#92400e" }}>
+                  📢 Announcements →
+                </Link>
+                {isFounder && (
+                  <Link href="/admin/teachers" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #9333ea", background: "#faf5ff", color: "#7e22ce" }}>
+                    👨‍🏫 Teacher accounts →
+                  </Link>
+                )}
                 <Link href="/admin/homework" className="btn" style={{ minHeight: 40, padding: "0 20px", fontSize: ".88rem", border: "2px solid #7c3aed", background: "#f5f3ff", color: "#7c3aed" }}>
                   📚 Homework →
                 </Link>
@@ -459,6 +509,7 @@ export default function Admin() {
                   <BigNavCard href="/admin/o-level-leads" icon="🎓" title="O Level Registered Students" count={m?.oLevelLeads ?? "—"} accent="#4338ca" />
                   <BigNavCard href="/admin/scholarship-students" icon="🎓" title="Scholarship Students" count={scholarshipStudentCount ?? "—"} accent="#b45309" />
                   <BigNavCard href="/admin/punjab-9th-leads" icon="📗" title="Punjab 9th Class Leads" count={punjab9thLeadCount ?? "—"} accent="#ea580c" />
+                  <BigNavCard href="/admin/punjab-10th-leads" icon="📙" title="Punjab 10th Class Leads" count={punjab10thLeadCount ?? "—"} accent="#b45309" />
                   <BigNavCard href="/admin/amna-shamima-leads" icon="🤖" title="Amna Shamima AI Course Leads" count={amnaShamimaLeadCount ?? "—"} accent="#7c3aed" />
                   <BigNavCard href="/admin/a-level-leads" icon="🎯" title="A Level Leads" count={aLevelLeadCount ?? "—"} accent="#be123c" />
                 </div>

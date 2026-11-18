@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getEnrollmentStatuses, setEnrollmentStatus, type EnrollmentProgram, type EnrollmentStatus } from "@/lib/enrollmentStatus";
 
-const PROGRAMS: EnrollmentProgram[] = ["sat", "o-level", "punjab-9th"];
+const PROGRAMS: EnrollmentProgram[] = ["sat", "o-level", "punjab-9th", "punjab-10th"];
 
 export async function GET() {
   const session = await getSession();

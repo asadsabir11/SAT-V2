@@ -229,6 +229,63 @@ export async function sendPunjab9thParentReport(opts: {
   });
 }
 
+// Identical to sendPunjab9thParentReport — same grade-level report format.
+export async function sendPunjab10thParentReport(opts: {
+  parentEmail: string;
+  parentName: string;
+  studentName: string;
+  weekNo: number;
+  attendanceStatus: string;
+  subjects: { subjectLabel: string; attempts: number; avgPercent: number | null }[];
+  strengths: string[];
+  focusAreas: string[];
+  coachNote: string;
+  parentAction: string;
+}) {
+  const subjectRows = opts.subjects.map((s) => `
+    <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">${s.subjectLabel}</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${s.attempts > 0 ? `${s.avgPercent}% average · ${s.attempts} quiz${s.attempts !== 1 ? "zes" : ""} attempted` : "No quiz attempts yet"}</td></tr>
+  `).join("");
+
+  return sendEmail({
+    to: opts.parentEmail,
+    subject: `Week ${opts.weekNo} Progress Report — ${opts.studentName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <div style="background:linear-gradient(135deg,#071b33,#0f2d54);padding:24px;border-radius:12px;margin-bottom:24px;">
+          <p style="color:#5eead4;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;">Weekly Progress Report</p>
+          <h1 style="color:#fff;margin:0 0 4px;font-size:1.4rem;">${opts.studentName}</h1>
+          <p style="color:rgba(255,255,255,.6);margin:0;font-size:.85rem;">Week ${opts.weekNo}</p>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8eef6;margin-bottom:20px;">
+          <tr><td style="padding:10px 0 10px 16px;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:200px;">Attendance</td><td style="padding:10px 16px 10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.attendanceStatus === "present" ? "✅ Present" : opts.attendanceStatus === "late" ? "🕐 Late" : opts.attendanceStatus === "not recorded" ? "— Not recorded" : "❌ Absent"}</td></tr>
+          ${subjectRows}
+        </table>
+
+        ${opts.strengths.length ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#15803d;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Strengths</p><p style="margin:0;color:#065f46;font-weight:600;">${opts.strengths.join(" · ")}</p></div>` : ""}
+        ${opts.focusAreas.length ? `<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px 18px;margin-bottom:14px;"><p style="color:#c2410c;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;">Focus areas</p><p style="margin:0;color:#9a3412;font-weight:600;">${opts.focusAreas.join(" · ")}</p></div>` : ""}
+
+        <div style="background:#eff6ff;border-radius:10px;padding:16px 18px;margin-bottom:14px;">
+          <p style="color:#1d4ed8;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">Coach note</p>
+          <p style="margin:0;color:#1e3a5f;font-style:italic;line-height:1.6;">"${opts.coachNote}"</p>
+          <p style="margin:8px 0 0;color:#6b7c93;font-size:.78rem;">— Ibrahim Malick, Founder &amp; Coach</p>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#155eef,#18a999);border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+          <p style="color:rgba(255,255,255,.7);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;">⭐ Your action this week</p>
+          <p style="color:#fff;font-weight:800;margin:0;font-size:.95rem;line-height:1.5;">${opts.parentAction}</p>
+        </div>
+
+        <div style="text-align:center;margin-bottom:20px;">
+          <a href="${APP_URL}/parent" style="display:inline-block;padding:12px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.9rem;">View full report →</a>
+        </div>
+
+        <p style="color:#a0aec0;font-size:.72rem;line-height:1.6;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendNewStudentAlert(student: {
   name: string;
   email: string;
@@ -430,8 +487,8 @@ export async function sendOLevelAccountWelcome(opts: { email: string; name: stri
   });
 }
 
-export async function sendParentAccountWelcome(opts: { email: string; name: string; studentName: string; studentEmail: string; program: "sat" | "o-level" | "punjab-9th"; setupUrl: string }) {
-  const programLabel = opts.program === "o-level" ? "Cambridge O Level" : opts.program === "punjab-9th" ? "Punjab Board 9th Class" : "SAT Prep";
+export async function sendParentAccountWelcome(opts: { email: string; name: string; studentName: string; studentEmail: string; program: "sat" | "o-level" | "punjab-9th" | "punjab-10th"; setupUrl: string }) {
+  const programLabel = opts.program === "o-level" ? "Cambridge O Level" : opts.program === "punjab-9th" ? "Punjab Board 9th Class" : opts.program === "punjab-10th" ? "Punjab Board 10th Class" : "SAT Prep";
   await sendEmail({
     to: opts.email,
     subject: `Your parent account is ready — track ${opts.studentName}'s ${programLabel} progress`,
@@ -885,8 +942,8 @@ export async function sendChallanGenerated(opts: { email: string; name: string; 
   });
 }
 
-export async function sendChallanVerified(opts: { email: string; name: string; amountPaid: number; subjects: string; program?: "sat" | "o-level" | "punjab-9th" }) {
-  const dashboardHref = opts.program === "punjab-9th" ? `${APP_URL}/punjab-board-9th-class/portal` : `${APP_URL}/dashboard`;
+export async function sendChallanVerified(opts: { email: string; name: string; amountPaid: number; subjects: string; program?: "sat" | "o-level" | "punjab-9th" | "punjab-10th" }) {
+  const dashboardHref = opts.program === "punjab-9th" ? `${APP_URL}/punjab-board-9th-class/portal` : opts.program === "punjab-10th" ? `${APP_URL}/punjab-board-10th-class/portal` : `${APP_URL}/dashboard`;
   await sendEmail({
     to: opts.email,
     subject: "Payment verified — you're all set!",
@@ -1036,6 +1093,142 @@ export async function sendPunjab9thAccessGranted(opts: { email: string; name: st
         </p>
         <div style="margin-bottom:20px;">
           <a href="${APP_URL}/punjab-board-9th-class/portal" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my portal →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
+// Mirrors the Punjab 9th Class set above exactly — same register → unlock
+// → learn flow, just its own landing/portal links.
+export async function sendPunjab10thLeadAdminAlert(lead: {
+  studentName: string; parentName: string; parentWhatsapp: string; parentEmail?: string | null; city: string;
+  punjabBoard: string; studyGroup: string; teachingMedium: string; preferredClassTime: string;
+}) {
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
+    to: ADMIN_EMAILS,
+    subject: `New Punjab Board 10th Class lead: ${lead.studentName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">New 10th Class registration 🎓</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:150px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${lead.studentName}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Parent</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.parentName} · ${lead.parentWhatsapp}${lead.parentEmail ? ` · ${lead.parentEmail}` : ""}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">City / Board</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.city} · ${lead.punjabBoard}</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;">Group</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#071b33;">${lead.studyGroup}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Medium / Time</td><td style="padding:10px 0;color:#071b33;">${lead.teachingMedium} · ${lead.preferredClassTime}</td></tr>
+        </table>
+        <p style="color:#6b7c93;font-size:.82rem;margin:14px 0 0;">Contact the parent on WhatsApp with batch timings and joining instructions.</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPunjab10thRegistrationWelcome(student: { name: string; email: string }) {
+  await sendEmail({
+    to: student.email,
+    subject: "Welcome to The Digital Tutor — you're in!",
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 6px;font-size:1.4rem;">Welcome, ${student.name}! 🎉</h2>
+        <p style="color:#6b7c93;margin:0 0 24px;font-size:.95rem;line-height:1.6;">
+          You've registered for The Digital Tutor's Punjab Board 10th Class program. Here's how it works:
+        </p>
+        <div style="background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:16px;border:1.5px solid #e8eef6;">
+          <p style="margin:0 0 14px;font-weight:800;color:#071b33;font-size:.95rem;">Your next steps</p>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">1</span>
+                <strong style="color:#071b33;">Receive your class details</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Our admissions team will contact your parent on WhatsApp with batch timings and joining instructions</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #f0f4f8;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">2</span>
+                <strong style="color:#071b33;">Attend your first week</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 10px 32px;border-bottom:1px solid #f0f4f8;color:#6b7c93;font-size:.85rem;">Experience the classes before paying anything</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;vertical-align:top;">
+                <span style="display:inline-block;width:22px;height:22px;background:#155eef;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:.7rem;font-weight:900;margin-right:10px;">3</span>
+                <strong style="color:#071b33;">Unlock full access</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:2px 0 0 32px;color:#6b7c93;font-size:.85rem;">PKR 10,000/month covers every subject in your group — submit payment from your portal once you're ready to continue</td>
+            </tr>
+          </table>
+        </div>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/punjab-board-10th-class/portal" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my portal →</a>
+        </div>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;line-height:1.6;">
+          Questions? Reply to this email or visit <a href="${APP_URL}/contact" style="color:#155eef;">our contact page</a>.<br>
+          The Digital Tutor · academy.thedigitaltutor.net
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPunjab10thPaymentSubmittedAck(opts: { email: string; name: string }) {
+  await sendEmail({
+    to: opts.email,
+    subject: "Payment received — under review",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">We've got your payment details, ${opts.name}</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment for the 10th Class program is under review. Once verified, your account unlocks and we'll
+          email you — usually within a business day.
+        </p>
+        <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPunjab10thPaymentSubmittedAdminAlert(opts: { email: string; name: string }) {
+  if (ADMIN_EMAILS.length === 0) return;
+  await sendEmail({
+    to: ADMIN_EMAILS,
+    subject: `10th Class payment submitted for verification: ${opts.name}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 8px;">Payment awaiting verification 💳</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #e8eef6;color:#6b7c93;font-size:.85rem;width:100px;">Student</td><td style="padding:10px 0;border-bottom:1px solid #e8eef6;font-weight:700;color:#071b33;">${opts.name}</td></tr>
+          <tr><td style="padding:10px 0;color:#6b7c93;font-size:.85rem;">Email</td><td style="padding:10px 0;color:#155eef;">${opts.email}</td></tr>
+        </table>
+        <div style="margin-top:20px;">
+          <a href="${APP_URL}/admin/punjab-10th-access" style="display:inline-block;padding:12px 24px;background:#155eef;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;">Review and verify →</a>
+        </div>
+      </div>
+    `,
+  });
+}
+
+export async function sendPunjab10thAccessGranted(opts: { email: string; name: string }) {
+  await sendEmail({
+    to: opts.email,
+    subject: "Your 10th Class access is unlocked! 🎉",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#071b33;margin:0 0 12px;">You're in, ${opts.name}! 🎉</h2>
+        <p style="color:#344054;line-height:1.65;margin:0 0 20px;">
+          Your payment has been verified and your account now has full access to all your subjects and class links.
+        </p>
+        <div style="margin-bottom:20px;">
+          <a href="${APP_URL}/punjab-board-10th-class/portal" style="display:inline-block;padding:13px 28px;background:#155eef;color:#fff;border-radius:9px;text-decoration:none;font-weight:800;font-size:.95rem;">Go to my portal →</a>
         </div>
         <p style="color:#a0aec0;font-size:.75rem;margin-top:28px;">The Digital Tutor · academy.thedigitaltutor.net</p>
       </div>

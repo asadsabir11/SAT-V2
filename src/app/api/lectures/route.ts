@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getAllLectures, getPublishedLectures, createLecture, OLEVEL_LECTURE_CATEGORIES, PUNJAB9TH_LECTURE_CATEGORIES, ALEVEL_LECTURE_CATEGORIES, type Program, type LectureCategory } from "@/lib/lectures";
+import { getAllLectures, getPublishedLectures, createLecture, OLEVEL_LECTURE_CATEGORIES, PUNJAB9TH_LECTURE_CATEGORIES, PUNJAB10TH_LECTURE_CATEGORIES, ALEVEL_LECTURE_CATEGORIES, type Program, type LectureCategory } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
 import { getOLevelAccessMap } from "@/lib/olevelAccess";
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
+import { getPunjab10thAccessLevel } from "@/lib/punjab10thAccess";
 import { getALevelAccessMap } from "@/lib/aLevelAccess";
 
 export async function GET() {
@@ -16,28 +17,32 @@ export async function GET() {
   }
 
   // Student: return all published lectures marked with is_locked
-  const [lectures, accessLevel, oLevelAccess, punjab9thAccessLevel, aLevelAccess] = await Promise.all([
+  const [lectures, accessLevel, oLevelAccess, punjab9thAccessLevel, punjab10thAccessLevel, aLevelAccess] = await Promise.all([
     getPublishedLectures(),
     getStudentAccessLevel(session.email),
     getOLevelAccessMap(session.email),
     getPunjab9thAccessLevel(session.email),
+    getPunjab10thAccessLevel(session.email),
     getALevelAccessMap(session.email),
   ]);
 
   const isUnlocked = accessLevel === "unlocked";
   const punjab9thUnlocked = punjab9thAccessLevel === "unlocked";
+  const punjab10thUnlocked = punjab10thAccessLevel === "unlocked";
   const lecturesWithLock = lectures.map(({ video_url: _v, ...l }) => ({
     ...l,
     is_locked: l.program === "o-level"
       ? !l.is_free_preview && oLevelAccess[l.category] !== "unlocked"
       : l.program === "punjab-9th"
       ? !l.is_free_preview && !punjab9thUnlocked
+      : l.program === "punjab-10th"
+      ? !l.is_free_preview && !punjab10thUnlocked
       : l.program === "a-level"
       ? !l.is_free_preview && aLevelAccess[l.category] !== "unlocked"
       : l.category !== "introduction" && !isUnlocked && !l.is_free_preview,
   }));
 
-  return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel, o_level_access: oLevelAccess, punjab9th_access: punjab9thAccessLevel, a_level_access: aLevelAccess });
+  return NextResponse.json({ lectures: lecturesWithLock, access_level: accessLevel, o_level_access: oLevelAccess, punjab9th_access: punjab9thAccessLevel, punjab10th_access: punjab10thAccessLevel, a_level_access: aLevelAccess });
 }
 
 export async function POST(req: NextRequest) {
@@ -49,11 +54,13 @@ export async function POST(req: NextRequest) {
   if (!title || !video_url) {
     return NextResponse.json({ error: "title and video_url are required" }, { status: 400 });
   }
-  const prog: Program = program === "o-level" ? "o-level" : program === "punjab-9th" ? "punjab-9th" : program === "a-level" ? "a-level" : "sat";
+  const prog: Program = program === "o-level" ? "o-level" : program === "punjab-9th" ? "punjab-9th" : program === "punjab-10th" ? "punjab-10th" : program === "a-level" ? "a-level" : "sat";
   const cat: LectureCategory = prog === "o-level"
     ? (OLEVEL_LECTURE_CATEGORIES.includes(category) ? category : "mathematics")
     : prog === "punjab-9th"
     ? (PUNJAB9TH_LECTURE_CATEGORIES.includes(category) ? category : "english")
+    : prog === "punjab-10th"
+    ? (PUNJAB10TH_LECTURE_CATEGORIES.includes(category) ? category : "english")
     : prog === "a-level"
     ? (ALEVEL_LECTURE_CATEGORIES.includes(category) ? category : "computer-science-vol1")
     : (category === "english" ? "english" : category === "introduction" ? "introduction" : "math");

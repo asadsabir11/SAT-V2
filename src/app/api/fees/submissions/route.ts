@@ -15,7 +15,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 
 function subjectLabel(program: string, subject: string): string {
   if (subject) return SUBJECT_LABELS[subject] ?? subject;
-  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+  return program === "punjab-9th" ? "9th Class — All Subjects" : program === "punjab-10th" ? "10th Class — All Subjects" : "Full SAT Access";
 }
 
 export async function POST(req: NextRequest) {

@@ -6,9 +6,9 @@ interface Link_ { id: string; parent_id: string; parent_name: string; parent_ema
 interface Student { id: string; name: string; email: string; parentName?: string; parentEmail?: string; }
 interface UnlinkedParent { id: string; name: string; email: string; created_at: string; }
 
-const OTHER_PROGRAM_LABEL: Record<string, string> = { sat: "O Level", "o-level": "SAT", "punjab-9th": "SAT or O Level" };
+const OTHER_PROGRAM_LABEL: Record<string, string> = { sat: "O Level", "o-level": "SAT", "punjab-9th": "SAT or O Level", "punjab-10th": "SAT or O Level" };
 
-export function AdminParentsPanel({ program, title, description }: { program: "sat" | "o-level" | "punjab-9th"; title: string; description: string }) {
+export function AdminParentsPanel({ program, title, description }: { program: "sat" | "o-level" | "punjab-9th" | "punjab-10th"; title: string; description: string }) {
   const [links, setLinks]       = useState<Link_[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [unlinkedParents, setUnlinkedParents] = useState<UnlinkedParent[]>([]);

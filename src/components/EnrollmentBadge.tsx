@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-type Program = "sat" | "o-level" | "punjab-9th";
+type Program = "sat" | "o-level" | "punjab-9th" | "punjab-10th";
 
 // Tiny client-side island so the home page itself can stay fully static
 // (prerendered, served from cache) while this one badge still reflects an

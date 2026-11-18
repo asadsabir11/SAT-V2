@@ -17,7 +17,7 @@ interface BookCodeRow {
   created_at: string;
 }
 
-const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "a-level": "A Level" };
+const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "punjab-10th": "10th Class", "a-level": "A Level" };
 const OLEVEL_SUBJECTS = getOLevelSubjects().map((s) => ({ slug: s.slug, name: s.name }));
 const ALEVEL_SUBJECTS = [
   { slug: "computer-science-vol1", name: "Computer Science (CS 9618 Vol 1)" },
@@ -34,7 +34,7 @@ export default function AdminBookCodes() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unused" | "used">("all");
 
-  const [program, setProgram] = useState<"o-level" | "punjab-9th" | "a-level">("o-level");
+  const [program, setProgram] = useState<"o-level" | "punjab-9th" | "punjab-10th" | "a-level">("o-level");
   const [subject, setSubject] = useState(OLEVEL_SUBJECTS[0]?.slug ?? "computer-science");
   const [aLevelSubject, setALevelSubject] = useState(ALEVEL_SUBJECTS[0].slug);
   const [count, setCount] = useState("100");
@@ -110,6 +110,7 @@ export default function AdminBookCodes() {
               <select value={program} onChange={(e) => setProgram(e.target.value as typeof program)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #cbd7e5" }}>
                 <option value="o-level">O Level</option>
                 <option value="punjab-9th">9th Class</option>
+                <option value="punjab-10th">10th Class</option>
                 <option value="a-level">A Level</option>
               </select>
             </div>

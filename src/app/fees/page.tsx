@@ -5,7 +5,7 @@ import { PageHero } from "@/components/site";
 
 interface Challan {
   id: string;
-  program: "sat" | "o-level" | "punjab-9th";
+  program: "sat" | "o-level" | "punjab-9th" | "punjab-10th";
   subject: string;
   period: string;
   amount_due: string;
@@ -23,7 +23,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 
 function subjectLabel(program: Challan["program"], subject: string): string {
   if (subject) return SUBJECT_LABELS[subject] ?? subject;
-  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+  return program === "punjab-9th" ? "9th Class — All Subjects" : program === "punjab-10th" ? "10th Class — All Subjects" : "Full SAT Access";
 }
 
 const STATUS_META: Record<Challan["status"], { label: string; bg: string; color: string }> = {
@@ -147,8 +147,8 @@ export default function FeesPage() {
       <PageHero
         eyebrow="Fee portal"
         title="Fees"
-        backHref={me?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : "/dashboard"}
-        backLabel={me?.program === "punjab-9th" ? "My Portal" : "Dashboard"}
+        backHref={me?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : me?.program === "punjab-10th" ? "/punjab-board-10th-class/portal" : "/dashboard"}
+        backLabel={me?.program === "punjab-9th" || me?.program === "punjab-10th" ? "My Portal" : "Dashboard"}
       >
         View your monthly fee challans and submit payment proof for verification.
       </PageHero>

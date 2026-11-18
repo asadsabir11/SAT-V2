@@ -6,7 +6,7 @@ interface Challan {
   id: string;
   student_email: string;
   student_name: string | null;
-  program: "sat" | "o-level" | "punjab-9th";
+  program: "sat" | "o-level" | "punjab-9th" | "punjab-10th";
   subject: string;
   period: string;
   amount_due: string;
@@ -37,7 +37,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 
 function subjectLabel(program: Challan["program"], subject: string): string {
   if (subject) return SUBJECT_LABELS[subject] ?? subject;
-  return program === "punjab-9th" ? "9th Class — All Subjects" : "Full SAT Access";
+  return program === "punjab-9th" ? "9th Class — All Subjects" : program === "punjab-10th" ? "10th Class — All Subjects" : "Full SAT Access";
 }
 
 const STATUS_META: Record<Challan["status"], { label: string; bg: string; color: string }> = {
@@ -320,7 +320,7 @@ export default function AdminFeesPage() {
                         return (
                           <tr key={c.id}>
                             <td style={{ fontWeight: 700, color: "#071b33" }}>{c.student_name || "—"}<br /><span style={{ fontWeight: 400, color: "#6b7c93", fontSize: ".78rem" }}>{c.student_email}</span></td>
-                            <td style={{ fontSize: ".83rem" }}>{c.program === "o-level" ? "O Level" : c.program === "punjab-9th" ? "9th Class" : "SAT"}</td>
+                            <td style={{ fontSize: ".83rem" }}>{c.program === "o-level" ? "O Level" : c.program === "punjab-9th" ? "9th Class" : c.program === "punjab-10th" ? "10th Class" : "SAT"}</td>
                             <td style={{ fontSize: ".83rem" }}>{subjectLabel(c.program, c.subject)}</td>
                             <td style={{ fontSize: ".83rem", whiteSpace: "nowrap" }}>{fmtPeriod(c.period)}</td>
                             <td style={{ fontSize: ".83rem", fontWeight: 700 }}>PKR {Number(c.amount_due).toLocaleString()}</td>

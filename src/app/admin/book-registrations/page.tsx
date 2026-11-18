@@ -11,7 +11,7 @@ interface RegistrationRow {
   redeemed: boolean;
 }
 
-const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "a-level": "A Level" };
+const PROGRAM_LABELS: Record<string, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "punjab-10th": "10th Class", "a-level": "A Level" };
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });

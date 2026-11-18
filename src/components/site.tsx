@@ -4,9 +4,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
-const PUBLIC_NAV = [["O Level", "/o-level"], ["A Level", "/a-level"], ["9th Class", "/punjab-board-9th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
+const PUBLIC_NAV = [["O Level", "/o-level"], ["A Level", "/a-level"], ["9th Class", "/punjab-board-9th-class"], ["10th Class", "/punjab-board-10th-class"], ["SAT Prep", "/founder-cohort"], ["Scholarships", "/scholarship"], ["For Parents", "/parent-webinar"]] as const;
 
-type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" | "amna-shamima" | "a-level" } | null;
+type AuthUser = { name: string; role: "student" | "founder" | "parent" | "teacher"; program?: "sat" | "o-level" | "punjab-9th" | "punjab-10th" | "amna-shamima" | "a-level" } | null;
 
 // Clicking through opens the full notifications page (LinkedIn-style)
 // rather than a navbar dropdown — this component is just the bell + unread
@@ -116,6 +116,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
   const href = (user.role === "founder" || user.role === "teacher") ? "/admin"
     : user.role === "parent" ? "/parent"
     : user.program === "punjab-9th" ? "/punjab-board-9th-class/portal"
+    : user.program === "punjab-10th" ? "/punjab-board-10th-class/portal"
     : user.program === "amna-shamima" ? "/amna-shamima/portal"
     : user.program === "a-level" ? "/a-level/portal"
     : "/dashboard";
@@ -133,7 +134,7 @@ function AuthBadge({ onUser }: { onUser?: (u: AuthUser) => void }) {
     </div>
   );
 }
-const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["9th Class (Punjab Board)","/punjab-board-9th-class"],["Scholarships","/scholarship"],["Guides for Parents","/guides"],["Careers","/careers"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
+const FOOTER_EXPLORE=[["Home","/"],["SAT Prep","/founder-cohort"],["9th Class (Punjab Board)","/punjab-board-9th-class"],["10th Class (Punjab Board)","/punjab-board-10th-class"],["Scholarships","/scholarship"],["Guides for Parents","/guides"],["Careers","/careers"],["Login","/login"],["For Parents","/parent-webinar"],["Contact Us","/contact"],["Privacy Policy","/privacy"],["Terms of Service","/terms"]] as const;
 const FOOTER_MARKETS=["Pakistan","Bangladesh","Nigeria","Indonesia","Malaysia","S. Korea","Haiti"];
 
 export function Header() {
@@ -150,17 +151,19 @@ export function Header() {
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "punjab-9th"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level" && href !== "/founder-cohort")
+    : user?.role === "student" && user.program === "punjab-10th"
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "amna-shamima"
     ? ([["Amna Shamima Program", "/amna-shamima"]] as const)
     : user?.role === "student" && user.program === "o-level"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/punjab-board-9th-class" && href !== "/a-level" && href !== "/founder-cohort")
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/punjab-board-9th-class" && href !== "/punjab-board-10th-class" && href !== "/a-level" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "a-level"
-    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/punjab-board-9th-class" && href !== "/founder-cohort")
+    ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/punjab-board-9th-class" && href !== "/punjab-board-10th-class" && href !== "/founder-cohort")
     : user?.role === "student" && user.program === "sat"
     ? PUBLIC_NAV.filter(([, href]) => href !== "/o-level" && href !== "/a-level")
     : PUBLIC_NAV;
   const showCambridgeDropdown = navItems.some(([, href]) => href === "/o-level") && navItems.some(([, href]) => href === "/a-level");
-  const showPunjabBoardDropdown = navItems.some(([, href]) => href === "/punjab-board-9th-class");
+  const showPunjabBoardDropdown = navItems.some(([, href]) => href === "/punjab-board-9th-class") && navItems.some(([, href]) => href === "/punjab-board-10th-class");
   return (
     <header style={{borderBottom:"1px solid #e8eef6",background:"rgba(255,255,255,.96)",position:"sticky",top:0,zIndex:30,backdropFilter:"blur(16px)"}}>
       <div className="container" style={{minHeight:70,display:"flex",alignItems:"center",justifyContent:"space-between",gap:20}}>
@@ -171,7 +174,8 @@ export function Header() {
           {navItems.map(([label, href]) => {
             if (showCambridgeDropdown && href === "/o-level") return <NavDropdown key="cambridge" label="Cambridge" items={[["O Level", "/o-level"], ["A Level", "/a-level"]]} />;
             if (showCambridgeDropdown && href === "/a-level") return null;
-            if (showPunjabBoardDropdown && href === "/punjab-board-9th-class") return <NavDropdown key="punjab-board" label="Punjab Board" items={[["9th Class", "/punjab-board-9th-class"]]} />;
+            if (showPunjabBoardDropdown && href === "/punjab-board-9th-class") return <NavDropdown key="punjab-board" label="Punjab Board" items={[["9th Class", "/punjab-board-9th-class"], ["10th Class", "/punjab-board-10th-class"]]} />;
+            if (showPunjabBoardDropdown && href === "/punjab-board-10th-class") return null;
             return <Link key={href} href={href} style={{padding:"8px 12px",borderRadius:10,color:"#2d4261",transition:".16s",whiteSpace:"nowrap"}}>{label}</Link>;
           })}
           {user?.role === "student" && <NotificationBell isAdmin={false} />}
@@ -256,7 +260,7 @@ export function Footer(){
                   <p style={{color:"#a8c0d8",fontSize:".88rem",lineHeight:1.7,marginBottom:20}}>
                     Welcome back — head to your dashboard to browse subjects or unlock a new one.
                   </p>
-                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : user?.program === "amna-shamima" ? "/amna-shamima/portal" : user?.program === "a-level" ? "/a-level/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
+                  <Link href={user?.program === "punjab-9th" ? "/punjab-board-9th-class/portal" : user?.program === "punjab-10th" ? "/punjab-board-10th-class/portal" : user?.program === "amna-shamima" ? "/amna-shamima/portal" : user?.program === "a-level" ? "/a-level/portal" : "/dashboard"} className="footer-cta-btn footer-cta-primary">Go to My Dashboard →</Link>
                 </>
               ) : (
                 <>

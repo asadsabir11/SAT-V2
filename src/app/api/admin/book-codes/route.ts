@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { generateBookCodes, listBookCodes, type BookCodeProgram } from "@/lib/bookCodes";
 
-const VALID_PROGRAMS: BookCodeProgram[] = ["o-level", "punjab-9th", "a-level"];
+const VALID_PROGRAMS: BookCodeProgram[] = ["o-level", "punjab-9th", "punjab-10th", "a-level"];
 
 export async function GET(req: NextRequest) {
   const session = await getSession();

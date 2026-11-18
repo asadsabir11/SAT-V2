@@ -2,18 +2,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Program = "sat" | "o-level" | "punjab-9th";
+type Program = "sat" | "o-level" | "punjab-9th" | "punjab-10th";
 type Status = "open" | "full";
 
 const PROGRAM_META: Record<Program, { label: string; icon: string }> = {
   sat: { label: "SAT® Preparation", icon: "🎓" },
   "o-level": { label: "Cambridge O Level / IGCSE", icon: "📘" },
   "punjab-9th": { label: "9th Class (Punjab Board)", icon: "📗" },
+  "punjab-10th": { label: "10th Class (Punjab Board)", icon: "📙" },
 };
-const PROGRAMS: Program[] = ["sat", "o-level", "punjab-9th"];
+const PROGRAMS: Program[] = ["sat", "o-level", "punjab-9th", "punjab-10th"];
 
 export default function AdminEnrollmentStatus() {
-  const [statuses, setStatuses] = useState<Record<Program, Status>>({ sat: "open", "o-level": "open", "punjab-9th": "open" });
+  const [statuses, setStatuses] = useState<Record<Program, Status>>({ sat: "open", "o-level": "open", "punjab-9th": "open", "punjab-10th": "open" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Program | null>(null);
 

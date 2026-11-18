@@ -5,11 +5,12 @@ import Link from "next/link";
 
 type AuthUser = { name: string; role: string; program?: string } | null;
 
-const REDEEMABLE_PROGRAMS = ["o-level", "punjab-9th", "a-level"];
+const REDEEMABLE_PROGRAMS = ["o-level", "punjab-9th", "punjab-10th", "a-level"];
 
 const PORTAL_LINKS: Record<string, { label: string; href: string }> = {
   "o-level": { label: "Go to my O Level lectures", href: "/o-level/lectures" },
   "punjab-9th": { label: "Go to my portal", href: "/punjab-board-9th-class/portal" },
+  "punjab-10th": { label: "Go to my portal", href: "/punjab-board-10th-class/portal" },
   "a-level": { label: "Go to my portal", href: "/a-level/portal" },
 };
 
@@ -94,6 +95,7 @@ function RedeemForm() {
               code, they're not a lead that needs the admissions funnel. */}
           <Link href="/redeem/register?program=o-level" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for O Level</Link>
           <Link href="/redeem/register?program=punjab-9th" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for 9th Class</Link>
+          <Link href="/redeem/register?program=punjab-10th" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for 10th Class</Link>
           <Link href="/redeem/register?program=a-level" className="btn" style={{ background: "#fff", color: "var(--blue)", border: "1.5px solid #cbd7e5" }}>Register for A Level</Link>
         </div>
       </div>
@@ -104,7 +106,7 @@ function RedeemForm() {
     return (
       <div className="card" style={{ maxWidth: 480, margin: "0 auto", textAlign: "center", padding: 40 }}>
         <p style={{ fontWeight: 800, color: "#071b33", marginBottom: 8 }}>Book codes aren&apos;t available for your account yet</p>
-        <p style={{ color: "var(--muted)", lineHeight: 1.65 }}>Printed-book redemption currently covers O Level, 9th Class and A Level accounts.</p>
+        <p style={{ color: "var(--muted)", lineHeight: 1.65 }}>Printed-book redemption currently covers O Level, 9th Class, 10th Class and A Level accounts.</p>
       </div>
     );
   }

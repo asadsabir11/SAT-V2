@@ -12,6 +12,10 @@ const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@thedigit
 const SAT_WHATSAPP_URL      = process.env.NEXT_PUBLIC_WHATSAPP_COMMUNITY_URL || "https://chat.whatsapp.com/DPnhbBha1z7KW6NfOggNdp";
 const OLEVEL_WHATSAPP_URL   = process.env.NEXT_PUBLIC_OLEVEL_WHATSAPP_COMMUNITY_URL || "";
 const PUNJAB9TH_WHATSAPP_URL = process.env.NEXT_PUBLIC_PUNJAB9TH_WHATSAPP_COMMUNITY_URL || "https://www.whatsapp.com/channel/0029Vb8CwzC9MF91yctcHH2J";
+// Falls back to the 9th Class channel (not a separate hardcoded default)
+// since both grades share the same Punjab Board community for now — set
+// NEXT_PUBLIC_PUNJAB10TH_WHATSAPP_COMMUNITY_URL to split them later.
+const PUNJAB10TH_WHATSAPP_URL = process.env.NEXT_PUBLIC_PUNJAB10TH_WHATSAPP_COMMUNITY_URL || PUNJAB9TH_WHATSAPP_URL;
 
 export default function Contact() {
   return (
@@ -39,6 +43,7 @@ export default function Contact() {
                   { label: "SAT Prep community", url: SAT_WHATSAPP_URL },
                   { label: "O Level community", url: OLEVEL_WHATSAPP_URL },
                   { label: "9th Class community", url: PUNJAB9TH_WHATSAPP_URL },
+                  { label: "10th Class community", url: PUNJAB10TH_WHATSAPP_URL },
                 ] as const).map(({ label, url }) => (
                   url ? (
                     <a

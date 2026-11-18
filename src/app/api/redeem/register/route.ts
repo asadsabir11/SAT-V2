@@ -7,8 +7,8 @@ import { createNotification } from "@/lib/notifications";
 import { recordBookRegistration, type BookCodeProgram } from "@/lib/bookCodes";
 
 type BookProgram = BookCodeProgram;
-const VALID_PROGRAMS: BookProgram[] = ["o-level", "punjab-9th", "a-level"];
-const PROGRAM_LABELS: Record<BookProgram, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "a-level": "A Level" };
+const VALID_PROGRAMS: BookProgram[] = ["o-level", "punjab-9th", "punjab-10th", "a-level"];
+const PROGRAM_LABELS: Record<BookProgram, string> = { "o-level": "O Level", "punjab-9th": "9th Class", "punjab-10th": "10th Class", "a-level": "A Level" };
 
 // Deliberately separate from each program's full OLevelRegistrationForm/etc
 // — those collect parent contact, city, exam session and so on for the

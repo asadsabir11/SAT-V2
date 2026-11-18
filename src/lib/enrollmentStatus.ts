@@ -5,7 +5,7 @@ import { sql } from "@/lib/db";
 // signup flow stay exactly as they are. A program with no row yet defaults
 // to "open" rather than needing to be pre-seeded.
 
-export type EnrollmentProgram = "sat" | "o-level" | "punjab-9th";
+export type EnrollmentProgram = "sat" | "o-level" | "punjab-9th" | "punjab-10th";
 export type EnrollmentStatus = "open" | "full";
 
 let ready = false;
@@ -22,12 +22,12 @@ async function ensureTable() {
   ready = true;
 }
 
-const ALL_PROGRAMS: EnrollmentProgram[] = ["sat", "o-level", "punjab-9th"];
+const ALL_PROGRAMS: EnrollmentProgram[] = ["sat", "o-level", "punjab-9th", "punjab-10th"];
 
 export async function getEnrollmentStatuses(): Promise<Record<EnrollmentProgram, EnrollmentStatus>> {
   await ensureTable();
   const rows = await sql`SELECT program, status FROM program_enrollment_status`;
-  const map: Record<EnrollmentProgram, EnrollmentStatus> = { sat: "open", "o-level": "open", "punjab-9th": "open" };
+  const map: Record<EnrollmentProgram, EnrollmentStatus> = { sat: "open", "o-level": "open", "punjab-9th": "open", "punjab-10th": "open" };
   for (const r of rows) {
     const program = r.program as EnrollmentProgram;
     if (ALL_PROGRAMS.includes(program)) map[program] = (r.status as EnrollmentStatus) === "full" ? "full" : "open";

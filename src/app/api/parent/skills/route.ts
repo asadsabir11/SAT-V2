@@ -11,7 +11,7 @@ export async function GET() {
   if (!student) return NextResponse.json({ error: "No student linked" }, { status: 404 });
 
   const program = (student as { program: string }).program;
-  if (program === "o-level" || program === "punjab-9th") return NextResponse.json({ skills: [] });
+  if (program === "o-level" || program === "punjab-9th" || program === "punjab-10th") return NextResponse.json({ skills: [] });
 
   const skills = await getSkillAccuracy(student.id as string);
   return NextResponse.json({ skills });

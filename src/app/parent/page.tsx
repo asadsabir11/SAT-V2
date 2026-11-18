@@ -99,10 +99,10 @@ export default function ParentPortal() {
     }).finally(() => setLoading(false));
   }, [retryKey]);
 
-  // O-Level and punjab-9th share the same "subjects-based" report shape
-  // (per-subject quiz performance, no single mock score) — SAT is the odd
-  // one out with its diagnostic/mock score model.
-  const usesSubjectsView = student?.program === "o-level" || student?.program === "punjab-9th";
+  // O-Level, punjab-9th and punjab-10th share the same "subjects-based"
+  // report shape (per-subject quiz performance, no single mock score) —
+  // SAT is the odd one out with its diagnostic/mock score model.
+  const usesSubjectsView = student?.program === "o-level" || student?.program === "punjab-9th" || student?.program === "punjab-10th";
 
   if (loading) return (
     <section className="section"><div className="container">
@@ -356,7 +356,7 @@ export default function ParentPortal() {
                     <div style={{ fontSize: ".75rem", color: "#6b7c93" }}>{fmt(r.period_start)} – {fmt(r.period_end)}</div>
                   </div>
                   <div style={{ fontSize: ".78rem", color: "#6b7c93", marginTop: 4 }}>
-                    {r.metrics_json?.program === "o-level" || r.metrics_json?.program === "punjab-9th" ? (
+                    {r.metrics_json?.program === "o-level" || r.metrics_json?.program === "punjab-9th" || r.metrics_json?.program === "punjab-10th" ? (
                       <>Attendance: {r.metrics_json?.attendance?.status ?? "—"}{(r.metrics_json?.subjects?.length ?? 0) > 0 ? ` · ${r.metrics_json.subjects!.filter(s => s.attempts > 0).length}/${r.metrics_json.subjects!.length} subjects attempted` : ""}</>
                     ) : (
                       <>Attendance: {r.metrics_json?.attendance?.status ?? "—"} · Homework: {r.metrics_json?.homework?.done ?? 0}/{r.metrics_json?.homework?.assigned ?? 0}
@@ -443,7 +443,7 @@ export default function ParentPortal() {
           </div>
         )}
 
-        {student?.program !== "punjab-9th" && (
+        {student?.program !== "punjab-9th" && student?.program !== "punjab-10th" && (
           <div style={{ padding: "14px 18px", borderRadius: 12, background: "#fffbeb", border: "1px solid #fde68a", fontSize: ".75rem", color: "#92400e" }}>
             {student?.program === "o-level"
               ? "Cambridge, IGCSE and O Level are registered trademarks of Cambridge Assessment International Education. The Digital Tutor is an independent tuition service and is not affiliated with Cambridge Assessment."

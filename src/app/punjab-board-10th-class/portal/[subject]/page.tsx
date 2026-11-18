@@ -1,0 +1,143 @@
+import type { Metadata } from "next";
+import type { CSSProperties } from "react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
+import { findByField } from "@/lib/storage";
+import { subjectsForStudyGroup, subjectSlugToLabel, getActivePunjab10thSessionsForSubjectAndGroup } from "@/lib/punjab10thSessions";
+import { getPunjab10thAccessLevel } from "@/lib/punjab10thAccess";
+import { getPublishedPunjab10thQuizzesBySubject } from "@/lib/punjab10thQuiz";
+import { getPublishedLecturesByProgram } from "@/lib/lectures";
+import { getPublishedAssignments } from "@/lib/punjab10thAssignments";
+
+interface Punjab10thLead { studyGroup: string; }
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
+
+function fmtWhen(iso: string) {
+  return new Date(iso).toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+export default async function Punjab10thSubjectPage({ params }: { params: Promise<{ subject: string }> }) {
+  const session = await getSession();
+  if (!session || session.role !== "student" || session.program !== "punjab-10th") {
+    redirect("/login?role=student&program=punjab-10th&next=/punjab-board-10th-class/portal");
+  }
+
+  const { subject: slug } = await params;
+  const subject = subjectSlugToLabel(slug);
+  const lead = await findByField<Punjab10thLead>("leads-punjab-10th.json", "studentEmail", session!.email);
+  const group = lead?.studyGroup ?? "Biology";
+
+  // Only allow subjects that resolve to a real slug AND are actually part
+  // of this student's group — guards against both a bad slug and someone
+  // hand-editing the URL to a subject that isn't theirs (e.g. a
+  // Biology-group student trying /portal/computer-science).
+  if (!subject || !subjectsForStudyGroup(group).includes(subject)) {
+    notFound();
+  }
+
+  const accessLevel = await getPunjab10thAccessLevel(session!.email);
+  const unlocked = accessLevel === "unlocked";
+  const sessions = unlocked ? await getActivePunjab10thSessionsForSubjectAndGroup(subject, group) : [];
+  const quizzes = unlocked ? await getPublishedPunjab10thQuizzesBySubject(subject) : [];
+  // Lecture category values are the same slugs used in this page's URL
+  // (see SUBJECT_SLUGS in punjab10thSessions.ts), so filtering by `slug`
+  // here lines up directly with what the admin picks when uploading.
+  const lectures = unlocked ? (await getPublishedLecturesByProgram("punjab-10th")).filter((l) => l.category === slug) : [];
+  const assignments = unlocked ? (await getPublishedAssignments()).filter((a) => a.category === slug) : [];
+
+  return (
+    <section className="section">
+      <div className="container" style={{ maxWidth: 640 }}>
+        <Link href="/punjab-board-10th-class/portal" style={{ color: "#6b7c93", fontSize: ".85rem", textDecoration: "none" }}>← Your subjects</Link>
+        <h1 style={{ fontSize: "1.6rem", fontWeight: 900, color: "#071b33", margin: "10px 0 24px" }}>{subject}</h1>
+
+        {!unlocked ? (
+          <div className="card" style={{ textAlign: "center", padding: 40, background: "linear-gradient(135deg,#fff7ed,#eaf4ff)" }}>
+            <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>🔒</div>
+            <p style={{ fontWeight: 800, color: "#9a3412", marginBottom: 8, fontSize: "1.05rem" }}>
+              {accessLevel === "pending" ? "Payment under review" : "Full access required"}
+            </p>
+            <p style={{ color: "#7c4a1e", lineHeight: 1.65, maxWidth: 420, margin: "0 auto 20px" }}>
+              {accessLevel === "pending"
+                ? "We're verifying your payment — the Zoom link for this subject will appear here once your account is unlocked."
+                : `Unlock full access to see the class and Zoom link for ${subject}.`}
+            </p>
+            {accessLevel !== "pending" && (
+              <Link href="/punjab-board-10th-class/portal/unlock" className="btn btn-primary">Unlock Full Access →</Link>
+            )}
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="card" style={{ textAlign: "center", padding: 40, color: "#6b7c93" }}>
+            <div style={{ fontSize: "2rem", marginBottom: 10 }}>📅</div>
+            <p style={{ fontWeight: 700 }}>No class scheduled yet for {subject}</p>
+            <p style={{ fontSize: ".88rem" }}>Once your batch timing is set, the Zoom link will appear here — we&apos;ll also message your parent on WhatsApp.</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {sessions.map((s) => (
+              <div key={s.id} className="card" style={{ padding: "20px 24px" }}>
+                <p style={{ margin: "0 0 4px", fontWeight: 900, color: "#071b33", fontSize: "1.05rem" }}>{s.title}</p>
+                <p style={{ margin: "0 0 16px", color: "#6b7c93", fontSize: ".9rem" }}>{fmtWhen(s.scheduled_at)}</p>
+                <a href={s.meeting_link} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: "10px 22px" }}>
+                  Join Zoom →
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {unlocked && (
+          <div className="grid grid-3" style={{ marginTop: 32 }}>
+            <Link
+              href={`/punjab-board-10th-class/portal/${slug}/lectures`}
+              className="module-card fade-up"
+              style={{ "--module-accent": "#7c3aed", "--module-accent-grad": "linear-gradient(135deg,#7c3aed,#a855f7)", "--module-glow": "rgba(124,58,237,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#a855f7)", opacity: 0.1 }} />
+                <div className="module-icon">🎬</div>
+                <h3 style={{ margin: "14px 0 0", color: "#071b33" }}>Lectures</h3>
+                <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{lectures.length} available</p>
+                <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#7c3aed" }}>
+                  View lectures →
+                </span>
+              </article>
+            </Link>
+            <Link
+              href={`/punjab-board-10th-class/portal/${slug}/quizzes`}
+              className="module-card fade-up"
+              style={{ "--module-accent": "#ea580c", "--module-accent-grad": "linear-gradient(135deg,#ea580c,#f59e0b)", "--module-glow": "rgba(234,88,12,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg,#ea580c,#f59e0b)", opacity: 0.1 }} />
+                <div className="module-icon">📝</div>
+                <h3 style={{ margin: "14px 0 0", color: "#071b33" }}>Quizzes</h3>
+                <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{quizzes.length} available</p>
+                <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#ea580c" }}>
+                  View quizzes →
+                </span>
+              </article>
+            </Link>
+            <Link
+              href={`/punjab-board-10th-class/portal/${slug}/assignments`}
+              className="module-card fade-up"
+              style={{ "--module-accent": "#0e7490", "--module-accent-grad": "linear-gradient(135deg,#0e7490,#06b6d4)", "--module-glow": "rgba(14,116,144,.35)" } as CSSProperties}
+            >
+              <article className="card" style={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg,#0e7490,#06b6d4)", opacity: 0.1 }} />
+                <div className="module-icon">📋</div>
+                <h3 style={{ margin: "14px 0 0", color: "#071b33" }}>Assignments</h3>
+                <p style={{ margin: "4px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>{assignments.length} available</p>
+                <span className="module-arrow" style={{ marginTop: 10, display: "inline-flex", fontWeight: 700, fontSize: ".85rem", color: "#0e7490" }}>
+                  View assignments →
+                </span>
+              </article>
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { buildReportMetrics, buildOLevelReportMetrics, buildPunjab9thReportMetrics, saveReport, updateReportFields, ensureParentTables } from "@/lib/parent-system";
-import { generateReportNarrative, generateOLevelReportNarrative, generatePunjab9thReportNarrative, getAITutorUsage } from "@/lib/analytics";
+import { buildReportMetrics, buildOLevelReportMetrics, buildPunjab9thReportMetrics, buildPunjab10thReportMetrics, saveReport, updateReportFields, ensureParentTables } from "@/lib/parent-system";
+import { generateReportNarrative, generateOLevelReportNarrative, generatePunjab9thReportNarrative, generatePunjab10thReportNarrative, getAITutorUsage } from "@/lib/analytics";
 
 // Weekly draft generation (Vercel cron, see vercel.json). Aggregates each
 // student's real metrics into a draft report and pre-writes the AI narrative.
@@ -24,14 +24,15 @@ export async function GET(request: NextRequest) {
     return Math.max(1, Math.floor((now.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000)) + 1);
   }
 
-  const satWeekNo       = weekNoFor(process.env.COHORT_START_DATE ?? "");
-  const oLevelWeekNo    = weekNoFor(process.env.OLEVEL_COHORT_START_DATE ?? "");
-  const punjab9thWeekNo = weekNoFor(process.env.PUNJAB9TH_COHORT_START_DATE ?? "");
+  const satWeekNo        = weekNoFor(process.env.COHORT_START_DATE ?? "");
+  const oLevelWeekNo     = weekNoFor(process.env.OLEVEL_COHORT_START_DATE ?? "");
+  const punjab9thWeekNo  = weekNoFor(process.env.PUNJAB9TH_COHORT_START_DATE ?? "");
+  const punjab10thWeekNo = weekNoFor(process.env.PUNJAB10TH_COHORT_START_DATE ?? "");
 
-  if (satWeekNo === null && oLevelWeekNo === null && punjab9thWeekNo === null) {
+  if (satWeekNo === null && oLevelWeekNo === null && punjab9thWeekNo === null && punjab10thWeekNo === null) {
     return NextResponse.json({
       ok: false,
-      skipped: "None of COHORT_START_DATE, OLEVEL_COHORT_START_DATE, or PUNJAB9TH_COHORT_START_DATE is set (e.g. 2026-08-03). No reports generated.",
+      skipped: "None of COHORT_START_DATE, OLEVEL_COHORT_START_DATE, PUNJAB9TH_COHORT_START_DATE, or PUNJAB10TH_COHORT_START_DATE is set (e.g. 2026-08-03). No reports generated.",
     });
   }
 
@@ -42,9 +43,10 @@ export async function GET(request: NextRequest) {
   for (const s of students as { id: string; name: string; email: string; program: string }[]) {
     const isOLevel = s.program === "o-level";
     const isPunjab9th = s.program === "punjab-9th";
-    const weekNo = isOLevel ? oLevelWeekNo : isPunjab9th ? punjab9thWeekNo : satWeekNo;
+    const isPunjab10th = s.program === "punjab-10th";
+    const weekNo = isOLevel ? oLevelWeekNo : isPunjab9th ? punjab9thWeekNo : isPunjab10th ? punjab10thWeekNo : satWeekNo;
     if (weekNo === null) {
-      results.push({ student: s.name, status: `skipped: ${isOLevel ? "OLEVEL_COHORT_START_DATE" : isPunjab9th ? "PUNJAB9TH_COHORT_START_DATE" : "COHORT_START_DATE"} not set` });
+      results.push({ student: s.name, status: `skipped: ${isOLevel ? "OLEVEL_COHORT_START_DATE" : isPunjab9th ? "PUNJAB9TH_COHORT_START_DATE" : isPunjab10th ? "PUNJAB10TH_COHORT_START_DATE" : "COHORT_START_DATE"} not set` });
       continue;
     }
 
@@ -60,13 +62,15 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      if (isOLevel || isPunjab9th) {
+      if (isOLevel || isPunjab9th || isPunjab10th) {
         const metrics = isPunjab9th
           ? await buildPunjab9thReportMetrics(s.id, s.email, weekNo, periodStart, periodEnd)
+          : isPunjab10th
+          ? await buildPunjab10thReportMetrics(s.id, s.email, weekNo, periodStart, periodEnd)
           : await buildOLevelReportMetrics(s.id, s.email, weekNo, periodStart, periodEnd);
         const reportId = await saveReport(s.id, weekNo, periodStart, periodEnd, metrics, "", "");
 
-        const generateFn = isPunjab9th ? generatePunjab9thReportNarrative : generateOLevelReportNarrative;
+        const generateFn = isPunjab9th ? generatePunjab9thReportNarrative : isPunjab10th ? generatePunjab10thReportNarrative : generateOLevelReportNarrative;
         const narrative = await generateFn({
           studentName:      metrics.student,
           weekNo,
@@ -107,5 +111,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, satWeekNo, oLevelWeekNo, punjab9thWeekNo, periodStart, periodEnd, results });
+  return NextResponse.json({ ok: true, satWeekNo, oLevelWeekNo, punjab9thWeekNo, punjab10thWeekNo, periodStart, periodEnd, results });
 }

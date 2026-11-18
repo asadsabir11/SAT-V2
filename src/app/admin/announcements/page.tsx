@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-interface Announcement { id: string; title: string; body: string; created_at: string; program: "sat" | "o-level" | "amna-shamima" | "punjab-9th" | "a-level" | null; }
-type Program = "sat" | "o-level" | "amna-shamima" | "punjab-9th" | "a-level";
+interface Announcement { id: string; title: string; body: string; created_at: string; program: "sat" | "o-level" | "amna-shamima" | "punjab-9th" | "punjab-10th" | "a-level" | null; }
+type Program = "sat" | "o-level" | "amna-shamima" | "punjab-9th" | "punjab-10th" | "a-level";
 type Filter = "all" | Program;
 
 const PROGRAM_META: Record<Program, { label: string; bg: string; color: string }> = {
@@ -11,6 +11,7 @@ const PROGRAM_META: Record<Program, { label: string; bg: string; color: string }
   "o-level": { label: "O Level", bg: "#eef2ff", color: "#4338ca" },
   "amna-shamima": { label: "Amna Shamima", bg: "#f5f3ff", color: "#7c3aed" },
   "punjab-9th": { label: "9th Class", bg: "#fff7ed", color: "#c2410c" },
+  "punjab-10th": { label: "10th Class", bg: "#fef3c7", color: "#92400e" },
   "a-level": { label: "A Level", bg: "#fff1f2", color: "#be123c" },
 };
 
@@ -80,7 +81,7 @@ export default function AdminAnnouncements() {
             <div className="field" style={{ marginBottom: 14 }}>
               <label>Program *</label>
               <div style={{ display: "flex", gap: 8, background: "#f1f5f9", borderRadius: 10, padding: 4 }}>
-                {(["sat", "o-level", "amna-shamima", "punjab-9th", "a-level"] as Program[]).map(p => (
+                {(["sat", "o-level", "amna-shamima", "punjab-9th", "punjab-10th", "a-level"] as Program[]).map(p => (
                   <button
                     key={p}
                     type="button"
@@ -122,7 +123,7 @@ export default function AdminAnnouncements() {
 
         {!loading && items.length > 0 && (
           <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-            {(["all", "sat", "o-level", "amna-shamima", "punjab-9th"] as Filter[]).map(f => {
+            {(["all", "sat", "o-level", "amna-shamima", "punjab-9th", "punjab-10th"] as Filter[]).map(f => {
               const active = filter === f;
               const label = f === "all" ? "All" : PROGRAM_META[f].label;
               return (

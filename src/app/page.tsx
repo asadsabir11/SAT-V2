@@ -70,7 +70,7 @@ export default function Home() {
             <div className="stat"><strong>Weekly</strong><span>Live teaching + homework rhythm</span></div>
             <div className="stat"><strong>Always on</strong><span>AI explanations and study coaching</span></div>
             <div className="stat"><strong>Parent-ready</strong><span>Clear weekly progress visibility</span></div>
-            <div className="stat"><strong>Three programs</strong><span>SAT®, Cambridge O Level &amp; 9th Class</span></div>
+            <div className="stat"><strong>Four programs</strong><span>SAT®, Cambridge O Level, 9th &amp; 10th Class</span></div>
           </div>
         </div>
       </section>
@@ -80,9 +80,9 @@ export default function Home() {
         <div className="container">
           <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
             <div className="eyebrow" style={{ justifyContent: "center" }}>Choose your program</div>
-            <h2 className="title">One academy, three ways to get ahead</h2>
+            <h2 className="title">One academy, more ways to get ahead</h2>
           </div>
-          <div className="grid grid-3" style={{ marginTop: 32 }}>
+          <div className="grid grid-4" style={{ marginTop: 32 }}>
             <article className="card" style={{ display: "flex", flexDirection: "column" }}>
               <h3 style={{ marginTop: 0 }}>SAT® Preparation</h3>
               <EnrollmentBadge program="sat" />
@@ -118,6 +118,18 @@ export default function Home() {
                 <li>Parent progress updates</li>
               </ul>
               <Link href="/punjab-board-9th-class" className="btn btn-primary">Explore 9th Class</Link>
+            </article>
+            <article className="card" style={{ display: "flex", flexDirection: "column" }}>
+              <h3 style={{ marginTop: 0 }}>10th Class (Punjab Board)</h3>
+              <EnrollmentBadge program="punjab-10th" />
+              <p style={{ flex: 1 }}>Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus — PKR 10,000/month for all subjects.</p>
+              <ul className="check-list" style={{ margin: "14px 0 20px" }}>
+                <li>Attend your first week before paying</li>
+                <li>Live classes and teacher support</li>
+                <li>Regular tests and progress tracking</li>
+                <li>Parent progress updates</li>
+              </ul>
+              <Link href="/punjab-board-10th-class" className="btn btn-primary">Explore 10th Class</Link>
             </article>
           </div>
         </div>
@@ -229,7 +241,7 @@ export default function Home() {
                 Teach With The Digital Tutor
               </h3>
               <p style={{ margin: 0, color: "rgba(255,255,255,.82)", maxWidth: 560 }}>
-                We&apos;re looking for experienced teachers across SAT, Cambridge O Level, and Punjab Board 9th Class.
+                We&apos;re looking for experienced teachers across SAT, Cambridge O Level, and Punjab Board 9th &amp; 10th Class.
                 Submit your resume and our team will contact you directly.
               </p>
             </div>

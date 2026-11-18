@@ -1,23 +1,31 @@
 import { sql } from "@/lib/db";
 
 
-export type Program = "sat" | "o-level" | "punjab-9th" | "a-level";
+export type Program = "sat" | "o-level" | "punjab-9th" | "punjab-10th" | "a-level";
 export type SatLectureCategory = "introduction" | "math" | "english";
 export type OLevelLectureCategory = "mathematics" | "computer-science" | "english-language" | "islamiyat" | "pakistan-studies" | "physics";
 // Mirrors the subject slugs in punjab9thSessions.ts's SUBJECT_SLUGS (kept as a
 // separate literal list rather than imported, the same way OLevelLectureCategory
 // doesn't import from academy/data.ts — this file stays self-contained).
 export type Punjab9thLectureCategory = "english" | "urdu" | "maths" | "physics" | "chemistry" | "biology" | "computer-science" | "islamiat" | "tarjuma-tul-quran-or-ethics";
+// Same subject set as 9th Class (see punjab10thSessions.ts's SUBJECT_SLUGS) —
+// kept as its own literal type rather than reusing Punjab9thLectureCategory so
+// the two grades stay independently editable if their syllabuses diverge later.
+export type Punjab10thLectureCategory = "english" | "urdu" | "maths" | "physics" | "chemistry" | "biology" | "computer-science" | "islamiat" | "tarjuma-tul-quran-or-ethics";
 // Cambridge CS 9618's AS/A2 split — A-Level used to be single-subject
 // (plain "computer-science"), but now has two volumes with separate access.
 export type ALevelLectureCategory = "computer-science-vol1" | "computer-science-vol2";
-export type LectureCategory = SatLectureCategory | OLevelLectureCategory | Punjab9thLectureCategory | ALevelLectureCategory;
+export type LectureCategory = SatLectureCategory | OLevelLectureCategory | Punjab9thLectureCategory | Punjab10thLectureCategory | ALevelLectureCategory;
 
 export const OLEVEL_LECTURE_CATEGORIES: OLevelLectureCategory[] = [
   "mathematics", "computer-science", "english-language", "islamiyat", "pakistan-studies", "physics",
 ];
 
 export const PUNJAB9TH_LECTURE_CATEGORIES: Punjab9thLectureCategory[] = [
+  "english", "urdu", "maths", "physics", "chemistry", "biology", "computer-science", "islamiat", "tarjuma-tul-quran-or-ethics",
+];
+
+export const PUNJAB10TH_LECTURE_CATEGORIES: Punjab10thLectureCategory[] = [
   "english", "urdu", "maths", "physics", "chemistry", "biology", "computer-science", "islamiat", "tarjuma-tul-quran-or-ethics",
 ];
 

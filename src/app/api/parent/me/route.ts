@@ -4,6 +4,7 @@ import { getStudentForParent, getReportForStudent, listReportsForStudent, getHom
 import { getAssessmentHistory } from "@/lib/analytics";
 import { getSubjectPerformanceForStudent, getRecentAttemptsForStudent } from "@/lib/olevel-quiz";
 import { getPunjab9thSubjectPerformanceForStudent, getPunjab9thRecentAttemptsForStudent } from "@/lib/punjab9thQuiz";
+import { getPunjab10thSubjectPerformanceForStudent, getPunjab10thRecentAttemptsForStudent } from "@/lib/punjab10thQuiz";
 import { getSubject } from "@/lib/academy/data";
 
 export async function GET() {
@@ -21,6 +22,7 @@ export async function GET() {
   const studentEmail = (student as { id: string; email: string; program: string }).email;
   const isOLevel = (student as { program: string }).program === "o-level";
   const isPunjab9th = (student as { program: string }).program === "punjab-9th";
+  const isPunjab10th = (student as { program: string }).program === "punjab-10th";
 
   if (isOLevel) {
     const [latestReport, reports, attendance, subjectsRaw, recentAttempts] = await Promise.all([
@@ -44,6 +46,18 @@ export async function GET() {
     ]);
     // Subject is already a plain human-readable string for this program —
     // no slug-to-name lookup needed like O-Level's academy.ts registry.
+    const subjects = subjectsRaw.map((s) => ({ ...s, subjectLabel: s.subject }));
+    return NextResponse.json({ student, latestReport, reports, homework: [], attendance, subjects, recentAttempts });
+  }
+
+  if (isPunjab10th) {
+    const [latestReport, reports, attendance, subjectsRaw, recentAttempts] = await Promise.all([
+      getReportForStudent(studentId),
+      listReportsForStudent(studentId),
+      getAttendanceForStudent(studentId),
+      getPunjab10thSubjectPerformanceForStudent(studentEmail),
+      getPunjab10thRecentAttemptsForStudent(studentEmail),
+    ]);
     const subjects = subjectsRaw.map((s) => ({ ...s, subjectLabel: s.subject }));
     return NextResponse.json({ student, latestReport, reports, homework: [], attendance, subjects, recentAttempts });
   }

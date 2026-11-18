@@ -4,6 +4,7 @@ import { getLectureById } from "@/lib/lectures";
 import { getStudentAccessLevel } from "@/lib/users";
 import { getOLevelSubjectAccess } from "@/lib/olevelAccess";
 import { getPunjab9thAccessLevel } from "@/lib/punjab9thAccess";
+import { getPunjab10thAccessLevel } from "@/lib/punjab10thAccess";
 
 export const runtime = "edge";
 
@@ -31,6 +32,13 @@ export async function GET(req: NextRequest, { params }: Params) {
     } else if (lecture.program === "punjab-9th") {
       if (!lecture.is_free_preview) {
         const accessLevel = await getPunjab9thAccessLevel(session.email);
+        if (accessLevel !== "unlocked") {
+          return new NextResponse("Access denied", { status: 403 });
+        }
+      }
+    } else if (lecture.program === "punjab-10th") {
+      if (!lecture.is_free_preview) {
+        const accessLevel = await getPunjab10thAccessLevel(session.email);
         if (accessLevel !== "unlocked") {
           return new NextResponse("Access denied", { status: 403 });
         }
