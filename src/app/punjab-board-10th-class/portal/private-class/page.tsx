@@ -43,7 +43,7 @@ export default async function Punjab10thPrivateClassPage() {
               <div key={slot.subject} className="card" style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                 <div>
                   <p style={{ margin: "0 0 4px", fontWeight: 900, color: "#071b33", fontSize: "1.05rem" }}>{slot.subject}</p>
-                  <p style={{ margin: 0, color: "#6b7c93", fontSize: ".9rem" }}>Every {slot.day} · {slot.time} (PKT)</p>
+                  <p style={{ margin: 0, color: "#155eef", fontWeight: 800, fontSize: "1rem" }}>📅 Every {slot.day} · {slot.time} (PKT)</p>
                 </div>
                 <a href={slot.zoomUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: "10px 22px", flexShrink: 0 }}>
                   Join Zoom →
