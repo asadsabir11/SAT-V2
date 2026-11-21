@@ -139,6 +139,21 @@ export default async function Punjab10thPortal() {
           </article>
         </Link>
 
+        <Link
+          href="/punjab-board-10th-class/portal/private-class"
+          className="module-card fade-up"
+          style={{ "--module-accent": "#be123c", "--module-accent-grad": "linear-gradient(135deg,#be123c,#fb7185)", "--module-glow": "rgba(190,18,60,.35)", display: "block", marginBottom: 24 } as CSSProperties}
+        >
+          <article className="card" style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 16, padding: "18px 22px" }}>
+            <div className="module-icon" style={{ flexShrink: 0 }}>📞</div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, color: "#071b33" }}>Private Class</h3>
+              <p style={{ margin: "2px 0 0", color: "#6b7c93", fontSize: ".85rem" }}>Weekly Zoom links for your private candidate classes</p>
+            </div>
+            <span className="module-arrow" style={{ fontWeight: 700, fontSize: ".85rem", color: "#be123c", flexShrink: 0 }}>Open →</span>
+          </article>
+        </Link>
+
         <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "#071b33", margin: "0 0 14px" }}>Your subjects</h2>
         <div className="grid grid-3">
           {subjects.map((subject) => {
