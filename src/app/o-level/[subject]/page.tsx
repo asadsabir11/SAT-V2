@@ -15,6 +15,17 @@ export function generateStaticParams() {
   return getOLevelSubjects().map((s) => ({ subject: s.slug }));
 }
 
+// Mirrors SUBJECT_CLASS_TIME in ../page.tsx — duplicated here (not
+// imported) since that file isn't a shared module, just the sibling
+// marketing page. Only the 3 subjects actually open for enrollment (the
+// other 3 — islamiyat, pakistan-studies, physics — show "Coming soon" with
+// no real day/time yet) get a schedule in the Course schema below.
+const SUBJECT_SCHEDULE: Record<string, { day: string; start: string; end: string }> = {
+  "english-language": { day: "Friday", start: "18:00", end: "19:00" },
+  "mathematics": { day: "Saturday", start: "18:00", end: "19:00" },
+  "computer-science": { day: "Thursday", start: "18:00", end: "19:00" },
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -49,6 +60,11 @@ export default async function SubjectPage({
   const cohort = getCohortForSubject(subject.slug);
 
   const BASE_URL = "https://academy.thedigitaltutor.net";
+  // PKR 10,000/month is the real advertised single-subject price shown
+  // throughout the page (FAQ, pricing table) — the bundle/marginal pricing
+  // only applies to an already-signed-in student with other subjects
+  // unlocked, which isn't something anonymous schema can represent.
+  const schedule = SUBJECT_SCHEDULE[subject.slug];
   const courseSchema = {
     "@context": "https://schema.org",
     "@type": "Course",
@@ -57,6 +73,33 @@ export default async function SubjectPage({
     provider: { "@type": "EducationalOrganization", name: "The Digital Tutor", sameAs: BASE_URL },
     url: `${BASE_URL}/o-level/${subject.slug}`,
     ...(instructor ? { instructor: { "@type": "Person", name: instructor.name } } : {}),
+    offers: {
+      "@type": "Offer",
+      price: "10000",
+      priceCurrency: "PKR",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "10000",
+        priceCurrency: "PKR",
+        unitText: "MONTH",
+      },
+      availability: schedule ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
+      url: `${BASE_URL}/o-level#apply`,
+    },
+    ...(schedule ? {
+      hasCourseInstance: {
+        "@type": "CourseInstance",
+        courseMode: "online",
+        courseWorkload: "PT1H",
+        courseSchedule: {
+          "@type": "Schedule",
+          repeatFrequency: "P1W",
+          byDay: `https://schema.org/${schedule.day}`,
+          startTime: schedule.start,
+          endTime: schedule.end,
+        },
+      },
+    } : {}),
   };
   const faqSchema = subject.faqs && subject.faqs.length > 0 ? {
     "@context": "https://schema.org",
