@@ -6,13 +6,16 @@ import { TrackViewContent } from "../TrackViewContent";
 const BASE_URL = "https://academy.thedigitaltutor.net";
 const BOOK_URL = "https://papercraftpublishers.com/product/o-level-computer-science-interactive-exam-workbook";
 
+const TITLE = "O Level Computer Science Workbook 2210 | The Digital Tutor";
+const DESCRIPTION = "Buy Ibrahim Malick's O Level Computer Science 2210 workbook — worked examples, exam practice, mark schemes and QR-linked video lessons.";
+
 export const metadata: Metadata = {
-  title: "O Level Computer Science Exam Workbook",
-  description: "The O Level Computer Science 2210 exam workbook by Ibrahim Malick, with worked examples, mark schemes and QR-linked video lessons.",
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
   alternates: { canonical: `${BASE_URL}/o-level/computer-science-book` },
   openGraph: {
-    title: "O Level Computer Science Exam Workbook",
-    description: "The O Level Computer Science 2210 exam workbook by Ibrahim Malick, with worked examples, mark schemes and QR-linked video lessons.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: `${BASE_URL}/o-level/computer-science-book`,
     type: "website",
     images: ["/o-level-cs-workbook-cover.jpeg"],
@@ -26,10 +29,21 @@ const BENEFITS = [
   { icon: "💬", title: "WhatsApp study support", description: "Access to WhatsApp study support and free diagnostic resources that come with the book." },
 ];
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: BASE_URL },
+    { "@type": "ListItem", position: 2, name: "O Level", item: `${BASE_URL}/o-level` },
+    { "@type": "ListItem", position: 3, name: "Computer Science Workbook", item: `${BASE_URL}/o-level/computer-science-book` },
+  ],
+};
+
 export default function ComputerScienceWorkbookPage() {
   return (
     <section className="section">
       <TrackViewContent contentName="O Level CS Workbook" />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <div className="container" style={{ maxWidth: 880 }}>
         <nav style={{ marginBottom: 20, color: "var(--muted)", fontSize: ".85rem" }}>
           <Link href="/" style={{ color: "var(--muted)" }}>Home</Link>
@@ -42,19 +56,20 @@ export default function ComputerScienceWorkbookPage() {
         <div className="eyebrow">Study resource</div>
         <h1 className="title" style={{ marginTop: 8 }}>O Level Computer Science Interactive Exam Workbook</h1>
         <p className="lead">
-          Written by Ibrahim Malick, educator and O Level Computer Science tutor at The Digital Tutor. Covers the
-          complete Cambridge O Level Computer Science (2210) syllabus with worked examples, exam-style questions
-          and mark schemes.
+          A Cambridge O Level Computer Science 2210 revision workbook with worked examples, exam-style questions,
+          mark schemes, QR-linked video lessons and WhatsApp study support. Written by Ibrahim Malick, educator
+          and O Level Computer Science tutor at The Digital Tutor.
         </p>
 
-        <div className="grid grid-2" style={{ marginTop: 32, alignItems: "center" }}>
+        <h2 style={{ color: "var(--navy)", fontSize: "1.15rem", fontWeight: 800, marginTop: 32 }}>Pricing &amp; how to buy</h2>
+        <div className="grid grid-2" style={{ marginTop: 16, alignItems: "center" }}>
           <div
             className="card"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "linear-gradient(135deg,#eff6ff,#f5f3ff)", minHeight: 280 }}
           >
             <img
               src="/o-level-cs-workbook-cover.jpeg"
-              alt="O Level Computer Science Interactive Exam Workbook cover"
+              alt="Cover of Ibrahim Malick's O Level Computer Science Interactive Exam Workbook for Cambridge 2210."
               style={{ maxWidth: "100%", maxHeight: 360, borderRadius: 8, boxShadow: "0 8px 24px rgba(7,27,51,.15)", display: "block" }}
             />
           </div>
@@ -73,13 +88,14 @@ export default function ComputerScienceWorkbookPage() {
               Buy the Workbook →
             </BookPurchaseLink>
             <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".8rem", lineHeight: 1.6 }}>
-              Checkout and delivery are handled by PaperCraft Publishers — purchases are not processed on this
-              site.
+              Checkout and delivery are handled by PaperCraft Publishers — you&apos;ll select paperback or ebook
+              on their page, and purchases are not processed on this site.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-2" style={{ marginTop: 40 }}>
+        <h2 style={{ color: "var(--navy)", fontSize: "1.15rem", fontWeight: 800, marginTop: 40 }}>What&apos;s inside the workbook</h2>
+        <div className="grid grid-2" style={{ marginTop: 16 }}>
           {BENEFITS.map((b) => (
             <article className="card" key={b.title}>
               <div className="icon">{b.icon}</div>

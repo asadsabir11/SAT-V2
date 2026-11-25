@@ -123,12 +123,22 @@ export default async function SubjectPage({
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   } : null;
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: "O Level", item: `${BASE_URL}/o-level` },
+      { "@type": "ListItem", position: 3, name: subject.name, item: `${BASE_URL}/o-level/${subject.slug}` },
+    ],
+  };
 
   return (
     <section className="section">
       <TrackViewContent contentName={`O Level ${subject.name}`} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <div className="container" style={{ maxWidth: 880 }}>
         <nav style={{ marginBottom: 20, color: "var(--muted)", fontSize: ".85rem" }}>
           <Link href="/" style={{ color: "var(--muted)" }}>Home</Link>
