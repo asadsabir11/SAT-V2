@@ -143,7 +143,7 @@ export default async function WorkbookLandingPage({ params }: { params: Promise<
           <h2 style={{ color: "var(--navy)", fontSize: "1.15rem", fontWeight: 800 }}>Who wrote it</h2>
           <p style={{ color: "var(--muted)", lineHeight: 1.8, marginTop: 12 }}>
             The workbook is produced by The Digital Tutor, an independent online tuition provider running live Cambridge
-            O Level classes for students in Pakistan and abroad. Classes are taught by Ibrahim Sajid Malick, founder of
+            O Level classes for students in Pakistan and abroad. Classes are taught by Ibrahim Malick, founder of
             The Digital Tutor.
           </p>
         </section>

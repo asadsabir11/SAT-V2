@@ -61,7 +61,7 @@ const TRUST_POINTS = [
 ];
 
 const FAQ_ITEMS: [string, string][] = [
-  ["Who teaches these classes?", "English Language, Mathematics and Computer Science are taught by Ibrahim Sajid Malick, founder of The Digital Tutor."],
+  ["Who teaches these classes?", "English Language, Mathematics and Computer Science are taught by Ibrahim Malick, founder of The Digital Tutor."],
   ["Are the classes live or recorded?", "Classes are delivered live online."],
   ["What happens if my child misses a class?", "Our missed-class and recording policy will be shared with you directly after you register."],
   ["How often are classes held?", "Mathematics meets weekly on Saturdays and English Language weekly on Fridays (each 6:00–7:00 PM PKT, 1 hour long). Computer Science meets Monday to Thursday, 7:00–8:30 PM PKT. Office hours run Monday–Friday from 7:30–8:15 PM PKT."],
@@ -177,6 +177,14 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
       >
         Full syllabus, FAQs &amp; class model →
       </Link>
+      {subjectSlug === "computer-science" && (
+        <Link
+          href="/o-level/computer-science-book"
+          style={{ display: "block", marginTop: 4, textAlign: "center", color: "var(--muted)", fontWeight: 600, fontSize: ".78rem", textDecoration: "none" }}
+        >
+          Also available: the Computer Science workbook →
+        </Link>
+      )}
     </div>
   );
 }

@@ -46,7 +46,7 @@ const ORG_SCHEMA = {
   description: DESC,
   founder: {
     "@type": "Person",
-    name: "Ibrahim Sajid Malick",
+    name: "Ibrahim Malick",
   },
   // Matches the Country type (lib/types.ts) and the registration form's
   // own country list (components/forms.tsx) minus "Other" — the real set
