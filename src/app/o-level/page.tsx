@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   description: "Live online Cambridge O Level and IGCSE classes in English, Mathematics and Computer Science, with office hours, past-paper practice and parent reports.",
   alternates: { canonical: `${BASE_URL}/o-level` },
   openGraph: {
-    title: "O Level Founding Cohorts Now Enrolling",
-    description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
+    title: "Enroll Anytime — O Level Classes Open",
+    description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting.",
     url: `${BASE_URL}/o-level`,
     type: "website",
     // Declaring an openGraph block here overrides the root layout's, which
@@ -39,8 +39,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     images: ["/opengraph-image"],
-    title: "O Level Founding Cohorts Now Enrolling",
-    description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting. More subjects coming soon.",
+    title: "Enroll Anytime — O Level Classes Open",
+    description: "Live online English, Mathematics and Computer Science tuition with founder-led classes, office hours and parent progress reporting.",
   },
 };
 
@@ -61,10 +61,10 @@ const TRUST_POINTS = [
 ];
 
 const FAQ_ITEMS: [string, string][] = [
-  ["Who will teach the founding cohort?", "The initial English Language, Mathematics and Computer Science cohorts will be taught by Ibrahim Sajid Malick, founder of The Digital Tutor."],
+  ["Who teaches these classes?", "English Language, Mathematics and Computer Science are taught by Ibrahim Sajid Malick, founder of The Digital Tutor."],
   ["Are the classes live or recorded?", "Classes are delivered live online."],
-  ["What happens if my child misses a class?", "Our missed-class and recording policy will be published here before the founding cohort begins."],
-  ["How many students will be in each class?", "The founding cohorts will be limited to a maximum of 15 students per class."],
+  ["What happens if my child misses a class?", "Our missed-class and recording policy will be shared with you directly after you register."],
+  ["How many students will be in each class?", "Each class is limited to a maximum of 15 students."],
   ["How often are classes held?", "Mathematics meets weekly on Saturdays, English Language on Fridays, and Computer Science on Thursdays (each 6:00–7:00 PM PKT, 1 hour long), plus office hours Monday–Friday from 7:30–8:15 PM PKT."],
   ["Does the program guarantee a particular grade?", "No. The program provides teaching, practice, feedback and structured preparation, but no examination grade can be guaranteed."],
   ["How will parents receive progress updates?", "Parents will receive regular reports covering attendance, homework, current strengths, areas for improvement and recommended next steps."],
@@ -74,8 +74,7 @@ const FAQ_ITEMS: [string, string][] = [
 ];
 
 const COHORT_SCHEDULE = {
-  startDate: "September 12, 2026",
-  registrationDeadline: "September 10, 2026",
+  enrollment: "Open now — start with your subject's next scheduled class",
   officeHours: "7:30 PM – 8:15 PM, Monday–Friday (PKT)",
   sessionDuration: "1 hour",
 } as const;
@@ -107,8 +106,7 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
   const classTime = SUBJECT_CLASS_TIME[subjectSlug];
   const priceValue = fullyBooked ? `PKR ${basePrice.toLocaleString()}` : isUnlocked ? "Unlocked ✓" : `PKR ${marginalPrice.toLocaleString()}${isDiscounted ? " (bundle price)" : ""}`;
   const rows: [string, string][] = [
-    ["Cohort start date", COHORT_SCHEDULE.startDate],
-    ["Registration deadline", COHORT_SCHEDULE.registrationDeadline],
+    ["Enrollment", fullyBooked ? "Coming soon" : COHORT_SCHEDULE.enrollment],
     ["Class day & time (PKT)", classTime ?? "To be confirmed"],
     ["Session duration", COHORT_SCHEDULE.sessionDuration],
     ["Weekly office hours", COHORT_SCHEDULE.officeHours],
@@ -118,21 +116,21 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
 
   const body = (
     <>
-      <div className="eyebrow" style={fullyBooked ? { color: "#b91c1c" } : undefined}>
-        {fullyBooked ? "Fully booked" : `${cohort?.targetExam ?? "May/June 2027"} target`}
+      <div className="eyebrow" style={fullyBooked ? { color: "#92400e" } : undefined}>
+        {fullyBooked ? "Coming soon" : `${cohort?.targetExam ?? "May/June 2027"} target`}
       </div>
       <h3 style={{ marginTop: 6 }}>O Level {subject.name}</h3>
       <div style={{ display: "grid", gap: 6, margin: "12px 0 18px" }}>
         {rows.map(([label, value]) => (
           <div key={label} style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "2px 12px", fontSize: ".85rem", padding: "4px 0", borderBottom: "1px solid #f0f4f8" }}>
             <span style={{ color: "var(--muted)" }}>{label}</span>
-            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" ? "#92400e" : value === "Fully booked" ? "#b91c1c" : isUnlocked ? "#15803d" : "var(--navy)" }}>{value}</span>
+            <span style={{ fontWeight: 700, textAlign: "right", color: value === "To be confirmed" || value === "Coming soon" ? "#92400e" : isUnlocked ? "#15803d" : "var(--navy)" }}>{value}</span>
           </div>
         ))}
       </div>
       {fullyBooked ? (
-        <span style={{ marginTop: "auto", color: "#b91c1c", fontWeight: 700, fontSize: ".9rem" }}>
-          Fully booked for this cohort
+        <span style={{ marginTop: "auto", color: "#92400e", fontWeight: 700, fontSize: ".9rem" }}>
+          Coming soon — not open for enrollment yet
         </span>
       ) : !isSignedInStudent ? (
         <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
@@ -239,7 +237,7 @@ export default async function OLevelPage() {
             students preparing for Cambridge O Level and IGCSE examinations.
           </p>
           <p style={{ color: "#5eead4", fontWeight: 700, fontSize: ".95rem" }}>
-            Founding cohorts now enrolling for English Language, Mathematics and Computer Science. Limited to 15 students per class.
+            Enroll anytime for English Language, Mathematics and Computer Science — classes start with the next scheduled session. Limited to 15 students per class.
           </p>
           <div className="actions">
             {isSignedInStudent ? (
@@ -333,7 +331,7 @@ export default async function OLevelPage() {
             <div className="eyebrow" style={{ justifyContent: "center" }}>Founding cohorts</div>
             <h2 className="title">English Language, Mathematics and Computer Science</h2>
             <p className="lead" style={{ margin: "0 auto" }}>
-              These three subjects are confirmed for the founding cohort, starting September 12, 2026.
+              These three subjects are open for enrollment now — join anytime and start with the next scheduled class.
             </p>
           </div>
           <div className="grid grid-3" style={{ marginTop: 40 }}>
