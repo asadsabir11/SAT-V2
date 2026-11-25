@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Online O Level Tuition in Pakistan",
-  description: "Join live online Cambridge O Level and IGCSE classes in English Language, Mathematics and Computer Science, with weekly office hours, past-paper practice and parent progress reports. Islamiyat, Pakistan Studies and Physics coming soon.",
+  description: "Live online Cambridge O Level and IGCSE classes in English, Mathematics and Computer Science, with office hours, past-paper practice and parent reports.",
   alternates: { canonical: `${BASE_URL}/o-level` },
   openGraph: {
     title: "O Level Founding Cohorts Now Enrolling",

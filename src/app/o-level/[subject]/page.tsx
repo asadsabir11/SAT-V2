@@ -89,12 +89,21 @@ export default async function SubjectPage({
           </p>
         )}
         <p className="lead">{subject.description}</p>
+        {/* This page is statically generated (generateStaticParams) and served
+            identically to every visitor, signed in or not — it can't check
+            session state the way the dynamic /o-level page does. These 4
+            buttons used to link straight into middleware-protected routes
+            (/o-level/lectures etc.), which just bounced every signed-out
+            visitor (and every crawler) to /login. They now point at the same
+            registration anchor as "Create Your Free Account" — an already
+            signed-in student landing here can still reach their lectures via
+            the header/dashboard nav. */}
         <div className="actions">
           <CTAButton href="/o-level#apply" variant="accent">Create Your Free Account</CTAButton>
-          <CTAButton href={`/o-level/lectures?subject=${subject.slug}`} variant="secondary">Watch Lessons</CTAButton>
-          <CTAButton href={`/o-level/quizzes?subject=${subject.slug}`} variant="secondary">Take a Quiz</CTAButton>
-          <CTAButton href={`/o-level/sessions?subject=${subject.slug}`} variant="secondary">Live Sessions</CTAButton>
-          <CTAButton href={`/o-level/past-papers?subject=${subject.slug}`} variant="secondary">Past Papers</CTAButton>
+          <CTAButton href="/o-level#apply" variant="secondary">Watch Lessons</CTAButton>
+          <CTAButton href="/o-level#apply" variant="secondary">Take a Quiz</CTAButton>
+          <CTAButton href="/o-level#apply" variant="secondary">Live Sessions</CTAButton>
+          <CTAButton href="/o-level#apply" variant="secondary">Past Papers</CTAButton>
         </div>
 
         {cohort && (

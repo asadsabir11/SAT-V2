@@ -8,7 +8,7 @@ const BASE_URL = "https://academy.thedigitaltutor.net";
 export const metadata: Metadata = {
   title: "Guides for Parents",
   description:
-    "Practical guides for parents choosing Cambridge O Level tuition in Pakistan — what it costs, online versus home tuition, how to choose a tutor, and when to start preparing.",
+    "Practical guides for parents choosing O Level tuition in Pakistan — costs, online vs home tuition, choosing a tutor, and when to start preparing.",
   alternates: { canonical: `${BASE_URL}/guides` },
   openGraph: {
     title: "O Level Guides for Parents",

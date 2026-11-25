@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 import { getScholarshipByStudentUserId } from "@/lib/scholarships";
 
 const BASE_URL = "https://academy.thedigitaltutor.net";
-const DESC = "The Digital Tutor Opportunity Scholarship reserves fully funded places in our founding cohorts for students who demonstrate financial need and a genuine commitment to learning.";
+const DESC = "The Digital Tutor Opportunity Scholarship reserves fully funded places for students who show financial need and a genuine commitment to learning.";
 
 export const metadata: Metadata = {
   title: "Opportunity Scholarship",

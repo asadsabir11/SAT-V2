@@ -13,8 +13,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/punjab-board-9th-class`, priority: 0.85 },
     { url: `${BASE}/punjab-board-10th-class`, priority: 0.85 },
     { url: `${BASE}/academy`, priority: 0.8 },
-    { url: `${BASE}/register`, priority: 0.9 },
-    { url: `${BASE}/login`, priority: 0.7 },
+    // Account pages have no search value. /register keeps real descriptive
+    // content so it stays crawlable, just at a low priority; /login is
+    // excluded entirely (it also carries noindex — see src/app/login/page.tsx).
+    { url: `${BASE}/register`, priority: 0.3 },
     { url: `${BASE}/parent-webinar`, priority: 0.8 },
     { url: `${BASE}/scholarship`, priority: 0.7 },
     { url: `${BASE}/sample-report`, priority: 0.6 },
@@ -37,9 +39,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // still gets the PDF from it (SEO Phase 2 §22).
     ...WORKBOOK_PAGES.map((w) => ({ url: `${BASE}/resources/${w.slug}`, priority: 0.7 })),
   ];
+  // lastModified intentionally omitted: stamping every URL with the build
+  // time it happened to render at (the same instant, for all of them) gives
+  // crawlers a false "all pages changed just now" signal rather than no
+  // signal at all.
   return publicRoutes.map(r => ({
     url: r.url,
-    lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: r.priority,
   }));

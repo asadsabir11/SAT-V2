@@ -7,12 +7,12 @@ const BASE_URL = "https://academy.thedigitaltutor.net";
 const WHATSAPP_HERO_LINK = "https://wa.me/923316663291?text=Assalam-oAlaikum%2C%20mujhe%209th%20Class%20online%20program%20ki%20details%20chahiye.";
 
 export const metadata: Metadata = {
-  title: "Punjab Board 9th Class — All Subjects Online",
-  description: "Live online classes for Biology and Computer Science groups, taught by experienced teachers following the latest Punjab Board syllabus. Special launch fee: PKR 10,000/month for all subjects.",
+  title: "Punjab Board 9th Class Tuition",
+  description: "Live online 9th Class tuition for Biology and Computer Science groups, following the Punjab Board syllabus. PKR 10,000 per month, all subjects included.",
   alternates: { canonical: `${BASE_URL}/punjab-board-9th-class` },
   openGraph: {
-    title: "Punjab Board 9th Class — All Subjects Online",
-    description: "Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus. Special launch fee: PKR 10,000/month for all subjects.",
+    title: "Punjab Board 9th Class Tuition",
+    description: "Live online 9th Class tuition for Biology and Computer Science groups, following the Punjab Board syllabus. PKR 10,000 per month, all subjects included.",
     url: `${BASE_URL}/punjab-board-9th-class`,
     type: "website",
     images: ["/opengraph-image"],
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     images: ["/opengraph-image"],
-    title: "Punjab Board 9th Class — All Subjects Online",
-    description: "Live online classes for Biology and Computer Science groups, following the latest Punjab Board syllabus. Special launch fee: PKR 10,000/month for all subjects.",
+    title: "Punjab Board 9th Class Tuition",
+    description: "Live online 9th Class tuition for Biology and Computer Science groups, following the Punjab Board syllabus. PKR 10,000 per month, all subjects included.",
   },
 };
 
