@@ -53,6 +53,8 @@ export interface Subject {
   /** Optional overrides for search-targeted title/H1 (falls back to a generic "O Level {name}" pattern when unset). */
   seoTitle?: string;
   seoH1?: string;
+  /** Optional override for the meta description (falls back to a generic `{short} Live classes...` template when unset). */
+  seoDescription?: string;
 }
 
 export type ExamSession = string; // e.g. "May/June 2027"

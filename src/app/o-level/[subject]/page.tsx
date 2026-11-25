@@ -48,7 +48,7 @@ export async function generateMetadata({
   const subject = getSubject(slug);
   if (!subject) return { title: "Subject not found" };
   const title = subject.seoTitle ?? `O Level ${subject.name}`;
-  const description = `${subject.short} Live classes, office hours, past-paper practice, and progress reporting for Cambridge O Level ${subject.name}.`;
+  const description = subject.seoDescription ?? `${subject.short} Live classes, office hours, past-paper practice, and progress reporting for Cambridge O Level ${subject.name}.`;
   return {
     // absolute: these titles already carry brand-free keyword + syllabus code.
     // Letting the root layout append " | The Digital Tutor" pushed them past
@@ -163,22 +163,20 @@ export default async function SubjectPage({
         )}
         {/* This page is statically generated (generateStaticParams) and served
             identically to every visitor, signed in or not — it can't check
-            session state the way the dynamic /o-level page does. These 4
-            buttons used to link straight into middleware-protected routes
-            (/o-level/lectures etc.), which just bounced every signed-out
-            visitor (and every crawler) to /login. They now point at the same
-            registration anchor as "Create Your Free Account" — an already
-            signed-in student landing here can still reach their lectures via
-            the header/dashboard nav. */}
+            session state the way the dynamic /o-level page does. One button,
+            not several — they all pointed at the same /o-level#apply anchor
+            anyway (a prior fix, since they used to link straight into
+            middleware-protected routes like /o-level/lectures and bounce
+            every signed-out visitor to /login). An already signed-in student
+            landing here can still reach their lectures via the header/
+            dashboard nav. */}
         <div className="actions">
-          <CTAButton href="/o-level#apply" variant="accent">Create Your Free Account</CTAButton>
-          <CTAButton href="/o-level#apply" variant="secondary">Watch Lessons</CTAButton>
-          <CTAButton href="/o-level#apply" variant="secondary">Take a Quiz</CTAButton>
-          <CTAButton href="/o-level#apply" variant="secondary">Live Sessions</CTAButton>
-          <CTAButton href="/o-level#apply" variant="secondary">Past Papers</CTAButton>
+          <CTAButton href="/o-level#apply" variant="accent">View Schedule &amp; Register Free</CTAButton>
         </div>
-        <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".82rem" }}>
-          Register free to preview the learning platform. Payment is only required when you choose to unlock the course.
+        <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".82rem", maxWidth: 560 }}>
+          Creating an account is free — you can preview the learning platform before paying anything. When you&apos;re
+          ready, unlock the course by paying via bank transfer from your dashboard; verification usually takes
+          one business day.
         </p>
         {subject.slug === "computer-science" && (
           <p style={{ marginTop: 4, color: "var(--muted)", fontSize: ".82rem" }}>
