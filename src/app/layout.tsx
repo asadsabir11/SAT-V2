@@ -48,7 +48,10 @@ const ORG_SCHEMA = {
     "@type": "Person",
     name: "Ibrahim Sajid Malick",
   },
-  areaServed: ["Pakistan", "Bangladesh", "Nigeria"],
+  // Matches the Country type (lib/types.ts) and the registration form's
+  // own country list (components/forms.tsx) minus "Other" — the real set
+  // of countries students register from, not just the 3 launch markets.
+  areaServed: ["Pakistan", "Bangladesh", "Nigeria", "Indonesia", "Malaysia", "South Korea", "Haiti", "Vietnam", "Nepal", "Ghana", "Kenya", "Philippines", "Egypt", "Sri Lanka", "India", "Morocco"],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
