@@ -110,10 +110,10 @@ export const SUBJECTS: Subject[] = [
     syllabusRef: "Cambridge O Level Computer Science",
     syllabusCode: "2210",
     seoTitle: "O Level Computer Science Tuition Pakistan | Cambridge 2210",
-    seoH1: "Cambridge O Level Computer Science Tuition Online in Pakistan",
+    seoH1: "Cambridge O Level Computer Science 2210",
     short: "Exam content connected to real-world technology.",
     description:
-      "O Level Computer Science taught by a technology professional — exam-aligned, with concepts connected to how real systems actually work.",
+      "Live classes with Ibrahim Malick, educator and author of the O Level Computer Science Interactive Exam Workbook. Build concepts, practise exam-style questions and get support between classes.",
     forWho: [
       "Students preparing for Cambridge O Level / IGCSE Computer Science",
       "Students who want theory explained with real-world context",

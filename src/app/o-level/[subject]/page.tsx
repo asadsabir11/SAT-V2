@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { CTAButton, FAQAccordion } from "@/components/site";
 import { InstructorProfile } from "@/components/academy/InstructorProfile";
 import { AcademyPricingTable } from "@/components/academy/AcademyPricingTable";
+import { TrackViewContent } from "../TrackViewContent";
 import {
   getCohortForSubject,
   getInstructor,
@@ -25,6 +26,18 @@ const SUBJECT_SCHEDULE: Record<string, { days: string[]; start: string; end: str
   "mathematics": { days: ["Saturday"], start: "18:00", end: "19:00", workload: "PT1H" },
   "computer-science": { days: ["Monday", "Tuesday", "Wednesday", "Thursday"], start: "19:00", end: "20:30", workload: "PT1H30M" },
 };
+
+function formatTime12h(t: string): string {
+  const [h, m] = t.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${m.toString().padStart(2, "0")} ${period}`;
+}
+
+function formatSchedule(s: { days: string[]; start: string; end: string }): string {
+  const dayLabel = s.days.length > 1 ? `${s.days[0]}–${s.days[s.days.length - 1]}` : s.days[0];
+  return `${dayLabel}, ${formatTime12h(s.start)} – ${formatTime12h(s.end)} (PKT)`;
+}
 
 export async function generateMetadata({
   params,
@@ -113,6 +126,7 @@ export default async function SubjectPage({
 
   return (
     <section className="section">
+      <TrackViewContent contentName={`O Level ${subject.name}`} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       <div className="container" style={{ maxWidth: 880 }}>
@@ -132,6 +146,11 @@ export default async function SubjectPage({
           </p>
         )}
         <p className="lead">{subject.description}</p>
+        {schedule && (
+          <p style={{ color: "var(--blue)", fontWeight: 800, fontSize: "1rem", marginTop: -8, marginBottom: 16 }}>
+            {formatSchedule(schedule)} · PKR 10,000/month
+          </p>
+        )}
         {/* This page is statically generated (generateStaticParams) and served
             identically to every visitor, signed in or not — it can't check
             session state the way the dynamic /o-level page does. These 4
@@ -148,6 +167,17 @@ export default async function SubjectPage({
           <CTAButton href="/o-level#apply" variant="secondary">Live Sessions</CTAButton>
           <CTAButton href="/o-level#apply" variant="secondary">Past Papers</CTAButton>
         </div>
+        <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".82rem" }}>
+          Register free to preview the learning platform. Payment is only required when you choose to unlock the course.
+        </p>
+        {subject.slug === "computer-science" && (
+          <p style={{ marginTop: 4, color: "var(--muted)", fontSize: ".82rem" }}>
+            Also available: the companion{" "}
+            <Link href="/o-level/computer-science-book" style={{ color: "var(--blue)", fontWeight: 700 }}>
+              O Level Computer Science Interactive Exam Workbook →
+            </Link>
+          </p>
+        )}
 
         {cohort && (
           <div className="card" style={{ marginTop: 32, background: "#eaf1ff", borderColor: "#c9dcfb" }}>

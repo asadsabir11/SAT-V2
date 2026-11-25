@@ -90,6 +90,20 @@ export function trackWorkbookDownload(params: { title: string }) {
   });
 }
 
+// Distinct from trackWorkbookDownload (that's the free PDF lead-magnet) and
+// from trackInitiateCheckout (that's the O-Level tuition unlock funnel) — this
+// is a click on the PAID external-publisher book's "Buy" button. Checkout and
+// delivery happen entirely on PaperCraft's site, so this click is the only
+// conversion signal we can reliably report; a true "Purchase" event would
+// need the publisher to provide order confirmation back to us, which doesn't
+// exist today.
+export function trackBookPurchaseClick(params: { title: string }) {
+  safely(() => {
+    window.fbq?.("trackCustom", "BookPurchaseClick", { content_name: params.title });
+    window.gtag?.("event", "book_purchase_click", { item_name: params.title });
+  });
+}
+
 // channel distinguishes the floating WhatsApp CTA from the contact form, so
 // "which page produced a conversation" is answerable.
 export function trackContactAction(params: { channel: "whatsapp" | "contact_form" }) {

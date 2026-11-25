@@ -32,6 +32,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${BASE}/o-level/${s.slug}`,
       priority: s.slug === "mathematics" || s.slug === "english-language" || s.slug === "computer-science" ? 0.85 : 0.5,
     })),
+    // Paid workbook (external publisher) landing page — the Facebook/
+    // Instagram ad campaign's book landing surface.
+    { url: `${BASE}/o-level/computer-science-book`, priority: 0.8 },
     // Parent guides — informational pages targeting near-purchase parent
     // queries, feeding the commercial O Level pages (SEO Phase 2 §23).
     ...GUIDES.map((g) => ({ url: `${BASE}/guides/${g.slug}`, priority: 0.7 })),
