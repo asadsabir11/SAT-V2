@@ -248,7 +248,7 @@ export default async function OLevelPage() {
             {isSignedInStudent ? (
               <CTAButton href="/dashboard" variant="accent">Go to My Dashboard</CTAButton>
             ) : (
-              <CTAButton href="#apply" variant="accent">Create Your Free Account</CTAButton>
+              <CTAButton href="#apply" variant="accent">Register Your Account</CTAButton>
             )}
             <CTAButton href="#subjects" variant="ghost">View Subjects and Schedule</CTAButton>
           </div>
