@@ -133,8 +133,7 @@ export const SUBJECTS: Subject[] = [
       "Real-world context that makes concepts stick",
     ],
     classModel: [
-      { title: "Concept class", durationMins: 90, type: "concept", cadence: "Weekly" },
-      { title: "Practical / exam workshop", durationMins: 60, type: "practical", cadence: "Weekly" },
+      { title: "Live class", durationMins: 90, type: "concept", cadence: "Monday–Thursday" },
     ],
     assessmentApproach:
       "Topical quizzes plus monthly assessments focused on exam-style questions.",
@@ -387,7 +386,7 @@ export const COHORTS: Cohort[] = [
     subjectSlug: "computer-science",
     instructorId: "ibrahim",
     targetExam: "May/June 2027",
-    scheduleLabel: "Weekly concept class + weekly practical workshop",
+    scheduleLabel: "Live class, Monday to Thursday",
     status: "enrolling",
     capacity: 20,
     enrolled: 0,

@@ -20,10 +20,10 @@ export function generateStaticParams() {
 // marketing page. Only the 3 subjects actually open for enrollment (the
 // other 3 — islamiyat, pakistan-studies, physics — show "Coming soon" with
 // no real day/time yet) get a schedule in the Course schema below.
-const SUBJECT_SCHEDULE: Record<string, { day: string; start: string; end: string }> = {
-  "english-language": { day: "Friday", start: "18:00", end: "19:00" },
-  "mathematics": { day: "Saturday", start: "18:00", end: "19:00" },
-  "computer-science": { day: "Thursday", start: "18:00", end: "19:00" },
+const SUBJECT_SCHEDULE: Record<string, { days: string[]; start: string; end: string; workload: string }> = {
+  "english-language": { days: ["Friday"], start: "18:00", end: "19:00", workload: "PT1H" },
+  "mathematics": { days: ["Saturday"], start: "18:00", end: "19:00", workload: "PT1H" },
+  "computer-science": { days: ["Monday", "Tuesday", "Wednesday", "Thursday"], start: "19:00", end: "20:30", workload: "PT1H30M" },
 };
 
 export async function generateMetadata({
@@ -90,11 +90,11 @@ export default async function SubjectPage({
       hasCourseInstance: {
         "@type": "CourseInstance",
         courseMode: "online",
-        courseWorkload: "PT1H",
+        courseWorkload: schedule.workload,
         courseSchedule: {
           "@type": "Schedule",
           repeatFrequency: "P1W",
-          byDay: `https://schema.org/${schedule.day}`,
+          byDay: schedule.days.map((d) => `https://schema.org/${d}`),
           startTime: schedule.start,
           endTime: schedule.end,
         },

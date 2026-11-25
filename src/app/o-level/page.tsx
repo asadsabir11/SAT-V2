@@ -64,8 +64,7 @@ const FAQ_ITEMS: [string, string][] = [
   ["Who teaches these classes?", "English Language, Mathematics and Computer Science are taught by Ibrahim Sajid Malick, founder of The Digital Tutor."],
   ["Are the classes live or recorded?", "Classes are delivered live online."],
   ["What happens if my child misses a class?", "Our missed-class and recording policy will be shared with you directly after you register."],
-  ["How many students will be in each class?", "Each class is limited to a maximum of 15 students."],
-  ["How often are classes held?", "Mathematics meets weekly on Saturdays, English Language on Fridays, and Computer Science on Thursdays (each 6:00–7:00 PM PKT, 1 hour long), plus office hours Monday–Friday from 7:30–8:15 PM PKT."],
+  ["How often are classes held?", "Mathematics meets weekly on Saturdays and English Language weekly on Fridays (each 6:00–7:00 PM PKT, 1 hour long). Computer Science meets Monday to Thursday, 7:00–8:30 PM PKT. Office hours run Monday–Friday from 7:30–8:15 PM PKT."],
   ["Does the program guarantee a particular grade?", "No. The program provides teaching, practice, feedback and structured preparation, but no examination grade can be guaranteed."],
   ["How will parents receive progress updates?", "Parents will receive regular reports covering attendance, homework, current strengths, areas for improvement and recommended next steps."],
   ["How do I pay?", "Registration is free. When you're ready to unlock a subject, pay via bank transfer from your dashboard — that subject unlocks once we verify your payment."],
@@ -89,9 +88,16 @@ const WORKBOOK_THEMES = [
 const SUBJECT_CLASS_TIME: Record<string, string> = {
   "english-language": "Friday, 6:00 PM – 7:00 PM (PKT)",
   "mathematics": "Saturday, 6:00 PM – 7:00 PM (PKT)",
-  "computer-science": "Thursday, 6:00 PM – 7:00 PM (PKT)",
+  "computer-science": "Monday–Thursday, 7:00 PM – 8:30 PM (PKT)",
   "islamiyat": "Wednesday, 6:00 PM – 7:00 PM (PKT)",
   "pakistan-studies": "Tuesday, 6:00 PM – 7:00 PM (PKT)",
+};
+
+// Most subjects are a single 1-hour weekly session; Computer Science meets
+// 4x/week at 90 minutes each, so its duration needs its own entry rather
+// than the shared COHORT_SCHEDULE.sessionDuration.
+const SUBJECT_SESSION_DURATION: Record<string, string> = {
+  "computer-science": "90 minutes",
 };
 
 function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubjects, fullyBooked }: { subjectSlug: string; basePrice: number; isSignedInStudent: boolean; unlockedSubjects: string[]; fullyBooked?: boolean }) {
@@ -108,9 +114,8 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
   const rows: [string, string][] = [
     ["Enrollment", fullyBooked ? "Coming soon" : COHORT_SCHEDULE.enrollment],
     ["Class day & time (PKT)", classTime ?? "To be confirmed"],
-    ["Session duration", COHORT_SCHEDULE.sessionDuration],
+    ["Session duration", SUBJECT_SESSION_DURATION[subjectSlug] ?? COHORT_SCHEDULE.sessionDuration],
     ["Weekly office hours", COHORT_SCHEDULE.officeHours],
-    ["Maximum students", "15"],
     ["Monthly price", priceValue],
   ];
 
@@ -237,7 +242,7 @@ export default async function OLevelPage() {
             students preparing for Cambridge O Level and IGCSE examinations.
           </p>
           <p style={{ color: "#5eead4", fontWeight: 700, fontSize: ".95rem" }}>
-            Enroll anytime for English Language, Mathematics and Computer Science — classes start with the next scheduled session. Limited to 15 students per class.
+            Enroll anytime for English Language, Mathematics and Computer Science — classes start with the next scheduled session.
           </p>
           <div className="actions">
             {isSignedInStudent ? (
