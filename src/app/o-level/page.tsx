@@ -139,7 +139,7 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
         </span>
       ) : !isSignedInStudent ? (
         <Link href="/o-level#apply" className="btn btn-primary" style={{ marginTop: "auto" }}>
-          Register Free to Get Started
+          Register to Get Started
         </Link>
       ) : isUnlocked ? (
         <span style={{ marginTop: "auto", color: "#15803d", fontWeight: 700, fontSize: ".9rem" }}>View lessons →</span>
