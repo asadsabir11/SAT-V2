@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description: "The O Level Computer Science 2210 exam workbook by Ibrahim Malick, with worked examples, mark schemes and QR-linked video lessons.",
     url: `${BASE_URL}/o-level/computer-science-book`,
     type: "website",
-    images: ["/opengraph-image"],
+    images: ["/o-level-cs-workbook-cover.jpeg"],
   },
 };
 
@@ -50,12 +50,13 @@ export default function ComputerScienceWorkbookPage() {
         <div className="grid grid-2" style={{ marginTop: 32, alignItems: "center" }}>
           <div
             className="card"
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, background: "linear-gradient(135deg,#eff6ff,#f5f3ff)", minHeight: 280 }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "linear-gradient(135deg,#eff6ff,#f5f3ff)", minHeight: 280 }}
           >
-            <div style={{ fontSize: "4rem" }}>📘</div>
-            <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".82rem", textAlign: "center" }}>
-              Book cover image coming soon
-            </p>
+            <img
+              src="/o-level-cs-workbook-cover.jpeg"
+              alt="O Level Computer Science Interactive Exam Workbook cover"
+              style={{ maxWidth: "100%", maxHeight: 360, borderRadius: 8, boxShadow: "0 8px 24px rgba(7,27,51,.15)", display: "block" }}
+            />
           </div>
           <div>
             <div className="card" style={{ marginBottom: 16 }}>
