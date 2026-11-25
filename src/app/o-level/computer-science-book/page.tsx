@@ -98,8 +98,8 @@ export default function ComputerScienceWorkbookPage() {
         <div className="card" style={{ marginTop: 32, textAlign: "center", background: "#eaf1ff", borderColor: "#c9dcfb" }}>
           <p style={{ margin: 0, color: "var(--navy)" }}>
             Looking for live classes too?{" "}
-            <Link href="/o-level/computer-science" style={{ color: "var(--blue)", fontWeight: 700 }}>
-              Explore O Level Computer Science tuition →
+            <Link href="/o-level#apply" style={{ color: "var(--blue)", fontWeight: 700 }}>
+              Register for Computer Science tuition →
             </Link>
           </p>
         </div>
