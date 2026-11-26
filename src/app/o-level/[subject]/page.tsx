@@ -157,7 +157,7 @@ export default async function SubjectPage({
         )}
         <p className="lead">{subject.description}</p>
         {schedule && (
-          <p style={{ color: "var(--blue)", fontWeight: 800, fontSize: "1rem", marginTop: -8, marginBottom: 16 }}>
+          <p style={{ color: "var(--blue)", fontWeight: 800, fontSize: "1rem", marginTop: 16, marginBottom: 16 }}>
             {formatSchedule(schedule)} · PKR 10,000/month
           </p>
         )}
