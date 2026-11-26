@@ -67,11 +67,13 @@ export default function ComputerScienceWorkbookPage() {
             className="card"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "linear-gradient(135deg,#eff6ff,#f5f3ff)", minHeight: 280 }}
           >
-            <img
-              src="/o-level-cs-workbook-cover.jpeg"
-              alt="Cover of Ibrahim Malick's O Level Computer Science Interactive Exam Workbook for Cambridge 2210."
-              style={{ maxWidth: "100%", maxHeight: 360, borderRadius: 8, boxShadow: "0 8px 24px rgba(7,27,51,.15)", display: "block" }}
-            />
+            <BookPurchaseLink baseUrl={BOOK_URL} title="O Level CS Workbook cover">
+              <img
+                src="/o-level-cs-workbook-cover.jpeg"
+                alt="Cover of Ibrahim Malick's O Level Computer Science Interactive Exam Workbook for Cambridge 2210."
+                style={{ maxWidth: "100%", maxHeight: 360, borderRadius: 8, boxShadow: "0 8px 24px rgba(7,27,51,.15)", display: "block", cursor: "pointer" }}
+              />
+            </BookPurchaseLink>
           </div>
           <div>
             <div className="card" style={{ marginBottom: 16 }}>
