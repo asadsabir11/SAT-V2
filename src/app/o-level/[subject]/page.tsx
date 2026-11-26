@@ -171,7 +171,7 @@ export default async function SubjectPage({
             landing here can still reach their lectures via the header/
             dashboard nav. */}
         <div className="actions">
-          <CTAButton href="/o-level#apply" variant="accent">View Schedule &amp; Register Free</CTAButton>
+          <CTAButton href="/o-level#apply" variant="accent">View Schedule &amp; Register Now</CTAButton>
         </div>
         <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".82rem", maxWidth: 560 }}>
           Creating an account is free — you can preview the learning platform before paying anything. When you&apos;re

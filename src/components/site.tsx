@@ -184,7 +184,7 @@ export function Header() {
           {!user && (
             isOLevel ? (
               <Link href="/o-level#apply" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>
-                Register Free →
+                Register Now →
               </Link>
             ) : (
               <Link href="/register?plan=Core" className="btn btn-primary" style={{minHeight:40,padding:"0 18px",fontSize:".88rem",marginLeft:4}}>

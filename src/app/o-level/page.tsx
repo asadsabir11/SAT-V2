@@ -153,7 +153,7 @@ function CohortCard({ subjectSlug, basePrice, isSignedInStudent, unlockedSubject
 
   // The card itself is unchanged — the signed-in student still gets the whole
   // card as a link into lectures/unlock, and the anonymous visitor still gets
-  // the "Register Free" CTA.
+  // the "Register Now" CTA.
   const card = isSignedInStudent && !fullyBooked ? (
     <Link href={isUnlocked ? `/o-level/lectures?subject=${subjectSlug}` : `/o-level/unlock?subject=${subjectSlug}`} className="card" style={{ display: "flex", flexDirection: "column", textDecoration: "none", flex: 1 }}>
       {body}
