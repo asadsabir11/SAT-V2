@@ -39,6 +39,17 @@ function formatSchedule(s: { days: string[]; start: string; end: string }): stri
   return `${dayLabel}, ${formatTime12h(s.start)} – ${formatTime12h(s.end)} (PKT)`;
 }
 
+// Ties the "Practice & past papers" card to each subject's own topic list
+// instead of one boilerplate paragraph repeated on all 6 subject pages —
+// the topics already differ per subject in data.ts, so this reads as
+// genuinely subject-specific rather than templated copy.
+function formatTopicList(topics: string[]): string {
+  if (topics.length === 0) return "";
+  if (topics.length === 1) return topics[0];
+  if (topics.length === 2) return `${topics[0]} and ${topics[1]}`;
+  return `${topics.slice(0, -1).join(", ")} and ${topics[topics.length - 1]}`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -239,9 +250,11 @@ export default async function SubjectPage({
               </div>
             ))}
           </div>
-          <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".78rem" }}>
-            Exact days and times are set per cohort and shared on enrollment.
-          </p>
+          {!schedule && (
+            <p style={{ marginTop: 12, color: "var(--muted)", fontSize: ".78rem" }}>
+              Exact days and times are set per cohort and shared on enrollment.
+            </p>
+          )}
         </Section>
 
         <div className="grid grid-2" style={{ marginTop: 40 }}>
@@ -252,16 +265,17 @@ export default async function SubjectPage({
           <article className="card">
             <h3 style={{ marginTop: 0 }}>Practice &amp; past papers</h3>
             <p>
-              Topical questions, timed practice, and past-paper style questions with review. Original Digital Tutor
-              practice material is clearly distinct from official Cambridge past papers.
+              Past-paper style questions across {formatTopicList(subject.indicativeTopics)}, with full worked
+              solutions reviewed — not just a mark scheme. Original Digital Tutor practice material is clearly
+              distinct from official Cambridge past papers.
             </p>
           </article>
         </div>
 
         <Section title="Open office hours">
           <p>
-            Stuck between classes? Join live office hours to ask questions, review homework, and work through
-            difficult problems — no need to wait for the next lesson.
+            Stuck on a {subject.name} question between classes? Join live office hours to ask questions, review
+            homework, and work through difficult problems — no need to wait for the next lesson.
           </p>
         </Section>
 

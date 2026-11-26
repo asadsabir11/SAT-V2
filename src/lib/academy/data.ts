@@ -74,8 +74,7 @@ export const SUBJECTS: Subject[] = [
       "Familiarity with past-paper question styles",
     ],
     classModel: [
-      { title: "Concept class", durationMins: 90, type: "concept", cadence: "Weekly" },
-      { title: "Problem-solving / past-paper workshop", durationMins: 60, type: "workshop", cadence: "Weekly" },
+      { title: "Live class", durationMins: 60, type: "concept", cadence: "Saturdays" },
     ],
     assessmentApproach:
       "Regular topical quizzes and monthly assessments to estimate current working level and highlight areas for improvement.",
@@ -187,8 +186,7 @@ export const SUBJECTS: Subject[] = [
       "Exam-timing and structure strategies",
     ],
     classModel: [
-      { title: "Concept class", durationMins: 90, type: "concept", cadence: "Weekly" },
-      { title: "Writing / exam workshop", durationMins: 60, type: "workshop", cadence: "Weekly" },
+      { title: "Live class", durationMins: 60, type: "concept", cadence: "Fridays" },
     ],
     assessmentApproach:
       "Regular writing tasks with feedback and monthly assessments.",
@@ -240,6 +238,24 @@ export const SUBJECTS: Subject[] = [
     assessmentApproach:
       "Regular review questions and monthly assessments to track progress.",
     instructorId: "ibrahim",
+    faqs: [
+      {
+        q: "Is this Cambridge O Level Islamiyat?",
+        a: "Yes — the course is built around the Cambridge O Level Islamiyat syllabus, covering core themes and sources, key events and their significance, and exam answer structure and technique.",
+      },
+      {
+        q: "How much does O Level Islamiyat tuition cost in Pakistan?",
+        a: "Founding cohort pricing starts at PKR 10,000/month for one subject, with a lower per-subject rate if you add more subjects — see current pricing in the Enroll section below.",
+      },
+      {
+        q: "Is O Level Islamiyat taught live or recorded?",
+        a: "Fully online and live (not pre-recorded), with revision and past-paper sessions added as needed to reinforce whichever topics need more practice.",
+      },
+      {
+        q: "What if my child needs extra help between lessons?",
+        a: "Open office hours run between lessons — students can bring questions or ask for help structuring an exam answer without waiting for the next scheduled class.",
+      },
+    ],
   },
   {
     slug: "pakistan-studies",
@@ -267,8 +283,26 @@ export const SUBJECTS: Subject[] = [
       { title: "Revision / past-paper session", durationMins: 60, type: "revision", cadence: "As needed" },
     ],
     assessmentApproach:
-      "Regular review questions and monthly assessments to track progress.",
+      "Regular review questions and monthly assessments, with extra focus on whichever component — History or Geography — needs the most practice.",
     instructorId: "ibrahim",
+    faqs: [
+      {
+        q: "Is this Cambridge O Level Pakistan Studies?",
+        a: "Yes — the course is built around the Cambridge O Level Pakistan Studies syllabus, covering History of Pakistan themes, Geography of Pakistan themes, and source-based and structured question technique.",
+      },
+      {
+        q: "Does this cover both the History and Geography components?",
+        a: "Yes — lessons move between both components, with revision and past-paper sessions used to consolidate whichever theme needs more practice.",
+      },
+      {
+        q: "How much does O Level Pakistan Studies tuition cost in Pakistan?",
+        a: "Founding cohort pricing starts at PKR 10,000/month for one subject, with a lower per-subject rate if you add more subjects — see current pricing in the Enroll section below.",
+      },
+      {
+        q: "What if my child needs extra help between lessons?",
+        a: "Open office hours run between lessons — students can bring questions or ask for help with source-based or structured-answer technique without waiting for the next scheduled class.",
+      },
+    ],
   },
   {
     slug: "physics",
@@ -300,8 +334,26 @@ export const SUBJECTS: Subject[] = [
       { title: "Problem-solving / past-paper workshop", durationMins: 60, type: "workshop", cadence: "Weekly" },
     ],
     assessmentApproach:
-      "Regular topical quizzes and monthly assessments to estimate current working level and highlight areas for improvement.",
+      "Regular topical quizzes and monthly assessments, with worked solutions reviewed for whichever problems students found difficult.",
     instructorId: "ibrahim",
+    faqs: [
+      {
+        q: "Is this Cambridge O Level Physics or IGCSE Physics?",
+        a: "This course is built for Cambridge O Level Physics. If your school follows IGCSE Physics instead, message us on WhatsApp first to confirm fit.",
+      },
+      {
+        q: "Do you cover past papers for O Level Physics?",
+        a: "Yes — every week pairs a concept class with a problem-solving/past-paper workshop, so numerical and theory question technique is built in from the start rather than left until closer to the exam.",
+      },
+      {
+        q: "How much does O Level Physics tuition cost in Pakistan?",
+        a: "Founding cohort pricing starts at PKR 10,000/month for one subject, with a lower per-subject rate if you add more subjects — see current pricing in the Enroll section below.",
+      },
+      {
+        q: "What if my child gets stuck on Physics homework between classes?",
+        a: "Open office hours run between lessons specifically for this — students can bring a stuck question and get help without waiting for the next scheduled class.",
+      },
+    ],
   },
 ];
 
@@ -376,7 +428,7 @@ export const COHORTS: Cohort[] = [
     subjectSlug: "mathematics",
     instructorId: "ibrahim",
     targetExam: "May/June 2027",
-    scheduleLabel: "Weekly concept class + weekly workshop",
+    scheduleLabel: "Live class, weekly on Saturdays",
     status: "enrolling",
     capacity: 15,
     enrolled: 0,
@@ -398,7 +450,7 @@ export const COHORTS: Cohort[] = [
     subjectSlug: "english-language",
     instructorId: "ibrahim",
     targetExam: "May/June 2027",
-    scheduleLabel: "Weekly concept class + weekly writing workshop",
+    scheduleLabel: "Live class, weekly on Fridays",
     status: "enrolling",
     capacity: 15,
     enrolled: 0,
